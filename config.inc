@@ -59,22 +59,11 @@ endif
 CLIP_FASTQ_R1 ?=
 CLIP_FASTQ_R2 ?=
 
-
-MERGE_SPLIT_BAMS ?= false  # merge processed split bams
-BAM_REPROCESS ?= false
-BAM_PHRED64 ?= false
-SPLIT_CHR ?= true
-SPLIT_FASTQ ?= false
-MERGE_SPLIT_FASTQ ?= true
-BAM_REORDER ?= true
-BAM_SORT ?= true
-BAM_FILTER ?= true
-BAM_FIX_RG ?= false # fix the readgroups so that it corresponds with the bam filename
-
-# not primary alignment 256
-# read fails platform/vendor quality checks 512
 BAM_FILTER_FLAGS ?= 768
 SAMTOOLS_DOWNSAMPLE_FACTOR ?= 0.2
+
+
+
 
 ifeq ($(CAPTURE_METHOD),NONE)
 BAM_DUP_TYPE ?= markdup
@@ -119,7 +108,23 @@ BAM_RECAL ?= false
 BAM_REALN ?= false
 GENOTYPE_WITH_CHR2 = ?= false
 BAM_CHR2_BASE_RECAL ?= false
+SPLIT_CHR ?= false
 endif
+
+MERGE_SPLIT_BAMS ?= false  # merge processed split bams
+BAM_REPROCESS ?= false
+BAM_PHRED64 ?= false
+SPLIT_CHR ?= true
+SPLIT_FASTQ ?= false
+MERGE_SPLIT_FASTQ ?= true
+BAM_REORDER ?= true
+BAM_SORT ?= true
+BAM_FILTER ?= true
+BAM_FIX_RG ?= false # fix the readgroups so that it corresponds with the bam filename
+
+
+
+
 
 
 ### VARIANT FILTERS

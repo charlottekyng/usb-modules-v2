@@ -45,7 +45,7 @@ bwamem/bam/%.bwamem.bam : fastq/%.1.fastq.gz fastq/%.2.fastq.gz
 	-R \"@RG\tID:$*\tLB:$${LBID}\tPL:${SEQ_PLATFORM}\tSM:$${LBID}\" $(REF_FASTA) $^ | \
 	$(SAMTOOLS) view -bhS - > $@")
 
-bwamem/bam/%.bwamem.bam : fastq/%.fastq.gz
+bwamem/bam/%.bwamem.bam : fastq/%.1.fastq.gz
 	LBID=`echo "$*" | sed 's/_[A-Za-z0-9]\+//'`; \
 	$(call RUN,$(BWA_NUM_CORES),$(RESOURCE_REQ_LOW_MEM),$(RESOURCE_REQ_MEDIUM),$(BWA_MODULE) $(SAMTOOLS_MODULE),"\
 	$(BWA_MEM) -t $(BWA_NUM_CORES) $(BWA_ALN_OPTS) \
