@@ -1,0 +1,24 @@
+### BASIC SETTINGS FOR PROJECT MAKEFILE ###
+### see usb-modules-v2/config.inc for full options ###
+### for options related reference genome and target panels, see files in usb-modules-v2/genome_inc
+
+# default reference:
+# possible values: mm10, hg19, b37, hg19_ionref, b37_hbv_hcv
+REF ?= b37
+# possible values: ILLUMINA, IONTORRENT
+SEQ_PLATFORM ?= ILLUMINA
+# possible values: NONE, BAITS, PCR, RNA, CHIP
+CAPTURE_METHOD ?= NONE
+# possible values: NONE, AGILENT_CLINICAL_EXOME, IMPACTv5, CCP, CHPv2, IMPACT410, IMPACT341, AGILENT_ALLEXON_MOUSE, HCC, NOVARTIS_PC2
+PANEL ?= NONE
+# Single-end or paired-end, set to false if single-end
+PAIRED_END ?= true
+# for RNA-seq, possible values NONE, FIRST_READ_TRANSCRIPTION_STRAND, SECOND_READ_TRANSCRIPTION_STRAND
+STRAND_SPECIFICITY ?= NONE
+
+# possible values: CANCER, PSYCH
+ANALYSIS_TYPE ?= CANCER 
+
+
+include usb-modules-v2/Makefile
+
