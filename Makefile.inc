@@ -324,8 +324,8 @@ MUTECT ?= $(JAVA) -Xmx$(1) -jar $(JAR_DIR)/muTect-1.1.4.jar --analysis_type MuTe
 CONFIGURE_STRELKA = $(PERL) $(USR_DIR)/local/strelka_workflow-1.0.15/bin/configureStrelkaWorkflow.pl
 STRELKA_CONFIG = usb-modules-v2/variant_callers/somatic/strelka_config_bwa_default.ini
 
-TVC_ROOT_DIR ?= $(USR_DIR)/local/tvc-5.8.0-CentOS_7.3-x86_64-binary
-TVC = $(PYTHON_ENV_ACTIVATE) && $(TVC_ROOT_DIR)/bin/variant_caller_pipeline.py
+TVC_ROOT_DIR ?= $(USR_DIR)/local/tvc-5.0.3-CentOS_7.3-x86_64-binary
+TVC = $(TVC_ROOT_DIR)/bin/variant_caller_pipeline.py
 TVC_SOMATIC_JSON = usb-modules-v2/variant_callers/somatic/TVC_somatic_parameters.json
 TVC_SENSITIVE_JSON = usb-modules-v2/variant_callers/somatic/TVC_somatic_parameters_sensitive.json
 TVC_MOTIF ?= $(TVC_ROOT_DIR)/share/TVC/sse/ampliseqexome_germline_p1_hiq_motifset.txt
