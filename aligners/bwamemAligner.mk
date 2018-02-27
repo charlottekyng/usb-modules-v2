@@ -38,14 +38,7 @@ bwamem/bam/$2.bwamem.bam : $3
 endef
 $(foreach ss,$(SPLIT_SAMPLES),$(if $(fq.$(ss)),$(eval $(call align-split-fastq,$(split.$(ss)),$(ss),$(fq.$(ss))))))
 
-bwamem/bam/%.bwamem.bam : fastq/%.1.fastq.gz fastq/%.2.fastq.gz
-	LBID=`echo "$*" | sed 's/_[A-Za-z0-9]\+//'`; \
-	$(call RUN,$(BWA_NUM_CORES),$(RESOURCE_REQ_LOW_MEM),$(RESOURCE_REQ_MEDIUM),$(BWA_MODULE) $(SAMTOOLS_MODULE),"\
-	$(BWA_MEM) -t $(BWA_NUM_CORES) $(BWA_ALN_OPTS) \
-	-R \"@RG\tID:$*\tLB:$${LBID}\tPL:${SEQ_PLATFORM}\tSM:$${LBID}\" $(REF_FASTA) $^ | \
-	$(SAMTOOLS) view -bhS - > $@")
-
-bwamem/bam/%.bwamem.bam : fastq/%.1.fastq.gz
+bwamem/bam/%.bwamem.bam : fastq/%.1.fastq.gz $(if $(findstring true,$(PAIRED_END)),fastq/%.2.fastq.gz)
 	LBID=`echo "$*" | sed 's/_[A-Za-z0-9]\+//'`; \
 	$(call RUN,$(BWA_NUM_CORES),$(RESOURCE_REQ_LOW_MEM),$(RESOURCE_REQ_MEDIUM),$(BWA_MODULE) $(SAMTOOLS_MODULE),"\
 	$(BWA_MEM) -t $(BWA_NUM_CORES) $(BWA_ALN_OPTS) \

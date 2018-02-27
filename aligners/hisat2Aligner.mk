@@ -22,7 +22,7 @@ hisat2_bams : $(HISAT2_BAMS) $(addsuffix .bai,$(HISAT2_BAMS))
 bam/%.bam : hisat2/bam/%.hisat2.$(BAM_SUFFIX)
 	$(INIT) ln -f $(<) $(@) 
 
-hisat2/bam/%.raw.bam hisat2/unmapped_bam/%.raw_unmapped.bam : fastq/%.1.fastq.gz fastq/%.2.fastq.gz
+hisat2/bam/%.raw.bam hisat2/unmapped_bam/%.raw_unmapped.bam : fastq/%.1.fastq.gz $(if $(findstring true,$(PAIRED_END)),fastq/%.2.fastq.gz)
 	$(call RUN,$(HISAT2_NUM_CORES),$(RESOURCE_REQ_MEDIUM_MEM),$(RESOURCE_REQ_SHORT),$(HISAT2_MODULE) $(SAMTOOLS_MODULE),"\
 	$(MKDIR) hisat2/bam hisat2/unmapped_bam; \
 	LBID=`echo \"$*\" | sed 's/_.\+//'`; \
@@ -30,7 +30,7 @@ hisat2/bam/%.raw.bam hisat2/unmapped_bam/%.raw_unmapped.bam : fastq/%.1.fastq.gz
 	--rg-id $* --rg \"SM:\$${LBID}\" \
 	--rg PL:${SEQ_PLATFORM} --rg \"LB:\$${LBID}\" \
 	-S hisat2/bam/$*.raw.sam --un hisat2/unmapped_bam/$*.raw_unmapped.sam \
-	-1 $(<) -2 $(<<) && \
+	-1 $(<) $(if $(findstring true,$(PAIRED_END)),-2 $(<<)) && \
 	$(SAMTOOLS) view -Sbh hisat2/bam/$*.raw.sam > hisat2/bam/$*.raw.bam && \
 	$(SAMTOOLS) view -Sbh hisat2/unmapped_bam/$*.raw_unmapped.sam > hisat2/unmapped_bam/$*.raw_unmapped.bam && \
 	$(RM) hisat2/bam/$*.raw.sam hisat2/unmapped_bam/$*.raw_unmapped.sam")
