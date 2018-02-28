@@ -130,8 +130,12 @@ HRUN_FILTER ?= 4
 
 USE_SUFAM ?= true
 
-
-
+ifeq ($(findstring ILLUMINA,$(SEQ_PLATFORM)),ILLUMINA)
+PON_VCF ?= mutect2/pon.mutect2.vcf
+endif
+ifeq ($(findstring IONTORRENT,$(SEQ_PLATFORM)),IONTORRENT)
+PON_VCF ?= tvc/pon.tvc.vcf
+endif
 
 ##################################
 #### General MPS tools ###########

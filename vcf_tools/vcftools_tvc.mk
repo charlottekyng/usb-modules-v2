@@ -9,7 +9,7 @@ ifndef VCFTOOLS_MK_TVC
 		--filterExpression 'DP <= $(MIN_NORMAL_DEPTH) || FDP <= $(MIN_NORMAL_DEPTH)' \
 		--filterName Depth && $(RM) $< $<.idx")
 
-%.nft.vcf : %.vcf tvc/pon.tvc.vcf
+%.nft.vcf : %.vcf $(PON_VCF)
 	$(call RUN,1,$(RESOURCE_REQ_MEDIUM_MEM),$(RESOURCE_REQ_SHORT),$(JAVA8_MODULE),"\
 		$(call GATK,VariantFiltration,$(RESOURCE_REQ_MEDIUM_MEM_JAVA)) \
 		-R $(REF_FASTA) -V $< -o $@ --maskName 'PoN' --mask $(word 2,$^) && $(RM) $< $<.idx")

@@ -18,7 +18,7 @@ mutect2_tables : $(call SOMATIC_TABLES,mutect2)
 .PHONY : $(PHONY)
 
 define mutect2-tumor-normal-chr
-mutect2/chr_vcf/$1_$2.$3.mutect2%vcf : bam/$1%bam bam/$2%bam mutect2/chr_vcf_pon/pon.$3.mutect2.vcf
+mutect2/chr_vcf/$1_$2.$3.mutect2%vcf : bam/$1%bam bam/$2%bam $(PON_VCF)
 	$$(MKDIR) mutect2/chr_vcf; $$(call RUN,1,$$(RESOURCE_REQ_HIGH_MEM),$$(RESOURCE_REQ_LONG),$$(JAVA8_MODULE),"\
 	$$(call GATK,MuTect2,$$(RESOURCE_REQ_HIGH_MEM)) \
 	--reference_sequence $$(REF_FASTA) --input_file:tumor $$< --input_file:normal $$(word 2,$$^) \
