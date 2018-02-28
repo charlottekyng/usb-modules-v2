@@ -154,15 +154,6 @@ vcf/$1.%.hrun.vcf : vcf/$1.%.vcf bam/$1.bam bam/$1.bai
 endef
 $(foreach sample,$(SAMPLES),$(eval $(call hrun-sample,$(sample))))
 
-
-
-# Here first select the uncalled variants
-# then genotype them
-# then select the ones supported by at least 1 read
-# then set filter to "interrogation"
-# then merge
-#### these have been split into separate vcftools_*tvc.mk files
-
 %.dbsnp.vcf : %.vcf %.vcf.idx 
 	$(call CHECK_VCF,$<,$@,\
 	$(call RUN,1,$(RESOURCE_REQ_MEDIUM_MEM),$(RESOURCE_REQ_SHORT),$(SNP_EFF_MODULE),"\
@@ -188,6 +179,11 @@ $(foreach sample,$(SAMPLES),$(eval $(call hrun-sample,$(sample))))
 	$(call CHECK_VCF,$<,$@,\
 	$(call RUN,1,$(RESOURCE_REQ_HIGH_MEM),$(RESOURCE_REQ_VSHORT),$(SNP_EFF_MODULE),"\
 	$(SNP_SIFT) annotate $(SNP_SIFT_OPTS) $(EXAC_NONPSYCH) $< > $@ && $(RM) $^"))
+
+%.cadd.vcf : %.vcf %.vcf.idz
+	$(call CHECK_VCF,$<,$@,\
+	$(call RUN,1,$(RESOURCE_REQ_HIGH_MEM),$(RESOURCE_REQ_VSHORT),$(SNP_EFF_MODULE),"\
+	$(SNP_SIFT) annotate $(SNP_SIFT_OPTS) $(CADD) $< > $@ && $(RM) $^"))
 
 #%.mut_taste.vcf : %.vcf
 #	$(INIT) $(call CHECK_VCF,$<,$@,$(MUTATION_TASTER) $< > $@ 2> $(LOG))
