@@ -14,7 +14,7 @@ tvc_tables : $(foreach type,$(VARIANT_TYPES),$(call TABLES,$(type)))
 MUT_CALLER = tvc
 
 tvc/dbsnp/%/TSVC_variants.vcf : bam/%.bam
-	$(call RUN,$(TVC_NUM_CORES),$(RESOURCE_REQ_MEDIUM_MEM),$(RESOURCE_REQ_LONG),$(OPENBLAS_MODULE),"\
+	$(call RUN,$(TVC_NUM_CORES),$(RESOURCE_REQ_MEDIUM_MEM),$(RESOURCE_REQ_LONG),$(OPENBLAS_MODULE) $(PYTHON_MODULE),"\
 	$(TVC) -s $(DBSNP_TARGETS_INTERVALS) -i $< -r $(REF_FASTA) -o $(@D) \
 	-N $(TVC_NUM_CORES) -p $(TVC_SOMATIC_JSON) -m $(TVC_MOTIF) \
 	$(if $(TARGETS_FILE_INTERVALS),-b $(TARGETS_FILE_INTERVALS)) \
@@ -22,7 +22,7 @@ tvc/dbsnp/%/TSVC_variants.vcf : bam/%.bam
 
 define tvc-vcf
 tvc/vcf/$1/TSVC_variants.vcf.gz : bam/$1.bam bam/$1.bai
-	$$(call RUN,$$(TVC_NUM_CORES),$$(RESOURCE_REQ_MEDIUM_MEM),$$(RESOURCE_REQ_VSHORT),$(OPENBLAS_MODULE),"\
+	$$(call RUN,$$(TVC_NUM_CORES),$$(RESOURCE_REQ_MEDIUM_MEM),$$(RESOURCE_REQ_VSHORT),$(OPENBLAS_MODULE) $(PYTHON_MODULE),"\
 	$$(TVC) -i $$< -r $$(REF_FASTA) -o $$(@D) -N $(TVC_NUM_CORES) \
 	$$(if $(TARGETS_FILE_INTERVALS),-b $$(TARGETS_FILE_INTERVALS)) \
 	-p $$(TVC_SOMATIC_JSON) -m $$(TVC_MOTIF) \

@@ -28,7 +28,7 @@ endif
 ifeq ($(findstring IONTORRENT,$(SEQ_PLATFORM)),IONTORRENT)
 MUT_CALLER = tvc
 sufamscreen/%/TSVC_variants.vcf.gz : bam/%.bam sufamscreen/%.sites.to.screen.vcf
-	$(call RUN,$(TVC_NUM_CORES),$(RESOURCE_REQ_MEDIUM_MEM),$(RESOURCE_REQ_SHORT),$(BCFTOOLS_MODULE) $(JAVA8_MODULE) $(TABIX_MODULE),"\
+	$(call RUN,$(TVC_NUM_CORES),$(RESOURCE_REQ_MEDIUM_MEM),$(RESOURCE_REQ_SHORT),$(OPENBLAS_MODULE),"\
 	$(TVC) -s $(word 2,$^) -i $< -r $(REF_FASTA) -o $(@D) -N 4 \
 	$(if $(TARGETS_FILE_INTERVALS),-b $(TARGETS_FILE_INTERVALS)) \
 	-p $(TVC_SENSITIVE_JSON) -m $(TVC_MOTIF) \

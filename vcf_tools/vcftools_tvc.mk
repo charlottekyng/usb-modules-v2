@@ -60,7 +60,7 @@ vcf/$1_$2.%/isec/0001.vcf : vcf/$1_$2.%.vcf vcf/$3.%.sufam.tmp1.vcf vcf/$1_$2.%.
 	$$(BCFTOOLS) isec -O v -p $$(dir $$@) $$(word 3,$$^) $$(word 4,$$^)"))
 
 vcf/$1_$2.%/TSVC_variants.vcf.gz : vcf/$1_$2.%/isec/0001.sorted.vcf bam/$1.bam bam/$1.bam.bai
-	$$(call RUN,$$(TVC_NUM_CORES),$$(RESOURCE_REQ_MEDIUM_MEM),$$(RESOURCE_REQ_SHORT),,"\
+	$$(call RUN,$$(TVC_NUM_CORES),$$(RESOURCE_REQ_MEDIUM_MEM),$$(RESOURCE_REQ_SHORT),$(OPENBLAS_MODULE) $(PYTHON_MODULE),"\
 	$$(TVC) -s $$< -i $$(word 2,$$^) -r $$(REF_FASTA) -o $$(@D) -N $$(TVC_NUM_CORES) \
 	$$(if $$(TARGETS_FILE_INTERVALS),-b $$(TARGETS_FILE_INTERVALS)) -m $$(TVC_MOTIF) \
 	-t $$(TVC_ROOT_DIR) --primer-trim-bed $$(PRIMER_TRIM_BED) -p $(TVC_SENSITIVE_JSON)")
