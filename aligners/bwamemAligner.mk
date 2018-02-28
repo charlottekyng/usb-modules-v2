@@ -28,25 +28,37 @@ bwamem : $(BWA_BAMS) $(addsuffix .bai,$(BWA_BAMS))
 bam/%.bam : bwamem/bam/%.bwamem.$(BAM_SUFFIX)
 	$(INIT) ln -f $< $@
 
-#$(call align-split-fastq,name,split-name,fastqs)
-define align-split-fastq
-bwamem/bam/$2.bwamem.bam : $3
-	$$(call RUN,$$(BWA_NUM_CORES),$$(RESOURCE_REQ_LOW_MEM),$$(RESOURCE_REQ_MEDIUM),$$(BWA_MODULE) $$(SAMTOOLS_MODULE),"\
-	$$(BWA_MEM) -t $$(BWA_NUM_CORES) $$(BWA_ALN_OPTS) \
-	-R \"@RG\tID:$2\tLB:$1\tPL:$${SEQ_PLATFORM}\tSM:$1\" $$(REF_FASTA) $$^ | \
-	$$(SAMTOOLS) view -bhS - > $$@")
-endef
-$(foreach ss,$(SPLIT_SAMPLES),$(if $(fq.$(ss)),$(eval $(call align-split-fastq,$(split.$(ss)),$(ss),$(fq.$(ss))))))
-
+ifeq ($(MERGE_SPLIT_FASTQ),true)
 bwamem/bam/%.bwamem.bam : fastq/%.1.fastq.gz $(if $(findstring true,$(PAIRED_END)),fastq/%.2.fastq.gz)
 	LBID=`echo "$*" | sed 's/_[A-Za-z0-9]\+//'`; \
 	$(call RUN,$(BWA_NUM_CORES),$(RESOURCE_REQ_LOW_MEM),$(RESOURCE_REQ_MEDIUM),$(BWA_MODULE) $(SAMTOOLS_MODULE),"\
 	$(BWA_MEM) -t $(BWA_NUM_CORES) $(BWA_ALN_OPTS) \
 	-R \"@RG\tID:$*\tLB:$${LBID}\tPL:${SEQ_PLATFORM}\tSM:$${LBID}\" $(REF_FASTA) $^ | \
 	$(SAMTOOLS) view -bhS - > $@")
+else
+define align-split-fastq
+bwamem/bam/$1.bwamem.bam : fastq/$1.1.fastq.gz $$(if $$(findstring true,$$(PAIRED_END)),fastq/$1.2.fastq.gz)
+	$$(call RUN,$$(BWA_NUM_CORES),$$(RESOURCE_REQ_LOW_MEM),$$(RESOURCE_REQ_MEDIUM),$$(BWA_MODULE) $$(SAMTOOLS_MODULE),"\
+	$$(BWA_MEM) -t $$(BWA_NUM_CORES) $$(BWA_ALN_OPTS) \
+	-R \"@RG\tID:$2\tLB:$1\tPL:$${SEQ_PLATFORM}\tSM:$1\" $$(REF_FASTA) $$^ | \
+	$$(SAMTOOLS) view -bhS - > $$@")
+endef
+$(foreach sample,$(SPLIT_SAMPLES),$(foreach split,$(split.$(sample)),$(eval $(call align-split-fastq,$(split)))))
 
-fastq/%.fastq.gz : fastq/%.fastq
-	$(call RUN,1,$(RESOURCE_REQ_LOW_MEM),$(RESOURCE_REQ_SHORT),,"gzip -c $< > $(@) && $(RM) $<")
+define merged-bwamem-bam
+bwamem/bam/$1.bwamem.header.sam : $$(foreach split,$2,bwamem/bam/$$(split).bwamem.bam)
+	$$(INIT) module load $$(SAMTOOLS_MODULE); $$(SAMTOOLS) view -H $$< | grep -v '^@RG' > $$@.tmp; \
+	for bam in $$^; do $$(SAMTOOLS) view -H $$$$bam | grep '^@RG' >> $$@.tmp; done; \
+	uniq $$@.tmp > $$@ && $$(RM) $$@.tmp
+
+bwamem/bam/$1.bwamem.bam : bwamem/bam/$1.bwamem.header.sam $$(foreach split,$2,bwamem/bam/$$(split).bwamem.bam) 
+	$$(call RUN,1,$$(RESOURCE_REQ_HIGH_MEM),$$(RESOURCE_REQ_MEDIUM),$$(SAMTOOLS_MODULE),"\
+	$$(SAMTOOLS) merge -f -h $$< $$(@) $$(filter %.bam,$$^) && $$(RM) $$<")
+endef
+$(foreach sample,$(SPLIT_SAMPLES),$(eval $(call merged-bwamem-bam,$(sample),$(split.$(sample)))))
+
+
+endif
 
 include usb-modules-v2/fastq_tools/fastq.mk
 include usb-modules-v2/bam_tools/processBam.mk

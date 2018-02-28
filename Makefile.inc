@@ -283,6 +283,7 @@ BAM_READCOUNT ?= $(BIN_DIR)/bam-readcount
 
 VCF_SORT ?= $(PERL) $(SCRIPTS_DIR)/vcfsorter.pl
 FASTQ_TRIMMER = $(PERL) usb-modules-v2/fastq_tools/trimFastq.pl
+VCF_PASS ?= usb-modules-v2/vcf_tools/extract_pass_vcf.pl
 
 FASTQ_CHUNKS := 10
 FASTQ_CHUNK_SEQ := $(shell seq 1 $(FASTQ_CHUNKS))

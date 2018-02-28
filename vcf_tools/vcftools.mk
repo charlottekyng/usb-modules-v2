@@ -74,9 +74,14 @@ LOGDIR ?= log/vcf.$(NOW)
 
 %.pass.vcf : %.vcf
 	$(call CHECK_VCF,$<,$@,\
-	$(call RUN,1,$(RESOURCE_REQ_LOW_MEM),$(RESOURCE_REQ_VSHORT),$(SNP_EFF_MODULE),"\
-		$(SNP_SIFT) filter $(SNP_SIFT_OPTS) -f $< \
-		\"( na FILTER ) | (FILTER = 'PASS') | (FILTER has 'HOTSPOT')\" > $@"))
+	$(call RUN,1,$(RESOURCE_REQ_LOW_MEM),$(RESOURCE_REQ_VSHORT),,"\
+		$(VCF_PASS) $< $@ $(subst pass,fail,$@)"))
+
+#%.pass.vcf : %.vcf
+#	$(call CHECK_VCF,$<,$@,\
+#	$(call RUN,1,$(RESOURCE_REQ_LOW_MEM),$(RESOURCE_REQ_VSHORT),$(SNP_EFF_MODULE),"\
+#		$(SNP_SIFT) filter $(SNP_SIFT_OPTS) -f $< \
+#		\"( na FILTER ) | (FILTER = 'PASS') | (FILTER has 'HOTSPOT')\" > $@"))
 
 
 ##### PROESSING #######

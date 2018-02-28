@@ -4,6 +4,9 @@ ifndef SOMATIC_VARIANT_CALLER_INC
 
 ### Filters
 SOMATIC_FILTERS = $(if $(TARGETS_FILE_INTERVALS),target_ft) som_ad_ft
+ifeq ($(shell test $(words $(NORMAL_SAMPLES)) -gt 2; echo $$?),0)
+	SOMATIC_FILTERS += nft
+endif
 SOMATIC_FILTERS += $(if $(findstring GRCm38,$(REF)),,hotspot)
 
 SOMATIC_FILTER_SUFFIX = $(subst $( ),.,$(strip $(call SOMATIC_FILTERS,$1)))
@@ -15,10 +18,6 @@ SOMATIC_COMMON_ANNS := $(if $(findstring true,$(USE_SUFAM)),sufam) \
 
 ifeq ($(findstring IONTORRENT,$(SEQ_PLATFORM)),IONTORRENT)
 	SOMATIC_COMMON_ANNS += amplicons
-endif
-
-ifeq ($(shell test $(words $(NORMAL_SAMPLES)) -gt 2; echo $$?),0)
-	SOMATIC_COMMON_ANNS += nft
 endif
 
 ifeq ($(findstring true,$(ANN_FACETS)),true)

@@ -76,4 +76,7 @@ unprocessed_fastq/$1.%.fastq.gz : $$(foreach split,$2,unprocessed_fastq/$$(split
 endef
 $(foreach sample,$(SPLIT_SAMPLES),$(eval $(call merged-fastq,$(sample),$(split.$(sample)))))
 
+%.fastq.gz : %.fastq
+	$(call RUN,1,$(RESOURCE_REQ_LOW_MEM),$(RESOURCE_REQ_SHORT),,"gzip -c $< > $(@) && $(RM) $<")
+
 include usb-modules-v2/bam_tools/processBam.mk

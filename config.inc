@@ -49,80 +49,59 @@ include usb-modules-v2/genome_inc/$(REF).inc
 
 ## process FASTQs before alignment
 TRIM_LENGTH ?= 150
-# trim is fixed length trim, cutadapt
-ifeq ($(strip $(CAPTURE_METHOD)),RNA)
-FASTQ_FILTER ?= cutadapt
-else
-FASTQ_FILTER ?=
-endif
-
 CLIP_FASTQ_R1 ?=
 CLIP_FASTQ_R2 ?=
-
 BAM_FILTER_FLAGS ?= 768
 SAMTOOLS_DOWNSAMPLE_FACTOR ?= 0.2
 
-
-
+## default FASTQ and BAM processing parameters based on application
 
 ifeq ($(CAPTURE_METHOD),NONE)
-BAM_DUP_TYPE ?= markdup
-BAM_SPLIT_N_TRIM ?= false
-BAM_RECAL ?= true
-BAM_REALN ?= true
-GENOTYPE_WITH_CHR2 = ?= true
-BAM_CHR2_BASE_RECAL ?= true
 endif
 
 ifeq ($(CAPTURE_METHOD),RNA)
-BAM_DUP_TYPE ?= none
+FASTQ_FILTER ?= cutadapt
+MERGE_SPLIT_FASTQ ?= true
 BAM_SPLIT_N_TRIM ?= true
-BAM_RECAL ?= true
-BAM_REALN ?= true
-GENOTYPE_WITH_CHR2 = ?= true
-BAM_CHR2_BASE_RECAL ?= true
+BAM_DUP_TYPE ?= none
 endif
 
 ifeq ($(CAPTURE_METHOD),PCR)
 BAM_DUP_TYPE ?= none
-BAM_SPLIT_N_TRIM ?= false
-BAM_RECAL ?= false
 BAM_REALN ?= false
-GENOTYPE_WITH_CHR2 = ?= false
+BAM_RECAL ?= false
 BAM_CHR2_BASE_RECAL ?= false
+GENOTYPE_WITH_CHR2 = ?= false
 endif
 
 ifeq ($(CAPTURE_METHOD),BAITS)
-BAM_DUP_TYPE ?= markdup
-BAM_SPLIT_N_TRIM ?= false
-BAM_RECAL ?= true
-BAM_REALN ?= true
-GENOTYPE_WITH_CHR2 = ?= true
-BAM_CHR2_BASE_RECAL ?= true
 endif
 
 ifeq ($(CAPTURE_METHOD),CHIP)
-BAM_DUP_TYPE ?= none
-BAM_SPLIT_N_TRIM ?= false
-BAM_RECAL ?= false
-BAM_REALN ?= false
-GENOTYPE_WITH_CHR2 = ?= false
-BAM_CHR2_BASE_RECAL ?= false
 SPLIT_CHR ?= false
+BAM_DUP_TYPE ?= markdup
+BAM_REALN ?= true
+BAM_RECAL ?= true
+GENOTYPE_WITH_CHR2 = ?= false
 endif
 
-MERGE_SPLIT_BAMS ?= false  # merge processed split bams
+FASTQ_FILTER ?=
+MERGE_SPLIT_FASTQ ?= false 
+
 BAM_REPROCESS ?= false
 BAM_PHRED64 ?= false
-SPLIT_CHR ?= true
-SPLIT_FASTQ ?= false
-MERGE_SPLIT_FASTQ ?= true
+MERGE_SPLIT_BAMS ?= false  # merge processed split bams
 BAM_REORDER ?= true
 BAM_SORT ?= true
-BAM_FILTER ?= true
 BAM_FIX_RG ?= false # fix the readgroups so that it corresponds with the bam filename
-
-
+BAM_FILTER ?= true
+BAM_SPLIT_N_TRIM ?= false
+SPLIT_CHR ?= true
+BAM_DUP_TYPE ?= markdup
+BAM_REALN ?= true
+BAM_RECAL ?= true
+BAM_CHR2_BASE_RECAL ?= true
+GENOTYPE_WITH_CHR2 = ?= true
 
 
 
