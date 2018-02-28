@@ -11,7 +11,10 @@ VPATH ?= bam
 .SECONDARY: 
 .PHONY : all
 
+ifeq ($(shell test $(words $(SAMPLES)) -gt 2; echo $$?),0)
 all : genotype/all$(PROJECT_PREFIX).snps_filtered.sdp_ft.clust.png
+endif
+
 
 ifeq ($(findstring ILLUMINA,$(SEQ_PLATFORM)),ILLUMINA)
 define snps-chr
