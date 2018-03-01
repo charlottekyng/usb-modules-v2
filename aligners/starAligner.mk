@@ -57,6 +57,8 @@ star/secondpass/%.Chimeric.out.junction : star/secondpass/%.star.bam
 star/secondpass/%.ReadsPerGene.out.tab : star/secondpass/%.star.bam
 	
 star/secondpass/%.Aligned.toTranscriptome.out.bam : star/secondpass/%.star.bam
+
+star/secondpass/%.Log.final.out : star/secondpass/%.star.bam
 	
 
 bam/%.bam : star/secondpass/%.star.$(BAM_SUFFIX)
