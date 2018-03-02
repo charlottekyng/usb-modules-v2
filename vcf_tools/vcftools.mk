@@ -65,7 +65,6 @@ LOGDIR ?= log/vcf.$(NOW)
 #	$(call LSCRIPT_CHECK_MEM,8G,01:59:59,"$(LOAD_JAVA8_MODULE); $(call VARIANT_FILTRATION,7G) \
 #		-R $(REF_FASTA) -V $< -o $@ --maskName 'encode' --mask $(ENCODE_BED) && $(RM) $< $<.idx")
 
-### NOTE FOR UPGRADE: THIS DOES NOT TAKE NUCLEOTIDE INTO ACCOUNT!!!
 %.hotspot.vcf : %.vcf
 	$(call CHECK_VCF,$<,$@,\
 	$(call RUN,1,$(RESOURCE_REQ_MEDIUM_MEM),$(RESOURCE_REQ_SHORT),$(JAVA8_MODULE),"\
@@ -180,7 +179,7 @@ $(foreach sample,$(SAMPLES),$(eval $(call hrun-sample,$(sample))))
 	$(call RUN,1,$(RESOURCE_REQ_HIGH_MEM),$(RESOURCE_REQ_VSHORT),$(SNP_EFF_MODULE),"\
 	$(SNP_SIFT) annotate $(SNP_SIFT_OPTS) $(EXAC_NONPSYCH) $< > $@ && $(RM) $^"))
 
-%.cadd.vcf : %.vcf %.vcf.idz
+%.cadd.vcf : %.vcf %.vcf.idx
 	$(call CHECK_VCF,$<,$@,\
 	$(call RUN,1,$(RESOURCE_REQ_HIGH_MEM),$(RESOURCE_REQ_VSHORT),$(SNP_EFF_MODULE),"\
 	$(SNP_SIFT) annotate $(SNP_SIFT_OPTS) $(CADD) $< > $@ && $(RM) $^"))
