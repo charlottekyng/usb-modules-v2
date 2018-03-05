@@ -179,10 +179,12 @@ $(foreach sample,$(SAMPLES),$(eval $(call hrun-sample,$(sample))))
 	$(call RUN,1,$(RESOURCE_REQ_HIGH_MEM),$(RESOURCE_REQ_VSHORT),$(SNP_EFF_MODULE),"\
 	$(SNP_SIFT) annotate $(SNP_SIFT_OPTS) $(EXAC_NONPSYCH) $< > $@ && $(RM) $^"))
 
-%.cadd.vcf : %.vcf %.vcf.idx
+
+%.cadd.vcf : %.vcf %.vcf.idx 
 	$(call CHECK_VCF,$<,$@,\
-	$(call RUN,1,$(RESOURCE_REQ_HIGH_MEM),$(RESOURCE_REQ_VSHORT),$(SNP_EFF_MODULE),"\
-	$(SNP_SIFT) annotate $(SNP_SIFT_OPTS) $(CADD) $< > $@ && $(RM) $^"))
+	$(call RUN,1,$(RESOURCE_REQ_HIGH_MEM),$(RESOURCE_REQ_SHORT),$(SNP_EFF_MODULE),"\
+	$(SNP_SIFT) annotate $(SNP_SIFT_OPTS) \
+	$(if $(findstring indel,$<),$(CADD_INDEL),$(CADD_SNV)) $< > $@ && $(RM) $^"))
 
 #%.mut_taste.vcf : %.vcf
 #	$(INIT) $(call CHECK_VCF,$<,$@,$(MUTATION_TASTER) $< > $@ 2> $(LOG))

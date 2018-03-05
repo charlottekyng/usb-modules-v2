@@ -103,7 +103,8 @@ CLINVAR = $(ANN_DIR)/clinvar.vcf
 EXAC_NONTCGA = $(ANN_DIR)/ExAC_nonTCGA.r0.3.1.sites.vep.vcf
 COSMIC ?= $(ANN_DIR)/CosmicCodingMuts.sorted.vcf
 EXAC_NONPSYCH = $(ANN_DIR)/ExAC.r0.3.nonpsych.sites.edited.vcf
-CADD ?= $(ANN_DIR)/CADD_whole_genome_SNVs_header.vcf.gz
+CADD_SNV ?= $(ANN_DIR)/CADD_whole_genome_SNVs_header.vcf.gz
+CADD_INDEL ?= $(ANN_DIR)/CADD_Indels_1000Gphase3_indels_header_sorted.vcf.gz
 
 HAPLOTYPE_INSUF_BED = $(ANN_DIR)/haploinsufficient.genes.bed
 CANCER_GENE_CENSUS_BED = $(ANN_DIR)/cancer_gene_census.bed
