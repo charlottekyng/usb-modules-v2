@@ -154,7 +154,7 @@ if __name__ == '__main__':
         if job_name is not None:
             qsub_args += " --job-name {}".format(job_name)
         if args.num_cores > 1:
-            qsub_args += " --cpus-per-task {}".format(args.num_cores)
+            qsub_args += " -n {}".format(args.num_cores)
         if args.hard_memory is not None:
             hard_mem_gb = int(math.ceil(job.human2bytes(args.hard_memory) / 1000000000.0))
             qsub_args += " --mem-per-cpu {hard_mem_gb}".format(hard_mem_gb=args.hard_memory)             
