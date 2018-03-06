@@ -62,7 +62,7 @@ metrics/%.amplicon_metrics.txt metrics/%.interval_amplicon_metrics.txt : bam/%.b
 	PER_TARGET_COVERAGE=metrics/$*.interval_amplicon_metrics.txt COVERAGE_CAP=500000")
 
 metrics/%.per_base_depth.txt : bam/%.bam bam/%.bam.bai
-	$(call RUN,1,$(RESOURCE_REQ_HIGH_MEM),$(RESOURCE_REQ_VSHORT),$(BEDTOOLS_MODULE), "\
+	$(call RUN,1,$(RESOURCE_REQ_VHIGH_MEM),$(RESOURCE_REQ_VSHORT),$(BEDTOOLS_MODULE), "\
 	$(BEDTOOLS) coverage -d -b $< -a $(TARGETS_FILE_INTERVALS_MERGED) > $@")
  
 define amplicon-metrics-pools
