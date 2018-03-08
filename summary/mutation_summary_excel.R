@@ -41,20 +41,24 @@ for (file in files) {
 
 	tab <- tab[,output_fields2]
 
-	impact <- tab[,"ANN[*].IMPACT"]
-	impact_index <- lapply(impact, function(x) {
-		xx <- unlist(strsplit(x, "|", fixed=T))
-		if ("HIGH" %in% xx) { which(xx=="HIGH") 
-		} else if ("MODERATE" %in% xx) { which(xx=="MODERATE")
-		} else if ("LOW" %in% xx) { which(xx=="LOW") 
-		} else if ("MODIFIER" %in% xx) {which (xx=="MODIFIER") }
-	})
+	if("ANN[*].IMPACT" %in% colnames(tab)){
+		impact <- tab[,"ANN[*].IMPACT"]
+		impact_index <- lapply(impact, function(x) {
+			xx <- unlist(strsplit(x, "|", fixed=T))
+			if ("HIGH" %in% xx) { which(xx=="HIGH") 
+			} else if ("MODERATE" %in% xx) { which(xx=="MODERATE")
+			} else if ("LOW" %in% xx) { which(xx=="LOW") 
+			} else if ("MODIFIER" %in% xx) {which (xx=="MODIFIER") }
+		})
+	}
 
-	aa <- tab[,"ANN[*].HGVS_P"]
-	aa_index <- lapply(aa, function(x) {
-		xx <- unlist(strsplit(x, "|", fixed=T))
-		grep ("p\\.", xx)
-	})
+	if("ANN[*].HGVS_P" %in% colnames(tab)){
+		aa <- tab[,"ANN[*].HGVS_P"]
+		aa_index <- lapply(aa, function(x) {
+			xx <- unlist(strsplit(x, "|", fixed=T))
+			grep ("p\\.", xx)
+		})
+	}
 
 	for (i in grep("ANN[*]", colnames(tab), fixed=T)) {
 		for (j in 1:nrow(tab)) {
