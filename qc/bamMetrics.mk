@@ -25,7 +25,7 @@ endif
 hs_metrics : $(shell rm -f metrics/all$(PROJECT_PREFIX).hs_metrics.txt metrics/all$(PROJECT_PREFIX).interval_hs_metrics.txt) metrics/all$(PROJECT_PREFIX).hs_metrics.txt metrics/all$(PROJECT_PREFIX).interval_hs_metrics.txt
 amplicon_metrics : $(shell rm -f metrics/all$(PROJECT_PREFIX).hs_metrics.txt metrics/all$(PROJECT_PREFIX).interval_hs_metrics.txt) metrics/all$(PROJECT_PREFIX).amplicon_metrics.txt metrics/all$(PROJECT_PREFIX).interval_amplicon_metrics.txt
 per_base_depth : $(foreach sample,$(SAMPLES),metrics/$(sample).per_base_depth.txt)
-wgs_metrics : $(foreach sample,$(SAMPLES),metrics/$(sample).wgs_metrics.txt)
+wgs_metrics : $(shell rm -f metrics/all$(PROJECT_PREFIX).wgs_metrics.txt) metrics/all$(PROJECT_PREFIX).wgs_metrics.txt
 rna_metrics : $(shell rm -f metrics/all$(PROJECT_PREFIX).hs_metrics.txt metrics/all$(PROJECT_PREFIX).interval_hs_metrics.txt) metrics/all$(PROJECT_PREFIX).rnaseq_metrics.txt metrics/all$(PROJECT_PREFIX).normalized_coverage.rnaseq_metrics.txt
 #metrics/all.rnaseq_report/index.html
 flagstats : $(shell rm -f metrics/all$(PROJECT_PREFIX).flagstats.txt) metrics/all$(PROJECT_PREFIX).flagstats.txt
@@ -167,6 +167,17 @@ metrics/all$(PROJECT_PREFIX).amplicon_metrics.txt : $(foreach sample,$(SAMPLES),
 		head -8 $$metrics | sed "/^#/d; /^CUSTOM_AMPLICON_SET/d; /^\$$/d; s/^tmp/$$samplename/; s/\t\+$$//" ; \
 	done; \
 	} > $@
+
+metrics/all$(PROJECT_PREFIX).wgs_metrics.txt : $(foreach sample,$(SAMPLES),metrics/$(sample).wgs_metrics.txt)
+	$(INIT) \
+	{ \
+	sed '/^$$/d; /^#/d; s/^/SAMPLE\t/; s/\s$$//' $< | head -1; \
+	for metrics in $^; do \
+		samplename=$$(basename $${metrics%%.wgs_metrics.txt}); \
+		head -8 $$metrics | sed "/^#/d; /^GENOME_TERRITORY/d; /^\$$/d; s/^/$$samplename\t/; s/\t\+$$//" ; \
+	done; \
+	} > $@
+
 
 # summarize interval metrics into one file
 metrics/all$(PROJECT_PREFIX).interval_amplicon_metrics.txt : $(foreach sample,$(SAMPLES),metrics/$(sample).interval_amplicon_metrics.txt)
