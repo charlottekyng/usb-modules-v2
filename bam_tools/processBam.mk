@@ -118,7 +118,8 @@ ifeq ($(findstring true,$(BAM_CHR2_BASE_RECAL)),true)
 %.$(BAM_SUFFIX1).2.$(BAM_SUFFIX2)_report.grp : %.$(BAM_SUFFIX1).2.$(subst .recal,$(),$(BAM_SUFFIX2)).bam %.$(BAM_SUFFIX1).2.$(subst .recal,$(),$(BAM_SUFFIX2)).bam.bai
 	$(call RUN,1,$(RESOURCE_REQ_MEDIUM_MEM),$(RESOURCE_REQ_LONG),$(JAVA8_MODULE),"\
 	$(call GATK,BaseRecalibrator,$(RESOURCE_REQ_MEDIUM_MEM_JAVA)) \
-	-R $(REF_FASTA) $(BAM_BASE_RECAL_OPTS) -I $< -o $@")
+	-R $(REF_FASTA) $(BAM_BASE_RECAL_OPTS) -I $< -o $@ \
+	$(foreach chr,1 $(wordlist 3,100,$(CHROMOSOMES)), && ln -f $@ $*.$(BAM_SUFFIX1).$(chr).$(BAM_SUFFIX2)_report.grp)")
 
 define chr-recal-report
 %.$(BAM_SUFFIX1).$1.$(BAM_SUFFIX2)_report.grp : %.$(BAM_SUFFIX1).2.$(BAM_SUFFIX2)_report.grp
