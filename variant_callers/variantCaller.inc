@@ -37,5 +37,7 @@ TABLES += $(foreach suff,$(call TABLE_SUFFIXES,$1),alltables/all$(PROJECT_PREFIX
 VCF_STATS = $(foreach sample,$(SAMPLES),\
 	$(foreach suff,$(call VCF_SUFFIXES,$1), \
 	vcf/$(sample).$(suff).vcf.stats))
+VCF_STATS += $(foreach suff,$(call VCF_SUFFIXES,$1),alltables/all$(PROJECT_PREFIX).$(suff).vcf.stats)
 endif
 VARIANT_CALLER_INC = true
+

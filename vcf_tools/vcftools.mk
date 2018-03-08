@@ -403,6 +403,20 @@ endif
 	$(call RUN,1,$(RESOURCE_REQ_LOW_MEM),$(RESOURCE_REQ_VSHORT),$(BCFTOOLS_MODULE),"\
 	$(BCFTOOLS) stats $< > $@")
 
+alltables/all$(PROJECT_PREFIX).%.vcf.stats : $(foreach sample,$(SAMPLES),vcf/$(sample).%.vcf.stats)
+	$(INIT) \
+	echo "SAMPLE" > $@.tmp; \
+	egrep "^SN" $< | cut -f 3 >> $@.tmp; \
+	for metrics in $^; do \
+		echo $${metrics} | sed 's/vcf\///; s/\..*$$//;' > $@.tmp2;\
+		egrep "^SN" $${metrics} | cut -f 4 >> $@.tmp2; \
+		paste $@.tmp $@.tmp2 > $@;\
+		cp $@ $@.tmp;\
+	done;
+	
+
+
+
 #################### MAF ###################
 #ifdef SAMPLE_PAIRS
 #define vcf2maf-tumor-normal
