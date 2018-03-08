@@ -400,7 +400,7 @@ endif
 #### vcf stats
 
 %.vcf.stats : %.vcf
-	$(call RUN,1,$(RESOURCE_REQ_LOW_MEM),$(RESOURCE_REQ_VSHORT),$(BCFTOOLS),"\
+	$(call RUN,1,$(RESOURCE_REQ_LOW_MEM),$(RESOURCE_REQ_VSHORT),$(BCFTOOLS_MODULE),"\
 	$(BCFTOOLS) stats $< > $@")
 
 #################### MAF ###################
