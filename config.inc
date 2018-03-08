@@ -129,6 +129,12 @@ HRUN ?= false
 HRUN_FILTER ?= 4
 
 USE_SUFAM ?= true
+ifeq ($(findstring ILLUMINA,$(SEQ_PLATFORM)),ILLUMINA)
+USE_NFT ?= true
+endif
+ifeq ($(findstring IONTORRENT,$(SEQ_PLATFORM)),IONTORRENT)
+USE_NFT ?= false
+endif
 
 ifeq ($(findstring ILLUMINA,$(SEQ_PLATFORM)),ILLUMINA)
 PON_VCF ?= mutect2/pon.mutect2.vcf

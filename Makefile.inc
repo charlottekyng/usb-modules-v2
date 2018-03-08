@@ -195,36 +195,6 @@ export PATH := $(USR_DIR):$(PATH)
 SHELL ?= /bin/bash
 UNZIP ?= /usr/bin/unzip
 
-ifeq (SGE,$(CLUSTER_ENGINE))
-PERL_MODULE ?= Perl/5.22.2-goolf-1.7.20
-R_MODULE ?= R/3.3.0-goolf-1.7.20
-JAVA6_MODULE ?= Java/1.6.0_24
-JAVA7_MODULE ?= Java/1.7.0_80
-JAVA8_MODULE ?= Java/1.8.0_92
-PYTHON_MODULE ?= Python/3.5.1-goolf-1.4.10
-SAMTOOLS_MODULE ?= SAMtools/1.2-goolf-1.4.10
-BCFTOOLS_MODULE ?= BCFtools/1.2-goolf-1.4.10
-BEDTOOLS_MODULE ?= BEDTools/2.25.0-goolf-1.4.10
-IGVTOOLS_MODULE ?= IGVTools/2.3.60-Java-1.7.0_21
-VCFTOOLS_MODULE ?= VCFtools/0.1.14-goolf-1.4.10-Perl-5.16.3
-BCL2FASTQ_MODULE ?= bcl2fastq/2.17.1.14-goolf-1.7.20
-TRIM_GALORE_MODULE = Trim_Galore/0.4.1-goolf-1.4.10-Perl-5.16.3
-TABIX_MODULE ?= tabix/0.2.6-goolf-1.4.10
-FASTQC_MODULE ?= FastQC/0.11.4-Java-1.7.0_21
-BOWTIE2_MODULE ?= Bowtie2/2.2.6-goolf-1.4.10
-BWA_MODULE ?= BWA/0.7.12-goolf-1.4.10
-TOPHAT_MODULE ?= TopHat/2.1.1-goolf-1.7.20
-STAR_MODULE ?= STAR/2.5.2a-goolf-1.7.20
-STAR_FUSION_MODULE ?= STAR-Fusion/0.6.0-goolf-1.4.10-Perl-5.16.3
-HISAT2_MODULE ?= HISAT2/2.0.4-goolf-1.7.20
-STRINGTIE_MODULE ?= StringTie/1.3.3-goolf-1.7.20
-SNP_EFF_MODULE ?= snpEff/4.1l-Java-1.7.0_75
-CUFFLINKS_MODULE ?= Cufflinks/2.2.1-Linux_x86_64
-STRINGTIE_MODULE ?= StringTie/1.3.3-goolf-1.7.20
-RSEM_MODULE ?= RSEM/1.2.31-goolf-1.7.20
-endif
-
-ifeq (SLURM,$(CLUSTER_ENGINE))
 PERL_MODULE ?= Perl/5.22.2-goolf-1.7.20
 R_MODULE ?= R/3.4.2-goolf-1.7.20
 JAVA6_MODULE ?= Java/1.6.0_24
@@ -253,9 +223,11 @@ CUFFLINKS_MODULE ?= Cufflinks/2.2.1-Linux_x86_64
 STRINGTIE_MODULE ?= StringTie/1.3.3-goolf-1.7.20
 RSEM_MODULE ?= RSEM/1.2.31-goolf-1.7.20
 OPENBLAS_MODULE ?= OpenBLAS/0.2.13-GCC-4.8.4-LAPACK-3.5.0
-endif
-
-
+GATK36_MODULE ?= GATK/3.6-Java-1.8.0_92
+GATK40_MODULE ?= GATK/4.0.1.2-Java-1.8.0_92
+MUTECT_MODULE ?= MuTect/1.1.7-Java-1.7.0_80
+PICARD_MODULE ?= picard/2.9.2
+VARSCAN_MODULE ?= VarScan/2.4.1-Java-1.7.0_80
 
 PERL ?= perl
 JAVA ?= java -Djava.io.tmpdir=$(TMPDIR)
@@ -309,10 +281,19 @@ PICARD = $(JAVA) -Xmx$(2) -jar $(JAR_DIR)/picard-tools-2.4.1/picard.jar $(1)
 PICARD += VALIDATION_STRINGENCY=LENIENT MAX_RECORDS_IN_RAM=4000000 TMP_DIR=$(TMPDIR)
 PICARD += REFERENCE_SEQUENCE=$(REF_FASTA) CREATE_INDEX=true
 
+## For the future
+#PICARD = java -Xmx$(2) -jar \$$EBROOTPICARD/picard.jar
+#PICARD += VALIDATION_STRINGENCY=LENIENT MAX_RECORDS_IN_RAM=4000000 TMP_DIR=$(TMPDIR)
+#PICARD += REFERENCE_SEQUENCE=$(REF_FASTA) CREATE_INDEX=true
+
 GATK = $(JAVA) -Xmx$(2) -jar $(JAR_DIR)/GenomeAnalysisTK-3.6/GenomeAnalysisTK-3.6.jar 
 GATK += -S LENIENT -T $(1) -filterNoBases
 GATK37 = $(JAVA) -Xmx$(2) -jar $(JAR_DIR)/GenomeAnalysisTK-3.7/GenomeAnalysisTK-3.7.jar 
 GATK37 += -S LENIENT -T $(1) -filterNoBases
+
+## For the future
+#GATK = java -Xmx$(2) -jar \$$EBROOTGATK/GenomeAnalysisTK.jar
+#GATK += -S LENIENT -T $(1) -filterNoBases
 
 FIX_GATK_VCF = $(PERL) usb-modules-v2/variant_callers/fix_vcf_scripts/fix_gatk_vcf.pl
 FIX_VARSCAN_VCF = $(PERL) usb-modules-v2/variant_callers/fix_vcf_scripts/fix_varscan_vcf.pl
@@ -321,6 +302,9 @@ FIX_TVC_VCF = $(PERL) usb-modules-v2/variant_callers/fix_vcf_scripts/fix_tvc_vcf
 
 MUTECT ?= $(JAVA) -Xmx$(1) -jar $(JAR_DIR)/muTect-1.1.4.jar --analysis_type MuTect
 
+## For the future
+#MUTECT ?= java -Xmx$(1) -jar \$$EBROOTMUTECT/mutect-1.1.7.jar --analysis_type MuTect
+#MUTECT2 ?= java -Xmx$(2) -jar \$$EBROOTGATK/GenomeAnalysisTK.jar --analysis_type MuTect2
 
 CONFIGURE_STRELKA = $(PERL) $(USR_DIR)/local/strelka_workflow-1.0.15/bin/configureStrelkaWorkflow.pl
 STRELKA_CONFIG = usb-modules-v2/variant_callers/somatic/strelka_config_bwa_default.ini
@@ -332,7 +316,10 @@ TVC_SENSITIVE_JSON = usb-modules-v2/variant_callers/somatic/TVC_somatic_paramete
 TVC_MOTIF ?= $(TVC_ROOT_DIR)/share/TVC/sse/ampliseqexome_germline_p1_hiq_motifset.txt
 
 VARSCAN_JAR ?= $(JAR_DIR)/varscan/VarScan.v2.4.3.jar
-VARSCAN = $(JAVA) -Xmx6G -jar $(VARSCAN_JAR)
+VARSCAN = $(JAVA) -Xmx -jar $(VARSCAN_JAR)
+
+### For the future
+# VARSCAN ?= java -Xmx$(RESOURCE_REQ_LOW_MEM_JAVA) -jar \$$EBROOTVARSCAN/VarScan.v2.4.1.jar
 
 SNP_EFF_CONFIG ?= usb-modules-v2/snpEff.config
 SNP_EFF = $(JAVA) -Xmx$(RESOURCE_REQ_LOW_MEM_JAVA) -jar \$$EBROOTSNPEFF/snpEff.jar
@@ -350,9 +337,7 @@ FACETS = $(RSCRIPT) usb-modules-v2/copy_number/facetsRun.R
 FACETS_GENE_CN = $(RSCRIPT) usb-modules-v2/copy_number/facetsGeneCN.R
 FACETS_PLOT_GENE_CN = $(RSCRIPT) usb-modules-v2/copy_number/facetsGeneCNPlot.R
 FACETS_CCF = $(RSCRIPT) usb-modules-v2/copy_number/facetsCCF.R
-
 FACETS_GENE_CN_OPTS = $(if $(TARGETS_FILE_GENES),--genesFile $(TARGETS_FILE_GENES))
-
 
 MUTATION_SUMMARY_RSCRIPT = $(RSCRIPT) usb-modules-v2/summary/mutation_summary_excel.R
 
@@ -369,6 +354,8 @@ CUFFCMP ?= currcompare
 
 RSEM_CALC_EXPR ?= rsem-calculate-expression
 RSEM_GEN_DATA_MATRIX ?= usb-modules-v2/rnaseq/rsem-generate-data-matrix.pl
+RSEM_NORM ?= usb-modules-v2/rnaseq/rsem_normalize.R
+
 
 ##VCF2MAF ?= $(PERL) $(SCRIPTS_DIR)/vcf2maf.pl
 #MAF2MAF ?= $(PERL) $(SCRIPTS_DIR)/maf2maf.pl

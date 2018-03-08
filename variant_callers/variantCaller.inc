@@ -9,7 +9,8 @@ FILTER_SUFFIX = $(subst $( ),.,$(strip $(call FILTERS,$1)))
 ### Annotation
 
 COMMON_ANNS := $(if $(findstring GRCm38,$(REF)),eff dbsnp, \
-	eff dbsnp $(if $(findstring CANCER,$(ANALYSIS_TYPE)),cosmic exac_nontcga gene_ann,) $(if $(findstring PSYCH,$(ANALYSIS_TYPE)),exac_nonpsych cadd,) clinvar nsfp)
+	eff dbsnp $(if $(findstring CANCER,$(ANALYSIS_TYPE)),cosmic exac_nontcga gene_ann,) \
+	$(if $(findstring PSYCH,$(ANALYSIS_TYPE)),exac_nonpsych cadd,) clinvar nsfp)
 
 SNV_ANNS = $(COMMON_ANNS)
 INDEL_ANNS = $(COMMON_ANNS)
@@ -33,6 +34,8 @@ TABLES = $(foreach sample,$(SAMPLES),\
 	$(foreach suff,$(call TABLE_SUFFIXES,$1),\
 	tables/$(sample).$(suff).txt))
 TABLES += $(foreach suff,$(call TABLE_SUFFIXES,$1),alltables/all$(PROJECT_PREFIX).$(suff).txt)
-
+VCF_STATS = $(foreach sample,$(SAMPLES),\
+	$(foreach suff,$(call VCF_SUFFIXES,$1), \
+	vcf/$(sample).$(suff).vcf.stats))
 endif
 VARIANT_CALLER_INC = true
