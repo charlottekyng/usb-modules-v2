@@ -413,6 +413,7 @@ alltables/all$(PROJECT_PREFIX).%.vcf.stats : $(foreach sample,$(SAMPLES),vcf/$(s
 		paste $@.tmp $@.tmp2 > $@;\
 		cp $@ $@.tmp;\
 	done;
+	rm -rf $@.tmp $@.tmp2
 	
 
 

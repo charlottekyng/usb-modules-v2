@@ -9,7 +9,7 @@ LOGDIR ?= log/metrics.$(NOW)
 .PHONY: bam_metrics #hs_metrics amplicon_metrics wgs_metrics rna_metrics #interval_report #non_ref_metrics
 
 ifeq ($(CAPTURE_METHOD),NONE)
-bam_metrics : wgs_metrics oxog_wgs flagstats alignment_summary_metrics dup
+bam_metrics : wgs_metrics oxog_wgs flagstats flagstatsQ30 alignment_summary_metrics dup
 endif
 ifeq ($(CAPTURE_METHOD),BAITS)
 bam_metrics : hs_metrics oxog flagstats alignment_summary_metrics #dup
@@ -29,6 +29,7 @@ wgs_metrics : $(shell rm -f metrics/all$(PROJECT_PREFIX).wgs_metrics.txt) metric
 rna_metrics : $(shell rm -f metrics/all$(PROJECT_PREFIX).hs_metrics.txt metrics/all$(PROJECT_PREFIX).interval_hs_metrics.txt) metrics/all$(PROJECT_PREFIX).rnaseq_metrics.txt metrics/all$(PROJECT_PREFIX).normalized_coverage.rnaseq_metrics.txt
 #metrics/all.rnaseq_report/index.html
 flagstats : $(shell rm -f metrics/all$(PROJECT_PREFIX).flagstats.txt) metrics/all$(PROJECT_PREFIX).flagstats.txt
+flagstatsQ30 : $(shell rm -f metrics/all$(PROJECT_PREFIX).flagstatsQ30.txt) metrics/all$(PROJECT_PREFIX).flagstatsQ30.txt
 alignment_summary_metrics : $(shell rm -f metrics/all$(PROJECT_PREFIX).alignment_summary_metrics.txt) metrics/all$(PROJECT_PREFIX).alignment_summary_metrics.txt
 #gc : $(foreach sample,$(SAMPLES),metrics/$(sample).gc_bias_metrics.txt)
 artifacts : $(foreach sample,$(SAMPLES),metrics/$(sample).artifact_metrics.bait_bias_summary_metrics)
@@ -84,7 +85,7 @@ $(if $(TARGETS_FILE_INTERVALS_POOLS),\
 metrics/%.wgs_metrics.txt : bam/%.bam bam/%.bam.bai
 	$(call RUN,1,$(RESOURCE_REQ_MEDIUM_MEM),$(RESOURCE_REQ_SHORT),$(JAVA8_MODULE),"\
 		$(call PICARD,CollectWgsMetrics,$(RESOURCE_REQ_MEDIUM_MEM_JAVA)) \
-		INPUT=$< OUTPUT=$@ COUNT_UNPAIRED=true")
+		INPUT=$< OUTPUT=$@ COUNT_UNPAIRED=true MINIMUM_MAPPING_QUALITY=30")
 
 metrics/%.rnaseq_metrics.txt : bam/%.bam bam/%.bam.bai
 	$(call RUN,1,$(RESOURCE_REQ_MEDIUM_MEM),$(RESOURCE_REQ_SHORT),$(R_MODULE) $(JAVA8_MODULE),"\
@@ -132,6 +133,10 @@ metrics/%.wgs.oxog_metrics.txt : bam/%.bam bam/%.bam.bai
 metrics/%.flagstats.txt : bam/%.bam bam/%.bam.bai
 	$(call RUN,1,$(RESOURCE_REQ_LOW_MEM),$(RESOURCE_REQ_SHORT),$(SAMTOOLS_MODULE),"\
 	$(SAMTOOLS) flagstat $< > $@")
+
+metrics/%.flagstatsQ30.txt : bam/%.bam bam/%.bam.bai
+	$(call RUN,1,$(RESOURCE_REQ_LOW_MEM),$(RESOURCE_REQ_SHORT),$(SAMTOOLS_MODULE),"\
+	$(SAMTOOLS) view -bh -q 30 $< | $(SAMTOOLS) flagstat - > $@")
 
 # summarize metrics into one file
 metrics/all$(PROJECT_PREFIX).hs_metrics.txt : $(foreach sample,$(SAMPLES),metrics/$(sample).hs_metrics.txt)
@@ -242,6 +247,16 @@ metrics/all$(PROJECT_PREFIX).oxog_metrics.txt : $(foreach sample,$(SAMPLES),metr
 	} >$@
 
 metrics/all$(PROJECT_PREFIX).flagstats.txt : $(foreach sample,$(SAMPLES),metrics/$(sample).flagstats.txt)
+	$(INIT) \
+	{ \
+	echo -ne "category\t"; sed 's/^[0-9]\+ + [0-9]\+ //;' $< | tr '\n' '\t';  echo "";\
+	for metrics in $^; do \
+		samplename=$$(basename $${metrics%%.flagstats.txt}); echo -ne "$$samplename\t"; \
+		cut -f1 -d' ' $$metrics | tr '\n' '\t'; echo ""; \
+	done; \
+	} >$@
+
+metrics/all$(PROJECT_PREFIX).flagstatsQ30.txt : $(foreach sample,$(SAMPLES),metrics/$(sample).flagstatsQ30.txt)
 	$(INIT) \
 	{ \
 	echo -ne "category\t"; sed 's/^[0-9]\+ + [0-9]\+ //;' $< | tr '\n' '\t';  echo "";\
