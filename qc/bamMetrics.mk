@@ -9,7 +9,7 @@ LOGDIR ?= log/metrics.$(NOW)
 .PHONY: bam_metrics #hs_metrics amplicon_metrics wgs_metrics rna_metrics #interval_report #non_ref_metrics
 
 ifeq ($(CAPTURE_METHOD),NONE)
-bam_metrics : wgs_metrics oxog_wgs flagstats flagstatsQ30 alignment_summary_metrics dup
+bam_metrics : wgs_metrics oxog_wgs flagstats alignment_summary_metrics dup
 endif
 ifeq ($(CAPTURE_METHOD),BAITS)
 bam_metrics : hs_metrics oxog flagstats alignment_summary_metrics #dup
@@ -228,10 +228,10 @@ metrics/all$(PROJECT_PREFIX).alignment_summary_metrics.txt : $(foreach sample,$(
 metrics/all$(PROJECT_PREFIX).dup_metrics.txt : $(foreach sample,$(SAMPLES),metrics/$(sample).dup_metrics.txt)
 	$(INIT) \
 	{ \
-	sed '/^$$/d; /^#/d; s/SAMPLE.*//; s/\s$$//; s/^/SAMPLE\t/;' $< | head -1; \
+	sed '/^$$/d; /^#/d; s/\s$$//; ' $< | head -1; \
 	for metrics in $^; do \
 		samplename=$$(basename $${metrics%%.dup_metrics.txt}); \
-		sed "/^#/d; /^LIBRARY/d; /^\$$/d; s/^/$$samplename\t/; s/\t\+$$//" $$metrics | grep "^$$samplename"; \
+		head -8 $$metrics | sed "/^#/d; /^LIBRARY/d; /^\$$/d; s/\t\+$$//"; \
 	done; \
 	} >$@
 
