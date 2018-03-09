@@ -19,10 +19,10 @@ ifneq ($(wildcard $(SAMPLE_FILE)),)
   SAMPLES ?= $(shell sed '/^\#/d' $(SAMPLE_FILE))
 endif
 ifneq ($(wildcard $(SAMPLE_PON_FILE)),)
-  PANEL_OF_NORMAL_SAMPLES ?= $(shell sed '/^\#/d' $(SAMPLE_PON_FILE))
+  PANEL_OF_NORMAL_SAMPLES = $(shell sed '/^\#/d' $(SAMPLE_PON_FILE))
 endif
 ifneq ($(wildcard $(SAMPLE_POOLEDNORM_FILE)),)
-  POOLED_NORM_SAMPLES ?= $(shell sed '/^\#/d' $(SAMPLE_POOLEDNORM_FILE))
+  POOLED_NORM_SAMPLES = $(shell sed '/^\#/d' $(SAMPLE_POOLEDNORM_FILE))
 endif
 ifneq ($(wildcard $(MERGE_SAMPLE_FILE)),)
   MERGE_SAMPLES ?= $(shell sed '/^\#/d' $(MERGE_SAMPLE_FILE))
