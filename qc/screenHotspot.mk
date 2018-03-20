@@ -63,12 +63,12 @@ hotspots/%.hotspotscreen.vcf : hotspots/%/hotspotscreen.vcf
 endif
 
 ifndef $(TARGETS_FILE_INTERVALS)
-hotspots/all$(PROJECT_PREFIX).sites.to.screen.vcf : $(TARGETS_FILE_INTERVALS) $(CANCER_HOTSPOT_VCF)
+hotspots/sites.to.screen.vcf : $(TARGETS_FILE_INTERVALS) $(CANCER_HOTSPOT_VCF)
 	$(INIT) grep "^\#" $(CANCER_HOTSPOT_VCF) > $@ && \
 	module load $(BEDTOOLS_MODULE); \
 	$(BEDTOOLS) intersect -b $(TARGETS_FILE_INTERVALS) -a $(CANCER_HOTSPOT_VCF) -header >>$@
 else
-hotspots/all$(PROJECT_PREFIX).sites.to.screen.vcf : $(CANCER_HOTSPOT_VCF)
+hotspots/sites.to.screen.vcf : $(CANCER_HOTSPOT_VCF)
 	$(INIT) ln $(CANCER_HOTSPOT_VCF) $@
 endif
 
