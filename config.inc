@@ -406,6 +406,18 @@ DESEQ_PHENO_FILE ?= pheno.txt
 RSEM_NUM_CORES ?= 4
 RSEM_OPTIONS ?= --alignments --no-bam-output -p $(RSEM_NUM_CORES) --forward-prob 0
 
+#################################
+####### ChIP-seq ################
+#################################
+
+MOSAICS_FRAG_LEN ?= 200
+MOSAICS_BIN_SIZE ?= 200
+MOSAICS_NUM_CORES ?= 8
+MOSAICS_PARALLEL ?= TRUE
+MOSAICS_MAXGAP ?= 200
+MOSAICS_MINSIZE ?= 50
+MOSAICS_THRES ?= 10
+
 ##################################
 ########## Fusions ###############
 ##################################

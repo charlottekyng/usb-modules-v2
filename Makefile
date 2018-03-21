@@ -121,6 +121,10 @@ ballgown:
 ## or are known to be broken/obsolete.
 ##########################################################
 
+TARGETS += mosaics
+mosaics :
+	$(call RUN_MAKE,usb-modules-v2/chipseq/mosaics.mk)
+
 TARGETS += merge_fastq
 merge_fastq : 
 	$(call RUN_MAKE,modules/fastq_tools/mergeFastq.mk)

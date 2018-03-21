@@ -356,6 +356,8 @@ RSEM_CALC_EXPR ?= rsem-calculate-expression
 RSEM_GEN_DATA_MATRIX ?= usb-modules-v2/rnaseq/rsem-generate-data-matrix.pl
 RSEM_NORM ?= usb-modules-v2/rnaseq/rsem_normalize.R
 
+MOSAICS_RUN ?= $(RSCRIPT) usb-modules-v2/chipseq/mosaics_run.R
+MOSAICS_CONSTRUCTBINS ?= $(RSCRIPT) usb-modules-v2/chipseq/mosaics_constructBins.R
 
 ##VCF2MAF ?= $(PERL) $(SCRIPTS_DIR)/vcf2maf.pl
 #MAF2MAF ?= $(PERL) $(SCRIPTS_DIR)/maf2maf.pl
