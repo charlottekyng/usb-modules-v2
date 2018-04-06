@@ -121,6 +121,7 @@ DGV_FILE = $(ANN_DIR)/DGV_GRCh37_hg19_variants_2016-05-15.txt
 #ENSEMBL_TXDB = $(ANN_DIR)/hsapiens_ensembl_biomart.sqlite
 
 GENCODE_GTF = $(ANN_DIR)/Homo_sapiens.GRCh37.82.chr_patch_hapl_scaff.gtf
+GENCODE_GENE_GTF = $(ANN_DIR)/Homo_sapiens.GRCh37.82.chr_patch_hapl_scaff.genes.gtf
 
 RIBOSOMAL_INTERVALS ?= $(ANN_DIR)/ribosomalRNA.interval_list
 GENE_REF_FLAT = $(ANN_DIR)/refFlat.txt
