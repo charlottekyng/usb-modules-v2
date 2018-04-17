@@ -5,7 +5,7 @@ suppressPackageStartupMessages(library(rtracklayer));
 optList <- list(
 	make_option('--inputRSEMFile', action='store', default = 'all.genes.expected_count.results', help = 'input RSEM file to be normalized'),
 	make_option('--gtf', action='store', default = NULL, help = 'GTF annotation file if gene subset is required'),
-	make_option('--geneBiotype', action='store', default = NULL, help = 'gene biotype/s to include'),
+	make_option('--geneBiotype', action='store', default = "protein_coding", help = 'gene biotype/s to include'),
 	make_option('--outputFile', action='store', default = NULL, help = 'output file'),
 	make_option('--normalizationMethod', action='store', default = 'uq', help = 'which normalization method to use'),
 	make_option('--threshold_for_uq', action='store', type= 'integer', default = 1000, help = 'the threshold for UQ normalization'))
