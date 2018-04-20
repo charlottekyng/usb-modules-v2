@@ -194,6 +194,7 @@ export PATH := $(USR_DIR):$(PATH)
 
 SHELL ?= /bin/bash
 UNZIP ?= /usr/bin/unzip
+GZIP ?= gzip -f
 
 PERL_MODULE ?= Perl/5.22.2-goolf-1.7.20
 R_MODULE ?= R/3.4.2-goolf-1.7.20
@@ -268,6 +269,7 @@ CLUSTER_VCF = $(RSCRIPT) usb-modules-v2/qc/clusterVcf.R
 
 BOWTIE2 ?= bowtie2
 BWA_ALN ?= bwa aln
+BWA_SAMSE ?= bwa samse
 BWA_SAMPE ?= bwa sampe
 BWA_MEM ?= bwa mem
 TOPHAT ?= tophat

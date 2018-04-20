@@ -55,6 +55,10 @@ index : $(addsuffix .bai,$(BAMS))
 %.bai : %.bam.bai
 	$(INIT) sleep 5; ln -f $@ $<
 
+%.bam : %.sam
+	$(call RUN,1,$(RESOURCE_REQ_LOW_MEM),$(RESOURCE_REQ_SHORT),$(SAMTOOLS_MODULE),"\
+	$(SAMTOOLS) view -bSh $< > $@" && $(RM) $<)
+
 # limit coverage
 #%.dcov.bam : %.bam
 #	$(call LSCRIPT_MEM,18G,00:59:59,"$(call GATK_MEM,18G) -T PrintReads -R $(REF_FASTA) -I $< -dcov 50 -o $@")

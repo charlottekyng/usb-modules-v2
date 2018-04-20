@@ -9,7 +9,7 @@ LOGDIR ?= log/rsem.$(NOW)
 rsem : $(foreach sample,$(SAMPLES),rsem/$(sample).genes.results) rsem/all.genes.expected_count.results rsem/all.genes.TPM.results rsem/all.genes.FPKM.results rsem/all.isoforms.expected_count.results rsem/all.isoforms.TPM.results rsem/all.isoforms.FPKM.results rsem/all.genes.expected_count.results_coding_upper_quartiled
 
 define rsem-calc-expression
-rsem/$1.genes.results : star/secondpass/$1.Aligned.toTranscriptome.out.bam 
+rsem/$1.genes.results : star/$1.Aligned.toTranscriptome.out.bam 
 	$$(call RUN,$$(RSEM_NUM_CORES),$$(RESOURCE_REQ_LOW_MEM),$$(RESOURCE_REQ_SHORT),$$(PERL_MODULE) $$(RSEM_MODULE),"\
 	$$(RSEM_CALC_EXPR) $$(RSEM_OPTIONS) $$(if $$(findstring true,$$(PAIRED_END)),--paired-end) \
 	$$< $$(RSEM_INDEX) $$(@D)/$1")

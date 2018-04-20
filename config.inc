@@ -19,6 +19,11 @@ PANEL ?= NONE
 PAIRED_END ?= true
 # for RNA-seq, possible values NONE, FIRST_READ_TRANSCRIPTION_STRAND, SECOND_READ_TRANSCRIPTION_STRAND
 STRAND_SPECIFICITY ?= NONE
+# also for RNA-seq, if mutation calls will eventually be needed, 
+# then post-process, otherwise just dont, it takes a long time and creates hard-clipped
+# reads that may be problematic
+POST_PROCESS_RNA_BAM ?= false
+
 
 # possible values: CANCER, PSYCH
 ANALYSIS_TYPE ?= CANCER 
@@ -56,14 +61,17 @@ SAMTOOLS_DOWNSAMPLE_FACTOR ?= 0.2
 
 ## default FASTQ and BAM processing parameters based on application
 
-ifeq ($(CAPTURE_METHOD),NONE)
-endif
-
 ifeq ($(CAPTURE_METHOD),RNA)
 FASTQ_FILTER ?= cutadapt
 MERGE_SPLIT_FASTQ ?= true
-BAM_SPLIT_N_TRIM ?= true
 BAM_DUP_TYPE ?= none
+ifeq ($(POST_PROCESS_RNA_BAM),true)
+BAM_SPLIT_N_TRIM ?= true
+else
+BAM_REALN ?= false
+BAM_RECAL ?= false
+SPLIT_CHR ?= false
+endif
 endif
 
 ifeq ($(CAPTURE_METHOD),PCR)
@@ -72,9 +80,6 @@ BAM_REALN ?= false
 BAM_RECAL ?= false
 BAM_CHR2_BASE_RECAL ?= false
 GENOTYPE_WITH_CHR2 = ?= false
-endif
-
-ifeq ($(CAPTURE_METHOD),BAITS)
 endif
 
 ifeq ($(CAPTURE_METHOD),CHIP)
