@@ -39,6 +39,10 @@ TARGETS += bwamem
 bwamem :
 	$(call RUN_MAKE,usb-modules-v2/aligners/bwamemAligner.mk)
 
+TARGETS += bwaaln
+bwaaln :
+	$(call RUN_MAKE,usb-modules-v2/aligners/bwaalnAligner.mk)
+
 TARGETS += star
 star :
 	$(call RUN_MAKE,usb-modules-v2/aligners/starAligner.mk)
