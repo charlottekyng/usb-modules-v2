@@ -54,12 +54,12 @@ DBSNP_TARGETS_INTERVALS ?= $(BED_DIR)/S07604514_Agilent_AllExon_V6.dbsnp_138.vcf
 DBSNP_TARGETS_INTERVALS_COMMON ?= $(BED_DIR)/S07604514_Agilent_AllExon_V6.dbsnp_138.common.vcf
 RESOURCE_REQ ?= medium
 endif
-ifeq($(PANEL),SEQCAP_EXOME_V3)
+ifeq ($(PANEL),SEQCAP_EXOME_V3)
 TARGETS_FILE_COVERED_INTERVALS ?= $(BED_DIR)/SeqCap_EZ_Exome_v3_hg19_primary_targets.bed
 TARGETS_FILE_INTERVALS ?= $(BED_DIR)/SeqCap_EZ_Exome_v3_hg19_primary_targets.bed
 TARGETS_FILE_MUTATIONS ?= $(BED_DIR)/SeqCap_EZ_Exome_v3_hg19_primary_targets.bed
 DBSNP_TARGETS_INTERVALS ?= $(BED_DIR)/SeqCap_EZ_Exome_v3_hg19_primary_targets.dbsnp_138.vcf
-RESOURCE_REQ ?= medium
+RESOURCE_REQ ?= high
 endif
 ifeq ($(PANEL),NOVARTIS_PC2)
 TARGETS_FILE_COVERED_INTERVALS ?= $(BED_DIR)/pc2_novartis_Covered_noHeader_noAnn.bed
