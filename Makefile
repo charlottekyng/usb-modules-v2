@@ -59,6 +59,10 @@ TARGETS += fix_rg
 fix_rg :
 	$(call RUN_MAKE,usb-modules-v2/bam_tools/fixRG.mk)
 
+TARGETS += downsample_bam
+downsample_bam :
+	$(call RUN_MAKE,usb-modules-v2/bam_tools/downsampleBam.mk)
+
 TARGETS += mutect
 mutect :
 	$(call RUN_MAKE,usb-modules-v2/variant_callers/somatic/mutect.mk)
