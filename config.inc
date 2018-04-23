@@ -159,7 +159,8 @@ EXTRACT_TOOL ?= PICARD
 ##################################
 
 BWA_NUM_CORES ?= 8
-BWA_ALN_OPTS ?= -M
+BWA_MEM_OPTS ?= -M
+BWA_ALN_OPTS ?=
 
 #TMAP_MODE ?= map3
 #TMAP_OPTS =
