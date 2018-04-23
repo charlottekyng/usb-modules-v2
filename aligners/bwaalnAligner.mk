@@ -28,11 +28,11 @@ bwaaln : $(BWA_BAMS) $(addsuffix .bai,$(BWA_BAMS))
 bam/%.bam : bwaaln/bam/%.bwaaln.$(BAM_SUFFIX)
 	$(INIT) ln -f $< $@
 
-ifeq ($(MERGE_SPLIT_FASTQ),true)
 bwaaln/sai/%.sai : fastq/%.fastq.gz
 	$(call RUN,$(BWA_NUM_CORES),$(RESOURCE_REQ_LOW_MEM),$(RESOURCE_REQ_MEDIUM),$(BWA_MODULE),"\
 	$(BWA_ALN) $(BWA_ALN_OPTS) -t $(BWA_NUM_CORES) $(REF_FASTA) $(<) > $(@) ")
 
+ifeq ($(MERGE_SPLIT_FASTQ),true)
 bwaaln/bam/%.bwaaln.bam : bwaaln/sai/%.1.sai $(if $(findstring true,$(PAIRED_END)),bwaaln/sai/%.2.sai) \
 fastq/%.1.fastq.gz $(if $(findstring true,$(PAIRED_END)),fastq/%.2.fastq.gz)
 	LBID=`echo "$*" | sed 's/_[A-Za-z0-9]\+//'`; \
@@ -42,10 +42,6 @@ fastq/%.1.fastq.gz $(if $(findstring true,$(PAIRED_END)),fastq/%.2.fastq.gz)
 	$(SAMTOOLS) view -bhS - > $@")
 else
 define align-split-fastq
-bwaaln/sai/$1.sai : fastq/$1.fastq.gz
-	$$(call RUN,$$(BWA_NUM_CORES),$$(RESOURCE_REQ_LOW_MEM),$$(RESOURCE_REQ_MEDIUM),$$(BWA_MODULE),"\
-	$$(BWA_ALN) $$(BWA_ALN_OPTS) -t $$(BWA_NUM_CORES) $$(REF_FASTA) $$(<) > $$(@) ")
-
 bwaaln/bam/$1.bwaaln.bam : bwaaln/sai/$1.1.sai $(if $(findstring true,$(PAIRED_END)),bwaaln/sai/$1.2.sai) \
 fastq/$1.1.fastq.gz $$(if $$(findstring true,$$(PAIRED_END)),fastq/$1.2.fastq.gz)
 	LBID=`echo "$1" | sed 's/_[A-Za-z0-9]\+//'`; \
