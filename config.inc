@@ -57,7 +57,7 @@ TRIM_LENGTH ?= 150
 CLIP_FASTQ_R1 ?=
 CLIP_FASTQ_R2 ?=
 BAM_FILTER_FLAGS ?= 768
-SAMTOOLS_DOWNSAMPLE_FACTOR ?= 0.2
+SAMTOOLS_DOWNSAMPLE_FACTOR ?= 1001.2
 
 ## default FASTQ and BAM processing parameters based on application
 

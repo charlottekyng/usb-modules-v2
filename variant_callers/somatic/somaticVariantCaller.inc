@@ -5,7 +5,7 @@ ifndef SOMATIC_VARIANT_CALLER_INC
 ### Filters
 SOMATIC_FILTERS = $(if $(TARGETS_FILE_INTERVALS),target_ft) som_ad_ft
 ifeq ($(shell test $(words $(NORMAL_SAMPLES)) -gt 2; echo $$?),0)
-	SOMATIC_FILTERS += $(if $(findstring true,$(USE_NFT))),nft)	
+	SOMATIC_FILTERS += $(if $(findstring true,$(USE_NFT)),nft)	
 endif
 SOMATIC_FILTERS += $(if $(findstring GRCm38,$(REF)),,hotspot)
 

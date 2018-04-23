@@ -14,7 +14,12 @@ PANEL ?= NONE
 # Single-end or paired-end, set to false if single-end
 PAIRED_END ?= true
 # for RNA-seq, possible values NONE, FIRST_READ_TRANSCRIPTION_STRAND, SECOND_READ_TRANSCRIPTION_STRAND
-STRAND_SPECIFICITY ?= NONE
+STRAND_SPECIFICITY ?= SECOND_READ_TRANSCRIPTION_STRAND
+# also for RNA-seq, if mutation calls will eventually be needed,
+# then post-process, otherwise just dont, it takes a long time and creates hard-clipped
+# reads that may be problematic
+POST_PROCESS_RNA_BAM ?= false
+
 
 # possible values: CANCER, PSYCH
 ANALYSIS_TYPE ?= CANCER 
