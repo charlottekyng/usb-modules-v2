@@ -22,9 +22,9 @@ vcf/$1_$2.%.som_ad_ft.vcf : vcf/$1_$2.%.vcf
 		--filterExpression 'QUAL < 60' \
 		--filterName lowQual \
 		--filterExpression 'vc.getGenotype(\"$1\").getAnyAttribute(\"FAO\") < $(MIN_TUMOR_AD)' \
-		--filterName tumorVarAD_raw \
-		--filterExpression 'vc.getGenotype(\"$1\").getAnyAttribute(\"AO\") < $(MIN_TUMOR_AD)' \
 		--filterName tumorVarAD_flow \
+		--filterExpression 'vc.getGenotype(\"$1\").getAnyAttribute(\"AO\") < $(MIN_TUMOR_AD)' \
+		--filterName tumorVarAD_raw \
 		--filterExpression 'vc.getGenotype(\"$1\").getAnyAttribute(\"DP\") * 1.0 <= $(MIN_TUMOR_DEPTH)' \
 		--filterName tumorDepthFilter_raw \
 		--filterExpression 'vc.getGenotype(\"$1\").getAnyAttribute(\"FDP\") * 1.0 <= $(MIN_TUMOR_DEPTH)' \
