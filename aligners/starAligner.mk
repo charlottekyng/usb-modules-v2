@@ -60,9 +60,27 @@ bam/%.bam : star/%.star.$(BAM_SUFFIX)
 	$(INIT) ln -f $< $@
 
 star/all$(PROJECT_PREFIX).ReadsPerGene.out.tab : $(foreach sample,$(SAMPLES),star/$(sample).ReadsPerGene.out.tab)
-	perl -p -e "s/N_unmapped/GENE\t\t\t\nN_unmapped/;" `ls star/secondpass/*.ReadsPerGene.out.tab|head -1` | cut -f 1 > $@; \
-	for x in $^; do sample=`echo $$x | sed 's/.*\///; s/\..*//'`; perl -p -e "s/N_unmapped/\t$$sample\t\t\nN_unmapped/;" \
-	star/secondpass/$$sample.ReadsPerGene.out.tab | cut -f 2 | paste $@ - > $@.tmp; mv $@.tmp $@; done
+	perl -p -e "s/N_unmapped/GENE\t\t\t\nN_unmapped/;" `ls $< |head -1` | cut -f1 > $@; \
+	if [ "$$STRAND_SPECIFICITY" == "FIRST_READ_TRANSCRIPTION_STRAND" ]; then \
+	        for x in $^; do \
+			sample=`echo $$x | sed 's/.*\///; s/\..*//'`; \
+			perl -p -e "s/N_unmapped/\t$${sample}_total\t$${sample}_sense\t$${sample}_antisense\nN_unmapped/;" \
+      			star/$$sample.ReadsPerGene.out.tab | cut -f 2-4 | paste $@ - > $@.tmp; mv $@.tmp $@; \
+		done; \
+	elif [ "$$STRAND_SPECIFICITY" == "SECOND_READ_TRANSCRIPTION_STRAND" ]; then \
+	        for x in $^; do \
+			sample=`echo $$x | sed 's/.*\///; s/\..*//'`; \
+			perl -p -e "s/N_unmapped/\t$${sample}_total\t$${sample}_antisense\t$${sample}_sense\nN_unmapped/;" \
+      			star/$$sample.ReadsPerGene.out.tab | cut -f 2-4 | paste $@ - > $@.tmp; mv $@.tmp $@; \
+		done; \
+	else \
+	        for x in $^; do \
+			sample=`echo $$x | sed 's/.*\///; s/\..*//'`; \
+			perl -p -e "s/N_unmapped/\t$$sample\t\t\nN_unmapped/;" \
+      			star/$$sample.ReadsPerGene.out.tab | cut -f 2 | paste $@ - > $@.tmp; mv $@.tmp $@; \
+		done; \
+	fi
+
 
 star/all$(PROJECT_PREFIX).alignment_stats.txt : $(foreach sample,$(SAMPLES),star/$(sample).Log.final.out)
 	$(INIT) \
