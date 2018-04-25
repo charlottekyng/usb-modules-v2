@@ -22,8 +22,8 @@ optList <- list(
 	make_option("--maxNDepth", default= 1000, type= 'integer', help = "maximum depth in normal to keep the position"),
 	make_option("--pre_cval", default = NULL, type = 'integer', help = "pre-processing critical value"),
 	make_option("--cval1", default = NULL, type = 'integer', help = "critical value for estimating diploid log Ratio"),
-	make_option("--cval2", default = NULL, type = 'integer', help = "starting critical value for segmentation (increases by 10 until success)"),
-	make_option("--max_cval", default = 5000, type = 'integer', help = "maximum critical value for segmentation (increases by 10 until success)"),
+	make_option("--cval2", default = NULL, type = 'integer', help = "starting critical value for segmentation (increases by 25 until success)"),
+	make_option("--max_cval", default = 5000, type = 'integer', help = "maximum critical value for segmentation (increases by 25 until success)"),
 	make_option("--min_nhet", default = 25, type = 'integer', help = "minimum number of heterozygote snps in a segment used for bivariate t-statistic during clustering of segment"),
 	make_option("--gene_loc_file", default = '~/share/reference/IMPACT410_genes_for_copynumber.txt', type = 'character', help = "file containing gene locations"),
 	make_option("--genome", default = 'b37', type = 'character', help = "genome of counts file"),
@@ -132,7 +132,7 @@ while (!success && cval < opt$max_cval) {
         success <- T
 	fit2 <- out2 %>% emcncf2
     } else {
-        cval <- cval + 100
+        cval <- cval + 25
     }
 }
 if (!success) {

@@ -73,8 +73,8 @@ facets/cncf/all$(PROJECT_PREFIX).geneCN%heatmap.pdf  : facets/all$(PROJECT_PREFI
 	$(call RUN,1,$(RESOURCE_REQ_LOW_MEM),$(RESOURCE_REQ_VSHORT),$(R_MODULE),"\
 	$(FACETS_PLOT_GENE_CN) $(FACETS_PLOT_GENE_CN_OPTS) $< $@")
 
-include usb-modules-v2/variant_callers/gatk.mk
+#include usb-modules-v2/variant_callers/gatk.mk
 include usb-modules-v2/variant_callers/TVC.mk
 include usb-modules-v2/bam_tools/processBam.mk
-include usb-modules-v2/vcf_tools/vcftools.mk
+#include usb-modules-v2/vcf_tools/vcftools.mk
 include usb-modules-v2/variant_callers/gatkVariantCaller.mk

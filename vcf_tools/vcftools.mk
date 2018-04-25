@@ -509,7 +509,6 @@ alltables/all$(PROJECT_PREFIX).%.vcf.stats : $(foreach sample,$(SAMPLES),vcf/$(s
 #	$(call CHECK_VCF,$<,$@,$(call LSCRIPT_CHECK_MEM,2G,00:29:29,"$(LOAD_SNP_EFF_MODULE); $(SNP_SIFT) filter \
 #		$(SNP_SIFT_OPTS) -f $< \"( na FILTER ) | (FILTER = 'PASS')\" > $@"))
 
-
 ifeq ($(findstring tvc,$(MUT_CALLER)),tvc)
 include usb-modules-v2/vcf_tools/vcftools_tvc.mk
 else
