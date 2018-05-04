@@ -13,7 +13,7 @@ EXT_NAMES ?=
 SOMATIC_FILTERS := 
 
 
-ann_ext_vcf : ext_vcfs 
+ann_ext_vcf : ext_vcfs ext_tables
 
 ifeq ($(findstring true,$(SOMATIC_ANN)),true)
 ext_vcfs : $(foreach ext_name,$(EXT_NAMES),$(call SOMATIC_VCFS,$(ext_name)))
@@ -23,7 +23,7 @@ ext_vcfs : $(foreach ext_name,$(EXT_NAMES),$(call VCFS,$(EXT_NAME)))
 ext_tables : $(foreach ext_name,$(EXT_NAMES),$(call TABLES,$(EXT_NAME)))
 endif
 
-#$(info $(EXT_NAMES))
+$(info $(EXT_NAMES))
 
 .DELETE_ON_ERROR:
 .SECONDARY:

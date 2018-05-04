@@ -20,14 +20,43 @@ vcf/$1_$2.%.som_ad_ft.vcf : vcf/$1_$2.%.vcf
 		--filterExpression 'vc.getGenotype(\"$1\").getAD().1 < $(MIN_TUMOR_AD)' \
 		--filterName tumorVarAlleleDepth \
 		--filterExpression 'if (vc.getGenotype(\"$2\").getDP() > $(MIN_NORMAL_DEPTH)) { \
-		( vc.getGenotype(\"$2\").getAD().1 * 1.0 / vc.getGenotype(\"$2\").getDP()) > ( vc.getGenotype(\"$1\").getAD().1 * 1.0 / vc.getGenotype(\"$1\").getDP()) / $(MIN_TN_AD_RATIO) \
-			} else { ( vc.getGenotype(\"$2\").getAD().1 * 1.0 / vc.getGenotype(\"$2\").getDP()) > ( vc.getGenotype(\"$1\").getAD().1 * 1.0 / vc.getGenotype(\"$1\").getDP()) / $(MIN_TN_AD_RATIO) && \
+		( vc.getGenotype(\"$2\").getAD().1 * 1.0 / vc.getGenotype(\"$2\").getDP()) > \
+			(vc.getGenotype(\"$1\").getAD().1 * 1.0 / vc.getGenotype(\"$1\").getDP()) / $(MIN_TN_AD_RATIO) \
+			} else { ( vc.getGenotype(\"$2\").getAD().1 * 1.0 / vc.getGenotype(\"$2\").getDP()) > \
+			(vc.getGenotype(\"$1\").getAD().1 * 1.0 / vc.getGenotype(\"$1\").getDP()) / $(MIN_TN_AD_RATIO) && \
 			vc.getGenotype(\"$1\").getAD().1 * 1.0 < 1 && vc.getGenotype(\"$2\").getAD().1 > 1 }' \
 		--filterName somaticAlleleDepth \
 		--filterExpression 'vc.getGenotype(\"$1\").getDP() <= $$(MIN_TUMOR_DEPTH) || vc.getGenotype(\"$2\").getDP() <= $$(MIN_NORMAL_DEPTH)' \
 		--filterName depthFilter && sed -i 's/getGenotype(\"\([^\"]*\)\")/getGenotype(\1)/g' $$@ && $$(RM) $$< $$<.idx")
 endef
 $(foreach pair,$(SAMPLE_PAIRS),$(eval $(call som-ad-ft-tumor-normal,$(tumor.$(pair)),$(normal.$(pair)))))
+
+define som-ad-ft-tumor-normal_IGR
+vcf/$1_$2.%.som_ad_ft_igr.vcf : vcf/$1_$2.%.vcf
+	$$(call RUN,1,$$(RESOURCE_REQ_MEDIUM_MEM),$$(RESOURCE_REQ_SHORT),$$(JAVA8_MODULE),"\
+		$$(call GATK,VariantFiltration,$$(RESOURCE_REQ_MEDIUM_MEM_JAVA)) -R $$(REF_FASTA) -V $$< -o $$@ \
+			--filterExpression 'vc.getGenotype(\"$1\").getAnyAttribute(\"AC\") * 1.0 < $(MIN_TUMOR_AD)' \
+			--filterName tumorVarAlleleDepth \
+			--filterExpression 'if ((vc.getGenotype(\"$2\").getAnyAttribute(\"AC\") * 1.0 + \
+				vc.getGenotype(\"$2\").getAnyAttribute(\"RC\") * 1.0) > $(MIN_NORMAL_DEPTH)) { \
+					(vc.getGenotype(\"$2\").getAnyAttribute(\"AC\") * 1.0 / \
+					(vc.getGenotype(\"$2\").getAnyAttribute(\"AC\") * 1.0 + vc.getGenotype(\"$2\").getAnyAttribute(\"RC\") * 1.0)) > \
+					(vc.getGenotype(\"$1\").getAnyAttribute(\"AC\") * 1.0 * 1.0 / \
+					(vc.getGenotype(\"$1\").getAnyAttribute(\"AC\") * 1.0 + vc.getGenotype(\"$1\").getAnyAttribute(\"RC\") * 1.0)) / $(MIN_TN_AD_RATIO) \
+				} else { ( vc.getGenotype(\"$2\").getAnyAttribute(\"AC\") * 1.0 / \
+					(vc.getGenotype(\"$2\").getAnyAttribute(\"AC\") * 1.0 + vc.getGenotype(\"$2\").getAnyAttribute(\"RC\") * 1.0)) > \
+					(vc.getGenotype(\"$1\").getAnyAttribute(\"AC\") * 1.0 / \
+					(vc.getGenotype(\"$1\").getAnyAttribute(\"AC\") * 1.0 + vc.getGenotype(\"$1\").getAnyAttribute(\"RC\") * 1.0)) / $(MIN_TN_AD_RATIO) && \
+					vc.getGenotype(\"$1\").getAnyAttribute(\"AC\") * 1.0 < 1 && \
+					vc.getGenotype(\"$2\").getAnyAttribute(\"AC\") * 1.0 > 1 }' \
+			--filterName somaticAlleleDepth \
+			--filterExpression '(vc.getGenotype(\"$1\").getAnyAttribute(\"AC\") * 1.0 + \
+				vc.getGenotype(\"$1\").getAnyAttribute(\"RC\") * 1.0) <= $$(MIN_TUMOR_DEPTH) || \
+				(vc.getGenotype(\"$2\").getAnyAttribute(\"AC\") * 1.0 + \
+				vc.getGenotype(\"$2\").getAnyAttribute(\"RC\") * 1.0) <= $$(MIN_NORMAL_DEPTH)' \
+			--filterName depthFilter && sed -i 's/getGenotype(\"\([^\"]*\)\")/getGenotype(\1)/g' $$@ && $$(RM) $$< $$<.idx")
+endef
+$(foreach pair,$(SAMPLE_PAIRS),$(eval $(call som-ad-ft-tumor-normal_IGR,$(tumor.$(pair)),$(normal.$(pair)))))
 
 define sufam
 ifeq ($3,$2)

@@ -123,15 +123,18 @@ TARGETS += ballgown
 ballgown:
 	$(call RUN_MAKE,usb-modules-v2/rnaseq/ballgown.mk)
 
+TARGETS	+= deconstruct_sigs
+deconstruct_sigs :
+        $(call RUN_MAKE,usb-modules-v2/mut_sigs/deconstructSigs.mk)
+
+TARGETS += mosaics
+mosaics :
+	$(call RUN_MAKE,usb-modules-v2/chipseq/mosaics.mk)
 
 #########################################################
 ## The set of targets below have NOT been tested,
 ## or are known to be broken/obsolete.
 ##########################################################
-
-TARGETS += mosaics
-mosaics :
-	$(call RUN_MAKE,usb-modules-v2/chipseq/mosaics.mk)
 
 TARGETS += merge_fastq
 merge_fastq : 
