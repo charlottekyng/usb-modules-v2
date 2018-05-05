@@ -49,7 +49,8 @@ ifeq ($(PANEL),AGILENT_ALLEXON_V6)
 TARGETS_FILE_COVERED_INTERVALS ?= $(BED_DIR)/S07604514_Agilent_AllExon_V6_Covered_noHeader_noAnn.bed
 TARGETS_FILE_INTERVALS ?= $(BED_DIR)/S07604514_Agilent_AllExon_V6_Padded_noHeader_noAnn.bed
 TARGETS_FILE_MUTATIONS ?= $(BED_DIR)/S07604514_Agilent_AllExon_V6_Padded_noHeader_noAnn.bed
-TARGETS_FILE_GENES ?= $(BED_DIR)/S07604514_Agilent_AllExon_V6_TargetGeneSymbols.txt
+TARGETS_FILE_GENES ?=$ $(BED_DIR)/S06588914_Agilent_Clinical_Exome_TargetGeneSymbols.txt
+#TARGETS_FILE_GENES ?= $(BED_DIR)/S07604514_Agilent_AllExon_V6_TargetGeneSymbols.txt
 DBSNP_TARGETS_INTERVALS ?= $(BED_DIR)/S07604514_Agilent_AllExon_V6.dbsnp_138.vcf
 DBSNP_TARGETS_INTERVALS_COMMON ?= $(BED_DIR)/S07604514_Agilent_AllExon_V6.dbsnp_138.common.vcf
 RESOURCE_REQ ?= medium
@@ -152,7 +153,7 @@ HISAT2_REF = $(REF_DIR)/genome_index/hisat2_b37/genome_snp_tran
 #MAPSPLICE_REF_DIR = $(REF_DIR)/GATK_bundle/2.3/mapsplice_ref/chr
 #MAPSPLICE_REF_BASENAME = $(REF_DIR)/GATK_bundle/2.3/mapsplice_ref/hg19
 
-DB_NSFP ?= $(REF_DIR)/snpeff/GRCh37/dbNSFP-v2.9.txt.gz
+DB_NSFP ?= $(REF_DIR)/snpeff/GRCh37/dbNSFP2.9.txt.gz
 
 #TOPHAT_REF = GRCh37
 #GENES_GTF = $(REF_DIR)/Homo_sapiens/Ensembl/$(TOPHAT_REF)/Annotation/Genes/genes.gtf
