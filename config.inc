@@ -84,9 +84,9 @@ endif
 
 ifeq ($(CAPTURE_METHOD),CHIP)
 SPLIT_CHR ?= false
-BAM_DUP_TYPE ?= markdup
-BAM_REALN ?= true
-BAM_RECAL ?= true
+BAM_DUP_TYPE ?= none
+BAM_REALN ?= none
+BAM_RECAL ?= none
 GENOTYPE_WITH_CHR2 = ?= false
 endif
 
