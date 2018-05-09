@@ -101,7 +101,7 @@ endif
 
 ### ANNOTATION SETS ####
 
-CONTEST_REF_VCF ?= $(ANN_DIR)/hg19_population_stratified_af_hapmap_3.3.vcf
+CONTEST_POP_FILE ?= $(ANN_DIR)/hg19_population_stratified_af_hapmap_3.3.vcf
 
 KNOWN_INDELS ?= $(GSA_REF_DIR)/Mills_and_1000G_gold_standard.indels.b37.vcf
 OMNI ?= $(GSA_REF_DIR)/1000G_omni2.5.b37.vcf

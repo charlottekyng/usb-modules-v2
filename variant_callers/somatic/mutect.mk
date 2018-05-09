@@ -53,4 +53,4 @@ $(foreach pair,$(SAMPLE_PAIRS),\
 		$(eval $(call mutect-tumor-normal,$(tumor.$(pair)),$(normal.$(pair)))))
 
 include usb-modules-v2/vcf_tools/vcftools.mk
-include usb-modules-v2/variant_callers/somatic/pon.mk
+#include usb-modules-v2/variant_callers/somatic/pon.mk

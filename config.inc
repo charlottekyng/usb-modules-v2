@@ -208,9 +208,6 @@ BAM_REALN_OPTS = --knownAlleles $(KNOWN_INDELS)
 BAM_REALN_TARGET_OPTS = --known $(KNOWN_INDELS)
 endif
 
-CONTEST_OPTS ?= -T Contamination -BTI genotypes
-CONTEST += -R $(REF_FASTA) -B:pop$(,)vcf $(CONTEST_REF_VCF) $(CONTEST_OPTS)
-
 COVARIATES = -cov ReadGroupCovariate -cov QualityScoreCovariate -cov DinucCovariate -cov CycleCovariate
 
 REPORT_STRATIFICATION := Filter
@@ -228,7 +225,6 @@ MUTECT_GT_MAX_ALT_IN_NORMAL_FRACTION ?= 0.5
 STRELKA_NUM_CORES ?= 8
 
 TVC_NUM_CORES ?= 4
-USE_FPFILTER_FOR_TVC ?= true
 
 VARSCAN_OPTS=--output-vcf 1 --mpileup 1 --min-var-freq $(MIN_AF_SNP)
 
