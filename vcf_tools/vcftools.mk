@@ -59,17 +59,6 @@ LOGDIR ?= log/vcf.$(NOW)
 		$(call GATK,VariantFiltration,$(RESOURCE_REQ_MEDIUM_MEM_JAVA)) -R $(REF_FASTA) -V $< -o $@ \
 		--maskName HOTSPOT --mask $(CANCER_HOTSPOT_VCF) && $(RM) $< $<.idx"))
 
-%.pass.vcf : %.vcf
-	$(call CHECK_VCF,$<,$@,\
-	$(call RUN,1,$(RESOURCE_REQ_LOW_MEM),$(RESOURCE_REQ_VSHORT),,"\
-		$(VCF_PASS) $< $@ $(subst pass,fail,$@)"))
-
-#%.pass.vcf : %.vcf
-#	$(call CHECK_VCF,$<,$@,\
-#	$(call RUN,1,$(RESOURCE_REQ_LOW_MEM),$(RESOURCE_REQ_VSHORT),$(SNP_EFF_MODULE),"\
-#		$(SNP_SIFT) filter $(SNP_SIFT_OPTS) -f $< \
-#		\"( na FILTER ) | (FILTER = 'PASS') | (FILTER has 'HOTSPOT')\" > $@"))
-
 ## This is definitely broken
 # somatic filter for structural variants
 #vcf/$1_$2.%.sv_som_ft.vcf : vcf/$1_$2.%.vcf
