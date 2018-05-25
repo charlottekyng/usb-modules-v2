@@ -61,7 +61,16 @@ $(foreach cval1,$(FACETS_CVAL1),$(foreach pair,$(SAMPLE_PAIRS),$(eval $(call fac
 
 define facets-merge
 facets/cncfTN_$1/all$(PROJECT_PREFIX).summary.txt : $$(foreach pair,$$(SAMPLE_PAIRS),facets/cncfTN_$1/$$(pair).out)
-	$$(INIT) paste $$^ > $$@;
+	$$(INIT) \
+	{ \
+	cut -f2 -d' ' $$< | tr '\n' '\t'; echo ""; \
+	for metrics in $$^; do \
+		cut -f4 -d' ' $$$$metrics | tr '\n' '\t'; echo ""; \
+	done;\
+} >$$@
+
+
+#	$$(INIT) paste $$^ > $$@;
 
 facets/cncfTN_$1/all$(PROJECT_PREFIX).geneCN.filled.txt : $$(foreach pair,$$(SAMPLE_PAIRS),facets/cncfTN_$1/$$(pair).cncf.txt)
 	$$(call RUN,1,$$(RESOURCE_REQ_MEDIUM_MEM),$$(RESOURCE_REQ_SHORT),$$(R_MODULE),"\
