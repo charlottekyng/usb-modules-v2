@@ -91,6 +91,10 @@ TARGETS += mutation_summary
 mutation_summary :
 	$(call RUN_MAKE,usb-modules-v2/summary/mutationSummary.mk)
 
+TARGETS += panel_of_normal
+panel_of_normal:
+	$(call RUN_MAKE,usb-modules-v2/variant_callers/somatic/pon.mk)
+
 TARGETS += strelka
 strelka :
 	$(call RUN_MAKE,usb-modules-v2/variant_callers/somatic/strelka.mk)
