@@ -14,13 +14,17 @@ ifndef VCFTOOLS_MK_TVC
 		$(call GATK,VariantFiltration,$(RESOURCE_REQ_MEDIUM_MEM_JAVA)) \
 		-R $(REF_FASTA) -V $< -o $@ --maskName 'PoN' --mask $(word 2,$^) && $(RM) $< $<.idx")
 
+%.pass.vcf : %.vcf
+	$(call CHECK_VCF,$<,$@,\
+	$(call RUN,1,$(RESOURCE_REQ_LOW_MEM),$(RESOURCE_REQ_VSHORT),$(SNP_EFF_MODULE),"\
+		$(SNP_SIFT) filter $(SNP_SIFT_OPTS) -f $< \
+		\"( na FILTER ) | (FILTER = 'PASS') | (FILTER has 'HOTSPOT')\" > $@"))
+
 ifdef SAMPLE_PAIRS
 define som-ad-ft-tumor-normal
 vcf/$1_$2.%.som_ad_ft.vcf : vcf/$1_$2.%.vcf
 	$$(call RUN,1,$$(RESOURCE_REQ_MEDIUM_MEM),$$(RESOURCE_REQ_SHORT),$$(JAVA8_MODULE),"\
 		$$(call GATK,VariantFiltration,$$(RESOURCE_REQ_MEDIUM_MEM_JAVA)) -R $$(REF_FASTA) -V $$< -o $$@ \
-		--filterExpression 'QUAL < 60' \
-		--filterName lowQual \
 		--filterExpression 'vc.getGenotype(\"$1\").getAnyAttribute(\"FAO\") < $(MIN_TUMOR_AD)' \
 		--filterName tumorVarAD_flow \
 		--filterExpression 'vc.getGenotype(\"$1\").getAnyAttribute(\"AO\") < $(MIN_TUMOR_AD)' \
@@ -42,6 +46,8 @@ vcf/$1_$2.%.som_ad_ft.vcf : vcf/$1_$2.%.vcf
 		&& sed -i 's/getGenotype(\"\([^\"]*\)\")/getGenotype(\1)/g' $$@ && $$(RM) $$< $$<.idx")
 endef
 $(foreach pair,$(SAMPLE_PAIRS),$(eval $(call som-ad-ft-tumor-normal,$(tumor.$(pair)),$(normal.$(pair)))))
+#               --filterExpression 'QUAL < 60' \
+#               --filterName lowQual \
 
 define sufam
 ifeq ($3,$2)

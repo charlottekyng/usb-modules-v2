@@ -12,6 +12,11 @@ ifndef VCFTOOLS_MK_NONTVC
 		-R $(REF_FASTA) -V $< -o $@ --maskName 'PoN' --mask $(word 2,$^) && $(RM) $< $<.idx")
 
 
+%.pass.vcf : %.vcf
+	$(call CHECK_VCF,$<,$@,\
+	$(call RUN,1,$(RESOURCE_REQ_LOW_MEM),$(RESOURCE_REQ_VSHORT),,"\
+		$(VCF_PASS) $< $@ $(subst pass,fail,$@)"))
+
 ifdef SAMPLE_PAIRS
 define som-ad-ft-tumor-normal
 vcf/$1_$2.%.som_ad_ft.vcf : vcf/$1_$2.%.vcf
