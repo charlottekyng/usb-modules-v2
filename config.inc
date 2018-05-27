@@ -56,8 +56,11 @@ include usb-modules-v2/genome_inc/$(REF).inc
 TRIM_LENGTH ?= 150
 CLIP_FASTQ_R1 ?=
 CLIP_FASTQ_R2 ?=
-BAM_FILTER_FLAGS ?= 768
-SAMTOOLS_DOWNSAMPLE_FACTOR ?= 1001.2
+
+ADAPTOR_POS ?= 3prime
+ADAPTOR_SEQ ?= AGATCGGAAGAGC
+NEXTSEQ_TRIM ?= false
+
 
 ## default FASTQ and BAM processing parameters based on application
 
@@ -107,6 +110,8 @@ BAM_REALN ?= true
 BAM_RECAL ?= true
 BAM_CHR2_BASE_RECAL ?= true
 GENOTYPE_WITH_CHR2 = ?= true
+BAM_FILTER_FLAGS ?= 768
+SAMTOOLS_DOWNSAMPLE_FACTOR ?= 1001.2
 
 
 

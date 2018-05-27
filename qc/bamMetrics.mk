@@ -22,7 +22,8 @@ bam_metrics : rna_metrics flagstats alignment_summary_metrics
 #oxog_wgs flagstats alignment_summary_metrics dup
 endif
 ifeq ($(CAPTURE_METHOD),CHIP)
-bam_metrics : flagstats alignment_summary
+#bam_metrics : flagstats alignment_summary
+bam_metrics : flagstats
 endif
 
 hs_metrics : $(shell rm -f metrics/all$(PROJECT_PREFIX).hs_metrics.txt metrics/all$(PROJECT_PREFIX).interval_hs_metrics.txt) metrics/all$(PROJECT_PREFIX).hs_metrics.txt metrics/all$(PROJECT_PREFIX).interval_hs_metrics.txt

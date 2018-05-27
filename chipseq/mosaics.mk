@@ -23,7 +23,7 @@ mosaics/rdata_fragL$$(MOSAICS_FRAG_LEN)_bin$$(MOSAICS_BIN_SIZE)/$1_$2.rdata : mo
 	$$(BEDTOOLS) sort -i mosaics/peaks_fragL$$(MOSAICS_FRAG_LEN)_bin$$(MOSAICS_BIN_SIZE)/$1_$2.peakTFBS.bed -faidx $$(REF_FASTA).fai > tmp && \
 	mv tmp mosaics/peaks_fragL$$(MOSAICS_FRAG_LEN)_bin$$(MOSAICS_BIN_SIZE)/$1_$2.peakTFBS.bed && \
 	head -1 mosaics/peaks_fragL$$(MOSAICS_FRAG_LEN)_bin$$(MOSAICS_BIN_SIZE)/$1_$2.peakTFBS.txt > tmp && \
-	tail -n +2 mosaics/peaks_fragL$$(MOSAICS_FRAG_LEN)_bin$$(MOSAICS_BIN_SIZE)/$1_$2.peakTFBS.txt | 
+	tail -n +2 mosaics/peaks_fragL$$(MOSAICS_FRAG_LEN)_bin$$(MOSAICS_BIN_SIZE)/$1_$2.peakTFBS.txt | \
 	$$(BEDTOOLS) sort -faidx $$(REF_FASTA).fai >> tmp && mv tmp mosaics/peaks_fragL$$(MOSAICS_FRAG_LEN)_bin$$(MOSAICS_BIN_SIZE)/$1_$2.peakTFBS.txt")
 
 mosaics/peaks_fragL$$(MOSAICS_FRAG_LEN)_bin$$(MOSAICS_BIN_SIZE)/$1_$2.peakTFBS.bed : mosaics/rdata_fragL$$(MOSAICS_FRAG_LEN)_bin$$(MOSAICS_BIN_SIZE)/$1_$2.rdata

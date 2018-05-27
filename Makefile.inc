@@ -208,7 +208,8 @@ BEDTOOLS_MODULE ?= BEDTools/2.26.0-goolf-1.7.20
 IGVTOOLS_MODULE ?= IGVTools/2.3.60-Java-1.7.0_21
 VCFTOOLS_MODULE ?= VCFtools/0.1.14-goolf-1.7.20-Perl-5.22.2
 BCL2FASTQ_MODULE ?= bcl2fastq/2.17.1.14-goolf-1.7.20
-TRIM_GALORE_MODULE = Trim_Galore/0.4.4-goolf-1.7.20-Perl-5.22.2
+TRIM_GALORE_MODULE ?= Trim_Galore/0.4.4-goolf-1.7.20-Perl-5.22.2
+CUTADAPT_MODULE ?= cutadapt/1.16-goolf-1.7.20-Python-2.7.11
 HTSLIB_MODULE ?= HTSlib/1.3.1-goolf-1.7.20
 TABIX_MODULE ?= $(HTSLIB_MODULE)
 FASTQC_MODULE ?= FastQC/0.11.4-Java-1.7.0_21
@@ -253,6 +254,7 @@ VCFTOOLS ?= vcftools
 VCFTOOLS_MERGE ?= vcf-merge
 BCL2FASTQ ?= bcl2fastq
 TRIM_GALORE ?= trim_galore
+CUTADAPT ?= cutadapt
 BGZIP ?= bgzip
 TABIX ?= tabix -p vcf
 BAM_READCOUNT ?= $(BIN_DIR)/bam-readcount
@@ -263,6 +265,18 @@ VCF_PASS ?= usb-modules-v2/vcf_tools/extract_pass_vcf.pl
 
 FASTQ_CHUNKS := 10
 FASTQ_CHUNK_SEQ := $(shell seq 1 $(FASTQ_CHUNKS))
+
+ifeq ($(ADAPTOR_POS),3prime)
+CUTADAPT_OPTS ?= -a $(ADAPTOR_SEQ) $(if $(findstring true,$(PAIRED_END)),-A $(ADAPTOR_SEQ))
+endif
+ifeq ($(ADAPTOR_POS),5prime)
+CUTADAPT_OPTS ?= -g $(ADAPTOR_SEQ) $(if $(findstring true,$(PAIRED_END)),-G $(ADAPTOR_SEQ))
+endif
+ifeq ($(NEXTSEQ_TRIM),true)
+CUTADAPT_OPTS += --nextseq-trim=20
+endif
+CUTADAPT_OPTS += -q 20,20 --trim-n -m 35 --max-n=3 
+
 
 FASTQC ?= fastqc
 FASTQC_SUMMARY_PLOT = $(RSCRIPT) usb-modules-v2/qc/fastqcSummaryPlot.R
