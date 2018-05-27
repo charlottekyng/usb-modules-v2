@@ -4,8 +4,6 @@
 # Author: Raymond Lim <raylim@mm.st>
 #
 
-#include usb-modules-v2/config.inc
-
 export
 
 # job-related options
@@ -139,6 +137,10 @@ mosaics :
 ## The set of targets below have NOT been tested,
 ## or are known to be broken/obsolete.
 ##########################################################
+
+TARGETS += pyclone
+pyclone : 
+	$(call RUN_MAKE,usb-modules-v2/clonality/pyclone.mk)
 
 TARGETS += merge_fastq
 merge_fastq : 

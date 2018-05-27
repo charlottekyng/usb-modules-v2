@@ -220,6 +220,7 @@ STAR_FUSION_MODULE ?= STAR-Fusion/0.6.0-goolf-1.7.20-Perl-5.22.2
 HISAT2_MODULE ?= HISAT2/2.0.4-goolf-1.7.20
 STRINGTIE_MODULE ?= StringTie/1.3.3-goolf-1.7.20
 SNP_EFF_MODULE ?= snpEff/4.1l-Java-1.7.0_75
+SNP_EFF_43_MODULE ?= snpEff/4.3t-Java-1.8.0_92
 CUFFLINKS_MODULE ?= Cufflinks/2.2.1-Linux_x86_64
 STRINGTIE_MODULE ?= StringTie/1.3.3-goolf-1.7.20
 RSEM_MODULE ?= RSEM/1.2.31-goolf-1.7.20
@@ -229,11 +230,13 @@ GATK40_MODULE ?= GATK/4.0.1.2-Java-1.8.0_92
 MUTECT_MODULE ?= MuTect/1.1.7-Java-1.7.0_80
 PICARD_MODULE ?= picard/2.9.2
 VARSCAN_MODULE ?= VarScan/2.4.1-Java-1.7.0_80
+ANACONDA_MODULE ?= Anaconda3/5.0.1
 
 PERL ?= perl
 JAVA ?= java -Djava.io.tmpdir=$(TMPDIR)
 PYTHON ?= python
-PYTHON_ENV_ACTIVATE ?= source /scicore/home/terracci/GROUP/virtual_env/python/bin/activate
+PYTHON_ENV_ACTIVATE ?= ml load $(ANACONDA_MODULE) && source activate 
+PYTHON_ENV_DEACTIVATE = source deactivate
 
 R_LIBS ?= $(USR_DIR)/$(R_MODULE)/lib64/R/library
 R ?= export R_LIBS=$(R_LIBS); R
@@ -343,6 +346,14 @@ FACETS_GENE_CN_OPTS = $(if $(TARGETS_FILE_GENES),--genesFile $(TARGETS_FILE_GENE
 
 MUTATION_SUMMARY_RSCRIPT = $(RSCRIPT) usb-modules-v2/summary/mutation_summary_excel.R
 DECONSTRUCTSIGS = $(RSCRIPT) usb-modules-v2/mut_sigs/deconstructSigs.R
+
+PYCLONE ?= $(PYTHON_ENV_ACTIVATE) pyclonenv; PyClone
+PYCLONE_ITER ?= 10000
+PYCLONE_BURNIN ?= 1000
+PYCLONE_SEED ?= 1234567
+PYCLONE_PRIOR ?= parental_copy_number
+PYCLONE_MAKE_MUT_TXT ?= $(RSCRIPT) usb-modules-v2/clonality/pyclone_make_input.R
+
 
 CBS_SEGMENTCNV = $(RSCRIPT) usb-modules-v2/copy_number/varscanCNVSegment.R
 VARSCAN_GENE_CN = $(RSCRIPT) usb-modules-v2/copy_number/varscanCNVGeneCN.R

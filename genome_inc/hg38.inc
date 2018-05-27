@@ -74,7 +74,8 @@ GENE_REF_FLAT = $(ANN_DIR)/refFlat.txt
 #MAPSPLICE_REF_DIR = $(REF_DIR)/GATK_bundle/2.3/mapsplice_ref/chr
 #MAPSPLICE_REF_BASENAME = $(REF_DIR)/GATK_bundle/2.3/mapsplice_ref/hg19
 
-#DB_NSFP ?= $(REF_DIR)/snpeff/GRCh37/dbNSFP2.9.txt.gz
+SNP_EFF_GENOME = GRCh38.86
+DB_NSFP ?= $(REF_DIR)/dbNSFP/GRCh38/dbNSFP3.2.txt.gz
 
 #TOPHAT_REF = GRCh37
 #GENES_GTF = $(REF_DIR)/Homo_sapiens/Ensembl/$(TOPHAT_REF)/Annotation/Genes/genes.gtf
@@ -93,7 +94,6 @@ GENE_REF_FLAT = $(ANN_DIR)/refFlat.txt
 #REF_NAME := 1000GenomesPilot-NCBI37
 #REF_DATE := 20100517
 REF_DICT = $(REF_FASTA:.fasta=.dict)
-#SNP_EFF_GENOME = GRCh37.75
 
 #MUTSIGCV_REF_DIR ?= $(REF_DIR)/MutSigCV
 #MUTSIGCV_COVERAGE_REF ?= $(MUTSIGCV_REF_DIR)/coverage.exome_full192.txt

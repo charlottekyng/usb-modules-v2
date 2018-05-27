@@ -50,7 +50,7 @@ LOGDIR ?= log/vcf.$(NOW)
 
 %.sdp_ft.vcf : %.vcf
 	$(call CHECK_VCF,$<,$@,\
-	$(call RUN,1,$(RESOURCE_REQ_LOW_MEM),$(RESOURCE_REQ_VSHORT),$(SNP_EFF_MODULE),"\
+	$(call RUN,1,$(RESOURCE_REQ_LOW_MEM),$(RESOURCE_REQ_VSHORT),$(SNP_EFF_43_MODULE),"\
 		$(SNP_SIFT) filter $(SNP_SIFT_OPTS) -f $< '(exists GEN[?].DP) & (GEN[?].DP > 20)' > $@"))
 
 %.hotspot.vcf : %.vcf
@@ -108,7 +108,7 @@ LOGDIR ?= log/vcf.$(NOW)
 %.eff.vcf : %.vcf %.vcf.idx
 	$(call CHECK_VCF,$<,$@,\
 		$(call RUN,1,$(RESOURCE_REQ_MEDIUM_MEM),$(RESOURCE_REQ_SHORT),$(SNP_EFF_MODULE),"\
-		$(SNP_EFF) ann $(SNP_EFF_OPTS) $(SNP_EFF_GENOME) $< > $@"))
+		$(SNP_EFF) ann $(SNP_EFF_OPTS) -noStats $(SNP_EFF_GENOME) $< > $@"))
 
 %.nsfp.vcf : %.vcf %.vcf.idx
 	$(call CHECK_VCF,$<,$@,\
@@ -197,9 +197,10 @@ $(foreach sample,$(SAMPLES),$(eval $(call hrun-sample,$(sample))))
 ifdef SAMPLE_PAIRS
 define annotate-facets-pair
 vcf/$1_$2.%.facets.vcf : vcf/$1_$2.%.vcf facets/cncf/$1_$2.Rdata
-	$$(call CHECK_VCF,$<,$@,\
+	$$(call CHECK_VCF,$$<,$$@,\
 	$$(call RUN,1,$$(RESOURCE_REQ_LOW_MEM),$$(RESOURCE_REQ_VSHORT),$$(R_MODULE),"\
-		$$(ANNOTATE_FACETS_VCF) --genome \"$$(REF)\" --tumor \"$1\" --facetsRdata $$(<<) --outFile $$@ $$<"))
+		$$(ANNOTATE_FACETS_VCF) --genome \"$$(REF)\" --tumor \"$1\" --facetsRdata $$(<<) --outFile $$@ $$< \
+		$(RM) $<"))
 endef
 $(foreach pair,$(SAMPLE_PAIRS),$(eval $(call annotate-facets-pair,$(tumor.$(pair)),$(normal.$(pair)))))
 endif
@@ -331,16 +332,16 @@ sufamscreen/%.opl_tab.txt : sufamscreen/%.vcf
 # merge tables
 alltables/all$(PROJECT_PREFIX).%.txt : $(foreach sample,$(SAMPLES),tables/$(sample).%.txt)
 	$(call RUN,1,$(RESOURCE_REQ_MEDIUM_MEM),$(RESOURCE_REQ_VSHORT),$(R_MODULE),"\
-	$(RSCRIPT) $(RBIND) --sampleName $< $^ > $@")
+	$(RBIND) --sampleName $< $^ > $@")
 ifdef SAMPLE_SETS
 alltables/allSS$(PROJECT_PREFIX).%.txt : $(foreach set,$(SAMPLE_SETS),tables/$(set).%.txt)
 	$(call RUN,1,$(RESOURCE_REQ_MEDIUM_MEM),$(RESOURCE_REQ_VSHORT),$(R_MODULE),"\
-	$(RSCRIPT) $(RBIND) --normalLast $^ > $@")
+	$(RBIND) --normalLast $^ > $@")
 endif
 ifdef SAMPLE_PAIRS
 alltables/allTN$(PROJECT_PREFIX).%.txt : $(foreach pair,$(SAMPLE_PAIRS),tables/$(pair).%.txt)
 	$(call RUN,1,$(RESOURCE_REQ_MEDIUM_MEM),$(RESOURCE_REQ_VSHORT),$(R_MODULE),"\
-	$(RSCRIPT) $(RBIND) --tumorNormal $^ > $@")
+	$(RBIND) --tumorNormal $^ > $@")
 endif
 
 %.high_moderate.txt : %.txt
