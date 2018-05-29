@@ -21,8 +21,8 @@ if (length(arguments$args) < 1) {
 }
 
 lapply(bamFiles, function(bamFile) {
-	constructBins(bamFile, fileFormat="bam", outfileLoc="mosaics/bin",
+	constructBins(bamFile, fileFormat="bam", outfileLoc=opt$outfileLoc,
 	PET = opt$pet, fragLen = opt$fragLen, binSize = opt$binSize, capping = 0)
-	generateWig(bamFile, fileFormat="bam", outfileLoc="mosaics/bin",
+	generateWig(bamFile, fileFormat="bam", outfileLoc=opt$outfileLoc,
 	PET = opt$pet, fragLen = opt$fragLen, span = opt$binSize, capping = 0)
 })
