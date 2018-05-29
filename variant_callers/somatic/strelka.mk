@@ -26,18 +26,21 @@ strelka/$1_$2/Makefile : bam/$1.bam bam/$2.bam
 	--ref=$$(REF_FASTA) --config=$$(STRELKA_CONFIG) --output-dir=$$(@D)")
 
 #$$(INIT) qmake -inherit -q jrf.q -- -j 20 -C $$< > $$(LOG) && touch $$@
-strelka/$1_$2/task.complete : strelka/$1_$2/Makefile
+strelka/$1_$2/results/all.somatic.indels.vcf : strelka/$1_$2/Makefile
 	$$(call RUN,$$(STRELKA_NUM_CORES),$$(RESOURCE_REQ_LOW_MEM),$$(RESOURCE_REQ_SHORT),,"\
 	make -j $$(STRELKA_NUM_CORES) -C $$(<D)")
 
+strelka/$1_$2/results/all.somatic.snvs.vcf : strelka/$1_$2/results/all.somatic.indels.vcf
+	
+	
 vcf/$1_$2.%.vcf : strelka/vcf/$1_$2.%.vcf
 	$$(INIT) perl -ne 'if (/^#CHROM/) { s/NORMAL/$2/; s/TUMOR/$1/; } print;' $$< > $$@ && $$(RM) $$<
 
-strelka/vcf/$1_$2.strelka_snps.vcf : strelka/$1_$2/task.complete
-	$$(INIT) $$(FIX_STRELKA_VCF) strelka/$1_$2/results/all.somatic.snvs.vcf > $$@
+strelka/vcf/$1_$2.strelka_snps.vcf : strelka/$1_$2/results/all.somatic.snvs.vcf
+	$$(INIT) $$(FIX_STRELKA_VCF) $$< > $$@
 
-strelka/vcf/$1_$2.strelka_indels.vcf : strelka/$1_$2/task.complete
-	$$(INIT) $$(FIX_STRELKA_VCF) strelka/$1_$2/results/all.somatic.indels.vcf > $$@
+strelka/vcf/$1_$2.strelka_indels.vcf : strelka/$1_$2/results/all.somatic.indels.vcf
+	$$(INIT) $$(FIX_STRELKA_VCF) $$< > $$@
 
 endef
 $(foreach pair,$(SAMPLE_PAIRS),$(eval $(call strelka-tumor-normal,$(tumor.$(pair)),$(normal.$(pair)))))

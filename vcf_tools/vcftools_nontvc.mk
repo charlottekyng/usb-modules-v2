@@ -76,7 +76,9 @@ else
 vcf/$3.%.sufam.tmp : $$(foreach tumor,$$(wordlist 1,$$(shell expr $$(words $$(subst _,$$( ),$3)) - 1),$$(subst _,$$( ),$3)),vcf/$$(tumor)_$$(lastword $$(subst _,$$( ),$3)).%.vcf)
 	$$(call RUN,1,$$(RESOURCE_REQ_HIGH_MEM),$$(RESOURCE_REQ_SHORT),$$(JAVA8_MODULE),"\
 		$$(call GATK,CombineVariants,$$(RESOURCE_REQ_HIGH_MEM_JAVA)) \
-		$$(foreach vcf,$$^,--variant $$(vcf) ) -o $$@ --genotypemergeoption UNSORTED -sites_only -R $$(REF_FASTA)")
+		$$(foreach vcf,$$^,--variant $$(vcf) ) -o $$@.tmp --genotypemergeoption UNSORTED \
+		-sites_only -R $$(REF_FASTA) && grep \"#\" $$@.tmp > $$@ && \
+		 grep -v \"#\" $$@.tmp | awk '{OFS=\"\t\"; \$$$$7=\"PASS\" ; print ;}' >> $$@")
 
 ifeq ($$(findstring varscan,$$(MUT_CALLER)),varscan)
 vcf/$1_$2.%.sufam.vcf : vcf/$1_$2.%.vcf vcf/$3.%.sufam.tmp bam/$1.bam bam/$2.bam
@@ -118,9 +120,10 @@ vcf/$1_$2.%.sufam.vcf : vcf/$1_$2.%.vcf vcf/$3.%.sufam.tmp bam/$1.bam bam/$2.bam
 		\"(FILTER has 'interrogation') | (FILTER has 'interrogation_Absent')\" > $$@.tmp4 && \
 		$$(call PURGE_AND_LOAD, $$(JAVA8_MODULE)) && \
 		$$(call GATK,CombineVariants,$$(RESOURCE_REQ_HIGH_MEM_JAVA)) --variant $$< --variant $$@.tmp4 -o $$@ \
-		--genotypemergeoption UNSORTED -R $$(REF_FASTA) && \
-		$$(RM) $$@.tmp1 $$@.tmp2 $$@.tmp3 $$(word 2,$$^) $$@.tmp1.idx $$@.tmp2.idx $$@.tmp3.idx $$(word 2,$$^).idx \
-		$$@.tmp2fixed $$@.tmp2fixed.idx"))
+		--genotypemergeoption UNSORTED -R $$(REF_FASTA)"))
+# && \
+#		$$(RM) $$@.tmp1 $$@.tmp2 $$@.tmp3 $$(word 2,$$^) $$@.tmp1.idx $$@.tmp2.idx $$@.tmp3.idx $$(word 2,$$^).idx \
+#		$$@.tmp2fixed $$@.tmp2fixed.idx"))
 endif
 endif #ifeq ($3,$2)
 endef #define sufam

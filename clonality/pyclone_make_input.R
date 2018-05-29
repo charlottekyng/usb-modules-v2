@@ -79,7 +79,7 @@ make_pyclone_input <- function(muts,
 		cat ("mutation_id_col not provided. Constructing ids from: \n")
 		cat (toString(id_fields)); cat("\n")
 		x <- muts[,id_fields]
-		rownames(muts) <- gsub("|", "..", gsub(", ", "", apply(x, 1, toString)), fixed=T)
+		rownames(muts) <- gsub(" ", "", gsub(", ", "_", apply(x, 1, toString)), fixed=T)
 	}
 
 	res <- cbind(rownames(muts), ref_counts, var_counts, 2, major_cn, minor_cn)
