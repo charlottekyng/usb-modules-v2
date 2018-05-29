@@ -18,7 +18,7 @@ if (!interactive()) {
 }
 
 optList <- list(
-                make_option("--ccfRscript", default = 'usb-modules-v2/copy_number/runFacets_CCF.R', help='computCCF and confCCF R script'),
+                make_option("--ccfRscript", default = 'usb-modules-v2/copy_number/facetsCCF.R', help='computCCF and confCCF R script'),
                 make_option("--genome", default = 'b37', type = 'character', help = "genome of counts file"),
                 make_option("--tumor", default = 'TUMOR', type = 'character', help = "tumor sample"),
                 make_option("--purity", default = NULL, type = 'float', help = "purity of sample if overriding facets purity"),
@@ -106,7 +106,7 @@ ol <- findOverlaps(rowRanges(vcf), facetsGr, select = 'first')
 if (sum(!is.na(ol)) > 0) {
     tcn <- facetsGr[ol[!is.na(ol)], ]$tcn.em
     lcn <- facetsGr[ol[!is.na(ol)], ]$lcn.em
-    if(is.na (purity)) { purity=0.15} # If facets failed to estimate purity, assume it is very low.
+    if(is.na (purity)) { purity=0.1 } # If facets failed to estimate purity, assume it is very low.
     purity <- rep(purity, length(tcn))
 
     ref <- sapply(geno(vcf)$AD[!is.na(ol), tumorSample], function(x) x[1])
@@ -114,7 +114,7 @@ if (sum(!is.na(ol)) > 0) {
     vaf <- alt / (alt + ref)
 
     ccfFit <- computeCCF(vaf = vaf, tcn, lcn, purity = purity)
-	print(ccfFit)
+	#print(ccfFit)
     conf <- confCCF(alt = alt, ref = ref, tcn, lcn, purity = purity,
                            multiplicity = ccfFit$multiplicity)
     ccfLower <- conf$lower

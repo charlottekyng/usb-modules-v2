@@ -276,7 +276,7 @@ INDEL_FILTERS = --filterName 'QD' --filterExpression 'QD < $(HAPCALL_INDEL_QD_TH
 ##################################
 
 MUTATION_SUMMARY_FORMAT ?= EXCEL
-INCLUDE_LINCRNA_IN_SUMMARY ?= false
+INCLUDE_LNCRNA_IN_SUMMARY ?= false
 
 
 SNP_EFF_FLAGS ?= -canon -no NEXT_PROT -no-intergenic

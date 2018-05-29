@@ -16,7 +16,6 @@ arguments <- parse_args(parser, positional_arguments = T);
 opt <- arguments$options;
 files <- arguments$args;
 
-
 Data <- list();
 for (f in files) {
     X <- read.table(file = f, sep = '\t', as.is = T, comment.char = '', quote = '');
@@ -35,7 +34,8 @@ for (f in files) {
         h <- c(h, "SAMPLE")
         h <- sub(paste(sname, '\\.', sep = ''), 'SAMPLE.', h)
         colnames(X) <- h
-        Data[[sname]] <- X
+        #Data[[sname]] <- X 
+        Data[[f]] <- X # modified to use rbind for merging snvs and indels from the same samples
     }
     if (opt$tumorNormal) {
         sname <- sub('\\..*', '', f)
@@ -50,7 +50,8 @@ for (f in files) {
         h <- sub(paste(tumor, '\\.', sep = ''), 'TUMOR.', h)
         h <- sub(paste(normal, '\\.', sep = ''), 'NORMAL.', h)
         colnames(X) <- h
-        Data[[sname]] <- X
+        #Data[[sname]] <- X
+        Data[[f]] <- X# modified to use rbind for merging snvs and indels from the same samples
     }
     if (opt$normalLast) {
         sname <- sub('\\..*', '', f)
