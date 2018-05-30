@@ -6,7 +6,7 @@ LOGDIR ?= log/rsem.$(NOW)
 .SECONDARY:
 .PHONY: rsem
 
-rsem : $(foreach sample,$(SAMPLES),rsem/$(sample).genes.results) rsem/all.genes.expected_count.results rsem/all.genes.TPM.results rsem/all.genes.FPKM.results rsem/all.isoforms.expected_count.results rsem/all.isoforms.TPM.results rsem/all.isoforms.FPKM.results rsem/all.genes.expected_count.results_coding_upper_quartiled
+rsem : $(foreach sample,$(SAMPLES),rsem/$(sample).genes.results) rsem/all$(PROJECT_PREFIX).genes.expected_count.results rsem/all$(PROJECT_PREFIX).genes.TPM.results rsem/all$(PROJECT_PREFIX).genes.FPKM.results rsem/all$(PROJECT_PREFIX).isoforms.expected_count.results rsem/all$(PROJECT_PREFIX).isoforms.TPM.results rsem/all$(PROJECT_PREFIX).isoforms.FPKM.results rsem/all$(PROJECT_PREFIX).genes.expected_count.results_coding_upper_quartiled
 
 define rsem-calc-expression
 rsem/$1.genes.results : star/$1.Aligned.toTranscriptome.out.bam 
@@ -20,31 +20,31 @@ $(foreach sample,$(SAMPLES),\
 rsem/%.isoforms.results : rsem/%.genes.results
 	
 
-rsem/all.genes.expected_count.results : $(foreach sample,$(SAMPLES),rsem/$(sample).genes.results)
+rsem/all$(PROJECT_PREFIX).genes.expected_count.results : $(foreach sample,$(SAMPLES),rsem/$(sample).genes.results)
 	$(call RUN,1,$(RESOURCE_REQ_LOW_MEM),$(RESOURCE_REQ_VSHORT),$(PERL_MODULE),"\
 	$(RSEM_GEN_DATA_MATRIX) expected_count $^ > $@")
 
-rsem/all.genes.TPM.results : $(foreach sample,$(SAMPLES),rsem/$(sample).genes.results)
+rsem/all$(PROJECT_PREFIX).genes.TPM.results : $(foreach sample,$(SAMPLES),rsem/$(sample).genes.results)
 	$(call RUN,1,$(RESOURCE_REQ_LOW_MEM),$(RESOURCE_REQ_VSHORT),$(PERL_MODULE),"\
 	$(RSEM_GEN_DATA_MATRIX) TPM $^ > $@")
 
-rsem/all.genes.FPKM.results : $(foreach sample,$(SAMPLES),rsem/$(sample).genes.results)
+rsem/all$(PROJECT_PREFIX).genes.FPKM.results : $(foreach sample,$(SAMPLES),rsem/$(sample).genes.results)
 	$(call RUN,1,$(RESOURCE_REQ_LOW_MEM),$(RESOURCE_REQ_VSHORT),$(PERL_MODULE),"\
 	$(RSEM_GEN_DATA_MATRIX) FPKM $^ > $@")
 
-rsem/all.isoforms.expected_count.results : $(foreach sample,$(SAMPLES),rsem/$(sample).isoforms.results)
+rsem/all$(PROJECT_PREFIX).isoforms.expected_count.results : $(foreach sample,$(SAMPLES),rsem/$(sample).isoforms.results)
 	$(call RUN,1,$(RESOURCE_REQ_MEDIUM_MEM),$(RESOURCE_REQ_VSHORT),$(PERL_MODULE),"\
 	$(RSEM_GEN_DATA_MATRIX) expected_count $^ > $@")
 
-rsem/all.isoforms.TPM.results : $(foreach sample,$(SAMPLES),rsem/$(sample).isoforms.results)
+rsem/all$(PROJECT_PREFIX).isoforms.TPM.results : $(foreach sample,$(SAMPLES),rsem/$(sample).isoforms.results)
 	$(call RUN,1,$(RESOURCE_REQ_MEDIUM_MEM),$(RESOURCE_REQ_VSHORT),$(PERL_MODULE),"\
 	$(RSEM_GEN_DATA_MATRIX) TPM $^ > $@")
 
-rsem/all.isoforms.FPKM.results : $(foreach sample,$(SAMPLES),rsem/$(sample).isoforms.results)
+rsem/all$(PROJECT_PREFIX).isoforms.FPKM.results : $(foreach sample,$(SAMPLES),rsem/$(sample).isoforms.results)
 	$(call RUN,1,$(RESOURCE_REQ_MEDIUM_MEM),$(RESOURCE_REQ_VSHORT),$(PERL_MODULE),"\
 	$(RSEM_GEN_DATA_MATRIX) FPKM $^ > $@")
 
-rsem/all.genes.expected_count.results_coding_upper_quartiled : rsem/all.genes.expected_count.results
+rsem/all$(PROJECT_PREFIX).genes.expected_count.results_coding_upper_quartiled : rsem/all.genes.expected_count.results
 	$(call RUN,1,$(RESOURCE_REQ_LOW_MEM),$(RESOURCE_REQ_VSHORT),$(R_MODULE),"\
 	$(RSCRIPT) $(RSEM_NORM) --inputRSEMFile $< --gtf $(GENCODE_GTF) --outputFile $@ \
 	--normalizationMethod \"uq\" --threshold_for_uq 1000")
