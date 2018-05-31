@@ -94,7 +94,11 @@ if (opt$minGC == 0 & opt$maxGC == 1) {
 		gbuild=gbuild, unmatched=opt$unmatched, ndepthmax=opt$maxNDepth)
 	dmat <- facets:::counts2logROR(pmat[pmat$rCountT > 0, ], gbuild, unmatched=opt$unmatched)
         dmat$keep[which(dmat$gcpct>=opt$maxGC | dmat$gcpct<=opt$minGC)] <- 0
+	dmat <- dmat[dmat$keep == 1,]
 	tmp <- facets:::segsnps(dmat, opt$pre_cval, hetscale=F)
+	pmat$keep <- 0
+	pmat$keep[which(paste(pmat$chrom, pmat$maploc, sep="_") %in% paste(dmat$chrom, dmat$maploc, sep="_"))] <- 1
+
 	out <- list(pmat = pmat, gbuild=gbuild, nX=nX)
 	preOut <- c(out,tmp)
 }
