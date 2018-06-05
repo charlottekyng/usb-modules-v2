@@ -8,14 +8,9 @@ LOGDIR ?= log/facets.$(NOW)
 .PHONY : facets
 
 SNPPILEUP_SUFFIX = q$(FACETS_SNP_PILEUP_MINMAPQ)_Q$(FACETS_SNP_PILEUP_MINBASEQ)_d$(FACETS_SNP_PILEUP_MAX_DEPTH)_r$(FACETS_SNP_PILEUP_MIN_DEPTH)
-FACETS_SUFFIX = $(SNPPILEUP_SUFFIX)_bin$(FACETS_WINDOW_SIZE)_mingc$(FACETS_MINGC)_maxgc$(FACETS_MAXGC)_nhet$(FACETS_MIN_NHET)_cval1$(FACETS_CVAL1)
+FACETS_SUFFIX = $(SNPPILEUP_SUFFIX)_bin$(FACETS_WINDOW_SIZE)_mingc$(FACETS_MINGC)_maxgc$(FACETS_MAXGC)_nhet$(FACETS_MIN_NHET)_cval$(FACETS_CVAL1)
 
-
-
-facets : $(foreach pair,$(SAMPLE_PAIRS),facets/cncf/$(pair).out) facets/cncf/all$(PROJECT_PREFIX).summary.txt facets/cncf/all$(PROJECT_PREFIX).geneCN.filled.txt
-
-#facets : $(foreach cval1,$(FACETS_CVAL1),$(foreach pair,$(SAMPLE_PAIRS),facets/cncfTN_$(cval1)/$(pair).out) facets/cncfTN_$(cval1)/all$(PROJECT_PREFIX).summary.txt facets/cncfTN_$(cval1)/all$(PROJECT_PREFIX).geneCN.filled.txt)
-#	facets/geneCN.txt facets/geneCN.fill.txt facets/geneCN.heatmap.pdf facets/geneCN.fill.heatmap.pdf
+facets : facets/cncf/all$(PROJECT_PREFIX).summary.txt facets/cncf/all$(PROJECT_PREFIX).geneCN.filled.txt
 
 ifeq ($(findstring ILLUMINA,$(SEQ_PLATFORM)),ILLUMINA)
 facets/base_pos/%.gatk.dbsnp.vcf : gatk/dbsnp/%.gatk_snps.vcf gatk/vcf/%.variants.vcf
@@ -35,7 +30,6 @@ $(foreach pair,$(SAMPLE_PAIRS),$(eval $(call snp-pileup-tumor-normal,$(tumor.$(p
 endif
 
 ifeq ($(findstring IONTORRENT,$(SEQ_PLATFORM)),IONTORRENT)
-
 define snp-pileup-tumor-normal
 facets/snp_pileup/$1_$2.bc.gz : tvc/dbsnp/$2/TSVC_variants.vcf tvc/dbsnp/$1/TSVC_variants.vcf
 	$$(call RUN,1,$$(RESOURCE_REQ_HIGH_MEM),$$(RESOURCE_REQ_SHORT),$$(SNP_EFF_MODULE) $$(JAVA8_MODULE),"\
@@ -56,11 +50,14 @@ facets/cncfTN/$1_$2_$$(FACETS_SUFFIX).out : facets/snp_pileup/$1_$2_$$(SNPPILEUP
 	$$(FACETS) --minNDepth $$(FACETS_SNP_PILEUP_MIN_DEPTH) \
 	--maxNDepth $$(FACETS_SNP_PILEUP_MAX_DEPTH) --snp_nbhd $$(FACETS_WINDOW_SIZE) \
 	--minGC $$(FACETS_MINGC) --maxGC $$(FACETS_MAXGC) \
-	--cval1 $1 --genome $$(REF) --min_nhet $$(FACETS_MIN_NHET) \
+	--cval1 $$(FACETS_CVAL1) --genome $$(REF) --min_nhet $$(FACETS_MIN_NHET) \
 	--outPrefix $$* $$< ")
 
 facets/cncfTN/$1_$2_$$(FACETS_SUFFIX).Rdata : facets/cncfTN/$1_$2_$$(FACETS_SUFFIX).out
+	
+
 facets/cncfTN/$1_$2_$$(FACETS_SUFFIX).cncf.txt : facets/cncfTN/$1_$2_$$(FACETS_SUFFIX).out
+	
 
 endef
 $(foreach pair,$(SAMPLE_PAIRS),$(eval $(call facets-cval1-tumor-normal,$(cval1),$(tumor.$(pair)),$(normal.$(pair)))))
@@ -71,7 +68,7 @@ facets/cncf/%.out : facets/cncfTN/%_$(FACETS_SUFFIX).out
 facets/cncf/%.Rdata : facets/cncfTN/%_$(FACETS_SUFFIX).Rdata
 	$(INIT) ln -f $(<) $(@)
 
-facets/cncf/%.cncf.txt : facets/cncf/%_$(FACETS_SUFFIX).cncf.txt
+facets/cncf/%.cncf.txt : facets/cncfTN/%_$(FACETS_SUFFIX).cncf.txt
 	$(INIT) ln -f $(<) $(@)
 
 facets/cncf/all$(PROJECT_PREFIX).summary.txt : $(foreach pair,$(SAMPLE_PAIRS),facets/cncf/$(pair).out)
@@ -83,9 +80,9 @@ facets/cncf/all$(PROJECT_PREFIX).summary.txt : $(foreach pair,$(SAMPLE_PAIRS),fa
 	done;\
 } >$@
 
-facets/cncf/all$(PROJECT_PREFIX).geneCN.filled.txt : $(foreach pair,$(SAMPLE_PAIRS),facets/cncf/$(pair).cncf.txt)
+facets/cncf/all$(PROJECT_PREFIX).geneCN.filled.txt : $(foreach pair,$(SAMPLE_PAIRS),facets/cncf/$(pair).cncf.txt) $(foreach pair,$(SAMPLE_PAIRS),facets/cncf/$(pair).Rdata)
 	$(call RUN,1,$(RESOURCE_REQ_MEDIUM_MEM),$(RESOURCE_REQ_SHORT),$(R_MODULE),"\
-	$(FACETS_GENE_CN) $(FACETS_GENE_CN_OPTS) --outFile $@ $^")
+	$(FACETS_GENE_CN) $(FACETS_GENE_CN_OPTS) --outFile $@ $(filter %.cncf.txt,$^)")
 
 #facets/cncf/all$(PROJECT_PREFIX).geneCN%heatmap.pdf  : facets/all$(PROJECT_PREFIX).geneCN%txt
 #	$(call RUN,1,$(RESOURCE_REQ_LOW_MEM),$(RESOURCE_REQ_VSHORT),$(R_MODULE),"\
