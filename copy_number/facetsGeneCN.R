@@ -111,31 +111,24 @@ mm <- lapply(facetsFiles, function(f) {
 	ploidy <- median(unlist(apply(cbind(df$tcn.em, df$num.mark),1,function(x){rep(x[1], x[2])})))
 #	ploidy <- as.numeric(names(ploidy)[which.max(ploidy)])
 
-	df$GL <- 0
-	df$GL[df$tcn.em < ploidy] <- -1
-	df$GL[df$tcn.em == 0] <- -2
-	df$GL[df$tcn.em > ploidy] <- 1
-	df$GL[df$tcn.em >= ploidy + 4] <- 2
+	df$GL_ASCNA <- 0
+	df$GL_ASCNA[df$tcn.em < ploidy] <- -1
+	df$GL_ASCNA[df$tcn.em == 0] <- -2
+	df$GL_ASCNA[df$tcn.em > ploidy] <- 1
+	df$GL_ASCNA[df$tcn.em >= ploidy + 4] <- 2
 
 	load(gsub("cncf.txt", "Rdata", f, fixed=T))
 	noise <- median(abs(out2$jointseg$cnlr-  unlist(apply(out2$out[,c("cnlr.median", "num.mark")], 1, function(x) {rep(x[1], each=x[2])}))))
 
 	lrr <- sort(out2$jointseg$cnlr)
-#	if (noise <= 0.2) { lrr <- lrr[round(0.25*length(lrr)):round(0.75*length(lrr))]
-#	} else if ( noise <= 0.3 ) { lrr <- lrr[round(0.275*length(lrr)):round(0.725*length(lrr))]
-#	} else { lrr <- lrr[round(0.3*length(lrr)):round(0.7*length(lrr))]}
+	lrr <- lrr[round(0.25*length(lrr)):round(0.75*length(lrr))] 
+	df$GL_LRR <- 0
+	df$GL_LRR[df$cnlr.median < median(lrr)-(2.5*sd(lrr))] <- -1
+	df$GL_LRR[df$cnlr.median < median(lrr)-(7*sd(lrr))] <- -2
+	df$GL_LRR[df$cnlr.median > median(lrr)+(2*sd(lrr))] <- 1
+	df$GL_LRR[df$cnlr.median > median(lrr)+(6*sd(lrr))] <- 2
 
-#	if (noise <= 0.2) { lrr <- lrr[round(0.3*length(lrr)):round(0.7*length(lrr))]
-#	} else if ( noise <= 0.3 ) { lrr <- lrr[round(0.275*length(lrr)):round(0.725*length(lrr))]
-#	} else { 
-lrr <- lrr[round(0.25*length(lrr)):round(0.75*length(lrr))] 
-	df$GL2 <- 0
-	df$GL2[df$cnlr.median < median(lrr)-(2.5*sd(lrr))] <- -1
-	df$GL2[df$cnlr.median < median(lrr)-(7*sd(lrr))] <- -2
-	df$GL2[df$cnlr.median > median(lrr)+(2*sd(lrr))] <- 1
-	df$GL2[df$cnlr.median > median(lrr)+(6*sd(lrr))] <- 2
-
-	df %>% select(hgnc, GL, GL2, tcn.em, lcn.em, cnlr.median) %>% ungroup
+	df %>% select(hgnc, GL_ASCNA, GL_LRR, tcn.em, lcn.em, cnlr.median) %>% ungroup
 })
 names(mm) <- facetsFiles
 for (f in facetsFiles) {
@@ -144,7 +137,6 @@ for (f in facetsFiles) {
 }
 
 mm <- left_join(genes, join_all(mm, type = 'full', by="hgnc")) %>% arrange(as.integer(chrom), start, end)
-#write.table(mm, file=opt$outFile, sep="\t", row.names=F, na="", quote=F)
 
 seg_sample <- seg_chr <- seg_band <- seg_start <- seg_end <- seg_cnlr <- seg_genes <- seg_type <- seg_GLtype <- NA
 for (i in grep("GL", colnames(mm))) {
