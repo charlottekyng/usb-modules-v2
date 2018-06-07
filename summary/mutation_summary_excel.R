@@ -29,10 +29,11 @@ output_fields = c("TUMOR_SAMPLE", "NORMAL_SAMPLE", "ANN[*].GENE", "ANN[*].HGVS_P
 	"ANN[*].IMPACT", "ANN[*].BIOTYPE", "ANN[*].FEATURE", "ANN[*].FEATUREID", "TUMOR.FA", "NORMAL.FA", "TUMOR.AF", "NORMAL.AF",
 	"TUMOR.DP", "NORMAL.DP", "TUMOR.FDP", "NORMAL.FDP", "TUMOR.AD", "NORMAL.AD", "TUMOR.AO", "NORMAL.AO", 
 	"TUMOR.FAO", "NORMAL.FAO", "TUMOR.RO", "NORMAL.RO", "TUMOR.FRO", "NORMAL.FRO",
-	"cancer_gene_census", "kandoth", "lawrence", "hap_insuf", 
+	"cancer_gene_census", "kandoth", "lawrence", "hap_insuf", "ExACnontcga_AC", "ExACnontcga_AF", 
 	"facetsCF", "facetsTCN_EM", "facetsLCN_EM", "facetsLOHCall", "facetsMultiplicity", "ccf", "clonalStatus", "ccfConfUpper", "ccfConfLower",
-	"duplicatedGenesDB", "dbNSFP_MutationTaster_pred", "dbNSFP_Polyphen2_HVAR_pred", "dbNSFP_Interpro_domain", "AMPLICON_NUM",
-	"CHROM", "POS", "ID", "REF", "ALT", "QUAL", "FILTER", "dbNSFP_ExAC_AC", "dbNSFP_ExAC_AF", "dbNSFP_ExAC_Adj_AF", "dbNSFP_Uniprot_acc")
+	#"dbNSFP_MutationTaster_pred", "dbNSFP_Polyphen2_HVAR_pred", "dbNSFP_Interpro_domain", 
+	"AMPLICON_NUM",
+	"CHROM", "POS", "ID", "REF", "ALT", "FILTER", "dbNSFP_Uniprot_acc")
 
 output <- lapply(files, function(file) {
 	tab <- read.delim(file, as.is=T, check.names=F)

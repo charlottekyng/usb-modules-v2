@@ -173,7 +173,7 @@ $(foreach sample,$(SAMPLES),$(eval $(call hrun-sample,$(sample))))
 %.exac_nontcga.vcf : %.vcf %.vcf.idx 
 	$(call CHECK_VCF,$<,$@,\
 		$(call RUN,1,$(RESOURCE_REQ_HIGH_MEM),$(RESOURCE_REQ_VSHORT),$(SNP_EFF_MODULE),"\
-	$(SNP_SIFT) annotate $(SNP_SIFT_OPTS) -info $(EXAC_INFO_FIELDS) $(EXAC_NONTCGA) \
+	$(SNP_SIFT) annotate $(SNP_SIFT_OPTS) $(EXAC_NONTCGA) \
 	$< > $@ && $(RM) $^"))
 
 %.exac_nonpsych.vcf : %.vcf %.vcf.idx
