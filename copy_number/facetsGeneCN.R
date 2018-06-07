@@ -17,13 +17,14 @@ suppressPackageStartupMessages(library("facets"));
 #--------------
 
 optList <- list(
-				make_option("--outFile", default = NULL, help = "output file"),
-#				make_option("--mysqlHost", default = '10.0.200.48', help = "MySQL server hostname"),
-#				make_option("--mysqlPort", default = 38493, help = "MySQL server port"),
-#				make_option("--mysqlUser", default = 'embl', help = "MySQL server username"),
-#				make_option("--mysqlPassword", default = 'embl', help = "MySQL server password"),
-#				make_option("--mysqlDb", default = 'homo_sapiens_core_75_37', help = "MySQL server database"),
-				make_option("--genesFile", default = NULL, help = "list of genes to include (hgnc symbols)"))
+	make_option("--outFile", default = NULL, help = "output file"),
+	make_option("--summaryType", default = c("GL_ASCNA", "GL_LRR", "cnlr.median")),
+#	make_option("--mysqlHost", default = '10.0.200.48', help = "MySQL server hostname"),
+#	make_option("--mysqlPort", default = 38493, help = "MySQL server port"),
+#	make_option("--mysqlUser", default = 'embl', help = "MySQL server username"),
+#	make_option("--mysqlPassword", default = 'embl', help = "MySQL server password"),
+#	make_option("--mysqlDb", default = 'homo_sapiens_core_75_37', help = "MySQL server database"),
+	make_option("--genesFile", default = NULL, help = "list of genes to include (hgnc symbols)"))
 parser <- OptionParser(usage = "%prog [options] [facets files]", option_list = optList);
 
 arguments <- parse_args(parser, positional_arguments = T);
@@ -41,6 +42,10 @@ if (length(arguments$args) < 1) {
         cat("Need genes files\n")
         print_help(parser);
         stop();
+} else if (!all(opt$summaryType %in% c("GL_ASCNA", "GL_LRR", "tcn.em", "lcn.em", "cnlr.median"))) {
+	cat("summaryType can only be one or more of GL_ASCNA, GL_LRR, tcn.em, lcn.em, cnlr.median\n")
+	print_help(prase);
+	stop();
 } else {
 	facetsFiles <- arguments$args
 }
@@ -108,26 +113,28 @@ mm <- lapply(facetsFiles, function(f) {
 	df <- as.data.frame(cbind(mcols(genesGR)[subjectHits(fo),], mcols(tabGR)[queryHits(fo),]))
 	df %<>% group_by(hgnc) %>% top_n(1, abs(cnlr.median))
 
-	ploidy <- median(unlist(apply(cbind(df$tcn.em, df$num.mark),1,function(x){rep(x[1], x[2])})))
-#	ploidy <- as.numeric(names(ploidy)[which.max(ploidy)])
+	if ("GL_ASCNA" %in% opt$summaryType) {
 
-	df$GL_ASCNA <- 0
-	df$GL_ASCNA[df$tcn.em < ploidy] <- -1
-	df$GL_ASCNA[df$tcn.em == 0] <- -2
-	df$GL_ASCNA[df$tcn.em > ploidy] <- 1
-	df$GL_ASCNA[df$tcn.em >= ploidy + 4] <- 2
+		ploidy <- median(unlist(apply(cbind(df$tcn.em, df$num.mark),1,function(x){rep(x[1], x[2])})))
 
-	load(gsub("cncf.txt", "Rdata", f, fixed=T))
-	noise <- median(abs(out2$jointseg$cnlr-  unlist(apply(out2$out[,c("cnlr.median", "num.mark")], 1, function(x) {rep(x[1], each=x[2])}))))
+		df$GL_ASCNA <- 0
+		df$GL_ASCNA[df$tcn.em < ploidy] <- -1
+		df$GL_ASCNA[df$tcn.em == 0] <- -2
+		df$GL_ASCNA[df$tcn.em > ploidy] <- 1
+		df$GL_ASCNA[df$tcn.em >= ploidy + 4] <- 2
+	}
+	if ("GL_LRR" %in% opt$summaryType) {
+		load(gsub("cncf.txt", "Rdata", f, fixed=T))
+		noise <- median(abs(out2$jointseg$cnlr-  unlist(apply(out2$out[,c("cnlr.median", "num.mark")], 1, function(x) {rep(x[1], each=x[2])}))))
 
-	lrr <- sort(out2$jointseg$cnlr)
-	lrr <- lrr[round(0.25*length(lrr)):round(0.75*length(lrr))] 
-	df$GL_LRR <- 0
-	df$GL_LRR[df$cnlr.median < median(lrr)-(2.5*sd(lrr))] <- -1
-	df$GL_LRR[df$cnlr.median < median(lrr)-(7*sd(lrr))] <- -2
-	df$GL_LRR[df$cnlr.median > median(lrr)+(2*sd(lrr))] <- 1
-	df$GL_LRR[df$cnlr.median > median(lrr)+(6*sd(lrr))] <- 2
-
+		lrr <- sort(out2$jointseg$cnlr)
+		lrr <- lrr[round(0.25*length(lrr)):round(0.75*length(lrr))] 
+		df$GL_LRR <- 0
+		df$GL_LRR[df$cnlr.median < median(lrr)-(2.5*sd(lrr))] <- -1
+		df$GL_LRR[df$cnlr.median < median(lrr)-(7*sd(lrr))] <- -2
+		df$GL_LRR[df$cnlr.median > median(lrr)+(2*sd(lrr))] <- 1
+		df$GL_LRR[df$cnlr.median > median(lrr)+(6*sd(lrr))] <- 2
+	}
 	df %>% select(hgnc, GL_ASCNA, GL_LRR, tcn.em, lcn.em, cnlr.median) %>% ungroup
 })
 names(mm) <- facetsFiles
@@ -181,5 +188,11 @@ for (i in grep("GL", colnames(mm))) {
 }
 seg_type[which(seg_type==2)] <- "amp"
 seg_type[which(seg_type== -2)] <- "del"
-write.table(cbind(seg_sample, seg_chr, seg_band, seg_start, seg_end, seg_genes, seg_type, seg_GLtype), file=gsub("txt", "ampdel.txt", opt$outFile), sep="\t", row.names=F, na="", quote=F)
-write.table(mm, file=opt$outFile, sep="\t", row.names=F, na="", quote=F)
+write.table(cbind(seg_sample, seg_chr, seg_band, seg_start, seg_end, seg_genes, seg_type, seg_GLtype), 
+	file=paste(opt$outFile, ".ampdel.txt", sep=""), sep="\t", row.names=F, na="", quote=F)
+
+lapply(opt$summaryType, function(c){
+	mm2 <- cbind(mm[,1:5], mm[,grep(c, colnames(mm))])
+	colnames(mm2) <- gsub(paste("_", c, sep=""), "", colnames(mm2))
+	write.table(mm2, file=paste(opt$outFile, ".", c, ".txt", sep=""), sep="\t", row.names=F, na="", quote=F)
+})
