@@ -140,6 +140,7 @@ RIBOSOMAL_INTERVALS ?= $(ANN_DIR)/ribosomalRNA.interval_list
 GENE_REF_FLAT = $(ANN_DIR)/refFlat.txt
 
 #SNP_TXT = $(ANN_DIR)/b37_snp137.SingleDiNucl.1based.nochr.txt
+MOSAICS_CHRFILE = $(GSA_REF_DIR)/human_g1k_v37_decoy.mosaics.chrfile
 
 ### TOOL-SPECIFIC REF ###
 

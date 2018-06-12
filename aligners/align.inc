@@ -5,6 +5,7 @@ BAM_SUFFIX1 = $(subst $( ),.,$(strip \
 	$(if $(findstring true,$(BAM_SORT)),sorted)\
 	$(if $(findstring true,$(BAM_FIX_RG)),rg)\
 	$(if $(findstring true,$(BAM_FILTER)),filtered)\
+	$(if $(findstring true,$(BAM_INTRACHR)),intrachr)\
 	$(if $(findstring true,$(BAM_SPLIT_N_TRIM)),splitntrim)))
 
 BAM_SUFFIX2 = $(subst $( ),.,$(strip \

@@ -197,7 +197,7 @@ UNZIP ?= /usr/bin/unzip
 GZIP ?= gzip -f
 
 PERL_MODULE ?= Perl/5.22.2-goolf-1.7.20
-R_MODULE ?= R/3.4.2-goolf-1.7.20
+R_MODULE ?= R/3.5.0-goolf-1.7.20
 JAVA6_MODULE ?= Java/1.6.0_24
 JAVA7_MODULE ?= Java/1.7.0_80
 JAVA8_MODULE ?= Java/1.8.0_92

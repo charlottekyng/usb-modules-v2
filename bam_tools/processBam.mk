@@ -106,6 +106,10 @@ index : $(addsuffix .bai,$(BAMS))
 	$(call GATK,SplitNCigarReads,$(RESOURCE_REQ_MEDIUM_MEM_JAVA)) -I $< -o $@ \
 	-rf ReassignOneMappingQuality -RMQF 255 -RMQT 60 -U ALLOW_N_CIGAR_READS -R $(REF_FASTA) && $(RM) $^")
 
+%.intrachr.bam : %.bam %.bai
+	$(call RUN,1,$(RESOURCE_REQ_LOW_MEM),$(RESOURCE_REQ_SHORT),$(SAMTOOLS_MODULE),"\
+	$(SAMTOOLS) view -h $< | awk '\$$1~\"@\" || \$$7==\"=\"' | $(SAMTOOLS) view -Sb >> $@ && $(RM) $^")
+
 %.intervals : %.bam %.bam.bai
 	$(call RUN,4,$(RESOURCE_REQ_LOW_MEM),$(RESOURCE_REQ_VSHORT),$(JAVA8_MODULE),"\
 	$(call GATK,RealignerTargetCreator,$(RESOURCE_REQ_LOW_MEM_JAVA)) \
