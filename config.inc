@@ -283,7 +283,8 @@ INCLUDE_LNCRNA_IN_SUMMARY ?= false
 
 SNP_EFF_FLAGS ?= -canon -no NEXT_PROT -no-intergenic
 
-EXAC_INFO_FIELDS ?= AC_AFR,AC_AMR,AC_Adj,AC_EAS,AC_FIN,AC_Hemi,AC_Het,AC_Hom,AC_NFE,AC_OTH,AC_SAS,AN_AFR,AN_AMR,AN_Adj,AN_EAS,AN_FIN,AN_NFE,AN_OTH,AN_SAS,Hemi_AFR,Hemi_AMR,Hemi_EAS,Hemi_FIN,Hemi_NFE,Hemi_OTH,Hemi_SAS,Het_AFR,Het_AMR,Het_EAS,Het_FIN,Het_NFE,Het_OTH,Het_SAS,Hom_AFR,Hom_AMR,Hom_EAS,Hom_FIN,Hom_NFE,Hom_OTH,Hom_SAS,AC_MALE,AC_FEMALE,AN_MALE,AN_FEMALE
+#EXAC_INFO_FIELDS ?= AC_AFR,AC_AMR,AC_Adj,AC_EAS,AC_FIN,AC_Hemi,AC_Het,AC_Hom,AC_NFE,AC_OTH,AC_SAS,AN_AFR,AN_AMR,AN_Adj,AN_EAS,AN_FIN,AN_NFE,AN_OTH,AN_SAS,Hemi_AFR,Hemi_AMR,Hemi_EAS,Hemi_FIN,Hemi_NFE,Hemi_OTH,Hemi_SAS,Het_AFR,Het_AMR,Het_EAS,Het_FIN,Het_NFE,Het_OTH,Het_SAS,Hom_AFR,Hom_AMR,Hom_EAS,Hom_FIN,Hom_NFE,Hom_OTH,Hom_SAS,AC_MALE,AC_FEMALE,AN_MALE,AN_FEMALE
+EXAC_INFO_FIELDS ?= ExACnontcga_AC,ExACnontcga_AF
 EXACNONPSYCH_INFO_FIELDS ?= ALL
 #EXACNONPSYCH_INFO_FIELDS ?= ExACnonpsychAC_AFR,ExACnonpsychAC_AMR,ExACnonpsychAC_Adj,ExACnonpsychAC_EAS,ExACnonpsychAC_FIN,ExACnonpsychAC_Hemi,ExACnonpsychAC_Het,ExACnonpsychAC_Hom,ExACnonpsychAC_NFE,ExACnonpsychAC_OTH,ExACnonpsychAC_SAS,ExACnonpsychAN_AFR,ExACnonpsychAN_AMR,ExACnonpsychAN_Adj,ExACnonpsychAN_EAS,ExACnonpsychAN_FIN,ExACnonpsychAN_NFE,ExACnonpsychAN_OTH,ExACnonpsychAN_SAS,ExACnonpsychHemi_AFR,ExACnonpsychHemi_AMR,ExACnonpsychHemi_EAS,ExACnonpsychHemi_FIN,ExACnonpsychHemi_NFE,ExACnonpsychHemi_OTH,ExACnonpsychHemi_SAS,ExACnonpsychHet_AFR,ExACnonpsychHet_AMR,ExACnonpsychHet_EAS,ExACnonpsychHet_FIN,ExACnonpsychHet_NFE,ExACnonpsychHet_OTH,ExACnonpsychHet_SAS,ExACnonpsychHom_AFR,ExACnonpsychHom_AMR,ExACnonpsychHom_EAS,ExACnonpsychHom_FIN,ExACnonpsychHom_NFE,ExACnonpsychHom_OTH,ExACnonpsychHom_SAS,ExACnonpsychAC_MALE,ExACnonpsychAC_FEMALE,ExACnonpsychAN_MALE,ExACnonpsychAN_FEMALE
 VCF_FIELDS = CHROM POS ID REF ALT FILTER QUAL
@@ -366,6 +367,7 @@ FACETS_PRE_CVAL ?=
 FACETS_CVAL2 ?=
 FACETS_MIN_NHET ?= 15
 
+FACETS_SPECIAL_CASES ?=
 FACETS_PLOT_GENE_CN_OPTS = --sampleColumnPostFix '_EM'
 
 ANN_FACETS ?= false

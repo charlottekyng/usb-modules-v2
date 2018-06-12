@@ -382,7 +382,7 @@ CUFFCMP ?= currcompare
 
 RSEM_CALC_EXPR ?= rsem-calculate-expression
 RSEM_GEN_DATA_MATRIX ?= usb-modules-v2/rnaseq/rsem-generate-data-matrix.pl
-RSEM_NORM ?= usb-modules-v2/rnaseq/rsem_normalize.R
+RSEM_PROCCESS ?= usb-modules-v2/rnaseq/rsem_process.R
 
 MOSAICS_RUN ?= $(RSCRIPT) usb-modules-v2/chipseq/mosaics_run.R
 MOSAICS_CONSTRUCTBINS ?= $(RSCRIPT) usb-modules-v2/chipseq/mosaics_constructBins.R

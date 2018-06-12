@@ -113,7 +113,7 @@ OMNI ?= $(GSA_REF_DIR)/1000G_omni2.5.b37.vcf
 HAPMAP ?= $(GSA_REF_DIR)/hapmap_3.3.b37.vcf
 
 CLINVAR = $(ANN_DIR)/clinvar.vcf
-EXAC_NONTCGA = $(ANN_DIR)/ExAC_nonTCGA.r0.3.1.sites.vep.vcf
+EXAC_NONTCGA = $(ANN_DIR)/ExAC_nonTCGA.r0.3.1.sites.vep.edited.vcf
 COSMIC ?= $(ANN_DIR)/CosmicCodingMuts.sorted.vcf
 EXAC_NONPSYCH = $(ANN_DIR)/ExAC.r0.3.nonpsych.sites.edited.vcf
 CADD_SNV ?= $(ANN_DIR)/CADD_whole_genome_SNVs_header.vcf.gz

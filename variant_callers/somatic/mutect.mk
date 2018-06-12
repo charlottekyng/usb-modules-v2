@@ -46,8 +46,10 @@ $(foreach pair,$(SAMPLE_PAIRS),$(eval $(call ext-mutect-tumor-normal,$(pair))))
 # merge variants 
 define mutect-tumor-normal
 vcf/$1_$2.mutect.vcf : $$(foreach chr,$$(CHROMOSOMES),mutect/chr_vcf/$1_$2.$$(chr).mutect.vcf)
-	$$(INIT) module load $$(PERL_MODULE); grep '^#' $$< > $$@; cat $$^ | grep -v '^#' | \
-	$$(VCF_SORT) $$(REF_DICT) - >> $$@ 2> $$(LOG)
+	$$(call RUN,1,$$(RESOURCE_REQ_MEDIUM_MEM),$$(RESOURCE_REQ_VSHORT),$$(PERL_MODULE),"\
+	grep '^#' $$< > $$@; cat $$^ | grep -v '^#' | $$(VCF_SORT) $$(REF_DICT) - >> $$@")
+#	$$(INIT) module load $$(PERL_MODULE); grep '^#' $$< > $$@; cat $$^ | grep -v '^#' | \
+#	$$(VCF_SORT) $$(REF_DICT) - >> $$@ 2> $$(LOG)
 endef
 $(foreach pair,$(SAMPLE_PAIRS),\
 		$(eval $(call mutect-tumor-normal,$(tumor.$(pair)),$(normal.$(pair)))))
