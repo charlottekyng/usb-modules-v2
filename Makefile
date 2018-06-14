@@ -7,7 +7,7 @@
 export
 
 # job-related options
-NUM_ATTEMPTS ?= 20
+NUM_ATTEMPTS ?= 1
 USE_CLUSTER ?= true
 NUM_JOBS ?= 100
 # possible values: SGE, SLURM
@@ -128,6 +128,10 @@ ballgown:
 TARGETS	+= deconstruct_sigs
 deconstruct_sigs :
 	$(call RUN_MAKE,usb-modules-v2/mut_sigs/deconstructSigs.mk)
+
+TARGETS += msisensor
+msisensor :
+	$(call RUN_MAKE,usb-modules-v2/mut_sigs/msiSensor.mk)
 
 TARGETS += mosaics
 mosaics :

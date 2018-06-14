@@ -162,22 +162,6 @@ HISAT2_REF = $(REF_DIR)/genome_index/hisat2_b37/genome_snp_tran
 SNP_EFF_GENOME = GRCh37.75
 DB_NSFP ?= $(REF_DIR)/dbNSFP/GRCh37/dbNSFP2.9.txt.gz
 
-#TOPHAT_REF = GRCh37
-#GENES_GTF = $(REF_DIR)/Homo_sapiens/Ensembl/$(TOPHAT_REF)/Annotation/Genes/genes.gtf
-
-#ANNOVAR_REF = hg19
-
-#UCSC_REFSEQ_GTF = $(REF_DIR)s/genomes/ucsc.refseq.gtf
-#REFSEQ_GTF := $(UCSC_REFSEQ_GTF)
-
-#CHR_LEN = $(REF_DIR)/GATK_bundle/2.3/b37.len
-
-#REF_2BIT ?= $(REF_DIR)/GATK_bundle/2.3/human_g1k_v37.2bit
-
-#MAP_BIGWIG ?= $(REF_DIR)/wgEncodeCrgMapabilityAlign100mer.nochr.bigWig
-
-REF_NAME := 1000GenomesPilot-NCBI37
-REF_DATE := 20100517
 REF_DICT = $(REF_FASTA:.fasta=.dict)
 
 MUTSIGCV_REF_DIR ?= $(REF_DIR)/MutSigCV
@@ -186,19 +170,7 @@ MUTSIGCV_COV_REF ?= $(MUTSIGCV_REF_DIR)/gene.covariates.txt
 MUTSIGCV_DICT_REF ?= $(MUTSIGCV_REF_DIR)/mutation_type_dictionary_file.txt
 MUTSIGCV_SEQ_REF_DIR ?= $(MUTSIGCV_REF_DIR)/chr_files_hg19/
 
-#EMU_REF_DIR ?= $(REF_DIR)/GATK_bundle/2.3/emu_ref
-#EMU_REF_MUTATIONS ?= $(REF_DIR)/emu_ref/exome_ref/Breast_clean_somatic_mutations_for_signature_analysis.emu.mutations.txt
-#EMU_REF_CNV ?= $(REF_DIR)/emu_ref/exome_ref/Breast_clean_somatic_mutations_for_signature_analysis.emu.copynum.txt
-
-#HMMCOPY_GC_WIG = $(REF_DIR)/GATK_bundle/2.3/gc_hg19.wig
-#HMMCOPY_MAP_WIG = $(REF_DIR)/map_hg19.wig
-
-
-#INTEGRATE_ANN = $(REF_DIR)/annot.ucsc.txt
-#INTEGRATE_BWTS = $(REF_DIR)/GATK_bundle/2.3/bwts
-#ONCOTATOR_DB ?= $(REF_DIR)/oncotator_v1_ds_Jan262014
-
-#ANNOVAR_DB = $(HOME)/share/usr/annovar/humandb
+MSISENSOR_REF ?= $(REF_DIR)/msi_reference/b37.txt
 
 endif
 B37_INC = true

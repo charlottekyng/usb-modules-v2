@@ -3,13 +3,13 @@
 ### for options related reference genome and target panels, see files in usb-modules-v2/genome_inc
 
 # default reference:
-# possible values: mm10, hg19, b37, hg19_ionref, b37_hbv_hcv
+# possible values: mm10, hg19, b37, hg19_ionref, b37_hbv_hcv, hg38
 REF ?= b37
 # possible values: ILLUMINA, IONTORRENT
 SEQ_PLATFORM ?= ILLUMINA
 # possible values: NONE, BAITS, PCR, RNA, CHIP
 CAPTURE_METHOD ?= NONE
-# possible values: NONE, AGILENT_CLINICAL_EXOME, IMPACTv5, CCP, CHPv2, IMPACT410, IMPACT341, AGILENT_ALLEXON_MOUSE, HCC, NOVARTIS_PC2
+# possible values: NONE, AGILENT_CLINICAL_EXOME, IMPACTv5, CCP, CHPv2, IMPACT410, IMPACT341, AGILENT_ALLEXON_MOUSE, HCC, NOVARTIS_PC2, WXS
 PANEL ?= NONE
 # Single-end or paired-end, set to false if single-end
 PAIRED_END ?= true

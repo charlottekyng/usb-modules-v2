@@ -387,6 +387,8 @@ RSEM_PROCCESS ?= usb-modules-v2/rnaseq/rsem_process.R
 MOSAICS_RUN ?= $(RSCRIPT) usb-modules-v2/chipseq/mosaics_run.R
 MOSAICS_CONSTRUCTBINS ?= $(RSCRIPT) usb-modules-v2/chipseq/mosaics_constructBins.R
 
+MSISENSOR ?= $(BIN_DIR)/msisensor_Linux_x86_64
+
 ##VCF2MAF ?= $(PERL) $(SCRIPTS_DIR)/vcf2maf.pl
 #MAF2MAF ?= $(PERL) $(SCRIPTS_DIR)/maf2maf.pl
 #MAF2VCF ?= $(PERL) $(SCRIPTS_DIR)/maf2vcf.pl
