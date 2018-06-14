@@ -21,6 +21,10 @@ CHROMOSOMES ?= chr1 chr2 chr3 chr4 chr5 chr6 chr7 chr8 chr9 chr10 chr11 chr12 ch
 endif
 
 ifeq ($(PANEL),WXS)
+TARGETS_FILE_COVERED_INTERVALS ?= $(BED_DIR)/wxs.bed
+TARGETS_FILE_INTERVALS ?= $(TARGETS_FILE_COVERED_INTERVALS)
+TARGETS_FILE_MUTATIONS ?= $(TARGETS_FILE_COVERED_INTERVALS)
+TARGETS_FILE_GENES ?= $(BED_DIR)/wxs.GeneSymbols.txt
 DBSNP_TARGETS_INTERVALS_COMMON ?= $(BED_DIR)/dbsnp_146.hg38.common.wxs.vcf
 RESOURCE_REQ ?= medium
 SNP_EFF_FLAGS ?= -canon -no NEXT_PROT -no-downstream -no-intergenic -no-intron -no-upstream -no-utr -onlyProtein

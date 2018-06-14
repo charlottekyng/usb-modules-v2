@@ -53,10 +53,8 @@ facets/cncfTN/$1_$2_$$(FACETS_SUFFIX).out : facets/snp_pileup/$1_$2_$$(SNPPILEUP
 	--cval1 $$(FACETS_CVAL1) --genome $$(REF) --min_nhet $$(FACETS_MIN_NHET) \
 	--outPrefix $$* $$< ")
 
-facets/cncfTN/$1_$2_$$(FACETS_SUFFIX).Rdata : facets/cncfTN/$1_$2_$$(FACETS_SUFFIX).out
-	
 
-facets/cncfTN/$1_$2_$$(FACETS_SUFFIX).cncf.txt : facets/cncfTN/$1_$2_$$(FACETS_SUFFIX).out
+facets/cncfTN/$1_$2_$$(FACETS_SUFFIX).Rdata facets/cncfTN/$1_$2_$$(FACETS_SUFFIX).cncf.txt facets/cncfTN/$1_$2_$$(FACETS_SUFFIX).cncf.pdf facets/cncfTN/$1_$2_$$(FACETS_SUFFIX).logR.pdf: facets/cncfTN/$1_$2_$$(FACETS_SUFFIX).out
 	
 
 endef
