@@ -16,9 +16,9 @@ SNV_ANNS = $(COMMON_ANNS)
 INDEL_ANNS = $(COMMON_ANNS)
 
 ANNS = $(if $(findstring indel,$1),$(INDEL_ANNS),$(SNV_ANNS))
-ANN_SUFFIX = $(subst $( ),.,$(strip pass $(call ANNS,$1)))
+ANN_SUFFIX = $(subst $( ),.,$(strip $(call ANNS,$1)))
 
-SUFFIX = $(subst $( ),.,$(strip $1 $(FILTER_SUFFIX) $(ANN_SUFFIX)))
+SUFFIX = $(subst $( ),.,$(strip $1 $(FILTER_SUFFIX) pass $(ANN_SUFFIX)))
 
 EFF_TYPES := synonymous nonsynonymous nonsynonymous_synonymous_hotspot nonsynonymous_synonymous_hotspot_lincRNA
 VCF_SUFFIXES = $(foreach type,$1,$(call SUFFIX,$(type)))
