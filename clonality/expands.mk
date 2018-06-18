@@ -1,49 +1,36 @@
 # run expands for determining tumor ploidy
 
-include modules/Makefile.inc
+include usb-modules-v2/Makefile.inc
+
+EXPANDS_NUM_CORES ?= 4
 
 LOGDIR = log/expands.$(NOW)
 
-SHELL = modules/scripts/Rshell
-.SHELLFLAGS = -s -m $(MEM) -n $(@F) -l $(LOGDIR) -e 
-
-.ONESHELL:
 .DELETE_ON_ERROR:
 .SECONDARY:
-.PHONY: all
+.PHONY: expands
 
-MEM = 20G
+expands : $(foreach pair,$(SAMPLE_PAIRS),expands/input/$(pair).mutations.txt expands/input/$(pair).segments.txt)
 
-all : $(foreach pair,$(SAMPLE_PAIRS),expands/rdata/$(pair).cbs_snv.Rdata)
+expands/output/%.expands.RData : expands/input/%.mutations.txt expands/input/%.segments.txt
+	$(MKDIR) expands/output; 
+	$(call RUN,$(EXPANDS_NUM_CORES),$(RESOURCE_REQ_MEDIUM_MEM),$(RESOURCE_REQ_VSHORT),$(R_MODULE),"\
+	$(EXPANDS) --mutations $(<) --segs $$(<<) --nc $(EXPANDS_NUM_CORES) --outPrefix $(subst .RData,,$@)")
 
-expands/rdata/%.cbs.Rdata : varscan/copycall/%.copycall
-	cn <- read.table("$<", header=T, as.is=T)
-	keep <- which(cn[,1] %in% c(1:22, "X"))
-	if (length(rm) > 0) { cn <- cn[keep,]}
-	cn[which(cn[,1]=="X"),1] <- 23
-	cn[,1] <- as.numeric(cn[,1])
-	cn <- cn[order(cn[,1], cn[,2]),]
-	cn <- cbind(name = paste(cn[,1], cn[,2], sep="_"), cn[,c(1:3,7)])
-	cgh <- make_cghRaw(cn)
-	normalized <- normalize(cgh)
-	segmented <- segmentData(normalized, relSDlong=2, undo.splits="sdundo", undo.SD=1.5)
-	calls <- CGHcall(segmented, nclass=3)
-	excalls <- ExpandCGHcall(calls, segmented)
-	cbs <- with(fData(excalls), data.frame(chr = as.character(Chromosome[calls[[5]][,"wm"]]), startpos = Start[calls[[5]][,"wm"]], endpos = End[calls[[5]][,"wmend"]], CN_Estimate = 2^calls[[5]][, "smwh"], stringsAsFactors = F))
-	cbs <- transform(cbs, segmentLength = endpos - startpos)
+define expands_make_input
+expands/input/$1_$2.mutations.txt : $$(foreach prefix,$$(CALLER_PREFIX),tables/$1_$2.$$(call SOMATIC_VCF_SUFFIXES,$$(prefix)).$$(TABLE_SUFFIX).txt)
+        $$(MKDIR) expands/input; \
+        $$(call RUN,1,$$(RESOURCE_REQ_MEDIUM_MEM),$$(RESOURCE_REQ_VSHORT),$$(R_MODULE),"\
+        $$(RBIND) --tumorNormal $$^ > $$@.tmp1 && \
+        $$(MUTATION_SUMMARY_RSCRIPT) --outFile $$@.tmp2 --outputFormat TXT $$@.tmp1 && \
+        $$(EXPANDS_MAKE_INPUT) --outFile $$@ --type mutations $$@.tmp2 && \
+        $$(RM) $$@.tmp1 $$@.tmp2")
 
+expands/input/$1_$2.segments.txt : facets/cncf/$1_$2.cncf.txt
+	$$(MKDIR) expands/input; \
+	$$(call RUN,1,$$(RESOURCE_REQ_LOW_MEM),$$(RESOURCE_REQ_VSHORT),$$(R_MODULE),"\
+	$$(EXPANDS_MAKE_INPUT) --outFile $$@ --type cna $$<")
+endef
+$(foreach pair,$(SAMPLE_PAIRS),$(eval $(call expands_make_input,$(tumor.$(pair)),$(normal.$(pair)))))
 
-expands/rdata/%.snv.Rdata : mutect/tables/%.mutect.txt
-	library(expands)
-	snv <- read.table("$<", header = T, sep = "\t", stringsAsFactors = F)
-	snv <- subset(snv, judgement != "REJECT")
-	colnames(snv)[1:2] <- c("chr", "startpos")
-	snv <- subset(snv, select = 'chr', 'startpos')
-	snv$$chr <- as.integer(snv$$chr)
-	snv <- as.matrix(snv[!is.na(snv$$chr), ])
-	dir.create("$(@D)", recursive = T)
-	dm <- assignQuantityToMutation(snv, cbs, "CN_Estimate")
-	save(snv, cbs, file = "$@")
-
-
-
+include usb-modules-v2/variants/somatic/

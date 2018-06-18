@@ -1,5 +1,8 @@
 include usb-modules-v2/Makefile.inc
 
+RSEM_NUM_CORES ?= 4
+RSEM_OPTIONS ?= --alignments --no-bam-output -p $(RSEM_NUM_CORES) --forward-prob 0
+
 LOGDIR ?= log/rsem.$(NOW)
 
 .DELETE_ON_ERROR:
@@ -28,31 +31,6 @@ endef
 $(foreach type1,genes,\
 	$(foreach type2,expected_count FPKM TPM,\
 		$(eval $(call rsem-gen-dat-matrix,$(type1),$(type2)))))
-
-#rsem/all$(PROJECT_PREFIX).genes.expected_count.results : $(foreach sample,$(SAMPLES),rsem/$(sample).genes.results)
-#	$(call RUN,1,$(RESOURCE_REQ_LOW_MEM),$(RESOURCE_REQ_VSHORT),$(PERL_MODULE),"\
-#	$(RSEM_GEN_DATA_MATRIX) expected_count $^ | sed 's/rsem\///g; s/\.genes\.results//g' | tr -d \"\\\"\" > $@.tmp && \
-#	")
-
-#rsem/all$(PROJECT_PREFIX).genes.TPM.results : $(foreach sample,$(SAMPLES),rsem/$(sample).genes.results)
-#	$(call RUN,1,$(RESOURCE_REQ_LOW_MEM),$(RESOURCE_REQ_VSHORT),$(PERL_MODULE),"\
-#	$(RSEM_GEN_DATA_MATRIX) TPM $^ | sed 's/rsem\///g; s/\.genes\.results//g' | tr -d \"\\\"\" > $@")
-
-#rsem/all$(PROJECT_PREFIX).genes.FPKM.results : $(foreach sample,$(SAMPLES),rsem/$(sample).genes.results)
-#	$(call RUN,1,$(RESOURCE_REQ_LOW_MEM),$(RESOURCE_REQ_VSHORT),$(PERL_MODULE),"\
-#	$(RSEM_GEN_DATA_MATRIX) FPKM $^ | sed 's/rsem\///g; s/\.genes\.results//g' | tr -d \"\\\"\" > $@")
-
-#rsem/all$(PROJECT_PREFIX).isoforms.expected_count.results : $(foreach sample,$(SAMPLES),rsem/$(sample).isoforms.results)
-#	$(call RUN,1,$(RESOURCE_REQ_MEDIUM_MEM),$(RESOURCE_REQ_VSHORT),$(PERL_MODULE),"\
-#	$(RSEM_GEN_DATA_MATRIX) expected_count $^ | sed 's/rsem\///g; s/\.isoforms\.results//g' | tr -d \"\\\"\" > $@")
-
-#rsem/all$(PROJECT_PREFIX).isoforms.TPM.results : $(foreach sample,$(SAMPLES),rsem/$(sample).isoforms.results)
-#	$(call RUN,1,$(RESOURCE_REQ_MEDIUM_MEM),$(RESOURCE_REQ_VSHORT),$(PERL_MODULE),"\
-#	$(RSEM_GEN_DATA_MATRIX) TPM $^ | sed 's/rsem\///g; s/\.isoforms\.results//g' | tr -d \"\\\"\"> $@")
-
-#rsem/all$(PROJECT_PREFIX).isoforms.FPKM.results : $(foreach sample,$(SAMPLES),rsem/$(sample).isoforms.results)
-#	$(call RUN,1,$(RESOURCE_REQ_MEDIUM_MEM),$(RESOURCE_REQ_VSHORT),$(PERL_MODULE),"\
-#	$(RSEM_GEN_DATA_MATRIX) FPKM $^ | sed 's/rsem\///g; s/\.isoforms\.results//g' | tr -d \"\\\"\"> $@")
 
 rsem/all$(PROJECT_PREFIX).genes.expected_count.results_coding_uq : $(foreach sample,$(SAMPLES),rsem/$(sample).genes.results)
 	$(call RUN,1,$(RESOURCE_REQ_LOW_MEM),$(RESOURCE_REQ_VSHORT),$(PERL_MODULE) $(R_MODULE),"\

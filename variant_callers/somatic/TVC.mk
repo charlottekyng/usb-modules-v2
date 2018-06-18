@@ -1,20 +1,22 @@
 include usb-modules-v2/Makefile.inc
 include usb-modules-v2/variant_callers/somatic/somaticVariantCaller.inc
 
+MUT_CALLER := tvc
+TVC_NUM_CORES ?= 4
+
 LOGDIR ?= log/tvc_somatic.$(NOW)
 
 PHONY += tvc_somatic tvc_somatic_vcfs tvc_somatic_tables 
 tvc_somatic : tvc_somatic_vcfs tvc_somatic_tables 
 
 VARIANT_TYPES ?= tvc_snps tvc_indels
-tvc_somatic_vcfs : $(foreach type,$(VARIANT_TYPES),$(call SOMATIC_VCFS,$(type)) $(addsuffix .idx,$(call SOMATIC_VCFS,$(type))))
-tvc_somatic_tables : $(foreach type,$(VARIANT_TYPES),$(call SOMATIC_TABLES,$(type)))
+tvc_somatic_vcfs : $(foreach type,$(VARIANT_TYPES),$(call MAKE_VCF_FILE_LIST,$(type)) $(addsuffix .idx,$(call MAKE_VCF_FILE_LIST,$(type))))
+tvc_somatic_tables : $(foreach type,$(VARIANT_TYPES),$(call MAKE_TABLE_FILE_LIST,$(type)))
 
 .DELETE_ON_ERROR:
 .SECONDARY:
 .PHONY : $(PHONY)
 
-MUT_CALLER = tvc
 
 define tvc-somatic-vcf
 tvc/vcf/$1_$2/TSVC_variants.vcf.gz : bam/$1.bam bam/$1.bam.bai bam/$2.bam bam/$2.bam.bai

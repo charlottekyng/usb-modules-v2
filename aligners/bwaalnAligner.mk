@@ -1,12 +1,11 @@
-# vim: set ft=make :
-# BWA-mem alignment of short reads
-# OPTIONS: NO_MARKDUP = true/false (default: false)
-# 		   EXTRACT_FASTQ = true/false (default: false)
-# 		   BAM_NO_RECAL = true/false (default: false)
-ALIGNER := bwaaln
+
 
 include usb-modules-v2/Makefile.inc
 include usb-modules-v2/aligners/align.inc
+
+ALIGNER := bwaaln
+BWA_ALN_OPTS ?=
+BWA_NUM_CORES ?= 8
 
 LOGDIR ?= log/bwaaln.$(NOW)
 

@@ -114,7 +114,7 @@ LOGDIR ?= log/vcf.$(NOW)
 %.sorted.vcf : %.vcf
 	$(call CHECK_VCF,$<,$@,\
 	$(call RUN,1,$(RESOURCE_REQ_LOW_MEM),$(RESOURCE_REQ_VSHORT),,"\
-	$(VCF_SORT) $(REF_DICT) $< > $@"))
+	$(VCF_SORT) $(REF_DICT) $< > $@ && $(RM) $<"))
 
 ############ ANNOTATION #########
 
@@ -277,6 +277,8 @@ $(foreach pair,$(SAMPLE_PAIRS),$(eval $(call rename-samples-tumor-normal,$(tumor
 #endif
 
 ##### extract vcf to table
+
+VCF_FIELDS = CHROM POS ID REF ALT QUAL FILTER
 tables/%.opl_tab.txt : vcf/%.vcf
 	$(call RUN,1,$(RESOURCE_REQ_MEDIUM_MEM),$(RESOURCE_REQ_VSHORT),$(SNP_EFF_MODULE),"\
 	format_fields=\$$(grep '^##FORMAT=<ID=' $< | sed 's/dbNSFP_GERP++/dbNSFP_GERP/g' | sed 's/.*ID=//; s/,.*//;' | tr '\n' ' '); \

@@ -146,6 +146,10 @@ TARGETS += pyclone
 pyclone : 
 	$(call RUN_MAKE,usb-modules-v2/clonality/pyclone.mk)
 
+TAREGETS += expands
+expands :
+	$(call RUN_MAKE,usb-modules-v2/clonality/expands.mk)
+
 TARGETS += merge_fastq
 merge_fastq : 
 	$(call RUN_MAKE,modules/fastq_tools/mergeFastq.mk)

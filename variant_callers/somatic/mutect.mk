@@ -7,8 +7,8 @@ PHONY += mutect mutect_vcfs mutect_tables ext_output #mut_report
 ..DUMMY := $(shell mkdir -p version; echo "$(MUTECT) &> version/mutect.txt")
 
 mutect : mutect_vcfs mutect_tables ext_output
-mutect_vcfs : $(call SOMATIC_VCFS,mutect) $(addsuffix .idx,$(call SOMATIC_VCFS,mutect))
-mutect_tables : $(call SOMATIC_TABLES,mutect)
+mutect_vcfs : $(call MAKE_VCF_FILE_LIST,mutect) $(addsuffix .idx,$(call MAKE_VCF_FILE_LIST,mutect))
+mutect_tables : $(call MAKE_TABLE_FILE_LIST,mutect)
 ext_output : $(foreach pair,$(SAMPLE_PAIRS),mutect/tables/$(pair).mutect.txt)
 
 MUT_CALLER = mutect

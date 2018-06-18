@@ -21,8 +21,8 @@ STRAND_SPECIFICITY ?= SECOND_READ_TRANSCRIPTION_STRAND
 POST_PROCESS_RNA_BAM ?= false
 
 
-# possible values: CANCER, PSYCH
-ANALYSIS_TYPE ?= CANCER 
+# possible values: SOMATIC,GERMLINE
+ANALYSIS_TYPE ?= SOMATIC
 
 
 include usb-modules-v2/Makefile

@@ -1,5 +1,9 @@
 include usb-modules-v2/Makefile.inc
 
+GISTIC_OPTS = -genegistic 0 -smallmem 1 -maxseg 5000 -savegene 1 -saveseg 1 -savedata 0 -v 30
+GISTIC_OPTS += -qvt 0.25 -conf 0.99 -broad 1 -brlen 0.5 -rx 0
+GISTIC_OPTS += -ta $(GISTIC_THRESHOLD) -td $(GISTIC_THRESHOLD) -js $(GISTIC_JS)
+
 LOGDIR = log/gisticFacets.$(NOW)
 
 SHELL = usb-modules-v2/scripts/Rshell

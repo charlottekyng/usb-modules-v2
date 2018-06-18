@@ -1,43 +1,51 @@
 ifndef VARIANT_CALLER_INC
 
 ### Filters
-FILTERS += $(if $(TARGETS_FILE_INTERVALS),target_ft) dp_ft
-FILTERS += $(if $(or $(findstring GRCm38,$(REF)),$(findstring CANCER,$(ANALYSIS_TYPE))),hotspot,)
 
-FILTER_SUFFIX = $(subst $( ),.,$(strip $(call FILTERS,$1)))
+ifeq ($(findstring true,$(FILTER_VARIANTS)),true)
+VCF_FILTERS += $(if $(TARGETS_FILE_INTERVALS),target_ft) dp_ft
+VCF_FILTERS += $(if $(or $(findstring GRCm38,$(REF)),$(findstring SOMATIC,$(ANALYSIS_TYPE))),hotspot,) pass
+endif
+VCF_FILTER_SUFFIX = $(subst $( ),.,$(strip $(call VCF_FILTERS)))
 
 ### Annotation
+ifeq ($(findstring true,$(ANNOTATE_VARIANTS)),true)
 
-COMMON_ANNS := $(if $(findstring GRCm38,$(REF)),eff dbsnp, \
-	eff dbsnp $(if $(findstring CANCER,$(ANALYSIS_TYPE)),cosmic exac_nontcga gene_ann,) \
-	$(if $(findstring PSYCH,$(ANALYSIS_TYPE)),exac_nonpsych cadd,) clinvar nsfp)
+VCF_ANNS = $(if $(findstring GRCm38,$(REF)),eff dbsnp, \
+	eff dbsnp $(if $(findstring SOMATIC,$(ANALYSIS_TYPE)),cosmic exac_nontcga gene_ann,) \
+	$(if $(findstring GERMLINE,$(ANALYSIS_TYPE)),exac_nonpsych cadd,) clinvar nsfp)
+else 
+VCF_ANNS =
+endif
+VCF_ANNS_SUFFIX = $(subst $( ),.,$(strip $(VCF_ANNS)))
 
-SNV_ANNS = $(COMMON_ANNS)
-INDEL_ANNS = $(COMMON_ANNS)
+####
 
-ANNS = $(if $(findstring indel,$1),$(INDEL_ANNS),$(SNV_ANNS))
-ANN_SUFFIX = $(subst $( ),.,$(strip $(call ANNS,$1)))
+VCF_SUFFIX = $(subst $( ),.,$(strip $1 $(VCF_FILTER_SUFFIX) $(VCF_ANNS_SUFFIX)))
 
-SUFFIX = $(subst $( ),.,$(strip $1 $(FILTER_SUFFIX) pass $(ANN_SUFFIX)))
+VCF_SUFFIXES = $(foreach type,$1,$(call VCF_SUFFIX,$(type)))
 
-EFF_TYPES := synonymous nonsynonymous nonsynonymous_synonymous_hotspot nonsynonymous_synonymous_hotspot_lincRNA
-VCF_SUFFIXES = $(foreach type,$1,$(call SUFFIX,$(type)))
-
-TABLE_EXTENSIONS = tab $(foreach eff,$(EFF_TYPES),tab.$(eff))
-TABLE_SUFFIXES = $(foreach suff,$(call VCF_SUFFIXES,$1),\
-	$(foreach ext,$(TABLE_EXTENSIONS),$(suff).$(ext)))
-
-VCFS = $(foreach sample,$(SAMPLES),\
+MAKE_VCF_FILE_LIST = $(foreach sample,$(SAMPLES),\
 	$(foreach suff,$(call VCF_SUFFIXES,$1), \
 	vcf/$(sample).$(suff).vcf))
-TABLES = $(foreach sample,$(SAMPLES),\
+
+EFF_TYPES ?= nonsynonymous_synonymous_hotspot nonsynonymous_synonymous_hotspot_lincRNA
+
+TABLE_EFF_TYPES ?= nonsynonymous_synonymous_hotspot nonsynonymous_synonymous_hotspot_lincRNA_upstream
+TABLE_EXTENSIONS = tab $(foreach eff,$(TABLE_EFF_TYPES),tab.$(eff))
+TABLE_SUFFIXES = $(foreach suff,$(call VCF_SUFFIXES,$1),\
+	 $(foreach ext,$(TABLE_EXTENSIONS),$(suff).$(ext)))
+
+MAKE_TABLE_FILE_LIST = $(foreach sample,$(SAMPLES),\
 	$(foreach suff,$(call TABLE_SUFFIXES,$1),\
 	tables/$(sample).$(suff).txt))
-TABLES += $(foreach suff,$(call TABLE_SUFFIXES,$1),alltables/all$(PROJECT_PREFIX).$(suff).txt)
+MAKE_TABLE_FILE_LIST += $(foreach suff,$(call TABLE_SUFFIXES,$1),alltables/all$(PROJECT_PREFIX).$(suff).txt)
+
 VCF_STATS = $(foreach sample,$(SAMPLES),\
 	$(foreach suff,$(call VCF_SUFFIXES,$1), \
 	vcf/$(sample).$(suff).vcf.stats))
 VCF_STATS += $(foreach suff,$(call VCF_SUFFIXES,$1),alltables/all$(PROJECT_PREFIX).$(suff).vcf.stats)
+
 endif
 VARIANT_CALLER_INC = true
 
