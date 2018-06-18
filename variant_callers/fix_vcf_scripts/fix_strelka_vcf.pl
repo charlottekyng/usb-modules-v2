@@ -1,9 +1,11 @@
 use strict;
 
+my $normal_first = 0;
+
 while (my $line = <>) {
 	chomp $line;
 	if ($line =~ /^\#/) { 
-		if ($line =~ /^(\#CHROM.+)NORMAL\tTUMOR/) { $line = "$1"."TUMOR\tNORMAL";}
+		if ($line =~ /^(\#CHROM.+)NORMAL\tTUMOR/) { $line = "$1"."TUMOR\tNORMAL"; $normal_first = 1; }
 		print $line; print "\n"; 
 		if ($line =~ /^\#\#FORMAT\=\<ID\=TOR/) { 
 			print "\#\#FORMAT\=\<ID\=AD,Number=2,Type=Float,Description=\"AD computed from tier 1\"\>\n";
@@ -20,10 +22,14 @@ while (my $line = <>) {
 				$n_tir = $i;
 			}
 		}
-
-		my @normal = split /:/, $arr[9];
-		my @tumour = split /:/, $arr[10];
-
+		my @normal = my @tumour = "";
+		if ($normal_first == 1) {
+			@normal = split /:/, $arr[9];
+			@tumour = split /:/, $arr[10];
+		} else {
+			@tumour = split /:/, $arr[9];
+			@normal = split /:/, $arr[10];
+		}
 		$normal[$n_tir] =~ /^(\d+),/;
 		my $normal_ad = ($normal[$n_dp]-$1).",".$1;
 		my $normal_af = "";

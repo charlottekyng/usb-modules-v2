@@ -53,6 +53,15 @@ LOGDIR ?= log/vcf.$(NOW)
 	$(call RUN,1,$(RESOURCE_REQ_LOW_MEM),$(RESOURCE_REQ_VSHORT),$(SNP_EFF_43_MODULE),"\
 		$(SNP_SIFT) filter $(SNP_SIFT_OPTS) -f $< '(exists GEN[?].DP) & (GEN[?].DP > 20)' > $@"))
 
+%.strelka_ft.vcf : %.vcf
+	$(call CHECK_VCF,$<,$@,\
+	$(call RUN,1,$(RESOURCE_REQ_MEDIUM_MEM),$(RESOURCE_REQ_SHORT),$(JAVA8_MODULE),"\
+	$(call GATK,VariantFiltration,$(RESOURCE_REQ_MEDIUM_MEM_JAVA)) \
+	-R $(REF_FASTA) -V $< -o $@ \
+	--filterExpression 'QSI_NT < 30' --filterName QSI_ref \
+	--filterExpression 'IHP > 14' --filterName iHpol \
+	--filterExpression 'MQ0 > 1' --filterName MQ0"))
+
 %.hotspot.vcf : %.vcf
 	$(call CHECK_VCF,$<,$@,\
 	$(call RUN,1,$(RESOURCE_REQ_MEDIUM_MEM),$(RESOURCE_REQ_SHORT),$(JAVA8_MODULE),"\
@@ -98,10 +107,14 @@ LOGDIR ?= log/vcf.$(NOW)
 	$(call GATK,LeftAlignAndTrimVariants,$(RESOURCE_REQ_LOW_MEM_JAVA)) -R $(REF_FASTA) -V $< -o $@"))
 
 %.post_bcftools.vcf : %.vcf
-	$(INIT) grep -v "##contig" $< | $(VCF_SORT) $(REF_DICT) - > $@
+	$(call CHECK_VCF,$<,$@,\
+	$(call RUN,1,$(RESOURCE_REQ_LOW_MEM),$(RESOURCE_REQ_VSHORT),,"\
+	grep -v "##contig" $< | $(VCF_SORT) $(REF_DICT) - > $@"))
 
 %.sorted.vcf : %.vcf
-	$(INIT) $(VCF_SORT) $(REF_DICT) $< > $@
+	$(call CHECK_VCF,$<,$@,\
+	$(call RUN,1,$(RESOURCE_REQ_LOW_MEM),$(RESOURCE_REQ_VSHORT),,"\
+	$(VCF_SORT) $(REF_DICT) $< > $@"))
 
 ############ ANNOTATION #########
 
