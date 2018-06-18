@@ -18,8 +18,8 @@ msisensor/all$(PROJECT_PREFIX).msisensor.txt : $(foreach pair,$(SAMPLE_PAIRS),ms
 define msisensor-msi
 msisensor/$1_$2.msisensor : bam/$1.bam bam/$2.bam bam/$1.bam.bai bam/$2.bam.bai
 	$$(call RUN,1,$$(RESOURCE_REQ_MEDIUM_MEM),$$(RESOURCE_REQ_MEDIUM),,"\
-		$$(MSISENSOR) msi -d $$(MSISENSOR_REF) -t $$(<) -n $$(<<) \
-		$$(if $$(TARGETS_FILE_INTERVALS),-e $$(TARGETS_FILE_COVERED_INTERVALS)) -o $$@")
+		$$(MSISENSOR) msi -d $$(MSISENSOR_REF) -t $$(<) -n $$(<<) -o $$@ \
+		$$(if $$(TARGETS_FILE_INTERVALS),-e $$(TARGETS_FILE_COVERED_INTERVALS))")
 endef
 $(foreach pair,$(SAMPLE_PAIRS),$(eval $(call msisensor-msi,$(tumor.$(pair)),$(normal.$(pair)))))
 
