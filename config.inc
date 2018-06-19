@@ -191,15 +191,10 @@ HAPCALL_INDEL_READPOS_RANKSUM_THRESHOLD ?= -8.0
 
 ifeq ($(findstring ILLUMINA,$(SEQ_PLATFORM)),ILLUMINA)
 USE_NFT ?= true
-endif
-ifeq ($(findstring IONTORRENT,$(SEQ_PLATFORM)),IONTORRENT)
-USE_NFT ?= false
-endif
-
-ifeq ($(findstring ILLUMINA,$(SEQ_PLATFORM)),ILLUMINA)
 PON_VCF ?= mutect2/pon.mutect2.vcf
 endif
 ifeq ($(findstring IONTORRENT,$(SEQ_PLATFORM)),IONTORRENT)
+USE_NFT ?= false
 PON_VCF ?= tvc/pon.tvc.vcf
 endif
 
@@ -215,10 +210,17 @@ ANN_FACETS ?= false
 MUTATION_SUMMARY_FORMAT ?= EXCEL
 INCLUDE_LNCRNA_IN_SUMMARY ?= false
 
-SNP_EFF_FLAGS ?= -canon -no NEXT_PROT -no-intergenic
+SNP_EFF_FLAGS ?= -canon -no NEXT_PROT -no-intergenic -noStats
 
 EXAC_INFO_FIELDS ?= ExACnontcga_AC,ExACnontcga_AF
 EXACNONPSYCH_INFO_FIELDS ?= ALL
+
+ifeq ($(findstring ILLUMINA,$(SEQ_PLATFORM)),ILLUMINA)
+CALLER_PREFIX ?= mutect strelka_indels
+endif
+ifeq ($(findstring IONTORRENT,$(SEQ_PLATFORM)),IONTORRENT)
+CALLER_PREFIX ?= tvc_snps tvc_indels
+endif
 
 
 ##################################
@@ -314,6 +316,9 @@ STAR_FUSION_MAX_PROMISCUITY ?= 3
 STAR_FUSION_MIN_JUNC_SUPP ?= 2
 STAR_FUSION_MIN_ALT_PCT_JUNC ?= 5
 
-
+################################
+###### Miscellaneous ###########
+###############################
+DECONSTRUCTSIGS_NUMITER ?= 100
 endif
 CONFIG_INC = true

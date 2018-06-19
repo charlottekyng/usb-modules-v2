@@ -1,8 +1,9 @@
 # run expands for determining tumor ploidy
 
 include usb-modules-v2/Makefile.inc
+include usb-modules-v2/variant_callers/somatic/somaticVariantCaller.inc
 
-EXPANDS_NUM_CORES ?= 4
+EXPANDS_NUM_CORES ?= 1
 
 LOGDIR = log/expands.$(NOW)
 
@@ -10,6 +11,7 @@ LOGDIR = log/expands.$(NOW)
 .SECONDARY:
 .PHONY: expands
 
+#expands : $(foreach pair,$(SAMPLE_PAIRS),expands/output/(pair).expands.RData)
 expands : $(foreach pair,$(SAMPLE_PAIRS),expands/input/$(pair).mutations.txt expands/input/$(pair).segments.txt)
 
 expands/output/%.expands.RData : expands/input/%.mutations.txt expands/input/%.segments.txt
@@ -18,13 +20,13 @@ expands/output/%.expands.RData : expands/input/%.mutations.txt expands/input/%.s
 	$(EXPANDS) --mutations $(<) --segs $$(<<) --nc $(EXPANDS_NUM_CORES) --outPrefix $(subst .RData,,$@)")
 
 define expands_make_input
-expands/input/$1_$2.mutations.txt : $$(foreach prefix,$$(CALLER_PREFIX),tables/$1_$2.$$(call SOMATIC_VCF_SUFFIXES,$$(prefix)).$$(TABLE_SUFFIX).txt)
-        $$(MKDIR) expands/input; \
-        $$(call RUN,1,$$(RESOURCE_REQ_MEDIUM_MEM),$$(RESOURCE_REQ_VSHORT),$$(R_MODULE),"\
-        $$(RBIND) --tumorNormal $$^ > $$@.tmp1 && \
-        $$(MUTATION_SUMMARY_RSCRIPT) --outFile $$@.tmp2 --outputFormat TXT $$@.tmp1 && \
-        $$(EXPANDS_MAKE_INPUT) --outFile $$@ --type mutations $$@.tmp2 && \
-        $$(RM) $$@.tmp1 $$@.tmp2")
+expands/input/$1_$2.mutations.txt : $$(foreach prefix,$$(CALLER_PREFIX),tables/$1_$2.$$(call DOWMSTREAM_VCF_TABLE_SUFFIX,$$(prefix)).txt)
+	$$(MKDIR) expands/input; \
+	$$(call RUN,1,$$(RESOURCE_REQ_MEDIUM_MEM),$$(RESOURCE_REQ_VSHORT),$$(R_MODULE),"\
+	$$(RBIND) --tumorNormal $$^ > $$@.tmp1 && \
+	$$(MUTATION_SUMMARY_RSCRIPT) --outFile $$@.tmp2 --outputFormat TXT $$@.tmp1 && \
+	$$(EXPANDS_MAKE_INPUT) --outFile $$@ --type mutations $$@.tmp2 && \
+	$$(RM) $$@.tmp1 $$@.tmp2")
 
 expands/input/$1_$2.segments.txt : facets/cncf/$1_$2.cncf.txt
 	$$(MKDIR) expands/input; \
@@ -32,5 +34,3 @@ expands/input/$1_$2.segments.txt : facets/cncf/$1_$2.cncf.txt
 	$$(EXPANDS_MAKE_INPUT) --outFile $$@ --type cna $$<")
 endef
 $(foreach pair,$(SAMPLE_PAIRS),$(eval $(call expands_make_input,$(tumor.$(pair)),$(normal.$(pair)))))
-
-include usb-modules-v2/variants/somatic/

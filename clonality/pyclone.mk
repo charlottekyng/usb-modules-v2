@@ -7,20 +7,6 @@ LOGDIR ?= log/pyclone.$(NOW)
 .DELETE_ON_ERROR:
 .PHONY : pyclone
 
-ifeq ($(findstring ILLUMINA,$(SEQ_PLATFORM)),ILLUMINA)
-CALLER_PREFIX ?= mutect strelka_indels
-endif
-ifeq ($(findstring IONTORRENT,$(SEQ_PLATFORM)),IONTORRENT)
-CALLER_PREFIX ?= tvc_snps tvc_indels
-endif
-
-ifeq ($(findstring false,$(INCLUDE_LNCRNA_IN_SUMMARY)),false)
-TABLE_SUFFIX = tab.nonsynonymous_synonymous_hotspot
-endif
-ifeq ($(findstring true,$(INCLUDE_LNCRNA_IN_SUMMARY)),true)
-TABLE_SUFFIX = tab.nonsynonymous_synonymous_hotspot_lincRNA_upstream
-endif 
-
 pyclone : $(foreach normal_sample,$(NORMAL_SAMPLES),pyclone/tables/$(normal_sample).cluster.txt)
 
 pyclone/tables/%.cluster.txt : pyclone/configs/%.yaml pyclone/runs/%/alpha.tsv.bz2
@@ -81,7 +67,7 @@ pyclone/mutations/%.mutations.yaml : pyclone/mutations/%.mutations.txt
 	&& $(PYTHON_ENV_DEACTIVATE)")
 
 define pyclone_make_mutations
-pyclone/mutations/$1_$2.mutations.txt : $$(foreach prefix,$$(CALLER_PREFIX),tables/$1_$2.$$(call SOMATIC_VCF_SUFFIXES,$$(prefix)).$$(TABLE_SUFFIX).txt)
+pyclone/mutations/$1_$2.mutations.txt : $$(foreach prefix,$$(CALLER_PREFIX),tables/$1_$2.$$(call DOWMSTREAM_VCF_TABLE_SUFFIX,$$(prefix)).txt)
 	$$(MKDIR) pyclone/mutations; \
 	$$(call RUN,1,$$(RESOURCE_REQ_MEDIUM_MEM),$$(RESOURCE_REQ_VSHORT),$$(R_MODULE),"\
 	$$(RBIND) --tumorNormal $$^ > $$@.tmp1 && \
@@ -89,8 +75,5 @@ pyclone/mutations/$1_$2.mutations.txt : $$(foreach prefix,$$(CALLER_PREFIX),tabl
 	$$(PYCLONE_MAKE_MUT_TXT) --outFile $$@ $$@.tmp2 && \
 	$$(RM) $$@.tmp1 $$@.tmp2")
 endef
-$(foreach pair,$(SAMPLE_PAIRS),$(eval $(call pyclone_make_mutations,$(tumor.$(pair)),$(normal.$(pair)))))
-
-
-
-
+$(foreach pair,$(SAMPLE_PAIRS),\
+	$(eval $(call pyclone_make_mutations,$(tumor.$(pair)),$(normal.$(pair)))))

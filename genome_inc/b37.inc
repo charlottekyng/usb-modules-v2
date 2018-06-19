@@ -35,7 +35,7 @@ TARGETS_FILE_GENES ?= $(BED_DIR)/S06588914_Agilent_Clinical_Exome_TargetGeneSymb
 DBSNP_TARGETS_INTERVALS ?= $(BED_DIR)/S06588914_Agilent_Clinical_Exome.dbsnp_138.vcf
 DBSNP_TARGETS_INTERVALS_COMMON ?= $(BED_DIR)/S06588914_Agilent_Clinical_Exome.dbsnp_138.common.vcf
 RESOURCE_REQ ?= medium
-SNP_EFF_FLAGS ?= -canon -no NEXT_PROT -no-downstream -no-intergenic -no-intron -no-upstream -no-utr -onlyProtein
+SNP_EFF_FLAGS ?= -canon -no NEXT_PROT -no-downstream -no-intergenic -no-intron -no-upstream -no-utr
 endif
 ifeq ($(PANEL),AGILENT_ALLEXON_V4)
 TARGETS_FILE_COVERED_INTERVALS ?= $(BED_DIR)/S03723314_Agilent_AllExon_V4_Covered_noHeader_noAnn.bed
@@ -45,7 +45,7 @@ TARGETS_FILE_GENES ?= $(BED_DIR)/S03723314_Agilent_AllExon_V4_TargetGeneSymbols.
 DBSNP_TARGETS_INTERVALS ?= $(BED_DIR)/S03723314_Agilent_AllExon_V4.dbsnp_138.vcf
 DBSNP_TARGETS_INTERVALS_COMMON ?= $(BED_DIR)/S03723314_Agilent_AllExon_V4.dbsnp_138.common.vcf
 RESOURCE_REQ ?= medium
-SNP_EFF_FLAGS ?= -canon -no NEXT_PROT -no-downstream -no-intergenic -no-intron -no-upstream -no-utr -onlyProtein
+SNP_EFF_FLAGS ?= -canon -no NEXT_PROT -no-downstream -no-intergenic -no-intron -no-upstream -no-utr
 endif
 ifeq ($(PANEL),AGILENT_ALLEXON_V6)
 TARGETS_FILE_COVERED_INTERVALS ?= $(BED_DIR)/S07604514_Agilent_AllExon_V6_Covered_noHeader_noAnn.bed
@@ -56,7 +56,7 @@ TARGETS_FILE_GENES ?=$ $(BED_DIR)/S06588914_Agilent_Clinical_Exome_TargetGeneSym
 DBSNP_TARGETS_INTERVALS ?= $(BED_DIR)/S07604514_Agilent_AllExon_V6.dbsnp_138.vcf
 DBSNP_TARGETS_INTERVALS_COMMON ?= $(BED_DIR)/S07604514_Agilent_AllExon_V6.dbsnp_138.common.vcf
 RESOURCE_REQ ?= medium
-SNP_EFF_FLAGS ?= -canon -no NEXT_PROT -no-downstream -no-intergenic -no-intron -no-upstream -no-utr -onlyProtein
+SNP_EFF_FLAGS ?= -canon -no NEXT_PROT -no-downstream -no-intergenic -no-intron -no-upstream -no-utr
 endif
 ifeq ($(PANEL),SEQCAP_EXOME_V3)
 TARGETS_FILE_COVERED_INTERVALS ?= $(BED_DIR)/SeqCap_EZ_Exome_v3_hg19_primary_targets.bed
@@ -64,7 +64,7 @@ TARGETS_FILE_INTERVALS ?= $(BED_DIR)/SeqCap_EZ_Exome_v3_hg19_primary_targets.bed
 TARGETS_FILE_MUTATIONS ?= $(BED_DIR)/SeqCap_EZ_Exome_v3_hg19_primary_targets.bed
 DBSNP_TARGETS_INTERVALS ?= $(BED_DIR)/SeqCap_EZ_Exome_v3_hg19_primary_targets.dbsnp_138.vcf
 RESOURCE_REQ ?= high
-SNP_EFF_FLAGS ?= -canon -no NEXT_PROT -no-downstream -no-intergenic -no-intron -no-upstream -no-utr -onlyProtein
+SNP_EFF_FLAGS ?= -canon -no NEXT_PROT -no-downstream -no-intergenic -no-intron -no-upstream -no-utr
 endif
 ifeq ($(PANEL),NOVARTIS_PC2)
 TARGETS_FILE_COVERED_INTERVALS ?= $(BED_DIR)/pc2_novartis_Covered_noHeader_noAnn.bed
@@ -72,7 +72,7 @@ TARGETS_FILE_INTERVALS ?= $(BED_DIR)/pc2_novartis_Padded_noHeader_noAnn.bed
 TARGETS_FILE_MUTATIONS ?= $(BED_DIR)/pc2_novartis_Padded_noHeader_noAnn.bed
 DBSNP_TARGETS_INTERVALS ?= $(BED_DIR)/pc2_novartis.dbsnp_138.vcf
 RESOURCE_REQ ?= low
-SNP_EFF_FLAGS ?= -canon -no NEXT_PROT -no-downstream -no-intergenic -no-intron -no-upstream -no-utr -onlyProtein
+SNP_EFF_FLAGS ?= -canon -no NEXT_PROT -no-downstream -no-intergenic -no-intron -no-upstream -no-utr
 endif
 ifeq ($(PANEL),IMPACT410)
 TARGETS_FILE_INTERVALS ?= $(BED_DIR)/impact410_b37.bed

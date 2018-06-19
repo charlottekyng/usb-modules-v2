@@ -28,7 +28,7 @@ TARGETS_FILE_GENES ?= $(BED_DIR)/wxs.GeneSymbols.txt
 DBSNP_TARGETS_INTERVALS ?= $(BED_DIR)/dbsnp_146.hg38.wxs.vcf
 DBSNP_TARGETS_INTERVALS_COMMON ?= $(BED_DIR)/dbsnp_146.hg38.common.wxs.vcf
 RESOURCE_REQ ?= medium
-SNP_EFF_FLAGS ?= -canon -no NEXT_PROT -no-downstream -no-intergenic -no-intron -no-upstream -no-utr -onlyProtein
+SNP_EFF_FLAGS ?= -canon -no NEXT_PROT -no-downstream -no-intergenic -no-intron -no-upstream -no-utr
 endif
 
 

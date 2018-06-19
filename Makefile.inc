@@ -361,6 +361,7 @@ FACETS_GENE_CN_OPTS = $(if $(TARGETS_FILE_GENES),--genesFile $(TARGETS_FILE_GENE
 
 MUTATION_SUMMARY_RSCRIPT = $(RSCRIPT) usb-modules-v2/summary/mutation_summary_excel.R
 DECONSTRUCTSIGS = $(RSCRIPT) usb-modules-v2/mut_sigs/deconstructSigs.R
+DECONSTRUCTSIGS_NUMCORES ?= 8
 
 PYCLONE ?= $(PYTHON_ENV_ACTIVATE) pyclonenv; PyClone
 PYCLONE_ITER ?= 10000

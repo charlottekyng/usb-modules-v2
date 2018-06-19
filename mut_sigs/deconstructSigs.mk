@@ -7,13 +7,11 @@ LOGDIR ?= log/deconstructSigs.$(NOW)
 .SECONDARY:
 .PHONY: deconstructSigs
 
-MUT_CALLER = mutect
+deconstructSigs : deconstructSigs/all$(PROJECT_PREFIX).deconstructSigs.RData
 
-ALLTABLE = $(lastword $(call SOMATIC_TABLES,$(MUT_CALLER)))
-OUTPREFIX = $(notdir $(basename $(ALLTABLE)))
-
-deconstructSigs : deconstructSigs/$(OUTPREFIX).deconstructSigs.RData
-
-deconstructSigs/$(OUTPREFIX).deconstructSigs.RData : $(ALLTABLE)
+deconstructSigs/all$(PROJECT_PREFIX).deconstructSigs.RData : summary/mutation_summary$(PROJECT_PREFIX).$(DOWNSTREAM_EFF_TYPES).txt
 	$(call RUN,1,$(RESOURCE_REQ_LOW_MEM),$(RESOURCE_REQ_VSHORT),$(R_MODULE),"\
-		$(DECONSTRUCTSIGS) --outPrefix=$(OUTPREFIX) $<")
+		$(DECONSTRUCTSIGS) --outPrefix=$(subst .RData,,$@) \
+		--num_iter $(DECONSTRUCTSIGS_NUMITER) --num_cores $(DECONSTRUCTSIGS_NUMCORES) $<")
+
+include usb-modules-v2/summary/mutationSummary.mk

@@ -60,7 +60,7 @@ LOGDIR ?= log/vcf.$(NOW)
 	-R $(REF_FASTA) -V $< -o $@ \
 	--filterExpression 'QSI_NT < 30' --filterName QSI_ref \
 	--filterExpression 'IHP > 14' --filterName iHpol \
-	--filterExpression 'MQ0 > 1' --filterName MQ0"))
+	--filterExpression 'MQ0 > 1' --filterName MQ0 && $(RM) $<"))
 
 %.hotspot.vcf : %.vcf
 	$(call CHECK_VCF,$<,$@,\
