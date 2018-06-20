@@ -10,12 +10,10 @@ PHONY : mutation_summary
 SUMMARY_PREFIX = summary/mutation_summary$(PROJECT_PREFIX).$(DOWNSTREAM_EFF_TYPES)
 
 ifeq ($(findstring EXCEL,$(MUTATION_SUMMARY_FORMAT)),EXCEL)
-mutation_summary : $(foreach summary_prefix,$(SUMMARY_PREFIX),\
-	$(shell rm -f $(summary_prefix).xlsx) $(summary_prefix).xlsx)
+mutation_summary : $(foreach summary_prefix,$(SUMMARY_PREFIX),$(summary_prefix).xlsx)
 endif
 ifeq ($(findstring TXT,$(MUTATION_SUMMARY_FORMAT)),TXT)
-mutation_summary : $(foreach summary_prefix,$(SUMMARY_PREFIX),\
-	$(shell rm -f $(summary_prefix).txt) $(summary_prefix).txt)
+mutation_summary : $(foreach summary_prefix,$(SUMMARY_PREFIX),$(summary_prefix).txt)
 endif
 
 ALLTABLES = $(foreach prefix,$(CALLER_PREFIX),\
