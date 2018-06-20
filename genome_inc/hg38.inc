@@ -57,7 +57,7 @@ HAPMAP ?= $(GSA_REF_DIR)/hapmap_3.3.hg38.vcf
 #DGD_BED = $(ANN_DIR)/dgd_Hsa_all_v71.bed
 #CANCER_HOTSPOT_VCF = $(ANN_DIR)/publication_hotspots_inclnoncoding_incl3d.vcf
 
-#CENTROMERE_TABLE = $(ANN_DIR)/centromeres_b37.txt
+CENTROMERE_TABLE = $(ANN_DIR)/centromeres_hg38.txt
 
 #DGV_FILE = $(ANN_DIR)/DGV_GRCh37_hg19_variants_2016-05-15.txt
 #KNOWN_CNVS = $(ANN_DIR)/GRCh37_hg19_variants_2013-07-23.txt

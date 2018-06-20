@@ -153,7 +153,7 @@ if (!is.null(opt$tumorSample)) {
 
 sn <- c("A", "C", "G", "T")
 subs <- allmuts[,opt$ref_col] %in% sn & allmuts[,opt$alt_col] %in% sn
-mutcounts <- table(factor(allmuts[,opt$sample_col], levels=sample_levels), subs)
+mutcounts <- table(factor(allmuts[,opt$sample_col], levels=sample_levels), factor(subs, levels=c("TRUE", "FALSE")))
 
 mutrate <- data.frame(
 	TOTAL = rowSums(mutcounts),

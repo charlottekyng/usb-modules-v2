@@ -363,6 +363,8 @@ MUTATION_SUMMARY_RSCRIPT = $(RSCRIPT) usb-modules-v2/summary/mutation_summary_ex
 DECONSTRUCTSIGS = $(RSCRIPT) usb-modules-v2/mut_sigs/deconstructSigs.R
 DECONSTRUCTSIGS_NUMCORES ?= 8
 
+LST = $(RSCRIPT) usb-modules-v2/mut_sigs/lst.R
+
 PYCLONE ?= $(PYTHON_ENV_ACTIVATE) pyclonenv; PyClone
 PYCLONE_ITER ?= 10000
 PYCLONE_BURNIN ?= 1000

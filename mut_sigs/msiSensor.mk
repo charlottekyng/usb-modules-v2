@@ -17,7 +17,7 @@ msisensor/all$(PROJECT_PREFIX).msisensor.txt : $(foreach pair,$(SAMPLE_PAIRS),ms
 
 define msisensor-msi
 msisensor/$1_$2.msisensor : bam/$1.bam bam/$2.bam bam/$1.bam.bai bam/$2.bam.bai
-	$$(call RUN,1,$$(RESOURCE_REQ_MEDIUM_MEM),$$(RESOURCE_REQ_MEDIUM),,"\
+	$$(call RUN,1,$$(RESOURCE_REQ_MEDIUM_MEM),$$(RESOURCE_REQ_SHORT),,"\
 		$$(MSISENSOR) msi -d $$(MSISENSOR_REF) -t $$(<) -n $$(<<) -o $$(subst .complete,,$$@) \
 		$$(if $$(TARGETS_FILE_INTERVALS),-e $$(TARGETS_FILE_INTERVALS)) || exit 0; \
 		if grep \"Total time consumed\" $$@; then exit 0; else exit 1; fi")

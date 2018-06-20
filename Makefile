@@ -129,6 +129,10 @@ TARGETS	+= deconstruct_sigs
 deconstruct_sigs :
 	$(call RUN_MAKE,usb-modules-v2/mut_sigs/deconstructSigs.mk)
 
+TARGETS += lst
+lst :
+	$(call RUN_MAKE,usb-modules-v2/mut_sigs/lst.mk)
+
 TARGETS += msisensor
 msisensor :
 	$(call RUN_MAKE,usb-modules-v2/mut_sigs/msiSensor.mk)

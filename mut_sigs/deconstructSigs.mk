@@ -26,7 +26,7 @@ define deconstruct-sigs
 deconstructSigs/$1_$2.deconstructSigs.RData : $$(foreach prefix,$$(CALLER_PREFIX),tables/$1_$2.$$(call DOWMSTREAM_VCF_TABLE_SUFFIX,$$(prefix)).txt)
 	$$(call RUN,1,$$(RESOURCE_REQ_MEDIUM_MEM),$$(RESOURCE_REQ_VSHORT),$$(R_MODULE),"\
 	$$(RBIND) --tumorNormal $$^ > $$@.tmp && \
-	$$(DECONSTRUCTSIGS) --outPrefix=$$(subst .RData,,$$@) \
+	$$(DECONSTRUCTSIGS) --outPrefix $$(subst .RData,,$$@) \
 	--num_iter $$(DECONSTRUCTSIGS_NUMITER) --num_cores $$(DECONSTRUCTSIGS_NUMCORES) $$@.tmp && \
 	$$(RM) $$@.tmp")
 
