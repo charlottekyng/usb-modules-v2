@@ -9,7 +9,9 @@
 #---------------
 
 # load base libraries
-suppressMessages(pacman::p_load(optparse,RColorBrewer,GenomicRanges,plyr,dplyr,tibble,readr,stringr,tidyr,purrr,magrittr,rlist,crayon,foreach,Cairo,RMySQL,rtracklayer,colorspace,ggplot2,grid,gridExtra,RColorBrewer))
+suppressMessages(pacman::p_load(optparse,RColorBrewer,GenomicRanges,plyr,dplyr,tibble))
+suppressMessages(pacman::p_load(readr,stringr,tidyr,purrr,magrittr,rlist,crayon,foreach))
+suppressMessages(pacman::p_load(Cairo,RMySQL,rtracklayer,colorspace,ggplot2,grid,gridExtra,RColorBrewer))
 suppressPackageStartupMessages(library("facets"));
 
 #--------------
@@ -125,7 +127,8 @@ mm <- lapply(facetsFiles, function(f) {
 	}
 	if ("GL_LRR" %in% opt$summaryType) {
 		load(gsub("cncf.txt", "Rdata", f, fixed=T))
-		noise <- median(abs(out2$jointseg$cnlr-  unlist(apply(out2$out[,c("cnlr.median", "num.mark")], 1, function(x) {rep(x[1], each=x[2])}))))
+		noise <- median(abs(out2$jointseg$cnlr-  unlist(apply(out2$out[,c("cnlr.median", "num.mark")], 1, 
+			function(x) {rep(x[1], each=x[2])}))))
 
 		lrr <- sort(out2$jointseg$cnlr)
 		lrr <- lrr[round(0.25*length(lrr)):round(0.75*length(lrr))] 
@@ -143,7 +146,13 @@ for (f in facetsFiles) {
 	colnames(mm[[f]])[2:ncol(mm[[f]])] <- paste(n,  colnames(mm[[f]])[2:ncol(mm[[f]])], sep="_")
 }
 
-mm <- left_join(genes, join_all(mm, type = 'full', by="hgnc")) %>% arrange(as.integer(chrom), start, end)
+save.image(paste(opt$outFile, ".RData", sep=""))
+
+#mm <- left_join(genes, join_all(mm, type = 'full', by="hgnc")) %>% arrange(as.integer(chrom), start, end)
+mm <- left_join(genes, join_all(lapply(seq(1,length(mm),by=10), function(i) {
+	join_all(mm[i:min(length(mm), i+9)], type='full', by='hgnc')
+})), type='full', by='hgnc')  %>% arrange(as.integer(chrom), start, end)
+
 
 seg_sample <- seg_chr <- seg_band <- seg_start <- seg_end <- seg_cnlr <- seg_genes <- seg_type <- seg_GLtype <- NA
 for (i in grep("GL", colnames(mm))) {
