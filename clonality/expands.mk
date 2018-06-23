@@ -28,9 +28,11 @@ expands/input/$1_$2.mutations.txt : $$(foreach prefix,$$(CALLER_PREFIX),tables/$
 	$$(EXPANDS_MAKE_INPUT) --outFile $$@ --type mutations $$@.tmp2 && \
 	$$(RM) $$@.tmp1 $$@.tmp2")
 
-expands/input/$1_$2.segments.txt : facets/cncf/$1_$2.cncf.txt
+expands/input/$1_$2.segments.txt : absolute/step3/SEG_MAF/$1_$2.segtab.txt
 	$$(MKDIR) expands/input; \
 	$$(call RUN,1,$$(RESOURCE_REQ_LOW_MEM),$$(RESOURCE_REQ_VSHORT),$$(R_MODULE),"\
 	$$(EXPANDS_MAKE_INPUT) --outFile $$@ --type cna $$<")
 endef
 $(foreach pair,$(SAMPLE_PAIRS),$(eval $(call expands_make_input,$(tumor.$(pair)),$(normal.$(pair)))))
+
+include usb-modules-v2/clonality/absoluteSeq.mk

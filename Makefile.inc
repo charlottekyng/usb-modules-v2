@@ -369,11 +369,22 @@ PYCLONE ?= $(PYTHON_ENV_ACTIVATE) pyclonenv; PyClone
 PYCLONE_ITER ?= 10000
 PYCLONE_BURNIN ?= 1000
 PYCLONE_SEED ?= 1234567
-PYCLONE_PRIOR ?= parental_copy_number
+PYCLONE_PRIOR ?= parenktal_copy_number
 PYCLONE_MAKE_MUT_TXT ?= $(RSCRIPT) usb-modules-v2/clonality/pyclone_make_input.R
 
 EXPANDS_MAKE_INPUT ?= $(RSCRIPT) usb-modules-v2/clonality/expands_make_input.R
 EXPANDS ?= $(RSCRIPT) usb-modules-v2/clonality/expandsRun.R
+
+ABSOLUTE_MAKE_MUTS ?= $(RSCRIPT) usb-modules-v2/clonality/absolute_make_muts.R
+ABSOLUTE_MAKE_SEGS ?= $(RSCRIPT) usb-modules-v2/clonality/absolute_make_segs.R
+ABSOLUTE_STEP1 ?= $(RSCRIPT) usb-modules-v2/clonality/absolute_step1.R
+ABSOLUTE_STEP2 ?= $(RSCRIPT) usb-modules-v2/clonality/absolute_step2.R
+ABSOLUTE_STEP3 ?= $(RSCRIPT) usb-modules-v2/clonality/absolute_step3.R
+ABSOLUTE_NUM_CORE ?= 1
+
+
+
+
 
 CBS_SEGMENTCNV = $(RSCRIPT) usb-modules-v2/copy_number/varscanCNVSegment.R
 VARSCAN_GENE_CN = $(RSCRIPT) usb-modules-v2/copy_number/varscanCNVGeneCN.R

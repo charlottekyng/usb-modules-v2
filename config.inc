@@ -316,6 +316,23 @@ STAR_FUSION_MAX_PROMISCUITY ?= 3
 STAR_FUSION_MIN_JUNC_SUPP ?= 2
 STAR_FUSION_MIN_ALT_PCT_JUNC ?= 5
 
+##################################
+####### CLONALITY ################
+##################################
+
+ABSOLUTE_SIGMA_P ?= 0
+ABSOLUTE_MAX_SIGMA_H ?= 0.07
+ABSOLUTE_MIN_PLOIDY ?= 0.9
+ABSOLUTE_MAX_PLOIDY ?= 8
+ABSOLUTE_DISEASE ?= BRCA
+ABSOLUTE_PLATFORM ?= Illumina_WES
+ABSOLUTE_MAX_SEG ?= 3500
+ABSOLUTE_COPYNUMTYPE ?= total
+ABSOLUTE_MAX_NEG_GENOME ?= 0.05
+ABSOLUTE_MAX_NON_CLONAL ?= 0.2
+
+PYCLONE_PRIOR ?= parental_copy_number
+
 ################################
 ###### Miscellaneous ###########
 ###############################

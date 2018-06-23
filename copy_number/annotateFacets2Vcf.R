@@ -21,9 +21,11 @@ optList <- list(
                 make_option("--ccfRscript", default = 'usb-modules-v2/copy_number/facetsCCF.R', help='computCCF and confCCF R script'),
                 make_option("--genome", default = 'b37', type = 'character', help = "genome of counts file"),
                 make_option("--tumor", default = 'TUMOR', type = 'character', help = "tumor sample"),
-                make_option("--purity", default = NULL, type = 'float', help = "purity of sample if overriding facets purity"),
+                make_option("--purity", default = NULL, type = 'numeric', help = "purity of sample if overriding facets purity"),
                 make_option("--facetsRdata", default = NULL, type = "character", action = "store", help ="facets Rdata file"),
+                make_option("--facetsSegTxt", default = NULL, type = "character", action = "store", help ="facets segments text file (instead of Rdata)"),
                 make_option("--outFile", default = NULL, type = "character", action = "store", help ="targeted interval bed"))
+print (optList)
 
 parser <- OptionParser(usage = "%prog [options] [vcf file]", option_list = optList);
 arguments <- parse_args(parser, positional_arguments = T);
@@ -33,8 +35,12 @@ if (length(arguments$args) < 1) {
   cat("Need vcf file\n\n")
   print_help(parser);
   stop();
-} else if (is.null(opt$facetsRdata)) {
-  cat("Need facets Rdata file\n\n")
+} else if (is.null(opt$facetsRdata) & (is.null(opt$facetsSegTxt) | is.null(opt$purity))) {
+  cat("Need facets Rdata file or segments file+ploidy\n\n")
+  print_help(parser);
+  stop();
+} else if (!is.null(opt$facetsRdata) & !is.null(opt$facetsSegTxt) ) {
+  cat("Cannot have both facets Rdata file and segments file\n\n")
   print_help(parser);
   stop();
 } else if (is.null(opt$outFile)) {
@@ -42,7 +48,6 @@ if (length(arguments$args) < 1) {
   print_help(parser);
   stop();
 }
-
 source(opt$ccfRscript)
 tumorSample <- opt$tumor
 
@@ -50,8 +55,13 @@ vcfFile <- arguments$args[1];
 vcf <- readVcf(vcfFile, opt$genome)
 
 # read primary rdata file
-load(opt$facetsRdata)
-facetsSeg <- fit$cncf
+if (!is.null(opt$facetsRdata)){
+	load(opt$facetsRdata)
+	facetsSeg <- fit$cncf
+} else {
+	facetsSeg <- read.delim(opt$facetsSegTxt, as.is=T)
+}	
+	
 facetsSeg$chrom <- as.character(facetsSeg$chrom)
 facetsSeg$chrom[facetsSeg$chrom == '23'] <- 'X'
 if (any(grepl('chr', as.character(seqnames(vcf))))) {
@@ -60,8 +70,9 @@ if (any(grepl('chr', as.character(seqnames(vcf))))) {
     chr <- facetsSeg$chrom
 }
 facetsGr <- with(facetsSeg, GRanges(seqnames = chr,
-                                    ranges = IRanges(start = start, end = end),
-                                    cf.em = cf.em, tcn.em = tcn.em, lcn.em = lcn.em, mafR = mafR))
+	ranges = IRanges(start = start, end = end),
+	cf.em = cf.em, tcn.em = tcn.em, lcn.em = lcn.em, cnlr.median = cnlr.median, mafR = mafR))
+	
 medianMafR <- median(facetsGr$mafR)
 sdMafR <- sd(facetsGr$mafR)
 if (!is.null(opt$purity)) {

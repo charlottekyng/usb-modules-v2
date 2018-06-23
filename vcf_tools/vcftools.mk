@@ -209,11 +209,18 @@ $(foreach sample,$(SAMPLES),$(eval $(call hrun-sample,$(sample))))
 
 ifdef SAMPLE_PAIRS
 define annotate-facets-pair
-vcf/$1_$2.%.facets.vcf : vcf/$1_$2.%.vcf facets/cncf/$1_$2.Rdata
+#vcf/$1_$2.%.facets.vcf : vcf/$1_$2.%.vcf facets/cncf/$1_$2.Rdata
+#	$$(call CHECK_VCF,$$<,$$@,\
+#	$$(call RUN,1,$$(RESOURCE_REQ_LOW_MEM),$$(RESOURCE_REQ_VSHORT),$$(R_MODULE),"\
+#		$$(ANNOTATE_FACETS_VCF) --genome \"$$(REF)\" --tumor \"$1\" --facetsRdata $$(<<) --outFile $$@ $$< && \
+#		$(RM) $<"))
+vcf/$1_$2.%.facets.vcf : vcf/$1_$2.%.vcf facets/cncf/$1_$2.cncf.txt facets/cncf/$1_$2.out 
 	$$(call CHECK_VCF,$$<,$$@,\
+	purity=`grep Purity $$(<<<) | cut -f2 -d'=' | sed 's/NA/0.1/; s/ //g;'` && \
 	$$(call RUN,1,$$(RESOURCE_REQ_LOW_MEM),$$(RESOURCE_REQ_VSHORT),$$(R_MODULE),"\
-		$$(ANNOTATE_FACETS_VCF) --genome \"$$(REF)\" --tumor \"$1\" --facetsRdata $$(<<) --outFile $$@ $$< \
-		$(RM) $<"))
+		$$(ANNOTATE_FACETS_VCF) --genome \"$$(REF)\" --tumor \"$1\" \
+		--facetsSegTxt $$(<<) --purity $$$$purity --outFile $$@ $$< && \
+		$$(RM) $$<"))
 endef
 $(foreach pair,$(SAMPLE_PAIRS),$(eval $(call annotate-facets-pair,$(tumor.$(pair)),$(normal.$(pair)))))
 endif
@@ -339,7 +346,7 @@ sufamscreen/%.opl_tab.txt : sufamscreen/%.vcf
 	done")
 
 %.tab.txt : %.opl_tab.txt
-	$(call RUN,1,$(RESOURCE_REQ_VHIGH_MEM),$(RESOURCE_REQ_MEDIUM),$(PERL_MODULE),"\
+	$(call RUN,1,$(RESOURCE_REQ_MEDIUM_MEM),$(RESOURCE_REQ_VSHORT),$(PERL_MODULE),"\
 	$(VCF_JOIN_EFF) < $< > $@")
 	
 #%.pass.txt : %.txt

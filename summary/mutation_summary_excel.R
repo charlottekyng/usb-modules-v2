@@ -9,7 +9,7 @@ optList <- list(
 	make_option("--makeChocolateBar", default = F, help = "include chocolate bar"),
 	make_option("--makeMutationHeatmap", default = F, help = "include mutation heatmap")
 )
-parser <- OptionParser(usage = "%prog vcf.file", option_list = optList);
+parser <- OptionParser(usage = "%prog [options] mutation_table", option_list = optList);
 arguments <- parse_args(parser, positional_arguments = T);
 opt <- arguments$options;
 

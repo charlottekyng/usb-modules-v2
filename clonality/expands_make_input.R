@@ -1,12 +1,12 @@
 suppressPackageStartupMessages(library("optparse"));
 
 optList <- list(
-        make_option("--outFile", default = NULL, help = "output file"),
+	make_option("--outFile", default = NULL, help = "output file"),
 	make_option("--type", default = NULL, help = "mutations or cna")
         
 )
 
-parser <- OptionParser(usage = "%prog vcf.file", option_list = optList);
+parser <- OptionParser(usage = "%prog [options] mutations/CNA file", option_list = optList);
 arguments <- parse_args(parser, positional_arguments = T);
 opt <- arguments$options;
 
@@ -30,7 +30,7 @@ if (opt$type == "mutations") {
 	colnames(out) <- c("chr", "startpos", "AF_Tumor")
 	out$PN_B <- 0
 } else if (opt$type == "cna") {
-	out <- dat[,c("chrom", "start", "end", "tcn.em")]
+	out <- dat[,c("chrom", "start", "end", "expected_cn")]
 	colnames(out) <- c("chr", "startpos", "endpos", "CN_Estimate")
 }
 

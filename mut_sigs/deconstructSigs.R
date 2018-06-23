@@ -48,127 +48,161 @@ if (!is.null(opt$tumorSample)) {
 		cat ("At least one sample appears to have no mutations:", missing_samples, "\n")
 	}
 	allmuts <- allmuts[which(allmuts[,opt$sample_col] %in% opt$tumorSample),,drop=F]
-} else { cat ("Using all samples in the mutations file\n") }
-
-if (length(grep("chr", allmuts[1,opt$chr_col]))==0) {
-	cat("chr_col colum appears not to have chr - appending chr\n")
-	allmuts$chr <- paste("chr", allmuts[,opt$chr_col], sep="")
-} else { allmuts$chr <- allmuts[,opt$chr_col] }
-
-if (is.na(opt$num_iter)){
-	cat("No bootstrapping to be performed\n")
-	muts_for_input <- allmuts
-} else {
-	if (opt$num_iter<10) {
-		cat ("Number of iterations too small (at least 10, otherwise what is the point?). Not going to perform bootstrapping.\n")
-		muts_for_input <- allmuts
-	} else {
-		muts_for_input <- do.call("rbind", lapply(unique(allmuts[,opt$sample_col]), function(s){
-			x <- allmuts[which(allmuts[,opt$sample_col] ==s),,drop=F]
-			set.seed(opt$seed)
-			y <- x[sample(1:nrow(x), opt$num_iter*nrow(x), replace=T),]
-			y$TUMOR_SAMPLE = paste(unique(y$TUMOR_SAMPLE), rep(1:opt$num_iter, nrow(x)), sep="_")
-			y
-		}))
-		cat("Finished bootstrapping mutations\n")
-	}
-}
-
-sigs <- mut.to.sigs.input(muts_for_input, opt$sample_col, "chr",opt$pos_col, opt$ref_col, opt$alt_col)
-cat ("Starting whichSignatures:", date(), "\n")
-if (opt$num_cores>1) {
-	cl <- makeCluster(opt$num_cores, "SOCK")
-	ws <- parLapply(cl, rownames(sigs), function(sample,sigs, ...) {
-		library(deconstructSigs)
-		whichSignatures(tumor.ref = sigs, sample.id=sample,
-                signatures.ref = signatures.cosmic, contexts.needed = T, ...)
-	}, sigs, tri.counts.method = opt$tri.count.method)
-	stopCluster(cl)
-} else {
-	ws <- lapply(rownames(sigs), function(sample) {
-		whichSignatures(tumor.ref = sigs, sample.id=sample,
-		signatures.ref = signatures.cosmic, contexts.needed = T,
-		tri.counts.method = opt$tri.count.method)
-	})
-
-}
-names(ws) <- rownames(sigs)
-cat("Finished whichSignatures", date(), "\n")
-
-if (!is.na(opt$num_iter)){
-	if(opt$num_iter>=10){
-		cat("Summarising bootstrapped signatures\n")
-		summarise_whichSignatures <- function(x, signatures=signatures.cosmic, sampleName) {
-			weights_mat <- do.call("rbind", lapply(x, function(y){y$weights}))
-			weights <- matrix(colMeans(weights_mat),nrow=1)
-			weightsSD <- apply(weights_mat, 2, sd)
-			colnames(weights) <- colnames(weights_mat)
-			rownames(weights) <- sampleName
-			unknown <- 1 - sum(weights)
-			product <- weights %*% as.matrix(signatures)
-			tumor_mat <- do.call("rbind", lapply(x, function(y){y$tumor}))
-			tumor <- matrix(colMeans(tumor_mat), nrow=1)
-			colnames(tumor) <- colnames(tumor_mat)
-			rownames(tumor) <- sampleName
-			diff <- tumor - product
-			out <- list(weights, tumor, product, diff, unknown, weightsSD)
-			names(out) <- c("weights", "tumor", "product", "diff", "unknown", "weightsSD")
-			return(out)
-		}
-		ws2 <- lapply(unique(allmuts[,opt$sample_col]), function(s){
-			summarise_whichSignatures(ws[grep(paste(s, "_", sep=""), names(ws))], sampleName=s)
-		})
-		names(ws2) <- unique(allmuts[,opt$sample_col])
-		ws <- ws2
-	}
-}
-
-plot_signature_bars_sanger_style <- function(x, main="", ylim=c(0,20), beside=T, border=NA, 
-	cex.axis=1.5, cex.lab=1, las=2, ylab="Proportion of mutations",
-	col=rep(c("cyan2", "black", "red", "grey", "chartreuse3", "lightpink1"), each=16),...) {
-	barplot(x*100, beside=T, border=border, main=main, ylim=ylim, cex.axis=cex.axis, cex.lab=cex.lab, ylab=ylab,
-	col=col, las=las, ...)
-}
-
-lapply(names(ws), function(sample) {
-	pdf(paste(opt$outPrefix, "_", sample, ".pdf", sep=""), height=3, width=6)
-	plot_signature_bars_sanger_style(ws[[sample]]$tumor)
-	dev.off()
-})
-
-signatures <- do.call("rbind", lapply(ws, function(w) { w$weights }))
-
-if (!is.na(opt$num_iter)){
-	if(opt$num_iter>=10){
-		signaturesSD <- do.call("rbind", lapply(ws, function(w) { w$weightsSD }))
-		colnames(signaturesSD) <- paste(colnames(signaturesSD), "SD", sep="")
-		signatures <- cbind(signatures, signaturesSD)
-	}
-	
-}
-
-if (!is.null(opt$tumorSample)) {
 	sample_levels <- opt$tumorSample
-} else { sample_levels <- unique(allmuts[,opt$sample_col]) }
+} else { cat ("Using all samples in the mutations file\n") 
+	sample_levels <- sort(unique(allmuts[,opt$sample_col]))}
 
 sn <- c("A", "C", "G", "T")
-subs <- allmuts[,opt$ref_col] %in% sn & allmuts[,opt$alt_col] %in% sn
-mutcounts <- table(factor(allmuts[,opt$sample_col], levels=sample_levels), factor(subs, levels=c("TRUE", "FALSE")))
+pointmuts <- allmuts[which(allmuts[,opt$ref_col] %in% sn & allmuts[,opt$alt_col] %in% sn),,drop=F]
 
-mutrate <- data.frame(
-	TOTAL = rowSums(mutcounts),
-	SNV = mutcounts[,"TRUE"],
-	INDEL = mutcounts[,"FALSE"])
-rownames(mutrate) <- sample_levels
 
-mutrate$SNV_prop = as.numeric(mutrate$SNV)/as.numeric(mutrate$TOTAL)
-mutrate$INDEL_prop = as.numeric(mutrate$INDEL)/as.numeric(mutrate$TOTAL)
+if(nrow(pointmuts)>0) {
 
-signatures <- signatures[match(rownames(mutrate), rownames(signatures)),,drop=F]
-signatures <- cbind(mutrate, signatures)
+	if (length(grep("chr", pointmuts[1,opt$chr_col]))==0) {
+		cat("chr_col colum appears not to have chr - appending chr\n")
+		pointmuts$chr <- paste("chr", pointmuts[,opt$chr_col], sep="")
+	} else { pointmuts$chr <- pointmuts[,opt$chr_col] }
+	pointmuts$chr <- gsub("chrMT", "chrM", pointmuts$chr)
+
+	if (is.na(opt$num_iter)){
+		cat("No bootstrapping to be performed\n")
+		muts_for_input <- pointmuts
+	} else {
+		if (opt$num_iter<10) {
+			cat ("Number of iterations too small (at least 10, otherwise what is the point?). Not going to perform bootstrapping.\n")
+			muts_for_input <- pointmuts
+		} else {
+			muts_for_input <- do.call("rbind", lapply(unique(pointmuts[,opt$sample_col]), function(s){
+				x <- pointmuts[which(pointmuts[,opt$sample_col] ==s),,drop=F]
+				set.seed(opt$seed)
+				y <- x[sample(1:nrow(x), opt$num_iter*nrow(x), replace=T),]
+				y$TUMOR_SAMPLE = paste(unique(y$TUMOR_SAMPLE), rep(1:opt$num_iter, nrow(x)), sep="_")
+				y
+			}))
+			cat("Finished bootstrapping mutations\n")
+		}
+	}
+
+	sigs <- mut.to.sigs.input(muts_for_input, opt$sample_col, "chr", opt$pos_col, opt$ref_col, opt$alt_col)
+
+	rs <- rowSums(sigs)
+
+	toofewmuts <- rownames(sigs)[which(rs<20)]
+	if(length(toofewmuts)>0) {
+		cat ("These samples had <20 point mutations:", toofewmuts, " Removing these samples\n")
+		sigs <- sigs[which(!rownames(sigs) %in% toofewmuts),,drop=F]
+	}
+
+	if(nrow(sigs) > 0) {
+	
+		cat ("Starting whichSignatures:", date(), "\n")
+		if (opt$num_cores>1) {
+			cl <- makeCluster(opt$num_cores, "SOCK")
+			ws <- parLapply(cl, rownames(sigs), function(sample,sigs, ...) {
+				library(deconstructSigs)
+				whichSignatures(tumor.ref = sigs, sample.id=sample,
+      	          signatures.ref = signatures.cosmic, contexts.needed = T, ...)
+			}, sigs, tri.counts.method = opt$tri.count.method)
+			stopCluster(cl)
+		} else {
+			ws <- lapply(rownames(sigs), function(sample) {
+				whichSignatures(tumor.ref = sigs, sample.id=sample,
+				signatures.ref = signatures.cosmic, contexts.needed = T,
+				tri.counts.method = opt$tri.count.method)
+			})
+		}
+		names(ws) <- rownames(sigs)
+		cat("Finished whichSignatures", date(), "\n")
+
+		if (!is.na(opt$num_iter)){
+			if(opt$num_iter>=10){
+				cat("Summarising bootstrapped signatures\n")
+				summarise_whichSignatures <- function(x, signatures=signatures.cosmic, sampleName) {
+					weights_mat <- do.call("rbind", lapply(x, function(y){y$weights}))
+					weights <- matrix(colMeans(weights_mat),nrow=1)
+					weightsSD <- apply(weights_mat, 2, sd)
+					colnames(weights) <- colnames(weights_mat)
+					rownames(weights) <- sampleName
+					unknown <- 1 - sum(weights)
+					product <- weights %*% as.matrix(signatures)
+					tumor_mat <- do.call("rbind", lapply(x, function(y){y$tumor}))
+					tumor <- matrix(colMeans(tumor_mat), nrow=1)
+					colnames(tumor) <- colnames(tumor_mat)
+					rownames(tumor) <- sampleName
+					diff <- tumor - product
+					out <- list(weights, tumor, product, diff, unknown, weightsSD)
+					names(out) <- c("weights", "tumor", "product", "diff", "unknown", "weightsSD")
+					return(out)
+				}
+				ws2 <- lapply(unique(allmuts[,opt$sample_col]), function(s){
+					summarise_whichSignatures(ws[grep(paste(s, "_", sep=""), names(ws))], sampleName=s)
+				})
+				names(ws2) <- unique(allmuts[,opt$sample_col])
+				ws <- ws2
+			}
+		}
+	
+		plot_signature_bars_sanger_style <- function(x, main="", ylim=c(0,20), beside=T, border=NA, 
+			cex.axis=1.5, cex.lab=1, las=2, ylab="Proportion of mutations",
+			col=rep(c("cyan2", "black", "red", "grey", "chartreuse3", "lightpink1"), each=16),...) {
+			barplot(x*100, beside=T, border=border, main=main, ylim=ylim, cex.axis=cex.axis, cex.lab=cex.lab, ylab=ylab,
+			col=col, las=las, ...)
+		}
+
+		lapply(names(ws), function(sample) {
+			pdf(paste(opt$outPrefix, "_", sample, ".pdf", sep=""), height=3, width=6)
+			plot_signature_bars_sanger_style(ws[[sample]]$tumor)
+			dev.off()
+		})
+
+		signatures <- do.call("rbind", lapply(ws, function(w) { w$weights }))
+
+		if (!is.na(opt$num_iter)){
+			if(opt$num_iter>=10){
+				signaturesSD <- do.call("rbind", lapply(ws, function(w) { w$weightsSD }))
+				colnames(signaturesSD) <- paste(colnames(signaturesSD), "SD", sep="")
+				signatures <- cbind(signatures, signaturesSD)
+			}	
+		}
+	}
+
+	sn <- c("A", "C", "G", "T")
+	subs <- allmuts[,opt$ref_col] %in% sn & allmuts[,opt$alt_col] %in% sn
+	mutcounts <- table(factor(allmuts[,opt$sample_col], levels=sample_levels), factor(subs, levels=c("TRUE", "FALSE")))
+
+	mutrate <- data.frame(
+		TOTAL = rowSums(mutcounts),
+		SNV = mutcounts[,"TRUE"],
+		INDEL = mutcounts[,"FALSE"])
+	rownames(mutrate) <- sample_levels
+
+	mutrate$SNV_prop = as.numeric(mutrate$SNV)/as.numeric(mutrate$TOTAL)
+	mutrate$INDEL_prop = as.numeric(mutrate$INDEL)/as.numeric(mutrate$TOTAL)
+
+	if(nrow(sigs) > 0) {
+		signatures <- signatures[match(rownames(mutrate), rownames(signatures)),,drop=F]
+		signatures <- cbind(mutrate, signatures)
+	} else {
+		signatures <- mutrate
+	}
+} else {
+	mutrate <- data.frame(
+		TOTAL = rep(0, length(sample_levels)),
+		SNV = rep(0, length(sample_levels)),
+		INDEL = rep(0, length(sample_levels)))
+	rownames(mutrate) <- sample_levels
+
+	mutrate$SNV_prop = rep(NA, length(sample_levels))
+	mutrate$INDEL_prop = rep(NA, length(sample_levels))
+	signatures <- mutrate
+}
 
 write.table(signatures, file=paste(opt$outPrefix, ".txt", sep=""), sep="\t", col.names=NA, quote=F, na="")
-save(signatures, ws, file=paste(opt$outPrefix, ".RData", sep=""))
+if(nrow(sigs) > 0) {
+	save(signatures, ws, file=paste(opt$outPrefix, ".RData", sep=""))
+} else {
+	save(signatures, file=paste(opt$outPrefix, ".RData", sep=""))
+}
 
 
 

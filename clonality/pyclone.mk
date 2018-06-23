@@ -62,7 +62,7 @@ $(foreach set,$(SAMPLE_SETS),\
 	$(wordlist 1,$(shell expr $(words $(subst _,$( ),$(set))) - 1),$(subst _,$( ),$(set))))))
 
 pyclone/mutations/%.mutations.yaml : pyclone/mutations/%.mutations.txt
-	$(call RUN,1,$(RESOURCE_REQ_LOW_MEM),$(RESOURCE_REQ_SHORT),,"\
+	$(call RUN,1,$(RESOURCE_REQ_LOW_MEM),$(RESOURCE_REQ_VSHORT),,"\
 	$(PYCLONE) build_mutations_file --prior $(PYCLONE_PRIOR) --in_file $< --out_file $@ \
 	&& $(PYTHON_ENV_DEACTIVATE)")
 
