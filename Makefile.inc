@@ -374,6 +374,7 @@ PYCLONE_MAKE_MUT_TXT ?= $(RSCRIPT) usb-modules-v2/clonality/pyclone_make_input.R
 
 EXPANDS_MAKE_INPUT ?= $(RSCRIPT) usb-modules-v2/clonality/expands_make_input.R
 EXPANDS ?= $(RSCRIPT) usb-modules-v2/clonality/expandsRun.R
+EXPANDS_NUM_CORES ?= 1
 
 ABSOLUTE_MAKE_MUTS ?= $(RSCRIPT) usb-modules-v2/clonality/absolute_make_muts.R
 ABSOLUTE_MAKE_SEGS ?= $(RSCRIPT) usb-modules-v2/clonality/absolute_make_segs.R

@@ -1,3 +1,5 @@
+cat ("Running absolute_step3.R\n\n")
+
 suppressPackageStartupMessages(library("optparse"));
 suppressPackageStartupMessages(library("ABSOLUTE"));
 

@@ -1,6 +1,9 @@
+cat ("Running mutation_summary_excel.R\n\n")
+
 options(java.parameters = "-Xmx8000m")
 suppressPackageStartupMessages(library("optparse"));
 suppressPackageStartupMessages(library("xlsx"));
+
 
 optList <- list(
 	make_option("--outFile", default = NULL, help = "output file"),

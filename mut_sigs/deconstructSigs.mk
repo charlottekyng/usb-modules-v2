@@ -9,6 +9,8 @@ LOGDIR ?= log/deconstructSigs.$(NOW)
 
 deconstructSigs : deconstructSigs/all$(PROJECT_PREFIX).deconstructSigs.txt
 
+# if bootstrap needs to be done, then do each sample separately
+# otherwise just run everything together
 ifdef DECONSTRUCTSIGS_NUMITER
 deconstructSigs/all$(PROJECT_PREFIX).deconstructSigs.txt : $(foreach pair,$(SAMPLE_PAIRS),deconstructSigs/$(pair).deconstructSigs.txt)
 	$(INIT) head -1 $< > $@; \

@@ -1,3 +1,5 @@
+cat ("Running absolute_make_segs.R\n\n")
+
 suppressPackageStartupMessages(library("optparse"));
 
 optList <- list(

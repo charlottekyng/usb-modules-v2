@@ -1,3 +1,5 @@
+cat ("Running deconstructSigs.R\n\n")
+
 suppressPackageStartupMessages(library(deconstructSigs))
 suppressPackageStartupMessages(library("optparse"));
 suppressPackageStartupMessages(library("parallel"));
@@ -52,6 +54,7 @@ if (!is.null(opt$tumorSample)) {
 } else { cat ("Using all samples in the mutations file\n") 
 	sample_levels <- sort(unique(allmuts[,opt$sample_col]))}
 
+cat ("Only using SNVs for deconstructSigs\n")
 sn <- c("A", "C", "G", "T")
 pointmuts <- allmuts[which(allmuts[,opt$ref_col] %in% sn & allmuts[,opt$alt_col] %in% sn),,drop=F]
 
@@ -150,7 +153,7 @@ if(nrow(pointmuts)>0) {
 		}
 
 		lapply(names(ws), function(sample) {
-			pdf(paste(opt$outPrefix, "_", sample, ".pdf", sep=""), height=3, width=6)
+			pdf(paste(opt$outPrefix, ".pdf", sep=""), height=3, width=6)
 			plot_signature_bars_sanger_style(ws[[sample]]$tumor)
 			dev.off()
 		})
@@ -166,6 +169,7 @@ if(nrow(pointmuts)>0) {
 		}
 	}
 
+	cat ("Computing mutational burden\n")
 	sn <- c("A", "C", "G", "T")
 	subs <- allmuts[,opt$ref_col] %in% sn & allmuts[,opt$alt_col] %in% sn
 	mutcounts <- table(factor(allmuts[,opt$sample_col], levels=sample_levels), factor(subs, levels=c("TRUE", "FALSE")))
@@ -196,6 +200,7 @@ if(nrow(pointmuts)>0) {
 	mutrate$INDEL_prop = rep(NA, length(sample_levels))
 	signatures <- mutrate
 }
+cat ("Writing and saving results\n")
 
 write.table(signatures, file=paste(opt$outPrefix, ".txt", sep=""), sep="\t", col.names=NA, quote=F, na="")
 if(exists("ws")) {

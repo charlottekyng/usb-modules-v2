@@ -1,8 +1,28 @@
+cat ("Running pyclone_make_input.R\n\n")
+
+
 suppressPackageStartupMessages(library("optparse"));
 
 optList <- list(
 	make_option("--outFile", default = NULL, help = "output file"),
-	make_option("--totalOrAllelic", default = "allelic", help ="total or allelic copy number")
+	make_option("--total_or_allelic", default = "allelic", help ="total or allelic copy number"),
+	make_option("--sample_col", default = "TUMOR_SAMPLE", help = "sample col name"),
+	make_option("--chrom_col", default = "CHROM", help = "chrom col name"),
+	make_option("--pos_col", default = "POS", help = "pos col name"),
+	make_option("--ref_col", default = "REF", help = "ref count col name"),
+	make_option("--alt_col", default = "ALT", help = "alt count col name"),
+	make_option("--gene_col", default = "GENE", help = "pos col name"),
+	make_option("--aa_col", default = "HGVS_P", help = "ref count col name"),
+	make_option("--cdna_col", default = "HGVS_C", help = "alt count col name"),
+	make_option("--maf_col", default = "TUMOR.FA", help = "maf col name"),
+	make_option("--dp_col", default = "TUMOR.DP", help = "depth col name"),
+	make_option("--ad_col", default = "TUMOR.AD", help = "AD col name"),
+	make_option("--ref_count_col", default = NULL, help = "ref count col name"),
+	make_option("--alt_count_col", default = NULL, help = "alt count col name"),
+	make_option("--total_cn_col", default = NULL, help = "total cn col name (positive integer)"),
+	make_option("--major_cn_col", default = "facetsTCN_EM", help = "major cn col name (positive integer)"),
+	make_option("--minor_cn_col", default = "facetsLCN_EM", help = "minor cn col name (positive integer)")
+	
 )
 
 parser <- OptionParser(usage = "%prog [options] mutation_file", option_list = optList);
@@ -22,83 +42,114 @@ if (is.null(opt$outFile)) {
 files <- arguments$args;
 if (length(files)>1) { cat ("Only converting first file. Everything else is ignored!!!!!\n")}
 
-make_pyclone_input <- function(muts, sample_col="TUMOR_SAMPLE", 
-	mutation_id_col=NULL, gene_col="GENE", aa_col="HGVS_P", cdna_col="HGVS_C",
-	chrom_col="CHROM", pos_col="POS", ref_col="REF", alt_col="ALT",
-	ref_counts_col=NULL, var_counts_col=NULL, ad_col="TUMOR.AD", MAF_col="TUMOR.FA", dp_col="TUMOR.DP", 
-	major_cn_col=NULL, minor_cn_col="facetsLCN_EM", total_cn_col="facetsTCN_EM", 
-	total_or_allelic="allelic") {
+dat <- read.delim(files[1], as.is=T)
 
-	empty_table <- 	matrix(nrow=0, ncol=6)
-	colnames(empty_table) <- c("mutation_id", "ref_counts", "var_counts", "normal_cn", "major_cn", "minor_cn")
+if(nrow(dat)>0) {
 
-	if (total_or_allelic =="allelic") { 
-		if (!minor_cn_col %in% colnames(muts)){stop ("minor_cn_col not found")}
-		muts <- muts[which(muts[,minor_cn_col] %in% seq(0,1000)),,drop=F] 
-	}
-	if(nrow(muts)==0) { return(empty_table)}
+	cat ("***Extracting copy number fields...\n")
+	if (opt$total_or_allelic =="allelic") { 
+		if (is.null(opt$major_cn_col) | is.null(opt$minor_cn_col)){
+			stop ("You need to specify valid major_cn_col and minor_cn_col for allelic CN\n")
+		}
+		if (!opt$major_cn_col %in% colnames(dat) | !opt$minor_cn_col %in% colnames(dat)) {
+			stop ("You need to specify valid major_cn_col and minor_cn_col for allelic CN\n")
+		}
+		major_cn <- as.numeric(dat[,opt$major_cn_col])
+		minor_cn <- as.numeric(dat[,opt$minor_cn_col])
+	} else if (opt$total_or_allelic =="total") { 
+		if (is.null(opt$total_cn_col) ){
+			stop ("You need to specify valid total_cn_col for total CN\n")
+		}
+		if (!opt$total_cn_col %in% colnames(dat)) {
+			stop ("You need to specify valid total_cn_col for total CN\n")
+		}
+		major_cn <- as.numeric(dat[,opt$total_cn_col])
+		minor_cn <- 0
+	} else { stop ("total_or_allelic can be total or allelic\n") }
 
-	if (!is.null(ref_counts_col) & !is.null(var_counts_col)) {
-		if (ref_counts_col %in% colnames(muts) & var_counts_col %in% colnames(muts)) {
+	cat ("***Extracting mutation fields...\n")
+	option = 0;
+	if (option == 0 & !is.null(opt$ref_counts_col) & !is.null(opt$var_counts_col)) {
+		if (opt$ref_counts_col %in% colnames(dat) & opt$var_counts_col %in% colnames(dat)) {
 			cat("Using ref_counts_col and var_counts_col\n")
-			ref_counts = muts[,ref_counts_col] 
-			var_counts = muts[,var_counts_col]
-		} else { cat("ref_counts_col and var_counts_col not valid. Trying something else\n") }
-	} else if (!is.null(ad_col)) {
-		if (ad_col %in% colnames(muts)) { 
-			cat("Using ad_col\n")	
-			tt <- lapply(muts[,ad_col], strsplit, split=",")
-			ref_counts <- unlist(lapply(tt, function(x){x[[1]][1]}))
-			var_counts <- unlist(lapply(tt, function(x){x[[1]][2]}))
-		} else { cat ("ad_col not in column names. Trying something else.") }
-	} else if (!is.null(MAF_col) & !is.null(dp_col)) {
-		if (MAF_col %in% colnames(muts) & dp_col %in% colnames(muts)) {
-			cat("Using MAF_col and dp_col \n")
-			muts[,MAF_col] <- gsub("%", "", muts[,MAF_col]); 
-			if (any(as.numeric(muts[,MAF_col])>1)) { muts[,MAF_col] <- as.numeric(muts[,MAF_col])/100 }
-			var_counts <- round(as.numeric(muts[,MAF_col])*as.numeric(muts[,dp_col])) 
-			ref_counts <- as.numeric(muts[,dp_col])-var_counts 
-		} else { cat ("MAF_col and dp_col not in column names. Trying something else.") }
-	} else { stop ("ref_counts_col and var_counts_col, ad_col, or MAF_col and dp_col required.\n") }
-		
-	if (is.null(major_cn_col) & total_or_allelic =="allelic") { 
-		if (!total_cn_col %in% colnames(muts) | !minor_cn_col %in% colnames(muts)){
-			stop("total_cn_col or minor_cn_col not found")}
-		major_cn <- as.numeric(muts[,total_cn_col])-as.numeric(muts[,minor_cn_col]) 
+			option = "ref_var"
+		}
+	} 
+	if (option == 0 & !is.null(opt$ad_col)) {
+		if (opt$ad_col %in% colnames(dat)) {
+			cat ("ad_col is valid. Using ad_col.\n")
+			option = "ad"
+		}
 	}
-	if (is.null(major_cn_col) & total_or_allelic =="total") { 
-		if (!total_cn_col %in% colnames(muts)) { stop ("total_cn_col not found")}
-		major_cn <- muts[,total_cn_col] 
+	if (option == 0 & !is.null(opt$maf_col)) {
+		if (opt$maf_col %in% colnames(dat) & opt$dp_col %in% colnames(dat)) {
+			cat ("maf_col and dp_col are valid. Using maf_col+dp_col.\n")
+			option = "maf_dp"
+		}
 	}
-	if (total_or_allelic =="allelic") { 
-		if (!minor_cn_col %in% colnames(muts)) { stop ("minor_cn_col not found")}
-		minor_cn <- muts[,minor_cn_col]
+	if (option == 0) {
+		stop ("ref_counts_col and var_counts_col, ad_col, or MAF_col and dp_col required.\n")
 	}
-	if (total_or_allelic =="total") { minor_cn <- 0 }
-
-	if (!is.null(mutation_id_col)) { rownames(muts) <- muts[,mutation_id_col] 
+	
+	if (option == "ref_var") {
+		t_ref_count=as.numeric(dat[,opt$ref_counts_col])
+		t_alt_count=as.numeric(dat[,opt$var_counts_col])
+	} else if (option == "ad") {
+		tt <- lapply(dat[,opt$ad_col], strsplit, split=",")	
+		t_ref_count <- as.numeric(unlist(lapply(tt, function(x){x[[1]][1]})))
+		t_alt_count <- as.numeric(unlist(lapply(tt, function(x){x[[1]][2]})))
+	} else if (option == "maf_dp") {
+		if (any(as.numeric(dat[,opt$maf_col])>1)) { 
+			muts[,opt$maf_col] <- as.numeric(muts[,opt$maf_col])/100 }
+		t_alt_count <- round(as.numeric(muts[,opt$maf_col])*as.numeric(muts[,opt$dp_col])) 
+		t_ref_count <- as.numeric(muts[,opt$dp_col])-var_counts 
+	} 
+								
+	cat ("***Getting mutation IDs...\n")
+	if (!is.null(opt$mutation_id_col)) { 
+		if (opt$mutation_id_col %in% colnames(dat)) {
+			mutation_id <- dat[,opt$mutation_id_col] 
+		} else { stop ("mutation_id_col invalid\n")
+		}
 	} else {
-		id_fields <- c(chrom_col, pos_col, ref_col, alt_col, gene_col, aa_col, cdna_col)
-		id_fields <- id_fields[which(id_fields %in% colnames(muts))]
+		id_fields <- c(opt$chrom_col, opt$pos_col, opt$ref_col, opt$alt_col, 
+			opt$gene_col, opt$aa_col, opt$cdna_col)
+		id_fields <- id_fields[which(id_fields %in% colnames(dat))]
 		cat ("mutation_id_col not provided. Constructing ids from: \n")
 		cat (toString(id_fields)); cat("\n")
-		x <- muts[,id_fields]
-		rownames(muts) <- gsub(" ", "", gsub(", ", "_", apply(x, 1, toString)), fixed=T)
+		x <- dat[,id_fields]
+		mutation_id <- gsub(" ", "", gsub(", ", "_", apply(x, 1, toString)), fixed=T)
+		if (length(mutation_id) != length(unique(mutation_id))) {
+			stop ("The columns provided do not allow generating unique mutation IDs\n")
+		}
 	}
 
-	res <- cbind(rownames(muts), ref_counts, var_counts, 2, major_cn, minor_cn)
-	colnames(res) <- c("mutation_id", "ref_counts", "var_counts", "normal_cn", "major_cn", "minor_cn")
-	res <- res[which(as.numeric(res[,"major_cn"]) > 0),,drop=F]
-	if(nrow(muts)==0) { return(empty_table)}
+	out <- data.frame(
+		mutation_id=mutation_id,
+		ref_counts=t_ref_count,
+		var_counts=t_alt_count,
+		normal_cn=2,
+		major_cn=major_cn,
+		minor_cn=minor_cn)
+		
+	cat ("***Last checks...\n")
+		
+	droprows <- which(!out[,"minor_cn"] %in% seq(0,1000))
+	if(length(droprows)>0) { 
+		cat ("Some rows do not have minor_cn. Dropping", length(droprows) ,"rows:\n")
+		out <- out[-droprows,,drop=F] 
+	}
+	if (nrow(out)==0) { 
+		cat ("No more data after dropping muts without minor_cn\n")
+		out <- matrix(nrow=0,ncol=6)
+		colnames(out) <- c("mutation_id", "ref_counts", "var_counts", "normal_cn", "major_cn", "minor_cn")
+	}
 
-	res
+} else {
+	out <- matrix(nrow=0,ncol=6)
+	colnames(out) <- c("mutation_id", "ref_counts", "var_counts", "normal_cn", "major_cn", "minor_cn")
 }
 
-dat <- read.delim(files[1], as.is=T)
-write.table(make_pyclone_input(dat), file=opt$outFile, sep="\t", row.names=F, quote=F, na="")
-	
-	
-	
-	
-	
-	
+
+write.table(out, file=opt$outFile, sep="\t", row.names=F, quote=F, na="")
+

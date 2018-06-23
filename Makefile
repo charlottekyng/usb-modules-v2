@@ -149,11 +149,9 @@ TARGETS += pyclone
 pyclone : 
 	$(call RUN_MAKE,usb-modules-v2/clonality/pyclone.mk)
 
-TAREGETS += expands
+TARGETS += expands
 expands :
 	$(call RUN_MAKE,usb-modules-v2/clonality/expands.mk)
-
-
 
 TARGETS += star_fusion
 star_fusion :

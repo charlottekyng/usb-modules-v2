@@ -68,6 +68,12 @@ absolute/step3/reviewed/all$(PROJECT_PREFIX).$(whoami).ABSOLUTE.table.txt : abso
 	$(ABSOLUTE_STEP3) --obj.name all$(PROJECT_PREFIX) --analyst $(whoami) \
 	--outdir absolute/step3 --modes.fn $(<) --pp.calls $(<<)")
 
+define absolute_step3
+absolute/step3/reviewed/SEG_MAF/$1_$2.segtab.txt : absolute/step3/reviewed/all$(PROJECT_PREFIX).$(whoami).ABSOLUTE.table.txt
+	
+endef
+$(foreach pair,$(SAMPLE_PAIRS),\
+	$(eval $(call absolute_step3,$(tumor.$(pair)),$(normal.$(pair)))))
 
 
 
