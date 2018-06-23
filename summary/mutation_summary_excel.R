@@ -44,45 +44,48 @@ output <- lapply(files, function(file) {
 
 	tab <- tab[,output_fields2]
 
-	if("ANN[*].IMPACT" %in% colnames(tab)){
-		impact <- tab[,"ANN[*].IMPACT"]
-		impact_index <- lapply(impact, function(x) {
-			xx <- unlist(strsplit(x, "|", fixed=T))
-			if ("HIGH" %in% xx) { which(xx=="HIGH") 
-			} else if ("MODERATE" %in% xx) { which(xx=="MODERATE")
-			} else if ("LOW" %in% xx) { which(xx=="LOW") 
-			} else if ("MODIFIER" %in% xx) {which (xx=="MODIFIER") }
-		})
-	}
+	if(nrow(tab)==0) { tab
+	} else {
+		if("ANN[*].IMPACT" %in% colnames(tab)){
+			impact <- tab[,"ANN[*].IMPACT"]
+			impact_index <- lapply(impact, function(x) {
+				xx <- unlist(strsplit(x, "|", fixed=T))
+					if ("HIGH" %in% xx) { which(xx=="HIGH") 
+					} else if ("MODERATE" %in% xx) { which(xx=="MODERATE")
+					} else if ("LOW" %in% xx) { which(xx=="LOW") 
+					} else if ("MODIFIER" %in% xx) {which (xx=="MODIFIER") }
+			})
+		}
 
-	if("ANN[*].HGVS_P" %in% colnames(tab)){
-		aa <- tab[,"ANN[*].HGVS_P"]
-		aa_index <- lapply(aa, function(x) {
-			xx <- unlist(strsplit(x, "|", fixed=T))
-			grep ("p\\.", xx)
-		})
-	}
+		if("ANN[*].HGVS_P" %in% colnames(tab)){
+			aa <- tab[,"ANN[*].HGVS_P"]
+			aa_index <- lapply(aa, function(x) {
+				xx <- unlist(strsplit(x, "|", fixed=T))
+				grep ("p\\.", xx)
+			})
+		}
 
-	for (i in grep("ANN[*]", colnames(tab), fixed=T)) {
-		for (j in 1:nrow(tab)) {
-			val <- tab[j,i]
-			val <- unlist(strsplit(val, "|", fixed=T))
-			if (length(intersect(impact_index[[j]], aa_index[[j]]))>0) {
-				select <- intersect(impact_index[[j]], aa_index[[j]])
-			} else {
-				select <- impact_index[[j]]
+		for (i in grep("ANN[*]", colnames(tab), fixed=T)) {
+			for (j in 1:nrow(tab)) {
+				val <- tab[j,i]
+				val <- unlist(strsplit(val, "|", fixed=T))
+				if (length(intersect(impact_index[[j]], aa_index[[j]]))>0) {
+					select <- intersect(impact_index[[j]], aa_index[[j]])
+				} else {
+					select <- impact_index[[j]]
+				}
+				tab[j,i] <- toString(val[select])
 			}
-			tab[j,i] <- toString(val[select])
+		}	
+		## for some reason, somewhere along the annotation for indels, ",0" is added to the FA
+		# This is a hack to get rid of it
+		for (i in c("TUMOR.FA", "NORMAL.FA", "TUMOR.AF", "NORMAL.AF")) {
+			if (i %in% colnames(tab)){
+				tab[,i] <- gsub(",0$", "", tab[,i], perl=T)
+			}
 		}
-	}	
-## for some reason, somewhere along the annotation for indels, ",0" is added to the FA
-# This is a hack to get rid of it
-	for (i in c("TUMOR.FA", "NORMAL.FA", "TUMOR.AF", "NORMAL.AF")) {
-		if (i %in% colnames(tab)){
-			tab[,i] <- gsub(",0$", "", tab[,i], perl=T)
-		}
+		tab
 	}
-	tab
 })
 
 output_fields <- output_fields[which(output_fields %in% unlist(lapply(output,colnames)))]
