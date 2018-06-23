@@ -101,6 +101,12 @@ if (length(arguments$args) < 1) {
 genes <- read.delim(opt$genesFile, as.is=T, check.names=F)
 genes$chrom <- gsub("chr", "", genes$chrom)
 
+chroms <- unique(genes$chrom)
+chrom_levels <- c(1:22, "X", "Y", "M", "MT")
+chrom_levels <- c(chrom_levels, setdiff(chroms, chrom_levels))
+
+genes$chrom <- factor(genes$chrom, levels=chrom_levels)
+
 genesGR <- genes %$% GRanges(seqnames = chrom, ranges = IRanges(start, end), band = band, hgnc = hgnc)
 			
 mm <- lapply(facetsFiles, function(f) {
@@ -148,11 +154,10 @@ for (f in facetsFiles) {
 
 save.image(paste(opt$outFile, ".RData", sep=""))
 
-#mm <- left_join(genes, join_all(mm, type = 'full', by="hgnc")) %>% arrange(as.integer(chrom), start, end)
-mm <- left_join(genes, join_all(lapply(seq(1,length(mm),by=10), function(i) {
-	join_all(mm[i:min(length(mm), i+9)], type='full', by='hgnc')
-})), type='full', by='hgnc')  %>% arrange(as.integer(chrom), start, end)
-
+mm <- lapply(mm, function(x){
+	x[match(genes$hgnc, x$hgnc),]
+})
+mm <- cbind(genes, do.call("cbind", mm))
 
 seg_sample <- seg_chr <- seg_band <- seg_start <- seg_end <- seg_cnlr <- seg_genes <- seg_type <- seg_GLtype <- NA
 for (i in grep("GL", colnames(mm))) {
