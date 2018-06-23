@@ -198,7 +198,7 @@ if(nrow(pointmuts)>0) {
 }
 
 write.table(signatures, file=paste(opt$outPrefix, ".txt", sep=""), sep="\t", col.names=NA, quote=F, na="")
-if(nrow(sigs) > 0) {
+if(exists("ws")) {
 	save(signatures, ws, file=paste(opt$outPrefix, ".RData", sep=""))
 } else {
 	save(signatures, file=paste(opt$outPrefix, ".RData", sep=""))

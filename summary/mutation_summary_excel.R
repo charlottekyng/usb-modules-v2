@@ -4,10 +4,7 @@ suppressPackageStartupMessages(library("xlsx"));
 
 optList <- list(
 	make_option("--outFile", default = NULL, help = "output file"),
-	make_option("--outputFormat", default = "EXCEL", help = "output Format, EXCEL or TXT"),
-	make_option("--concatInput", default = F, help = "concatenate input files into a single file"),
-	make_option("--makeChocolateBar", default = F, help = "include chocolate bar"),
-	make_option("--makeMutationHeatmap", default = F, help = "include mutation heatmap")
+	make_option("--outputFormat", default = "EXCEL", help = "output Format, EXCEL or TXT")
 )
 parser <- OptionParser(usage = "%prog [options] mutation_table", option_list = optList);
 arguments <- parse_args(parser, positional_arguments = T);
@@ -37,15 +34,19 @@ output_fields = c("TUMOR_SAMPLE", "NORMAL_SAMPLE", "ANN[*].GENE", "ANN[*].HGVS_P
 
 output <- lapply(files, function(file) {
 	tab <- read.delim(file, as.is=T, check.names=F)
-	print("These fields are not present in the input file - removing!")
-	print(output_fields[which(!output_fields %in% colnames(tab))])
+	
+	
+	missing_fields <- output_fields[which(!output_fields %in% colnames(tab))]
+	if(length(missing_fields)>0) {
+		print("These fields are not present in the input file - removing!")
+		print(missing_fields)
+	}
 
 	output_fields2 <- output_fields[which(output_fields %in% colnames(tab))]
 
 	tab <- tab[,output_fields2]
 
-	if(nrow(tab)==0) { tab
-	} else {
+	if(nrow(tab)>0) { 
 		if("ANN[*].IMPACT" %in% colnames(tab)){
 			impact <- tab[,"ANN[*].IMPACT"]
 			impact_index <- lapply(impact, function(x) {
@@ -84,8 +85,8 @@ output <- lapply(files, function(file) {
 				tab[,i] <- gsub(",0$", "", tab[,i], perl=T)
 			}
 		}
-		tab
 	}
+	tab
 })
 
 output_fields <- output_fields[which(output_fields %in% unlist(lapply(output,colnames)))]
