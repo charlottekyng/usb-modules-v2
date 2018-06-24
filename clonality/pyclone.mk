@@ -9,17 +9,31 @@ LOGDIR ?= log/pyclone.$(NOW)
 
 pyclone : $(foreach normal_sample,$(NORMAL_SAMPLES),pyclone/tables/$(normal_sample).cluster.txt)
 
-pyclone/tables/%.cluster.txt : pyclone/configs/%.yaml pyclone/runs/%/alpha.tsv.bz2
-	$(INIT) $(MKDIR) pyclone/tables; \
-	$(PYCLONE) build_table --config_file $< --table_type cluster \
-	--out_file $@ --burnin $(PYCLONE_BURNIN) && \
+# There are edge cases with no mutations...
+CHECK_PYCLONE_CONFIG = if [ `grep tumour_content $1 | wc -l` -eq 0 ] ; then touch $2; else $3; fi
+
+pyclone/tables/%.cluster.txt : pyclone/tables/%.loci.txt
+	$(INIT) \
+	if [ `wc -l $< | cut -f1 -d' '` -gt 0 ]; then \
+		ml $(R_MODULE);\
+		$(PYCLONE_MAKE_CLUSTER_TABLE) --outFile $@ $^; \
+	else \
+		touch $@; \
+	fi
+
+pyclone/tables/%.loci.txt : pyclone/configs/%.yaml pyclone/runs/%/alpha.tsv.bz2
+	$(call CHECK_PYCLONE_CONFIG,$<,$@,\
+	$(call RUN,1,$(RESOURCE_REQ_LOW_MEM),$(RESOURCE_REQ_SHORT),,"\
 	$(PYCLONE) build_table --config_file $< --table_type loci \
 	--out_file $(subst cluster,loci,$@) --burnin $(PYCLONE_BURNIN) && \
-	$(PYTHON_ENV_DEACTIVATE)
+	$(PYTHON_ENV_DEACTIVATE)"))
 
-pyclone/runs/%/alpha.tsv.bz2 : pyclone/configs/%.yaml 
+pyclone/runs/%/alpha.tsv.bz2 : pyclone/configs/%.yaml
+	$(MKDIR) $(@D); \
+	$(call CHECK_PYCLONE_CONFIG,$<,$@,\
 	$(call RUN,1,$(RESOURCE_REQ_LOW_MEM),$(RESOURCE_REQ_SHORT),,"\
-	$(PYCLONE) run_analysis --config_file $< --seed $(PYCLONE_SEED) && $(PYTHON_ENV_DEACTIVATE)")
+	$(PYCLONE) run_analysis --config_file $< --seed $(PYCLONE_SEED) && \
+	$(PYTHON_ENV_DEACTIVATE)"))
 
 define pyclone_make_config
 pyclone/configs/$1.yaml : $$(foreach tumor,$2,facets/cncf/$$(tumor)_$1.out pyclone/mutations/$$(tumor)_$1.mutations.yaml)
@@ -48,13 +62,15 @@ pyclone/configs/$1.yaml : $$(foreach tumor,$2,facets/cncf/$$(tumor)_$1.out pyclo
 	for cncf in $$(filter %.out,$$^); do \
 		samplename=`basename $$$$cncf | cut -f1 -d'_'`; \
 		tnname=`basename $$$$cncf | cut -f1 -d'.'`; \
-		echo "  $$$$samplename:" >> $$@; \
-		echo "    tumour_content: " >> $$@; \
-		echo -n "      value: " >> $$@; \
-		echo `grep Purity $$$$cncf | cut -f2 -d'=' | sed 's/NA/0.1/;'` >> $$@; \
-		echo -n "    mutations_file: pyclone/mutations/" >> $$@; \
-		echo "$$$${tnname}.mutations.yaml" >> $$@; \
-		echo "    error_rate: 0.001"  >> $$@; \
+		if [ `wc -l pyclone/mutations/$$$${tnname}.mutations.yaml | cut -f1 -d' '` -gt 1 ]; then \
+			echo "  $$$$samplename:" >> $$@; \
+			echo "    tumour_content: " >> $$@; \
+			echo -n "      value: " >> $$@; \
+			echo `grep Purity $$$$cncf | cut -f2 -d'=' | sed 's/NA/0.1/;'` >> $$@; \
+			echo -n "    mutations_file: pyclone/mutations/" >> $$@; \
+			echo "$$$${tnname}.mutations.yaml" >> $$@; \
+			echo "    error_rate: 0.001"  >> $$@; \
+		fi; \
 	done
 endef
 $(foreach set,$(SAMPLE_SETS),\
