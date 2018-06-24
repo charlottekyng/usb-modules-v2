@@ -12,6 +12,12 @@ pyclone : $(foreach normal_sample,$(NORMAL_SAMPLES),pyclone/tables/$(normal_samp
 # There are edge cases with no mutations...
 CHECK_PYCLONE_CONFIG = if [ `grep tumour_content $1 | wc -l` -eq 0 ] ; then touch $2; else $3; fi
 
+# not used yet, and probably does not take care of empty files
+pyclone/all$(PROJECT_PREFIX).num_clust.txt : $(foreach normal_sample,$(NORMAL_SAMPLES),pyclone/tables/$(normal_sample).cluster.txt)
+	$(INIT) \
+	for cl in $^; do awk '$3>1&&$4>0.05' $cl | cut -f1 | sort | uniq -c >>$@;
+	done
+	
 pyclone/tables/%.cluster.txt : pyclone/tables/%.loci.txt
 	$(INIT) \
 	if [ `wc -l $< | cut -f1 -d' '` -gt 0 ]; then \
