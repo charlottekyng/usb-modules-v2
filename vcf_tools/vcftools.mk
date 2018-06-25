@@ -364,7 +364,7 @@ alltables/allSS$(PROJECT_PREFIX).%.txt : $(foreach set,$(SAMPLE_SETS),tables/$(s
 endif
 ifdef SAMPLE_PAIRS
 alltables/allTN$(PROJECT_PREFIX).%.txt : $(foreach pair,$(SAMPLE_PAIRS),tables/$(pair).%.txt)
-	$(call RUN,1,$(RESOURCE_REQ_MEDIUM_MEM),$(RESOURCE_REQ_VSHORT),$(R_MODULE),"\
+	$(call RUN,1,$(RESOURCE_REQ_HIGH_MEM),$(RESOURCE_REQ_VSHORT),$(R_MODULE),"\
 	$(RBIND) --tumorNormal $^ > $@")
 endif
 
