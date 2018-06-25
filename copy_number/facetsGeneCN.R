@@ -155,9 +155,9 @@ for (f in facetsFiles) {
 save.image(paste(opt$outFile, ".RData", sep=""))
 
 mm <- lapply(mm, function(x){
-	x[match(genes$hgnc, x$hgnc),]
+	x[match(genes$hgnc, x$hgnc),-1]
 })
-mm <- cbind(genes, do.call("cbind", mm))
+mm <- cbind(genes, bind_cols(mm))
 
 seg_sample <- seg_chr <- seg_band <- seg_start <- seg_end <- seg_cnlr <- seg_genes <- seg_type <- seg_GLtype <- NA
 for (i in grep("GL", colnames(mm))) {

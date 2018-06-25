@@ -95,7 +95,7 @@ facets/cncf/all$(PROJECT_PREFIX).summary.txt : $(foreach pair,$(SAMPLE_PAIRS),fa
 } >$@
 
 facets/cncf/all$(PROJECT_PREFIX).geneCN.GL_ASCNA.txt : $(foreach pair,$(SAMPLE_PAIRS),facets/cncf/$(pair).cncf.txt) $(foreach pair,$(SAMPLE_PAIRS),facets/cncf/$(pair).Rdata)
-	$(call RUN,1,$(RESOURCE_REQ_MEDIUM_MEM),$(RESOURCE_REQ_SHORT),$(R_MODULE),"\
+	$(call RUN,1,$(RESOURCE_REQ_HIGH_MEM),$(RESOURCE_REQ_SHORT),$(R_MODULE),"\
 	$(FACETS_GENE_CN) $(FACETS_GENE_CN_OPTS) --outFile $(@D)/all$(PROJECT_PREFIX).geneCN $(filter %.cncf.txt,$^)")
 
 facets/cncf/all$(PROJECT_PREFIX).cncf.txt : $(foreach pair,$(SAMPLE_PAIRS),facets/cncf/$(pair).cncf.txt)
