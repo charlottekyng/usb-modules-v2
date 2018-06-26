@@ -134,9 +134,9 @@ if(nrow(dat)>0) {
 		
 	cat ("***Last checks...\n")
 		
-	droprows <- which(!out[,"minor_cn"] %in% seq(0,1000))
+	droprows <- which(!out[,"minor_cn"] %in% seq(0,1000) | out[,"major_cn"] == 0)
 	if(length(droprows)>0) { 
-		cat ("Some rows do not have minor_cn. Dropping", length(droprows) ,"rows:\n")
+		cat ("Some rows do not have minor_cn or 0 major_cn. Dropping", length(droprows) ,"rows:\n")
 		out <- out[-droprows,,drop=F] 
 	}
 	if (nrow(out)==0) { 
