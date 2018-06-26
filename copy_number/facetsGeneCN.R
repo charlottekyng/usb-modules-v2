@@ -159,6 +159,8 @@ mm <- lapply(mm, function(x){
 })
 mm <- cbind(genes, bind_cols(mm))
 
+save.image(paste(opt$outFile, ".RData", sep=""))
+
 seg_sample <- seg_chr <- seg_band <- seg_start <- seg_end <- seg_cnlr <- seg_genes <- seg_type <- seg_GLtype <- NA
 for (i in grep("GL", colnames(mm))) {
 	for(chr in intersect(c(1:22,"X"), unique(mm$chrom))) {

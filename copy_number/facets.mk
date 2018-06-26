@@ -108,6 +108,6 @@ facets/cncf/all$(PROJECT_PREFIX).cncf.txt : $(foreach pair,$(SAMPLE_PAIRS),facet
 facets/cncf/all$(PROJECT_PREFIX).cncf.pdf.tar.gz : $(foreach pair,$(SAMPLE_PAIRS),facets/cncf/$(pair).cncf.pdf) $(foreach pair,$(SAMPLE_PAIRS),facets/cncf/$(pair).logR.pdf)
 	$(INIT) tar -czf $@ $^
 
-include usb-modules-v2/variant_callers/TVC.mk
-include usb-modules-v2/bam_tools/processBam.mk
-include usb-modules-v2/variant_callers/gatkVariantCaller.mk
+#include usb-modules-v2/variant_callers/TVC.mk
+#include usb-modules-v2/bam_tools/processBam.mk
+#include usb-modules-v2/variant_callers/gatkVariantCaller.mk

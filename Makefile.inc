@@ -393,6 +393,10 @@ VARSCAN_GENE_CN = $(RSCRIPT) usb-modules-v2/copy_number/varscanCNVGeneCN.R
 
 MUTSIGCV ?= $(USR_DIR)/local/MutSigCV_1.4/run_MutSigCV.sh
 MCR ?= $(USR_DIR)/local/MCR_R2013a_glnxa64/v81/
+MUTSIGCV_MAKE_INPUT ?= $(RSCRIPT) usb-modules-v2/siggenes/make_mutSigCV_input.R
+
+YOUN_AND_SIMON ?= $(RSCRIPT) usb-modules-v2/siggenes/youn_and_simon.R
+YOUN_AND_SIMON_MAKE_INPUT ?= $(RSCRIPT) usb-modules-v2/siggenes/youn_and_simon_make_input.R
 
 GISTIC ?= $(USR_DIR)/local/gistic_2.0.23/gp_gistic2_from_seg
 

@@ -385,5 +385,8 @@ TARGETS += mutsigcv
 mutsigcv :
 	$(call RUN_MAKE,usb-modules-v2/siggenes/mutsigcv.mk)
 
+TARGETS += youn_and_simon
+youn_and_simon :
+	$(call RUN_MAKE,usb-modules-v2/siggenes/youn_and_simon.mk)
 
 .PHONY : $(TARGETS)
