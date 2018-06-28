@@ -81,8 +81,9 @@ make_mutSigCV_input <- function(mut_tab,
 		"Reference_Allele", "Tumor_Seq_Allele1", "Tumor_Seq_Allele2", "Variant_Classification", "dbSNP_Val_Status")
 
 	if(!is.null(symbol_checker_file)) {
+		cat("Running symbol converter.\n")
 		conv <- read.delim(symbol_checker_file, as.is=T)
-		conv <- conv[match(res$gene, conv$Approved),,drop=F]
+		conv <- conv[match(res$gene, conv$Approved.symbol),,drop=F]
 		res$gene[which(!is.na(conv$Input))] <- conv$Input[which(!is.na(conv$Input))]
 	}
 	write.table(res, file=outfile, sep="\t", row.names=F, na="", quote=F)
