@@ -29,7 +29,7 @@ pyclone/tables/%.cluster.txt : pyclone/tables/%.loci.txt
 
 pyclone/tables/%.loci.txt : pyclone/configs/%.yaml pyclone/runs/%/alpha.tsv.bz2
 	$(call CHECK_PYCLONE_CONFIG,$<,$@,\
-	$(call RUN,1,$(RESOURCE_REQ_LOW_MEM),$(RESOURCE_REQ_SHORT),,"\
+	$(call RUN,1,$(RESOURCE_REQ_LOW_MEM),$(RESOURCE_REQ_LONG),,"\
 	$(PYCLONE) build_table --config_file $< --table_type loci \
 	--out_file $(subst cluster,loci,$@) --burnin $(PYCLONE_BURNIN) && \
 	$(PYTHON_ENV_DEACTIVATE)"))
