@@ -2,17 +2,16 @@
 
 set -o pipefail
 
-RMODULE="module load R/3.3.0-goolf-1.7.20"
+RMODULE="ml purge && module load R/3.5.0-goolf-1.7.20"
 RCMD="Rscript"
-NAME="R"
-#TMPDIR="$HOME/share/tmp"
+NAME="Rshell"
 TMPDIR="/scicore/scratch"
-#QUEUE="jrf.q"
 LOGDIR=.
 MEM="1G"
 TIME="00:29:59"
+QOS="30min"
 PARALLEL=1
-QSUB="perl usb-modules-v2/scripts/qsub.pl"
+QSUB="python usb-modules-v2/scripts/run.py"
 
 while getopts "e:s:m:n:l:p:" opt; do
   case $opt in
@@ -32,7 +31,7 @@ while getopts "e:s:m:n:l:p:" opt; do
     NAME=$OPTARG
       ;;
     s)
-    SGE=true
+    SLURM=true
       ;;
     \:)
       echo "Argument missing: -$OPTARG" >&2
@@ -49,13 +48,13 @@ done
 echo "#---------------------------------";
 
 if [[ $PARALLEL -gt 1 ]]; then
-    PE="-pe smp $PARALLEL"
+	PE="-n $PARALLEL"
 fi
 
 umask 002
 mkdir -p $LOGDIR
 echo "Here" >&2
- 
+
 if [[ -n "$R" ]]; then 
     TMP=$(mktemp --tmpdir=${TMPDIR})
     #TMP=$(mktemp -t x)
@@ -64,12 +63,13 @@ if [[ -n "$R" ]]; then
     echo "${R}" >> ${TMP}
     echo "${R}" > $LOGDIR/$NAME.R
     chmod +rx ${TMP}
-    if [[ -n "$SGE" ]]; then
+    if [[ -n "$SLURM" ]]; then
         mkdir -p $LOGDIR
-        echo "umask 002; ${RMODULE}; ${RCMD} ${TMP}" | $QSUB -- -cwd -V -now n -N X$NAME $PE -l runtime=$TIME,membycore=$MEM -o $LOGDIR/$NAME.log -j y -b n
+#        echo "umask 002; ${RMODULE}; ${RCMD} ${TMP}" | $QSUB -- -cwd -V -now n -N X$NAME $PE -l runtime=$TIME,membycore=$MEM -o $LOGDIR/$NAME.log -j y -b n
+	echo "umask 002; ${RMODULE}; ${RCMD} ${TMP}" | $QSUB --log_file $LOGDIR/$NAME.log $PE -m $MEM -c -p X$NAME -g SLURM --qos $QOS -w $TIME -o $LOGDIR/$NAME.out 
         RET_CODE=$?
     else
-        $RCMD ${TMP} | tee -a $LOGDIR/$NAME.log
+        $RMODULE ; $RCMD ${TMP} | tee -a $LOGDIR/$NAME.log
         RET_CODE=$?
     fi
     rm -f ${TMP}

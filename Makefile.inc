@@ -96,6 +96,7 @@ COUNT_SAMPLES = $(shell expr `sed 's/\..*//; s:.*/::' <<< $1 | grep -o "_" | wc 
 ############################################
 
 RESOURCE_REQ ?= medium
+include usb-modules-v2/genome_inc/$(REF).inc
 include usb-modules-v2/resources.inc
 
 #####################################
@@ -188,15 +189,18 @@ JAR_DIR ?= $(USR_DIR)/local/lib/java
 SCRIPTS_DIR ?= $(USR_DIR)/local/scripts
 BIN_DIR ?= $(USR_DIR)/local/bin
 MODULE_SCRIPTS_DIR ?= usb-modules-v2/scripts
+LD_LIBRARY_PATH = $(USR_DIR)/local/MCR_R2014a/v83/runtime/glnxa64:$(USR_DIR)/local/MCR_R2014a/v83/bin/glnxa64:$(USR_DIR)/local/MCR_R2014a/v83/sys/os/glnxa64
 
 export TMPDIR := /scicore/scratch
 export PATH := $(USR_DIR):$(PATH)
+export LD_LIBRARY_PATH := $(LD_LIBRARY_PATH)
 
 SHELL ?= /bin/bash
 UNZIP ?= /usr/bin/unzip
+GZIP ?= gzip -f
 
 PERL_MODULE ?= Perl/5.22.2-goolf-1.7.20
-R_MODULE ?= R/3.4.2-goolf-1.7.20
+R_MODULE ?= R/3.5.0-goolf-1.7.20
 JAVA6_MODULE ?= Java/1.6.0_24
 JAVA7_MODULE ?= Java/1.7.0_80
 JAVA8_MODULE ?= Java/1.8.0_92
@@ -207,7 +211,8 @@ BEDTOOLS_MODULE ?= BEDTools/2.26.0-goolf-1.7.20
 IGVTOOLS_MODULE ?= IGVTools/2.3.60-Java-1.7.0_21
 VCFTOOLS_MODULE ?= VCFtools/0.1.14-goolf-1.7.20-Perl-5.22.2
 BCL2FASTQ_MODULE ?= bcl2fastq/2.17.1.14-goolf-1.7.20
-TRIM_GALORE_MODULE = Trim_Galore/0.4.4-goolf-1.7.20-Perl-5.22.2
+TRIM_GALORE_MODULE ?= Trim_Galore/0.4.4-goolf-1.7.20-Perl-5.22.2
+CUTADAPT_MODULE ?= cutadapt/1.16-goolf-1.7.20-Python-2.7.11
 HTSLIB_MODULE ?= HTSlib/1.3.1-goolf-1.7.20
 TABIX_MODULE ?= $(HTSLIB_MODULE)
 FASTQC_MODULE ?= FastQC/0.11.4-Java-1.7.0_21
@@ -219,6 +224,7 @@ STAR_FUSION_MODULE ?= STAR-Fusion/0.6.0-goolf-1.7.20-Perl-5.22.2
 HISAT2_MODULE ?= HISAT2/2.0.4-goolf-1.7.20
 STRINGTIE_MODULE ?= StringTie/1.3.3-goolf-1.7.20
 SNP_EFF_MODULE ?= snpEff/4.1l-Java-1.7.0_75
+SNP_EFF_43_MODULE ?= snpEff/4.3t-Java-1.8.0_92
 CUFFLINKS_MODULE ?= Cufflinks/2.2.1-Linux_x86_64
 STRINGTIE_MODULE ?= StringTie/1.3.3-goolf-1.7.20
 RSEM_MODULE ?= RSEM/1.2.31-goolf-1.7.20
@@ -228,11 +234,13 @@ GATK40_MODULE ?= GATK/4.0.1.2-Java-1.8.0_92
 MUTECT_MODULE ?= MuTect/1.1.7-Java-1.7.0_80
 PICARD_MODULE ?= picard/2.9.2
 VARSCAN_MODULE ?= VarScan/2.4.1-Java-1.7.0_80
+ANACONDA_MODULE ?= Anaconda3/5.0.1
 
 PERL ?= perl
 JAVA ?= java -Djava.io.tmpdir=$(TMPDIR)
 PYTHON ?= python
-PYTHON_ENV_ACTIVATE ?= source /scicore/home/terracci/GROUP/virtual_env/python/bin/activate
+PYTHON_ENV_ACTIVATE ?= ml load $(ANACONDA_MODULE) && source activate 
+PYTHON_ENV_DEACTIVATE = source deactivate
 
 R_LIBS ?= $(USR_DIR)/$(R_MODULE)/lib64/R/library
 R ?= export R_LIBS=$(R_LIBS); R
@@ -249,6 +257,7 @@ VCFTOOLS ?= vcftools
 VCFTOOLS_MERGE ?= vcf-merge
 BCL2FASTQ ?= bcl2fastq
 TRIM_GALORE ?= trim_galore
+CUTADAPT ?= cutadapt
 BGZIP ?= bgzip
 TABIX ?= tabix -p vcf
 BAM_READCOUNT ?= $(BIN_DIR)/bam-readcount
@@ -260,6 +269,18 @@ VCF_PASS ?= usb-modules-v2/vcf_tools/extract_pass_vcf.pl
 FASTQ_CHUNKS := 10
 FASTQ_CHUNK_SEQ := $(shell seq 1 $(FASTQ_CHUNKS))
 
+ifeq ($(ADAPTOR_POS),3prime)
+CUTADAPT_OPTS ?= -a $(ADAPTOR_SEQ) $(if $(findstring true,$(PAIRED_END)),-A $(ADAPTOR_SEQ))
+endif
+ifeq ($(ADAPTOR_POS),5prime)
+CUTADAPT_OPTS ?= -g $(ADAPTOR_SEQ) $(if $(findstring true,$(PAIRED_END)),-G $(ADAPTOR_SEQ))
+endif
+ifeq ($(NEXTSEQ_TRIM),true)
+CUTADAPT_OPTS += --nextseq-trim=20
+endif
+CUTADAPT_OPTS += -q 20,20 --trim-n -m 35 --max-n=3 
+
+
 FASTQC ?= fastqc
 FASTQC_SUMMARY_PLOT = $(RSCRIPT) usb-modules-v2/qc/fastqcSummaryPlot.R
 PLOT_RNASEQ_METRICS = $(RSCRIPT) usb-modules-v2/qc/plotRnaseqMetrics.R
@@ -268,6 +289,7 @@ CLUSTER_VCF = $(RSCRIPT) usb-modules-v2/qc/clusterVcf.R
 
 BOWTIE2 ?= bowtie2
 BWA_ALN ?= bwa aln
+BWA_SAMSE ?= bwa samse
 BWA_SAMPE ?= bwa sampe
 BWA_MEM ?= bwa mem
 TOPHAT ?= tophat
@@ -340,24 +362,60 @@ FACETS_CCF = $(RSCRIPT) usb-modules-v2/copy_number/facetsCCF.R
 FACETS_GENE_CN_OPTS = $(if $(TARGETS_FILE_GENES),--genesFile $(TARGETS_FILE_GENES))
 
 MUTATION_SUMMARY_RSCRIPT = $(RSCRIPT) usb-modules-v2/summary/mutation_summary_excel.R
+DECONSTRUCTSIGS = $(RSCRIPT) usb-modules-v2/mut_sigs/deconstructSigs.R
+DECONSTRUCTSIGS_NUMCORES ?= 8
+
+LST = $(RSCRIPT) usb-modules-v2/mut_sigs/lst.R
+
+PYCLONE ?= $(PYTHON_ENV_ACTIVATE) pyclonenv; PyClone
+PYCLONE_ITER ?= 10000
+PYCLONE_BURNIN ?= 1000
+PYCLONE_SEED ?= 1234567
+PYCLONE_PRIOR ?= parenktal_copy_number
+PYCLONE_MAKE_MUT_TXT ?= $(RSCRIPT) usb-modules-v2/clonality/pyclone_make_input.R
+PYCLONE_MAKE_CLUSTER_TABLE ?= $(RSCRIPT) usb-modules-v2/clonality/pyclone_make_cluster_table.R
+
+EXPANDS_MAKE_INPUT ?= $(RSCRIPT) usb-modules-v2/clonality/expands_make_input.R
+EXPANDS ?= $(RSCRIPT) usb-modules-v2/clonality/expandsRun.R
+EXPANDS_NUM_CORES ?= 1
+
+ABSOLUTE_MAKE_MUTS ?= $(RSCRIPT) usb-modules-v2/clonality/absolute_make_muts.R
+ABSOLUTE_MAKE_SEGS ?= $(RSCRIPT) usb-modules-v2/clonality/absolute_make_segs.R
+ABSOLUTE_STEP1 ?= $(RSCRIPT) usb-modules-v2/clonality/absolute_step1.R
+ABSOLUTE_STEP2 ?= $(RSCRIPT) usb-modules-v2/clonality/absolute_step2.R
+ABSOLUTE_STEP3 ?= $(RSCRIPT) usb-modules-v2/clonality/absolute_step3.R
+ABSOLUTE_NUM_CORE ?= 1
+
+
+
+
 
 CBS_SEGMENTCNV = $(RSCRIPT) usb-modules-v2/copy_number/varscanCNVSegment.R
 VARSCAN_GENE_CN = $(RSCRIPT) usb-modules-v2/copy_number/varscanCNVGeneCN.R
 
 MUTSIGCV ?= $(USR_DIR)/local/MutSigCV_1.4/run_MutSigCV.sh
 MCR ?= $(USR_DIR)/local/MCR_R2013a_glnxa64/v81/
+MUTSIGCV_MAKE_INPUT ?= $(RSCRIPT) usb-modules-v2/siggenes/make_mutSigCV_input.R
+
+YOUN_AND_SIMON ?= $(RSCRIPT) usb-modules-v2/siggenes/youn_and_simon.R
+YOUN_AND_SIMON_MAKE_INPUT ?= $(RSCRIPT) usb-modules-v2/siggenes/youn_and_simon_make_input.R
 
 GISTIC ?= $(USR_DIR)/local/gistic_2.0.23/gp_gistic2_from_seg
+GISTIC_MAKE_MARKERS_FILE ?= $(RSCRIPT) usb-modules-v2/copy_number/gistic_make_markers.R
+GISTIC_MAKE_SEG_FILE ?= $(RSCRIPT) usb-modules-v2/copy_number/gistic_make_seg.R
+GISTIC_MAKE_CNV_FILE ?= $(RSCRIPT) usb-modules-v2/copy_number/gistic_make_cnv.R
 
 CUFFLINKS ?= cufflinks
 CUFFCMP ?= currcompare
 
 RSEM_CALC_EXPR ?= rsem-calculate-expression
 RSEM_GEN_DATA_MATRIX ?= usb-modules-v2/rnaseq/rsem-generate-data-matrix.pl
-RSEM_NORM ?= usb-modules-v2/rnaseq/rsem_normalize.R
+RSEM_PROCCESS ?= usb-modules-v2/rnaseq/rsem_process.R
 
 MOSAICS_RUN ?= $(RSCRIPT) usb-modules-v2/chipseq/mosaics_run.R
 MOSAICS_CONSTRUCTBINS ?= $(RSCRIPT) usb-modules-v2/chipseq/mosaics_constructBins.R
+
+MSISENSOR ?= $(BIN_DIR)/msisensor_Linux_x86_64
 
 ##VCF2MAF ?= $(PERL) $(SCRIPTS_DIR)/vcf2maf.pl
 #MAF2MAF ?= $(PERL) $(SCRIPTS_DIR)/maf2maf.pl
@@ -373,6 +431,7 @@ MOSAICS_CONSTRUCTBINS ?= $(RSCRIPT) usb-modules-v2/chipseq/mosaics_constructBins
 #MUT_FREQ_REPORT = modules/variant_callers/somatic/mutectReport.Rmd
 
 #VARIANT_EVAL_GATK_REPORT = $(RSCRIPT) usb-modules-v2/variant_callers/variantEvalGatkReport.R
+
 
 endif
 MAKEFILE_INC = true

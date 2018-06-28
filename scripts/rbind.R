@@ -2,6 +2,7 @@
 # rbinds together tab-delimited tables and outputs to STDOUT
 
 suppressPackageStartupMessages(library("optparse"));
+suppressPackageStartupMessages(library("dplyr"));
 
 options(warn = -1, error = quote({ traceback(); q('no', status = 1) }))
 
@@ -15,7 +16,6 @@ parser <- OptionParser(usage = "%prog [options] vcf.file", option_list = optList
 arguments <- parse_args(parser, positional_arguments = T);
 opt <- arguments$options;
 files <- arguments$args;
-
 
 Data <- list();
 for (f in files) {
@@ -35,7 +35,8 @@ for (f in files) {
         h <- c(h, "SAMPLE")
         h <- sub(paste(sname, '\\.', sep = ''), 'SAMPLE.', h)
         colnames(X) <- h
-        Data[[sname]] <- X
+        #Data[[sname]] <- X 
+        Data[[f]] <- X # modified to use rbind for merging snvs and indels from the same samples
     }
     if (opt$tumorNormal) {
         sname <- sub('\\..*', '', f)
@@ -50,7 +51,8 @@ for (f in files) {
         h <- sub(paste(tumor, '\\.', sep = ''), 'TUMOR.', h)
         h <- sub(paste(normal, '\\.', sep = ''), 'NORMAL.', h)
         colnames(X) <- h
-        Data[[sname]] <- X
+        #Data[[sname]] <- X
+        Data[[f]] <- X# modified to use rbind for merging snvs and indels from the same samples
     }
     if (opt$normalLast) {
         sname <- sub('\\..*', '', f)
@@ -122,7 +124,8 @@ for (f in names(Data)) {
     Data[[f]][,miss] <- NA;
     Data[[f]] <- Data[[f]][, fields];
 }
-table.merged <- do.call(rbind, Data);
+#table.merged <- do.call(rbind, Data);
+table.merged <- bind_rows (Data)
 rownames(table.merged) <- NULL
 
 if (opt$sampleName) {

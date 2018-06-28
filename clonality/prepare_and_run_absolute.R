@@ -67,10 +67,10 @@ read_params <- function(file) {
 	params[which(params$include=="Y"), , drop=F]
 }
 
-run_absolute_step1 <- function(params, useSnow=T, numCores=3) {
+run_absolute_step1 <- function(params, parallel=T, numCores=3) {
 
-	if (useSnow) {
-		library(snow)
+	if (parallel) {
+		library(parallel)
 		cl <- makeCluster(numCores, "SOCK")
 		parApply(cl, params, 1, function(x) {
 			library(ABSOLUTE)
@@ -100,10 +100,10 @@ run_absolute_step1 <- function(params, useSnow=T, numCores=3) {
 
 }
 
-run_absolute_step1_CNAonly <- function(params, useSnow=T) {
+run_absolute_step1_CNAonly <- function(params, parallel=T) {
 
-	if (useSnow) {
-		library(snow)
+	if (parallel) {
+		library(parallel)
 		cl <- makeCluster(3, "SOCK")
 		parApply(cl, params, 1, function(x) {
 			library(ABSOLUTE)

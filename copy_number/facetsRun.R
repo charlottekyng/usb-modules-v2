@@ -22,8 +22,8 @@ optList <- list(
 	make_option("--maxNDepth", default= 1000, type= 'integer', help = "maximum depth in normal to keep the position"),
 	make_option("--pre_cval", default = NULL, type = 'integer', help = "pre-processing critical value"),
 	make_option("--cval1", default = NULL, type = 'integer', help = "critical value for estimating diploid log Ratio"),
-	make_option("--cval2", default = NULL, type = 'integer', help = "starting critical value for segmentation (increases by 10 until success)"),
-	make_option("--max_cval", default = 5000, type = 'integer', help = "maximum critical value for segmentation (increases by 10 until success)"),
+	make_option("--cval2", default = NULL, type = 'integer', help = "starting critical value for segmentation (increases by 25 until success)"),
+	make_option("--max_cval", default = 5000, type = 'integer', help = "maximum critical value for segmentation (increases by 25 until success)"),
 	make_option("--min_nhet", default = 25, type = 'integer', help = "minimum number of heterozygote snps in a segment used for bivariate t-statistic during clustering of segment"),
 	make_option("--gene_loc_file", default = '~/share/reference/IMPACT410_genes_for_copynumber.txt', type = 'character', help = "file containing gene locations"),
 	make_option("--genome", default = 'b37', type = 'character', help = "genome of counts file"),
@@ -61,6 +61,7 @@ switch(opt$genome,
 	mm9={gbuild="mm9"},
 	mm10={gbuild="mm10"},
 	GRCm38={gbuild="mm10"},
+	hg38={gbuild="hg38"},
        { stop(paste("Invalid Genome",opt$genome)) })
 
 buildData=installed.packages()["facets",]
@@ -94,7 +95,11 @@ if (opt$minGC == 0 & opt$maxGC == 1) {
 		gbuild=gbuild, unmatched=opt$unmatched, ndepthmax=opt$maxNDepth)
 	dmat <- facets:::counts2logROR(pmat[pmat$rCountT > 0, ], gbuild, unmatched=opt$unmatched)
         dmat$keep[which(dmat$gcpct>=opt$maxGC | dmat$gcpct<=opt$minGC)] <- 0
+	dmat <- dmat[dmat$keep == 1,]
 	tmp <- facets:::segsnps(dmat, opt$pre_cval, hetscale=F)
+	pmat$keep <- 0
+	pmat$keep[which(paste(pmat$chrom, pmat$maploc, sep="_") %in% paste(dmat$chrom, dmat$maploc, sep="_"))] <- 1
+
 	out <- list(pmat = pmat, gbuild=gbuild, nX=nX)
 	preOut <- c(out,tmp)
 }
@@ -132,7 +137,7 @@ while (!success && cval < opt$max_cval) {
         success <- T
 	fit2 <- out2 %>% emcncf2
     } else {
-        cval <- cval + 100
+        cval <- cval + 25
     }
 }
 if (!success) {

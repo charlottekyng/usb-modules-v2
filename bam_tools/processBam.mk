@@ -55,6 +55,10 @@ index : $(addsuffix .bai,$(BAMS))
 %.bai : %.bam.bai
 	$(INIT) sleep 5; ln -f $@ $<
 
+%.bam : %.sam
+	$(call RUN,1,$(RESOURCE_REQ_LOW_MEM),$(RESOURCE_REQ_SHORT),$(SAMTOOLS_MODULE),"\
+	$(SAMTOOLS) view -bSh $< > $@" && $(RM) $<)
+
 # limit coverage
 #%.dcov.bam : %.bam
 #	$(call LSCRIPT_MEM,18G,00:59:59,"$(call GATK_MEM,18G) -T PrintReads -R $(REF_FASTA) -I $< -dcov 50 -o $@")
@@ -102,6 +106,16 @@ index : $(addsuffix .bai,$(BAMS))
 	$(call GATK,SplitNCigarReads,$(RESOURCE_REQ_MEDIUM_MEM_JAVA)) -I $< -o $@ \
 	-rf ReassignOneMappingQuality -RMQF 255 -RMQT 60 -U ALLOW_N_CIGAR_READS -R $(REF_FASTA) && $(RM) $^")
 
+%.intrachr.bam : %.bam %.bai
+	$(call RUN,1,$(RESOURCE_REQ_LOW_MEM),$(RESOURCE_REQ_SHORT),$(SAMTOOLS_MODULE),"\
+	$(SAMTOOLS) view -h $< | awk '\$$1~\"@\" || \$$7==\"=\"' | $(SAMTOOLS) view -Sb >> $@ && $(RM) $^")
+
+
+ifneq ($(KNOWN_INDELS),)
+BAM_REALN_OPTS = --knownAlleles $(KNOWN_INDELS)
+BAM_REALN_TARGET_OPTS = --known $(KNOWN_INDELS)
+endif
+
 %.intervals : %.bam %.bam.bai
 	$(call RUN,4,$(RESOURCE_REQ_LOW_MEM),$(RESOURCE_REQ_VSHORT),$(JAVA8_MODULE),"\
 	$(call GATK,RealignerTargetCreator,$(RESOURCE_REQ_LOW_MEM_JAVA)) \
@@ -113,6 +127,10 @@ index : $(addsuffix .bai,$(BAMS))
 	$(call GATK,IndelRealigner,$(RESOURCE_REQ_MEDIUM_MEM_JAVA)) \
 	-I $< -R $(REF_FASTA) -targetIntervals $(<<) -o $@ $(BAM_REALN_OPTS) && $(RM) $^") ; \
 	else mv $< $@ ; fi
+
+BAM_BASE_RECAL_OPTS = -knownSites $(DBSNP) \
+	$(if $(findstring true,$(BAM_CHR2_BASE_RECAL)),-L $(word 2,$(CHROMOSOMES))) \
+	$(if $(TARGETS_FILE_INTERVALS),-L $(TARGETS_FILE_INTERVALS))
 
 ifeq ($(findstring true,$(BAM_CHR2_BASE_RECAL)),true)
 %.$(BAM_SUFFIX1).2.$(BAM_SUFFIX2)_report.grp : %.$(BAM_SUFFIX1).2.$(subst .recal,$(),$(BAM_SUFFIX2)).bam %.$(BAM_SUFFIX1).2.$(subst .recal,$(),$(BAM_SUFFIX2)).bam.bai

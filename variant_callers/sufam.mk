@@ -22,7 +22,7 @@ sufamscreen/%.sufamscreen.vcf : bam/%.bam sufamscreen/%.sites.to.screen.vcf
 	$(call GATK,UnifiedGenotyper,$(RESOURCE_REQ_MEDIUM_MEM)) -nt 8 -R $(REF_FASTA) \
 	--dbsnp $(DBSNP) $(foreach bam,$(filter %.bam,$<),-I $(bam) ) \
 	--downsampling_type NONE -o $@ --output_mode EMIT_ALL_SITES \
-	--genotyping_mode GENOTYPE_GIVEN_ALLELES -alleles $(word 2,$^)")
+	--genotyping_mode GENOTYPE_GIVEN_ALLELES -alleles $(word 2,$^) -L $(word 2,$^)")
 endif
 
 ifeq ($(findstring IONTORRENT,$(SEQ_PLATFORM)),IONTORRENT)
