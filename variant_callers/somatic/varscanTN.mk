@@ -2,30 +2,30 @@
 # Detect point mutations
 ##### DEFAULTS ######
 
+MUT_CALLER := varscan
+
+
 LOGDIR ?= log/varscanTN.$(NOW)
 
 ##### MAKE INCLUDES #####
 include usb-modules-v2/Makefile.inc
 include usb-modules-v2/variant_callers/somatic/somaticVariantCaller.inc
 
-#$(info CHR $(CHROMOSOMES))
-#$(info TARGETS_FILE_INTERVALS $(TARGETS_FILE_INTERVALS))
 VPATH ?= bam
 
-VARIANT_TYPES = varscan_indels varscan_snps
+VARIANT_TYPES = varscan_indels 
+#varscan_snps
 
 PHONY += varscan varscan_vcfs varscan_tables
 varscan : varscan_vcfs varscan_tables
-varscan_vcfs : $(foreach type,$(VARIANT_TYPES),$(call SOMATIC_VCFS,$(type)))
-varscan_tables : $(foreach type,$(VARIANT_TYPES),$(call SOMATIC_TABLES,$(type)))
-
-MUT_CALLER = varscan
+varscan_vcfs : $(foreach type,$(VARIANT_TYPES),$(call MAKE_VCF_FILE_LIST,$(type)))
+varscan_tables : $(foreach type,$(VARIANT_TYPES),$(call MAKE_TABLE_FILE_LIST,$(type)))
 
 define varscan-somatic-tumor-normal-chr
 varscan/chr_vcf/$1_$2.$3.varscan_timestamp : bam/$1.bam bam/$2.bam bam/$1.bam.bai bam/$2.bam.bai
 	$$(call RUN,1,$$(RESOURCE_REQ_LOW_MEM),$$(RESOURCE_REQ_VSHORT),$$(SAMTOOLS_MODULE) $$(JAVA8_MODULE),"\
 	$$(SAMTOOLS) mpileup -r $3 -q $$(MIN_MQ) -d 10000 -f $$(REF_FASTA) $$(word 2,$$^) $$< | \
-	$$(VARSCAN) somatic - varscan/chr_vcf/$1_$2.$3 $$(VARSCAN_OPTS) && \
+	$$(VARSCAN) somatic - varscan/chr_vcf/$1_$2.$3 --output-vcf 1 --mpileup 1 --min-var-freq $(MIN_AF_SNP) && \
 	$$(VARSCAN) processSomatic varscan/chr_vcf/$1_$2.$3.snp.vcf --min-tumor-freq $$(MIN_AF_SNP) && \
 	$$(VARSCAN) processSomatic varscan/chr_vcf/$1_$2.$3.indel.vcf --min-tumor-freq $$(MIN_AF_INDEL) && \
 	$$(RM) varscan/chr_vcf/$1_$2.$3.snp.vcf varscan/chr_vcf/$1_$2.$3.indel.vcf && \

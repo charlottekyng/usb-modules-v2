@@ -9,7 +9,9 @@
 #---------------
 
 # load base libraries
-suppressMessages(pacman::p_load(optparse,RColorBrewer,GenomicRanges,plyr,dplyr,tibble,readr,stringr,tidyr,purrr,magrittr,rlist,crayon,foreach,Cairo,RMySQL,rtracklayer,colorspace,ggplot2,grid,gridExtra,RColorBrewer))
+suppressMessages(pacman::p_load(optparse,RColorBrewer,GenomicRanges,plyr,dplyr,tibble))
+suppressMessages(pacman::p_load(readr,stringr,tidyr,purrr,magrittr,rlist,crayon,foreach))
+suppressMessages(pacman::p_load(Cairo,RMySQL,rtracklayer,colorspace,ggplot2,grid,gridExtra,RColorBrewer))
 suppressPackageStartupMessages(library("facets"));
 
 #--------------
@@ -99,6 +101,12 @@ if (length(arguments$args) < 1) {
 genes <- read.delim(opt$genesFile, as.is=T, check.names=F)
 genes$chrom <- gsub("chr", "", genes$chrom)
 
+chroms <- unique(genes$chrom)
+chrom_levels <- c(1:22, "X", "Y", "M", "MT")
+chrom_levels <- c(chrom_levels, setdiff(chroms, chrom_levels))
+
+genes$chrom <- factor(genes$chrom, levels=chrom_levels)
+
 genesGR <- genes %$% GRanges(seqnames = chrom, ranges = IRanges(start, end), band = band, hgnc = hgnc)
 			
 mm <- lapply(facetsFiles, function(f) {
@@ -125,7 +133,8 @@ mm <- lapply(facetsFiles, function(f) {
 	}
 	if ("GL_LRR" %in% opt$summaryType) {
 		load(gsub("cncf.txt", "Rdata", f, fixed=T))
-		noise <- median(abs(out2$jointseg$cnlr-  unlist(apply(out2$out[,c("cnlr.median", "num.mark")], 1, function(x) {rep(x[1], each=x[2])}))))
+		noise <- median(abs(out2$jointseg$cnlr-  unlist(apply(out2$out[,c("cnlr.median", "num.mark")], 1, 
+			function(x) {rep(x[1], each=x[2])}))))
 
 		lrr <- sort(out2$jointseg$cnlr)
 		lrr <- lrr[round(0.25*length(lrr)):round(0.75*length(lrr))] 
@@ -143,7 +152,14 @@ for (f in facetsFiles) {
 	colnames(mm[[f]])[2:ncol(mm[[f]])] <- paste(n,  colnames(mm[[f]])[2:ncol(mm[[f]])], sep="_")
 }
 
-mm <- left_join(genes, join_all(mm, type = 'full', by="hgnc")) %>% arrange(as.integer(chrom), start, end)
+save.image(paste(opt$outFile, ".RData", sep=""))
+
+mm <- lapply(mm, function(x){
+	x[match(genes$hgnc, x$hgnc),-1]
+})
+mm <- cbind(genes, bind_cols(mm))
+
+save.image(paste(opt$outFile, ".RData", sep=""))
 
 seg_sample <- seg_chr <- seg_band <- seg_start <- seg_end <- seg_cnlr <- seg_genes <- seg_type <- seg_GLtype <- NA
 for (i in grep("GL", colnames(mm))) {

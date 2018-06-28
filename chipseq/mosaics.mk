@@ -14,10 +14,6 @@ endif
 
 mosaics : $(foreach pair,$(SAMPLE_PAIRS),mosaics/rdata_$(MOSAICS_SUFFIX)/$(pair).rdata mosaics/peaks_$(MOSAICS_SUFFIX)/$(pair).peakTFBS.annotated.bed)
 
-
-
-
-
 define mosaics-peaks
 mosaics/rdata_$$(MOSAICS_SUFFIX)/$1_$2.rdata : mosaics/bin/$1.bam_$$(MOSAICS_SUFFIX).txt mosaics/bin/$2.bam_$$(MOSAICS_SUFFIX).txt
 	$$(call RUN,$$(MOSAICS_NUM_CORES),$$(RESOURCE_REQ_MEDIUM_MEM),$$(RESOURCE_REQ_SHORT),$$(R_MODULE) $$(BEDTOOLS_MODULE),"\
@@ -38,13 +34,20 @@ mosaics/peaks_$$(MOSAICS_SUFFIX)/$1_$2.peakTFBS.bed : mosaics/rdata_$$(MOSAICS_S
 
 mosaics/peaks_$$(MOSAICS_SUFFIX)/$1_$2.peakTFBS.txt : mosaics/rdata_$$(MOSAICS_SUFFIX)/$1_$2.rdata
 	
-
 endef
 $(foreach pair,$(SAMPLE_PAIRS),$(eval $(call mosaics-peaks,$(tumor.$(pair)),$(normal.$(pair)))))
 
-mosaics/%.annotated.bed : mosaics/%.bed
+mosaics/%.coding_genes.bed : mosaics/%.bed
 	$(call RUN,1,$(RESOURCE_REQ_LOW_MEM),$(RESOURCE_REQ_VSHORT),$(BEDTOOLS_MODULE),"\
-	$(BEDTOOLS) closest -g chr_order -k 3 -t all -D b -a $< -b $(GENCODE_GENE_GTF) > $@")
+	$(BEDTOOLS) closest -g $(REF_FASTA).fai -k 1 -t all -D b -a $< -b $(GENCODE_CODING_GENE_GTF) > $@")
+
+mosaics/%.noncoding_genes.bed : mosaics/%.bed
+	$(call RUN,1,$(RESOURCE_REQ_LOW_MEM),$(RESOURCE_REQ_VSHORT),$(BEDTOOLS_MODULE),"\
+	$(BEDTOOLS) closest -g $(REF_FASTA).fai -k 1 -t all -D b -a $< -b $(GENCODE_NONCODING_GENE_GTF) > $@")
+
+mosaics/%.closest_genes.bed : mosaics/%.bed
+	$(call RUN,1,$(RESOURCE_REQ_LOW_MEM),$(RESOURCE_REQ_VSHORT),$(BEDTOOLS_MODULE),"\
+	$(BEDTOOLS) closest -g $(REF_FASTA).fai -k 1 -t all -D b -a $< -b $(GENCODE_GENE_GTF) > $@")
 
 mosaics/bin/%.bam_$(MOSAICS_SUFFIX).txt : bam/%.bam
 	$(call RUN,1,$(RESOURCE_REQ_MEDIUM_MEM),$(RESOURCE_REQ_SHORT),$(R_MODULE) $(PERL_MODULE),"\

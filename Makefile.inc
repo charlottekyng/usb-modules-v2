@@ -96,6 +96,7 @@ COUNT_SAMPLES = $(shell expr `sed 's/\..*//; s:.*/::' <<< $1 | grep -o "_" | wc 
 ############################################
 
 RESOURCE_REQ ?= medium
+include usb-modules-v2/genome_inc/$(REF).inc
 include usb-modules-v2/resources.inc
 
 #####################################
@@ -188,9 +189,11 @@ JAR_DIR ?= $(USR_DIR)/local/lib/java
 SCRIPTS_DIR ?= $(USR_DIR)/local/scripts
 BIN_DIR ?= $(USR_DIR)/local/bin
 MODULE_SCRIPTS_DIR ?= usb-modules-v2/scripts
+LD_LIBRARY_PATH = $(USR_DIR)/local/MCR_R2014a/v83/runtime/glnxa64:$(USR_DIR)/local/MCR_R2014a/v83/bin/glnxa64:$(USR_DIR)/local/MCR_R2014a/v83/sys/os/glnxa64
 
 export TMPDIR := /scicore/scratch
 export PATH := $(USR_DIR):$(PATH)
+export LD_LIBRARY_PATH := $(LD_LIBRARY_PATH)
 
 SHELL ?= /bin/bash
 UNZIP ?= /usr/bin/unzip
@@ -360,13 +363,31 @@ FACETS_GENE_CN_OPTS = $(if $(TARGETS_FILE_GENES),--genesFile $(TARGETS_FILE_GENE
 
 MUTATION_SUMMARY_RSCRIPT = $(RSCRIPT) usb-modules-v2/summary/mutation_summary_excel.R
 DECONSTRUCTSIGS = $(RSCRIPT) usb-modules-v2/mut_sigs/deconstructSigs.R
+DECONSTRUCTSIGS_NUMCORES ?= 8
+
+LST = $(RSCRIPT) usb-modules-v2/mut_sigs/lst.R
 
 PYCLONE ?= $(PYTHON_ENV_ACTIVATE) pyclonenv; PyClone
 PYCLONE_ITER ?= 10000
 PYCLONE_BURNIN ?= 1000
 PYCLONE_SEED ?= 1234567
-PYCLONE_PRIOR ?= parental_copy_number
+PYCLONE_PRIOR ?= parenktal_copy_number
 PYCLONE_MAKE_MUT_TXT ?= $(RSCRIPT) usb-modules-v2/clonality/pyclone_make_input.R
+PYCLONE_MAKE_CLUSTER_TABLE ?= $(RSCRIPT) usb-modules-v2/clonality/pyclone_make_cluster_table.R
+
+EXPANDS_MAKE_INPUT ?= $(RSCRIPT) usb-modules-v2/clonality/expands_make_input.R
+EXPANDS ?= $(RSCRIPT) usb-modules-v2/clonality/expandsRun.R
+EXPANDS_NUM_CORES ?= 1
+
+ABSOLUTE_MAKE_MUTS ?= $(RSCRIPT) usb-modules-v2/clonality/absolute_make_muts.R
+ABSOLUTE_MAKE_SEGS ?= $(RSCRIPT) usb-modules-v2/clonality/absolute_make_segs.R
+ABSOLUTE_STEP1 ?= $(RSCRIPT) usb-modules-v2/clonality/absolute_step1.R
+ABSOLUTE_STEP2 ?= $(RSCRIPT) usb-modules-v2/clonality/absolute_step2.R
+ABSOLUTE_STEP3 ?= $(RSCRIPT) usb-modules-v2/clonality/absolute_step3.R
+ABSOLUTE_NUM_CORE ?= 1
+
+
+
 
 
 CBS_SEGMENTCNV = $(RSCRIPT) usb-modules-v2/copy_number/varscanCNVSegment.R
@@ -374,8 +395,15 @@ VARSCAN_GENE_CN = $(RSCRIPT) usb-modules-v2/copy_number/varscanCNVGeneCN.R
 
 MUTSIGCV ?= $(USR_DIR)/local/MutSigCV_1.4/run_MutSigCV.sh
 MCR ?= $(USR_DIR)/local/MCR_R2013a_glnxa64/v81/
+MUTSIGCV_MAKE_INPUT ?= $(RSCRIPT) usb-modules-v2/siggenes/make_mutSigCV_input.R
+
+YOUN_AND_SIMON ?= $(RSCRIPT) usb-modules-v2/siggenes/youn_and_simon.R
+YOUN_AND_SIMON_MAKE_INPUT ?= $(RSCRIPT) usb-modules-v2/siggenes/youn_and_simon_make_input.R
 
 GISTIC ?= $(USR_DIR)/local/gistic_2.0.23/gp_gistic2_from_seg
+GISTIC_MAKE_MARKERS_FILE ?= $(RSCRIPT) usb-modules-v2/copy_number/gistic_make_markers.R
+GISTIC_MAKE_SEG_FILE ?= $(RSCRIPT) usb-modules-v2/copy_number/gistic_make_seg.R
+GISTIC_MAKE_CNV_FILE ?= $(RSCRIPT) usb-modules-v2/copy_number/gistic_make_cnv.R
 
 CUFFLINKS ?= cufflinks
 CUFFCMP ?= currcompare
@@ -386,6 +414,8 @@ RSEM_PROCCESS ?= usb-modules-v2/rnaseq/rsem_process.R
 
 MOSAICS_RUN ?= $(RSCRIPT) usb-modules-v2/chipseq/mosaics_run.R
 MOSAICS_CONSTRUCTBINS ?= $(RSCRIPT) usb-modules-v2/chipseq/mosaics_constructBins.R
+
+MSISENSOR ?= $(BIN_DIR)/msisensor_Linux_x86_64
 
 ##VCF2MAF ?= $(PERL) $(SCRIPTS_DIR)/vcf2maf.pl
 #MAF2MAF ?= $(PERL) $(SCRIPTS_DIR)/maf2maf.pl
@@ -401,6 +431,7 @@ MOSAICS_CONSTRUCTBINS ?= $(RSCRIPT) usb-modules-v2/chipseq/mosaics_constructBins
 #MUT_FREQ_REPORT = modules/variant_callers/somatic/mutectReport.Rmd
 
 #VARIANT_EVAL_GATK_REPORT = $(RSCRIPT) usb-modules-v2/variant_callers/variantEvalGatkReport.R
+
 
 endif
 MAKEFILE_INC = true

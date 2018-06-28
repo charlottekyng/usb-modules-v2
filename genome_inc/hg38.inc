@@ -8,7 +8,7 @@ BED_DIR ?= $(REF_DIR)/target_beds/hg38
 
 REF_FASTA ?= $(GSA_REF_DIR)/Homo_sapiens_assembly38.fasta
 
-DBSNP ?= $(GSA_REF_DIR)/dbsnp_144.hg38.vcf
+DBSNP ?= $(GSA_REF_DIR)/dbsnp_146.hg38.vcf
 
 RESOURCE_REQ ?= medium
 
@@ -19,6 +19,21 @@ CHROMOSOMES := $(shell grep -v '@' $(TARGETS_FILE_INTERVALS) | cut -f1 | sort -V
 else
 CHROMOSOMES ?= chr1 chr2 chr3 chr4 chr5 chr6 chr7 chr8 chr9 chr10 chr11 chr12 chr13 chr14 chr15 chr16 chr17 chr18 chr19 chr20 chr21 chr22 chrX $(if $(findstring true,$(INCLUDE_CHR_Y)),chrY) chrM
 endif
+
+ifeq ($(PANEL),WXS)
+TARGETS_FILE_COVERED_INTERVALS ?= $(BED_DIR)/wxs.padded.bed
+TARGETS_FILE_INTERVALS ?= $(TARGETS_FILE_COVERED_INTERVALS)
+TARGETS_FILE_MUTATIONS ?= $(TARGETS_FILE_COVERED_INTERVALS)
+TARGETS_FILE_GENES ?= $(BED_DIR)/wxs.GeneSymbols.txt
+DBSNP_TARGETS_INTERVALS ?= $(BED_DIR)/dbsnp_146.hg38.wxs.vcf
+DBSNP_TARGETS_INTERVALS_COMMON ?= $(BED_DIR)/dbsnp_146.hg38.common.wxs.vcf
+RESOURCE_REQ ?= medium
+SNP_EFF_FLAGS ?= -canon -no NEXT_PROT -no-downstream -no-intergenic -no-upstream -no-utr
+endif
+
+
+
+FACETS_TARGETS_INTERVALS ?= $(DBSNP_TARGETS_INTERVALS)
 
 ### ANNOTATION SETS ####
 
@@ -42,7 +57,7 @@ HAPMAP ?= $(GSA_REF_DIR)/hapmap_3.3.hg38.vcf
 #DGD_BED = $(ANN_DIR)/dgd_Hsa_all_v71.bed
 #CANCER_HOTSPOT_VCF = $(ANN_DIR)/publication_hotspots_inclnoncoding_incl3d.vcf
 
-#CENTROMERE_TABLE = $(ANN_DIR)/centromeres_b37.txt
+CENTROMERE_TABLE = $(ANN_DIR)/centromeres_hg38.txt
 
 #DGV_FILE = $(ANN_DIR)/DGV_GRCh37_hg19_variants_2016-05-15.txt
 #KNOWN_CNVS = $(ANN_DIR)/GRCh37_hg19_variants_2013-07-23.txt
@@ -68,31 +83,11 @@ GENE_REF_FLAT = $(ANN_DIR)/refFlat.txt
 
 #HISAT2_REF = $(REF_DIR)/genome_index/hisat2_b37/genome_snp_tran
 
-#CHIMERASCAN_REF ?= $(REF_DIR)/chimerascan_index
-#BOWTIE_REF = $(REF_DIR)/GATK_bundle/2.3/human_g1k_v37
-
-#MAPSPLICE_REF_DIR = $(REF_DIR)/GATK_bundle/2.3/mapsplice_ref/chr
-#MAPSPLICE_REF_BASENAME = $(REF_DIR)/GATK_bundle/2.3/mapsplice_ref/hg19
 
 SNP_EFF_GENOME = GRCh38.86
 DB_NSFP ?= $(REF_DIR)/dbNSFP/GRCh38/dbNSFP3.2.txt.gz
 
-#TOPHAT_REF = GRCh37
-#GENES_GTF = $(REF_DIR)/Homo_sapiens/Ensembl/$(TOPHAT_REF)/Annotation/Genes/genes.gtf
 
-#ANNOVAR_REF = hg19
-
-#UCSC_REFSEQ_GTF = $(REF_DIR)s/genomes/ucsc.refseq.gtf
-#REFSEQ_GTF := $(UCSC_REFSEQ_GTF)
-
-#CHR_LEN = $(REF_DIR)/GATK_bundle/2.3/b37.len
-
-#REF_2BIT ?= $(REF_DIR)/GATK_bundle/2.3/human_g1k_v37.2bit
-
-#MAP_BIGWIG ?= $(REF_DIR)/wgEncodeCrgMapabilityAlign100mer.nochr.bigWig
-
-#REF_NAME := 1000GenomesPilot-NCBI37
-#REF_DATE := 20100517
 REF_DICT = $(REF_FASTA:.fasta=.dict)
 
 #MUTSIGCV_REF_DIR ?= $(REF_DIR)/MutSigCV
@@ -101,19 +96,7 @@ REF_DICT = $(REF_FASTA:.fasta=.dict)
 #MUTSIGCV_DICT_REF ?= $(MUTSIGCV_REF_DIR)/mutation_type_dictionary_file.txt
 #MUTSIGCV_SEQ_REF_DIR ?= $(MUTSIGCV_REF_DIR)/chr_files_hg19/
 
-#EMU_REF_DIR ?= $(REF_DIR)/GATK_bundle/2.3/emu_ref
-#EMU_REF_MUTATIONS ?= $(REF_DIR)/emu_ref/exome_ref/Breast_clean_somatic_mutations_for_signature_analysis.emu.mutations.txt
-#EMU_REF_CNV ?= $(REF_DIR)/emu_ref/exome_ref/Breast_clean_somatic_mutations_for_signature_analysis.emu.copynum.txt
-
-#HMMCOPY_GC_WIG = $(REF_DIR)/GATK_bundle/2.3/gc_hg19.wig
-#HMMCOPY_MAP_WIG = $(REF_DIR)/map_hg19.wig
-
-
-#INTEGRATE_ANN = $(REF_DIR)/annot.ucsc.txt
-#INTEGRATE_BWTS = $(REF_DIR)/GATK_bundle/2.3/bwts
-#ONCOTATOR_DB ?= $(REF_DIR)/oncotator_v1_ds_Jan262014
-
-#ANNOVAR_DB = $(HOME)/share/usr/annovar/humandb
+MSISENSOR_REF ?= $(REF_DIR)/msi_reference/hg38.txt
 
 endif
 B37_INC = true

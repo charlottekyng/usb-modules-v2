@@ -1,4 +1,5 @@
 include usb-modules-v2/Makefile.inc
+include usb-modules-v2/variant_callers/somatic/somaticVariantCaller.inc
 
 LOGDIR ?= log/mutsigcv.$(NOW)
 
@@ -6,8 +7,13 @@ LOGDIR ?= log/mutsigcv.$(NOW)
 .DELETE_ON_ERROR:
 .PHONY : mutsigcv
 
-mutsigcv : mutsigcv/mutsigcv.sig_genes.txt
-mutsigcv/mutsigcv.sig_genes.txt : mutsigcv/mutsigcv_input.maf
-	$(call RUN,1,$(RESOURCE_REQ_MEDIUM_MEM),$(RESOURCE_REQ_SHORT),,"$(MUTSIGCV) $(MCR) $^ \
-	$(MUTSIGCV_COVERAGE_REF) $(MUTSIGCV_COV_REF) mutsigcv $(MUTSIGCV_DICT_REF) $(MUTSIGCV_SEQ_REF_DIR) && \
-	mv mutsigcv.* mutsigcv")
+mutsigcv : siggenes/all$(PROJECT_PREFIX).mutsigcv.sig_genes.txt
+
+siggenes/all$(PROJECT_PREFIX).mutsigcv.sig_genes.txt : siggenes/all$(PROJECT_PREFIX).mutsigcv_input.maf
+	$(call RUN,1,$(RESOURCE_REQ_VHIGH_MEM),$(RESOURCE_REQ_SHORT),,"$(MUTSIGCV) $(MCR) $^ \
+	$(MUTSIGCV_COVERAGE_REF) $(MUTSIGCV_COV_REF) all$(PROJECT_PREFIX).mutsigcv $(MUTSIGCV_DICT_REF) $(MUTSIGCV_SEQ_REF_DIR) && \
+	mv all$(PROJECT_PREFIX).mutsigcv.* siggenes")
+
+siggenes/all$(PROJECT_PREFIX).mutsigcv_input.maf : summary/mutation_summary$(PROJECT_PREFIX).$(DOWNSTREAM_EFF_TYPES).txt
+	$(call RUN,1,$(RESOURCE_REQ_VHIGH_MEM),$(RESOURCE_REQ_SHORT),$(R_MODULE),"\
+	$(MUTSIGCV_MAKE_INPUT) --outFile $@ $<")

@@ -2,6 +2,7 @@
 # rbinds together tab-delimited tables and outputs to STDOUT
 
 suppressPackageStartupMessages(library("optparse"));
+suppressPackageStartupMessages(library("dplyr"));
 
 options(warn = -1, error = quote({ traceback(); q('no', status = 1) }))
 
@@ -123,7 +124,8 @@ for (f in names(Data)) {
     Data[[f]][,miss] <- NA;
     Data[[f]] <- Data[[f]][, fields];
 }
-table.merged <- do.call(rbind, Data);
+#table.merged <- do.call(rbind, Data);
+table.merged <- bind_rows (Data)
 rownames(table.merged) <- NULL
 
 if (opt$sampleName) {

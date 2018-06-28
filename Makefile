@@ -7,7 +7,7 @@
 export
 
 # job-related options
-NUM_ATTEMPTS ?= 20
+NUM_ATTEMPTS ?= 1
 USE_CLUSTER ?= true
 NUM_JOBS ?= 100
 # possible values: SGE, SLURM
@@ -129,42 +129,64 @@ TARGETS	+= deconstruct_sigs
 deconstruct_sigs :
 	$(call RUN_MAKE,usb-modules-v2/mut_sigs/deconstructSigs.mk)
 
+TARGETS += lst
+lst :
+	$(call RUN_MAKE,usb-modules-v2/mut_sigs/lst.mk)
+
+TARGETS += msisensor
+msisensor :
+	$(call RUN_MAKE,usb-modules-v2/mut_sigs/msiSensor.mk)
+
 TARGETS += mosaics
 mosaics :
 	$(call RUN_MAKE,usb-modules-v2/chipseq/mosaics.mk)
+
+TARGETS += absolute_seq
+absolute_seq :
+	$(call RUN_MAKE,usb-modules-v2/clonality/absoluteSeq.mk)
+
+TARGETS += pyclone
+pyclone : 
+	$(call RUN_MAKE,usb-modules-v2/clonality/pyclone.mk)
+
+TARGETS += expands
+expands :
+	$(call RUN_MAKE,usb-modules-v2/clonality/expands.mk)
+
+TARGETS += star_fusion
+star_fusion :
+	$(call RUN_MAKE,usb-modules-v2/sv_callers/starFusion.mk)
+
+TARGETS += contest
+contest :
+	$(call RUN_MAKE,usb-modules-v2/qc/contest.mk)
+
+# annotate external vcfs
+TARGETS += ann_ext_vcf
+ann_ext_vcf: 
+	$(call RUN_MAKE,usb-modules-v2/vcf_tools/annotateExtVcf.mk)
+
+TARGETS += tvc
+tvc :
+	$(call RUN_MAKE,usb-modules-v2/variant_callers/TVC.mk)
+
+TARGETS += sufam_screen
+sufam_screen :
+	$(call RUN_MAKE,usb-modules-v2/variant_callers/sufam.mk)
 
 #########################################################
 ## The set of targets below have NOT been tested,
 ## or are known to be broken/obsolete.
 ##########################################################
 
-TARGETS += pyclone
-pyclone : 
-	$(call RUN_MAKE,usb-modules-v2/clonality/pyclone.mk)
 
 TARGETS += merge_fastq
 merge_fastq : 
 	$(call RUN_MAKE,modules/fastq_tools/mergeFastq.mk)
 
-TARGETS += bwa
-bwa :
-	$(call RUN_MAKE,usb-modules-v2/aligners/bwaAligner.mk)
-
-TARGETS += bowtie
-bowtie :
-	$(call RUN_MAKE,usb-modules-v2/aligners/bowtieAligner.mk)
-
-TARGETS += tmap
-tmap :
-	$(call RUN_MAKE,usb-modules-v2/aligners/tmapAligner.mk)
-
 TARGETS += tophat_fusion
 tophat_fusion : 
-	$(call RUN_MAKE,usbmodules/sv_callers/tophatFusion.mk)
-
-TARGETS += tophat
-tophat : 
-	$(call RUN_MAKE,usb-modules-v2/aligners/tophatAligner.mk)
+	$(call RUN_MAKE,usb-modules/sv_callers/tophatFusion.mk)
 
 TARGETS += cufflinks
 cufflinks : 
@@ -249,10 +271,6 @@ TARGETS += chimscan
 chimscan :
 	$(call RUN_MAKE_J,modules/sv_callers/chimerascan.mk,$(NUM_CHIMSCAN_JOBS))
 
-TARGETS += star_fusion
-star_fusion :
-	$(call RUN_MAKE,usb-modules-v2/sv_callers/starFusion.mk)
-
 TARGETS += oncofuse
 oncofuse :
 	$(call RUN_MAKE,modules/sv_callers/oncofuse.mk)
@@ -309,10 +327,6 @@ TARGETS += samtools_het
 samtools_het :
 	$(call RUN_MAKE,modules/variant_callers/samtoolsHet.mk)
 
-TARGETS += absolute_seq
-absolute_seq :
-	$(call RUN_MAKE,modules/clonality/absoluteSeq.mk)
-
 TARGETS += merge_strelka_varscan
 merge_strelka_varscan :
 	$(call RUN_MAKE,modules/variant_callers/somatic/mergeStrelkaVarscanIndels.mk)
@@ -333,18 +347,10 @@ TARGETS += merge_split_fastq
 merge_split_fastq :
 	$(call RUN_MAKE,modules/fastq_tools/mergeSplitFastq.mk)
 
-TARGETS += contest
-contest :
-	$(call RUN_MAKE,usb-modules-v2/qc/contest.mk)
-
 TARGETS += virus_detection_bowtie2
 virus_detection_bowtie2 :
 	$(call RUN_MAKE,modules/virus/virus_detection_bowtie2.mk)
 
-
-TARGETS += endtoend_bam
-endtoend_bam :
-	$(call RUN_MAKE,usb-modules-v2/bam_tools/endtoendBam.mk)
 
 TARGETS += gatk_validation
 gatk_validation :
@@ -375,21 +381,12 @@ TARGETS += merge_bam
 merge_bam :
 	$(call RUN_MAKE,usb-modules-v2/bam_tools/mergeBam.mk)
 
-# annotate external vcfs
-TARGETS += ann_ext_vcf
-ann_ext_vcf: 
-	$(call RUN_MAKE,usb-modules-v2/vcf_tools/annotateExtVcf.mk)
-
 TARGETS += mutsigcv
 mutsigcv :
 	$(call RUN_MAKE,usb-modules-v2/siggenes/mutsigcv.mk)
 
-TARGETS += tvc
-tvc :
-	$(call RUN_MAKE,usb-modules-v2/variant_callers/TVC.mk)
-
-TARGETS += sufam_screen
-sufam_screen :
-	$(call RUN_MAKE,usb-modules-v2/variant_callers/sufam.mk)
+TARGETS += youn_and_simon
+youn_and_simon :
+	$(call RUN_MAKE,usb-modules-v2/siggenes/youn_and_simon.mk)
 
 .PHONY : $(TARGETS)

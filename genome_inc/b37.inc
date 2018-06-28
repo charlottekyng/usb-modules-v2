@@ -35,7 +35,7 @@ TARGETS_FILE_GENES ?= $(BED_DIR)/S06588914_Agilent_Clinical_Exome_TargetGeneSymb
 DBSNP_TARGETS_INTERVALS ?= $(BED_DIR)/S06588914_Agilent_Clinical_Exome.dbsnp_138.vcf
 DBSNP_TARGETS_INTERVALS_COMMON ?= $(BED_DIR)/S06588914_Agilent_Clinical_Exome.dbsnp_138.common.vcf
 RESOURCE_REQ ?= medium
-SNP_EFF_FLAGS ?= -canon -no NEXT_PROT -no-downstream -no-intergenic -no-intron -no-upstream -no-utr -onlyProtein
+SNP_EFF_FLAGS ?= -canon -no NEXT_PROT -no-downstream -no-intergenic -no-upstream -no-utr
 endif
 ifeq ($(PANEL),AGILENT_ALLEXON_V4)
 TARGETS_FILE_COVERED_INTERVALS ?= $(BED_DIR)/S03723314_Agilent_AllExon_V4_Covered_noHeader_noAnn.bed
@@ -45,7 +45,7 @@ TARGETS_FILE_GENES ?= $(BED_DIR)/S03723314_Agilent_AllExon_V4_TargetGeneSymbols.
 DBSNP_TARGETS_INTERVALS ?= $(BED_DIR)/S03723314_Agilent_AllExon_V4.dbsnp_138.vcf
 DBSNP_TARGETS_INTERVALS_COMMON ?= $(BED_DIR)/S03723314_Agilent_AllExon_V4.dbsnp_138.common.vcf
 RESOURCE_REQ ?= medium
-SNP_EFF_FLAGS ?= -canon -no NEXT_PROT -no-downstream -no-intergenic -no-intron -no-upstream -no-utr -onlyProtein
+SNP_EFF_FLAGS ?= -canon -no NEXT_PROT -no-downstream -no-intergenic -no-upstream -no-utr
 endif
 ifeq ($(PANEL),AGILENT_ALLEXON_V6)
 TARGETS_FILE_COVERED_INTERVALS ?= $(BED_DIR)/S07604514_Agilent_AllExon_V6_Covered_noHeader_noAnn.bed
@@ -56,7 +56,7 @@ TARGETS_FILE_GENES ?=$ $(BED_DIR)/S06588914_Agilent_Clinical_Exome_TargetGeneSym
 DBSNP_TARGETS_INTERVALS ?= $(BED_DIR)/S07604514_Agilent_AllExon_V6.dbsnp_138.vcf
 DBSNP_TARGETS_INTERVALS_COMMON ?= $(BED_DIR)/S07604514_Agilent_AllExon_V6.dbsnp_138.common.vcf
 RESOURCE_REQ ?= medium
-SNP_EFF_FLAGS ?= -canon -no NEXT_PROT -no-downstream -no-intergenic -no-intron -no-upstream -no-utr -onlyProtein
+SNP_EFF_FLAGS ?= -canon -no NEXT_PROT -no-downstream -no-intergenic -no-upstream -no-utr
 endif
 ifeq ($(PANEL),SEQCAP_EXOME_V3)
 TARGETS_FILE_COVERED_INTERVALS ?= $(BED_DIR)/SeqCap_EZ_Exome_v3_hg19_primary_targets.bed
@@ -64,7 +64,7 @@ TARGETS_FILE_INTERVALS ?= $(BED_DIR)/SeqCap_EZ_Exome_v3_hg19_primary_targets.bed
 TARGETS_FILE_MUTATIONS ?= $(BED_DIR)/SeqCap_EZ_Exome_v3_hg19_primary_targets.bed
 DBSNP_TARGETS_INTERVALS ?= $(BED_DIR)/SeqCap_EZ_Exome_v3_hg19_primary_targets.dbsnp_138.vcf
 RESOURCE_REQ ?= high
-SNP_EFF_FLAGS ?= -canon -no NEXT_PROT -no-downstream -no-intergenic -no-intron -no-upstream -no-utr -onlyProtein
+SNP_EFF_FLAGS ?= -canon -no NEXT_PROT -no-downstream -no-intergenic -no-upstream -no-utr
 endif
 ifeq ($(PANEL),NOVARTIS_PC2)
 TARGETS_FILE_COVERED_INTERVALS ?= $(BED_DIR)/pc2_novartis_Covered_noHeader_noAnn.bed
@@ -72,7 +72,7 @@ TARGETS_FILE_INTERVALS ?= $(BED_DIR)/pc2_novartis_Padded_noHeader_noAnn.bed
 TARGETS_FILE_MUTATIONS ?= $(BED_DIR)/pc2_novartis_Padded_noHeader_noAnn.bed
 DBSNP_TARGETS_INTERVALS ?= $(BED_DIR)/pc2_novartis.dbsnp_138.vcf
 RESOURCE_REQ ?= low
-SNP_EFF_FLAGS ?= -canon -no NEXT_PROT -no-downstream -no-intergenic -no-intron -no-upstream -no-utr -onlyProtein
+SNP_EFF_FLAGS ?= -canon -no NEXT_PROT -no-downstream -no-intergenic -no-upstream -no-utr
 endif
 ifeq ($(PANEL),IMPACT410)
 TARGETS_FILE_INTERVALS ?= $(BED_DIR)/impact410_b37.bed
@@ -134,7 +134,9 @@ DGV_FILE = $(ANN_DIR)/DGV_GRCh37_hg19_variants_2016-05-15.txt
 #ENSEMBL_TXDB = $(ANN_DIR)/hsapiens_ensembl_biomart.sqlite
 
 GENCODE_GTF = $(ANN_DIR)/Homo_sapiens.GRCh37.82.chr_patch_hapl_scaff.gtf
-GENCODE_GENE_GTF = $(ANN_DIR)/Homo_sapiens.GRCh37.82.chr_patch_hapl_scaff.genes.gtf
+GENCODE_GENE_GTF = $(ANN_DIR)/Homo_sapiens.GRCh37.82.chr_gsa_faidx.genes.gtf
+GENCODE_CODING_GENE_GTF = $(ANN_DIR)/Homo_sapiens.GRCh37.82.chr_gsa_faidx.genes.protein_coding.gtf
+GENCODE_NONCODING_GENE_GTF = $(ANN_DIR)/Homo_sapiens.GRCh37.82.chr_gsa_faidx.genes.non_coding.gtf
 
 RIBOSOMAL_INTERVALS ?= $(ANN_DIR)/ribosomalRNA.interval_list
 GENE_REF_FLAT = $(ANN_DIR)/refFlat.txt
@@ -162,22 +164,6 @@ HISAT2_REF = $(REF_DIR)/genome_index/hisat2_b37/genome_snp_tran
 SNP_EFF_GENOME = GRCh37.75
 DB_NSFP ?= $(REF_DIR)/dbNSFP/GRCh37/dbNSFP2.9.txt.gz
 
-#TOPHAT_REF = GRCh37
-#GENES_GTF = $(REF_DIR)/Homo_sapiens/Ensembl/$(TOPHAT_REF)/Annotation/Genes/genes.gtf
-
-#ANNOVAR_REF = hg19
-
-#UCSC_REFSEQ_GTF = $(REF_DIR)s/genomes/ucsc.refseq.gtf
-#REFSEQ_GTF := $(UCSC_REFSEQ_GTF)
-
-#CHR_LEN = $(REF_DIR)/GATK_bundle/2.3/b37.len
-
-#REF_2BIT ?= $(REF_DIR)/GATK_bundle/2.3/human_g1k_v37.2bit
-
-#MAP_BIGWIG ?= $(REF_DIR)/wgEncodeCrgMapabilityAlign100mer.nochr.bigWig
-
-REF_NAME := 1000GenomesPilot-NCBI37
-REF_DATE := 20100517
 REF_DICT = $(REF_FASTA:.fasta=.dict)
 
 MUTSIGCV_REF_DIR ?= $(REF_DIR)/MutSigCV
@@ -186,19 +172,9 @@ MUTSIGCV_COV_REF ?= $(MUTSIGCV_REF_DIR)/gene.covariates.txt
 MUTSIGCV_DICT_REF ?= $(MUTSIGCV_REF_DIR)/mutation_type_dictionary_file.txt
 MUTSIGCV_SEQ_REF_DIR ?= $(MUTSIGCV_REF_DIR)/chr_files_hg19/
 
-#EMU_REF_DIR ?= $(REF_DIR)/GATK_bundle/2.3/emu_ref
-#EMU_REF_MUTATIONS ?= $(REF_DIR)/emu_ref/exome_ref/Breast_clean_somatic_mutations_for_signature_analysis.emu.mutations.txt
-#EMU_REF_CNV ?= $(REF_DIR)/emu_ref/exome_ref/Breast_clean_somatic_mutations_for_signature_analysis.emu.copynum.txt
+YOUN_AND_SIMON_SEQ_DATA ?= $(ANN_DIR)/youn_and_simon_sequence_data.RData
 
-#HMMCOPY_GC_WIG = $(REF_DIR)/GATK_bundle/2.3/gc_hg19.wig
-#HMMCOPY_MAP_WIG = $(REF_DIR)/map_hg19.wig
-
-
-#INTEGRATE_ANN = $(REF_DIR)/annot.ucsc.txt
-#INTEGRATE_BWTS = $(REF_DIR)/GATK_bundle/2.3/bwts
-#ONCOTATOR_DB ?= $(REF_DIR)/oncotator_v1_ds_Jan262014
-
-#ANNOVAR_DB = $(HOME)/share/usr/annovar/humandb
+MSISENSOR_REF ?= $(REF_DIR)/msi_reference/b37.txt
 
 endif
 B37_INC = true
