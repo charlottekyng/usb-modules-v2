@@ -20,7 +20,7 @@ mosaics : $(foreach pair,$(SAMPLE_PAIRS),mosaics/rdata_$(MOSAICS_SUFFIX)/$(pair)
 
 define mosaics-peaks
 mosaics/rdata_$$(MOSAICS_SUFFIX)/$1_$2.rdata : mosaics/bin/$1.bam_$$(MOSAICS_SUFFIX).txt mosaics/bin/$2.bam_$$(MOSAICS_SUFFIX).txt
-	$$(call RUN,$$(MOSAICS_NUM_CORES),$$(RESOURCE_REQ_VHIGH_MEM),$$(RESOURCE_REQ_SHORT),$$(R_MODULE) $$(BEDOOLS_MODULE),"\
+	$$(call RUN,$$(MOSAICS_NUM_CORES),$$(RESOURCE_REQ_MEDIUM_MEM),$$(RESOURCE_REQ_SHORT),$$(R_MODULE) $$(BEDTOOLS_MODULE),"\
 	$$(MKDIR) mosaics mosaics/peaks_$$(MOSAICS_SUFFIX) mosaics/rdata_$$(MOSAICS_SUFFIX) mosaics/plots_$$(MOSAICS_SUFFIX); \
 	$$(MOSAICS_RUN) --parallel $$(MOSAICS_PARALLEL) --num_cores $$(MOSAICS_NUM_CORES) \
 	--plotFileLoc mosaics/plots_$$(MOSAICS_SUFFIX) \
@@ -39,26 +39,6 @@ mosaics/peaks_$$(MOSAICS_SUFFIX)/$1_$2.peakTFBS.bed : mosaics/rdata_$$(MOSAICS_S
 mosaics/peaks_$$(MOSAICS_SUFFIX)/$1_$2.peakTFBS.txt : mosaics/rdata_$$(MOSAICS_SUFFIX)/$1_$2.rdata
 	
 
-#mosaics/rdata_fragL$$(MOSAICS_FRAG_LEN)_bin$$(MOSAICS_BIN_SIZE)/$1_$2.rdata : mosaics/bin/$1.bam_fragL$$(MOSAICS_FRAG_LEN)_bin$$(MOSAICS_BIN_SIZE).txt mosaics/bin/$2.bam_fragL$$(MOSAICS_FRAG_LEN)_bin$$(MOSAICS_BIN_SIZE).txt
-#	$$(call RUN,$$(MOSAICS_NUM_CORES),$$(RESOURCE_REQ_VHIGH_MEM),$$(RESOURCE_REQ_SHORT),$$(R_MODULE) $$(BEDOOLS_MODULE),"\
-#	$$(MKDIR) mosaics mosaics/peaks_fragL$$(MOSAICS_FRAG_LEN)_bin$$(MOSAICS_BIN_SIZE) \
-#	mosaics/rdata_fragL$$(MOSAICS_FRAG_LEN)_bin$$(MOSAICS_BIN_SIZE) mosaics/plots_fragL$$(MOSAICS_FRAG_LEN)_bin$$(MOSAICS_BIN_SIZE); \
-#	$$(MOSAICS_RUN) --parallel $$(MOSAICS_PARALLEL) --num_cores $$(MOSAICS_NUM_CORES) \
-#	--plotFileLoc mosaics/plots_fragL$$(MOSAICS_FRAG_LEN)_bin$$(MOSAICS_BIN_SIZE) \
-#	--peakFileLoc mosaics/peaks_fragL$$(MOSAICS_FRAG_LEN)_bin$$(MOSAICS_BIN_SIZE) \
-#	--rdataFileLoc mosaics/rdata_fragL$$(MOSAICS_FRAG_LEN)_bin$$(MOSAICS_BIN_SIZE) \
-#	--maxgap $$(MOSAICS_MAXGAP) --minsize $$(MOSAICS_MINSIZE) --thres $$(MOSAICS_THRES) $$^ && \
-#	$$(BEDTOOLS) sort -i mosaics/peaks_fragL$$(MOSAICS_FRAG_LEN)_bin$$(MOSAICS_BIN_SIZE)/$1_$2.peakTFBS.bed -faidx $$(REF_FASTA).fai > tmp && \
-#	mv tmp mosaics/peaks_fragL$$(MOSAICS_FRAG_LEN)_bin$$(MOSAICS_BIN_SIZE)/$1_$2.peakTFBS.bed && \
-#	head -1 mosaics/peaks_fragL$$(MOSAICS_FRAG_LEN)_bin$$(MOSAICS_BIN_SIZE)/$1_$2.peakTFBS.txt > tmp && \
-#	tail -n +2 mosaics/peaks_fragL$$(MOSAICS_FRAG_LEN)_bin$$(MOSAICS_BIN_SIZE)/$1_$2.peakTFBS.txt | \
-#	$$(BEDTOOLS) sort -faidx $$(REF_FASTA).fai >> tmp && mv tmp mosaics/peaks_fragL$$(MOSAICS_FRAG_LEN)_bin$$(MOSAICS_BIN_SIZE)/$1_$2.peakTFBS.txt")
-
-#mosaics/peaks_fragL$$(MOSAICS_FRAG_LEN)_bin$$(MOSAICS_BIN_SIZE)/$1_$2.peakTFBS.bed : mosaics/rdata_fragL$$(MOSAICS_FRAG_LEN)_bin$$(MOSAICS_BIN_SIZE)/$1_$2.rdata
-#	
-#
-#mosaics/peaks_fragL$$(MOSAICS_FRAG_LEN)_bin$$(MOSAICS_BIN_SIZE)/$1_$2.peakTFBS.txt : mosaics/rdata_fragL$$(MOSAICS_FRAG_LEN)_bin$$(MOSAICS_BIN_SIZE)/$1_$2.rdata
-#	
 endef
 $(foreach pair,$(SAMPLE_PAIRS),$(eval $(call mosaics-peaks,$(tumor.$(pair)),$(normal.$(pair)))))
 

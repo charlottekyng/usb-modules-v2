@@ -90,7 +90,6 @@ SPLIT_CHR ?= false
 BAM_DUP_TYPE ?= none
 BAM_REALN ?= none
 BAM_RECAL ?= none
-BAM_INTRACHR ?= true
 GENOTYPE_WITH_CHR2 = ?= false
 endif
 
