@@ -121,7 +121,9 @@ DGV_FILE = $(ANN_DIR)/DGV_GRCh37_hg19_variants_2016-05-15.txt
 #ENSEMBL_TXDB = $(ANN_DIR)/hsapiens_ensembl_biomart.sqlite
 
 GENCODE_GTF = $(ANN_DIR)/Homo_sapiens.GRCh37.82.chr_patch_hapl_scaff.gtf
-GENCODE_GENE_GTF = $(ANN_DIR)/Homo_sapiens.GRCh37.82.chr_patch_hapl_scaff.genes.gtf
+GENCODE_GENE_GTF = $(ANN_DIR)/Homo_sapiens.GRCh37.82.chr_gsa_faidx.genes.gtf
+GENCODE_CODING_GENE_GTF = $(ANN_DIR)/Homo_sapiens.GRCh37.82.chr_gsa_faidx.genes.protein_coding.gtf
+GENCODE_NONCODING_GENE_GTF = $(ANN_DIR)/Homo_sapiens.GRCh37.82.chr_gsa_faidx.genes.non_coding.gtf
 
 RIBOSOMAL_INTERVALS ?= $(ANN_DIR)/ribosomalRNA.interval_list
 GENE_REF_FLAT = $(ANN_DIR)/refFlat.txt
@@ -148,7 +150,6 @@ HISAT2_REF = $(REF_DIR)/genome_index/hisat2_b37/genome_snp_tran
 DB_NSFP ?= $(REF_DIR)/snpeff/GRCh37/dbNSFP-v2.9.txt.gz
 
 #TOPHAT_REF = GRCh37
-#GENES_GTF = $(REF_DIR)/Homo_sapiens/Ensembl/$(TOPHAT_REF)/Annotation/Genes/genes.gtf
 
 #ANNOVAR_REF = hg19
 
