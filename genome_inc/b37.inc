@@ -111,6 +111,7 @@ CONTEST_POP_FILE ?= $(ANN_DIR)/hg19_population_stratified_af_hapmap_3.3.vcf
 KNOWN_INDELS ?= $(GSA_REF_DIR)/Mills_and_1000G_gold_standard.indels.b37.vcf
 OMNI ?= $(GSA_REF_DIR)/1000G_omni2.5.b37.vcf
 HAPMAP ?= $(GSA_REF_DIR)/hapmap_3.3.b37.vcf
+R1000G ?= $(GSA_REF_DIR)/1000G_phase1.snps.high_confidence.b37.vcf
 
 CLINVAR = $(ANN_DIR)/clinvar.vcf
 EXAC_NONTCGA = $(ANN_DIR)/ExAC_nonTCGA.r0.3.1.sites.vep.edited.vcf
