@@ -50,25 +50,23 @@ LOGDIR ?= log/vcf.$(NOW)
 
 %.sdp_ft.vcf : %.vcf
 	$(call CHECK_VCF,$<,$@,\
-	$(call RUN,1,$(RESOURCE_REQ_LOW_MEM),$(RESOURCE_REQ_VSHORT),$(SNP_EFF_MODULE),"\
+	$(call RUN,1,$(RESOURCE_REQ_LOW_MEM),$(RESOURCE_REQ_VSHORT),$(SNP_EFF_43_MODULE),"\
 		$(SNP_SIFT) filter $(SNP_SIFT_OPTS) -f $< '(exists GEN[?].DP) & (GEN[?].DP > 20)' > $@"))
+
+%.strelka_ft.vcf : %.vcf
+	$(call CHECK_VCF,$<,$@,\
+	$(call RUN,1,$(RESOURCE_REQ_MEDIUM_MEM),$(RESOURCE_REQ_SHORT),$(JAVA8_MODULE),"\
+	$(call GATK,VariantFiltration,$(RESOURCE_REQ_MEDIUM_MEM_JAVA)) \
+	-R $(REF_FASTA) -V $< -o $@ \
+	--filterExpression 'QSI_NT < 30' --filterName QSI_ref \
+	--filterExpression 'IHP > 14' --filterName iHpol \
+	--filterExpression 'MQ0 > 1' --filterName MQ0 && $(RM) $<"))
 
 %.hotspot.vcf : %.vcf
 	$(call CHECK_VCF,$<,$@,\
 	$(call RUN,1,$(RESOURCE_REQ_MEDIUM_MEM),$(RESOURCE_REQ_SHORT),$(JAVA8_MODULE),"\
 		$(call GATK,VariantFiltration,$(RESOURCE_REQ_MEDIUM_MEM_JAVA)) -R $(REF_FASTA) -V $< -o $@ \
 		--maskName HOTSPOT --mask $(CANCER_HOTSPOT_VCF) && $(RM) $< $<.idx"))
-
-%.pass.vcf : %.vcf
-	$(call CHECK_VCF,$<,$@,\
-	$(call RUN,1,$(RESOURCE_REQ_LOW_MEM),$(RESOURCE_REQ_VSHORT),,"\
-		$(VCF_PASS) $< $@ $(subst pass,fail,$@)"))
-
-#%.pass.vcf : %.vcf
-#	$(call CHECK_VCF,$<,$@,\
-#	$(call RUN,1,$(RESOURCE_REQ_LOW_MEM),$(RESOURCE_REQ_VSHORT),$(SNP_EFF_MODULE),"\
-#		$(SNP_SIFT) filter $(SNP_SIFT_OPTS) -f $< \
-#		\"( na FILTER ) | (FILTER = 'PASS') | (FILTER has 'HOTSPOT')\" > $@"))
 
 ## This is definitely broken
 # somatic filter for structural variants
@@ -109,17 +107,21 @@ LOGDIR ?= log/vcf.$(NOW)
 	$(call GATK,LeftAlignAndTrimVariants,$(RESOURCE_REQ_LOW_MEM_JAVA)) -R $(REF_FASTA) -V $< -o $@"))
 
 %.post_bcftools.vcf : %.vcf
-	$(INIT) grep -v "##contig" $< | $(VCF_SORT) $(REF_DICT) - > $@
+	$(call CHECK_VCF,$<,$@,\
+	$(call RUN,1,$(RESOURCE_REQ_LOW_MEM),$(RESOURCE_REQ_VSHORT),,"\
+	grep -v "##contig" $< | $(VCF_SORT) $(REF_DICT) - > $@"))
 
 %.sorted.vcf : %.vcf
-	$(INIT) $(VCF_SORT) $(REF_DICT) $< > $@
+	$(call CHECK_VCF,$<,$@,\
+	$(call RUN,1,$(RESOURCE_REQ_LOW_MEM),$(RESOURCE_REQ_VSHORT),,"\
+	$(VCF_SORT) $(REF_DICT) $< > $@ && $(RM) $<"))
 
 ############ ANNOTATION #########
 
 %.eff.vcf : %.vcf %.vcf.idx
 	$(call CHECK_VCF,$<,$@,\
 		$(call RUN,1,$(RESOURCE_REQ_MEDIUM_MEM),$(RESOURCE_REQ_SHORT),$(SNP_EFF_MODULE),"\
-		$(SNP_EFF) ann $(SNP_EFF_OPTS) $(SNP_EFF_GENOME) $< > $@"))
+		$(SNP_EFF) ann $(SNP_EFF_OPTS) -noStats $(SNP_EFF_GENOME) $< > $@"))
 
 %.nsfp.vcf : %.vcf %.vcf.idx
 	$(call CHECK_VCF,$<,$@,\
@@ -184,7 +186,7 @@ $(foreach sample,$(SAMPLES),$(eval $(call hrun-sample,$(sample))))
 %.exac_nontcga.vcf : %.vcf %.vcf.idx 
 	$(call CHECK_VCF,$<,$@,\
 		$(call RUN,1,$(RESOURCE_REQ_HIGH_MEM),$(RESOURCE_REQ_VSHORT),$(SNP_EFF_MODULE),"\
-	$(SNP_SIFT) annotate $(SNP_SIFT_OPTS) -info $(EXAC_INFO_FIELDS) $(EXAC_NONTCGA) \
+	$(SNP_SIFT) annotate $(SNP_SIFT_OPTS) $(EXAC_NONTCGA) \
 	$< > $@ && $(RM) $^"))
 
 %.exac_nonpsych.vcf : %.vcf %.vcf.idx
@@ -207,10 +209,18 @@ $(foreach sample,$(SAMPLES),$(eval $(call hrun-sample,$(sample))))
 
 ifdef SAMPLE_PAIRS
 define annotate-facets-pair
-vcf/$1_$2.%.facets.vcf : vcf/$1_$2.%.vcf facets/cncf/$1_$2.Rdata
-	$$(call CHECK_VCF,$<,$@,\
+#vcf/$1_$2.%.facets.vcf : vcf/$1_$2.%.vcf facets/cncf/$1_$2.Rdata
+#	$$(call CHECK_VCF,$$<,$$@,\
+#	$$(call RUN,1,$$(RESOURCE_REQ_LOW_MEM),$$(RESOURCE_REQ_VSHORT),$$(R_MODULE),"\
+#		$$(ANNOTATE_FACETS_VCF) --genome \"$$(REF)\" --tumor \"$1\" --facetsRdata $$(<<) --outFile $$@ $$< && \
+#		$(RM) $<"))
+vcf/$1_$2.%.facets.vcf : vcf/$1_$2.%.vcf facets/cncf/$1_$2.cncf.txt facets/cncf/$1_$2.out 
+	$$(call CHECK_VCF,$$<,$$@,\
+	purity=`grep Purity $$(<<<) | cut -f2 -d'=' | sed 's/NA/0.1/; s/ //g;'` && \
 	$$(call RUN,1,$$(RESOURCE_REQ_LOW_MEM),$$(RESOURCE_REQ_VSHORT),$$(R_MODULE),"\
-		$$(ANNOTATE_FACETS_VCF) --genome \"$$(REF)\" --tumor \"$1\" --facetsRdata $$(<<) --outFile $$@ $$<"))
+		$$(ANNOTATE_FACETS_VCF) --genome \"$$(REF)\" --tumor \"$1\" \
+		--facetsSegTxt $$(<<) --purity $$$$purity --outFile $$@ $$< && \
+		$$(RM) $$<"))
 endef
 $(foreach pair,$(SAMPLE_PAIRS),$(eval $(call annotate-facets-pair,$(tumor.$(pair)),$(normal.$(pair)))))
 endif
@@ -274,6 +284,10 @@ $(foreach pair,$(SAMPLE_PAIRS),$(eval $(call rename-samples-tumor-normal,$(tumor
 #endif
 
 ##### extract vcf to table
+
+VCF_FIELDS = CHROM POS ID REF ALT QUAL FILTER
+ANN_FIELDS = $(addprefix ANN[*].,ALLELE EFFECT IMPACT GENE GENEID FEATURE FEATUREID BIOTYPE RANK \
+	HGVS_C HGVS_P CDNA_POS CDNA_LEN CDS_POS CDS_LEN AA_POS AA_LEN DISTANCE ERRORS)
 tables/%.opl_tab.txt : vcf/%.vcf
 	$(call RUN,1,$(RESOURCE_REQ_MEDIUM_MEM),$(RESOURCE_REQ_VSHORT),$(SNP_EFF_MODULE),"\
 	format_fields=\$$(grep '^##FORMAT=<ID=' $< | sed 's/dbNSFP_GERP++/dbNSFP_GERP/g' | sed 's/.*ID=//; s/,.*//;' | tr '\n' ' '); \
@@ -332,7 +346,7 @@ sufamscreen/%.opl_tab.txt : sufamscreen/%.vcf
 	done")
 
 %.tab.txt : %.opl_tab.txt
-	$(call RUN,1,$(RESOURCE_REQ_VHIGH_MEM),$(RESOURCE_REQ_MEDIUM),$(PERL_MODULE),"\
+	$(call RUN,1,$(RESOURCE_REQ_MEDIUM_MEM),$(RESOURCE_REQ_VSHORT),$(PERL_MODULE),"\
 	$(VCF_JOIN_EFF) < $< > $@")
 	
 #%.pass.txt : %.txt
@@ -342,16 +356,16 @@ sufamscreen/%.opl_tab.txt : sufamscreen/%.vcf
 # merge tables
 alltables/all$(PROJECT_PREFIX).%.txt : $(foreach sample,$(SAMPLES),tables/$(sample).%.txt)
 	$(call RUN,1,$(RESOURCE_REQ_MEDIUM_MEM),$(RESOURCE_REQ_VSHORT),$(R_MODULE),"\
-	$(RSCRIPT) $(RBIND) --sampleName $< $^ > $@")
+	$(RBIND) --sampleName $< $^ > $@")
 ifdef SAMPLE_SETS
 alltables/allSS$(PROJECT_PREFIX).%.txt : $(foreach set,$(SAMPLE_SETS),tables/$(set).%.txt)
 	$(call RUN,1,$(RESOURCE_REQ_MEDIUM_MEM),$(RESOURCE_REQ_VSHORT),$(R_MODULE),"\
-	$(RSCRIPT) $(RBIND) --normalLast $^ > $@")
+	$(RBIND) --normalLast $^ > $@")
 endif
 ifdef SAMPLE_PAIRS
 alltables/allTN$(PROJECT_PREFIX).%.txt : $(foreach pair,$(SAMPLE_PAIRS),tables/$(pair).%.txt)
-	$(call RUN,1,$(RESOURCE_REQ_MEDIUM_MEM),$(RESOURCE_REQ_VSHORT),$(R_MODULE),"\
-	$(RSCRIPT) $(RBIND) --tumorNormal $^ > $@")
+	$(call RUN,1,$(RESOURCE_REQ_HIGH_MEM),$(RESOURCE_REQ_VSHORT),$(R_MODULE),"\
+	$(RBIND) --tumorNormal $^ > $@")
 endif
 
 %.high_moderate.txt : %.txt
@@ -370,6 +384,12 @@ endif
 %.nonsynonymous.txt : %.txt
 	col=$$(head -1 $< | tr '\t' '\n' | grep -n "IMPACT" | sed 's/:.*//'); \
 	$(INIT) head -1 $< > $@ && awk -v col=$$col 'match($$col, /MODERATE/) || match($$col, /HIGH/)' $< >> $@
+
+%.nonsynonymous_hotspot.txt : %.txt
+	col_imp=$$(head -1 $< | tr '\t' '\n' | grep -n "IMPACT" | sed 's/:.*//'); \
+	col_filter=$$(head -1 $< | tr '\t' '\n' | grep -n "FILTER"); \
+	$(INIT) head -1 $< > $@ && awk -v col_imp=$$col_imp -v col_filter=$$col_filter \
+	'(match($$col_imp, /MODERATE/) || match($$col_imp, /HIGH/) || match($$col_filter, /HOTSPOT/))' $< >> $@
 
 %.nonsynonymous_synonymous_hotspot.txt : %.txt
 	col_imp=$$(head -1 $< | tr '\t' '\n' | grep -n "IMPACT" | sed 's/:.*//'); \
@@ -508,7 +528,6 @@ alltables/all$(PROJECT_PREFIX).%.vcf.stats : $(foreach sample,$(SAMPLES),vcf/$(s
 #%.pass2.vcf : %.vcf
 #	$(call CHECK_VCF,$<,$@,$(call LSCRIPT_CHECK_MEM,2G,00:29:29,"$(LOAD_SNP_EFF_MODULE); $(SNP_SIFT) filter \
 #		$(SNP_SIFT_OPTS) -f $< \"( na FILTER ) | (FILTER = 'PASS')\" > $@"))
-
 
 ifeq ($(findstring tvc,$(MUT_CALLER)),tvc)
 include usb-modules-v2/vcf_tools/vcftools_tvc.mk

@@ -32,7 +32,7 @@ FACETS_TARGETS_INTERVALS ?= $(DBSNP)
 REF_FASTA := $(REF_DIR)/genomes/GRCm38_68.resorted.fa
 REF_DICT := $(REF_DIR)/genomes/GRCm38_68.resorted.dict
 
-SNP_EFF_GENOME = GRCm38.79
+SNP_EFF_GENOME = GRCm38.86
 
 GENCODE_GTF = $(ANN_DIR)/gencode.vM11.annotation_nochr.gtf
 

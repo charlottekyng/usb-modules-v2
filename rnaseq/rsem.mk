@@ -1,15 +1,18 @@
 include usb-modules-v2/Makefile.inc
 
+RSEM_NUM_CORES ?= 4
+RSEM_OPTIONS ?= --alignments --no-bam-output -p $(RSEM_NUM_CORES) --forward-prob 0
+
 LOGDIR ?= log/rsem.$(NOW)
 
 .DELETE_ON_ERROR:
 .SECONDARY:
 .PHONY: rsem
 
-rsem : $(foreach sample,$(SAMPLES),rsem/$(sample).genes.results) rsem/all.genes.expected_count.results rsem/all.genes.TPM.results rsem/all.genes.FPKM.results rsem/all.isoforms.expected_count.results rsem/all.isoforms.TPM.results rsem/all.isoforms.FPKM.results rsem/all.genes.expected_count.results_coding_upper_quartiled
+rsem : $(foreach type1,genes,$(foreach type2,expected_count TPM FPKM,rsem/all$(PROJECT_PREFIX).$(type1).$(type2).results)) rsem/all$(PROJECT_PREFIX).genes.expected_count.results_coding_uq
 
 define rsem-calc-expression
-rsem/$1.genes.results : star/secondpass/$1.Aligned.toTranscriptome.out.bam 
+rsem/$1.genes.results : star/$1.Aligned.toTranscriptome.out.bam 
 	$$(call RUN,$$(RSEM_NUM_CORES),$$(RESOURCE_REQ_LOW_MEM),$$(RESOURCE_REQ_SHORT),$$(PERL_MODULE) $$(RSEM_MODULE),"\
 	$$(RSEM_CALC_EXPR) $$(RSEM_OPTIONS) $$(if $$(findstring true,$$(PAIRED_END)),--paired-end) \
 	$$< $$(RSEM_INDEX) $$(@D)/$1")
@@ -19,36 +22,21 @@ $(foreach sample,$(SAMPLES),\
 
 rsem/%.isoforms.results : rsem/%.genes.results
 	
+define rsem-gen-dat-matrix
+rsem/all$$(PROJECT_PREFIX).$1.$2.results : $$(foreach sample,$$(SAMPLES),rsem/$$(sample).$1.results)
+	$$(call RUN,1,$$(RESOURCE_REQ_LOW_MEM),$$(RESOURCE_REQ_VSHORT),$$(PERL_MODULE) $$(R_MODULE),"\
+	$$(RSEM_GEN_DATA_MATRIX) $$(word 3,$$(subst .,$$( ),$$@)) $$^ | sed 's/rsem\///g;' | sed \"s/\.$$(word 2,$$(subst .,$$( ),$$@))\.results//g\" | tr -d \"\\\"\" > $$@.tmp && \
+	$$(RSCRIPT) $$(RSEM_PROCCESS) --inputRSEMFile $$@.tmp --gtf $$(GENCODE_GENE_GTF) --outputFile $$@ && $$(RM) $$@.tmp")
+endef
+$(foreach type1,genes,\
+	$(foreach type2,expected_count FPKM TPM,\
+		$(eval $(call rsem-gen-dat-matrix,$(type1),$(type2)))))
 
-rsem/all.genes.expected_count.results : $(foreach sample,$(SAMPLES),rsem/$(sample).genes.results)
-	$(call RUN,1,$(RESOURCE_REQ_LOW_MEM),$(RESOURCE_REQ_VSHORT),$(PERL_MODULE),"\
-	$(RSEM_GEN_DATA_MATRIX) expected_count $^ > $@")
-
-rsem/all.genes.TPM.results : $(foreach sample,$(SAMPLES),rsem/$(sample).genes.results)
-	$(call RUN,1,$(RESOURCE_REQ_LOW_MEM),$(RESOURCE_REQ_VSHORT),$(PERL_MODULE),"\
-	$(RSEM_GEN_DATA_MATRIX) TPM $^ > $@")
-
-rsem/all.genes.FPKM.results : $(foreach sample,$(SAMPLES),rsem/$(sample).genes.results)
-	$(call RUN,1,$(RESOURCE_REQ_LOW_MEM),$(RESOURCE_REQ_VSHORT),$(PERL_MODULE),"\
-	$(RSEM_GEN_DATA_MATRIX) FPKM $^ > $@")
-
-rsem/all.isoforms.expected_count.results : $(foreach sample,$(SAMPLES),rsem/$(sample).isoforms.results)
-	$(call RUN,1,$(RESOURCE_REQ_MEDIUM_MEM),$(RESOURCE_REQ_VSHORT),$(PERL_MODULE),"\
-	$(RSEM_GEN_DATA_MATRIX) expected_count $^ > $@")
-
-rsem/all.isoforms.TPM.results : $(foreach sample,$(SAMPLES),rsem/$(sample).isoforms.results)
-	$(call RUN,1,$(RESOURCE_REQ_MEDIUM_MEM),$(RESOURCE_REQ_VSHORT),$(PERL_MODULE),"\
-	$(RSEM_GEN_DATA_MATRIX) TPM $^ > $@")
-
-rsem/all.isoforms.FPKM.results : $(foreach sample,$(SAMPLES),rsem/$(sample).isoforms.results)
-	$(call RUN,1,$(RESOURCE_REQ_MEDIUM_MEM),$(RESOURCE_REQ_VSHORT),$(PERL_MODULE),"\
-	$(RSEM_GEN_DATA_MATRIX) FPKM $^ > $@")
-
-rsem/all.genes.expected_count.results_coding_upper_quartiled : rsem/all.genes.expected_count.results
-	$(call RUN,1,$(RESOURCE_REQ_LOW_MEM),$(RESOURCE_REQ_VSHORT),$(R_MODULE),"\
-	$(RSCRIPT) $(RSEM_NORM) --inputRSEMFile $< --gtf $(GENCODE_GTF) --outputFile $@ \
-	--normalizationMethod \"uq\" --threshold_for_uq 1000")
-	
+rsem/all$(PROJECT_PREFIX).genes.expected_count.results_coding_uq : $(foreach sample,$(SAMPLES),rsem/$(sample).genes.results)
+	$(call RUN,1,$(RESOURCE_REQ_LOW_MEM),$(RESOURCE_REQ_VSHORT),$(PERL_MODULE) $(R_MODULE),"\
+	$(RSEM_GEN_DATA_MATRIX) expected_count $^ | sed 's/rsem\///g; s/\.genes\.results//g' | tr -d \"\\\"\" > $@.tmp && \
+	$(RSCRIPT) $(RSEM_PROCCESS) --inputRSEMFile $@.tmp --gtf $(GENCODE_GENE_GTF) --outputFile $@ --geneBiotype protein_coding \
+	--normalizationMethod \"uq\" --threshold_for_uq 1000 && $(RM) $@.tmp")	
 
 include usb-modules-v2/bam_tools/processBam.mk
 include usb-modules-v2/aligners/align.mk

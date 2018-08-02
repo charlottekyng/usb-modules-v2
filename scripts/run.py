@@ -25,7 +25,7 @@ if __name__ == '__main__':
     parser.add_argument('-c', '--check', default=False, action='store_true', help='check for non-zero file size')
     parser.add_argument('-d', '--docker', default=False, action='store_true', help='request docker support')
     parser.add_argument('-I', '--internet', default=False, action='store_true', help='request internet access')
-    parser.add_argument('-g', '--cluster_engine', default='sge', help='cluster engine (sge, lfs, or pbs supported)')
+    parser.add_argument('-g', '--cluster_engine', default='slurm', help='cluster engine (slurm, sge, lfs, or pbs supported)')
     parser.add_argument('-l', '--local', default=False, action='store_true', help='run job locally')
     parser.add_argument('-o', '--out_file', default=None, help='output file to check for empty file, normally this should not be STDOUT')
     parser.add_argument('-p', '--project_name', default=None, help='project name')
@@ -154,7 +154,7 @@ if __name__ == '__main__':
         if job_name is not None:
             qsub_args += " --job-name {}".format(job_name)
         if args.num_cores > 1:
-            qsub_args += " -n {}".format(args.num_cores)
+            qsub_args += " --cpus-per-task {}".format(args.num_cores)
         if args.hard_memory is not None:
             hard_mem_gb = int(math.ceil(job.human2bytes(args.hard_memory) / 1000000000.0))
             qsub_args += " --mem-per-cpu {hard_mem_gb}".format(hard_mem_gb=args.hard_memory)             

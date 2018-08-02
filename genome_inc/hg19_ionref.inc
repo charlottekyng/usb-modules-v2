@@ -45,6 +45,7 @@ PRIMER_TRIM_BED ?= $(BED_DIR)/AmpliSeqHCC_WG_IAD97706_v2.20160511.designed.unmer
 TARGETS_FILE_INTERVALS_MERGED ?= $(BED_DIR)/AmpliSeqHCC_WG_IAD97706_v2.20160511.designed.merged.bed
 DBSNP_TARGETS_INTERVALS ?= $(BED_DIR)/AmpliSeqHCC_WG_IAD97706_v2.20160511.dbsnp_138.vcf
 DBSNP_TARGETS_INTERVALS_COMMON ?= $(BED_DIR)/AmpliSeqHCC_WG_IAD97706_v2.20160511.dbsnp_138.vcf
+INCLUDE_LNCRNA_IN_SUMMARY = true
 endif
 ifeq ($(PANEL),BREAST)
 INCLUDE_LINCRNA_IN_SUMMARY ?= true
@@ -126,8 +127,7 @@ SNP_TXT = $(ANN_DIR)/b37_snp137.SingleDiNucl.1based.nochr.txt
 #MAPSPLICE_REF_DIR = $(REF_DIR)/GATK_bundle/2.3/mapsplice_ref/chr
 #MAPSPLICE_REF_BASENAME = $(REF_DIR)/GATK_bundle/2.3/mapsplice_ref/hg19
 
-DB_NSFP ?= $(REF_DIR)/snpeff/GRCh37/dbNSFP-v2.9.txt.gz
-
+DB_NSFP ?= $(REF_DIR)/snpeff/GRCh37/dbNSFP2.9.txt.gz
 #TOPHAT_REF = GRCh37
 #GENES_GTF = $(REF_DIR)/Homo_sapiens/Ensembl/$(TOPHAT_REF)/Annotation/Genes/genes.gtf
 

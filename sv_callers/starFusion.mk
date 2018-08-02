@@ -6,10 +6,9 @@ PHONY += star_fusion
 .PHONY : $(PHONY)
 .DELETE_ON_ERROR:
 
-#star_fusion : $(foreach sample,$(SAMPLES),star_fusion/$(sample)/star-fusion.STAR-Fusion.filter.ok)
 star_fusion : star_fusion/all.star-fusion.STAR-Fusion.final
 define star-fusion
-star_fusion/$1/star-fusion.STAR-Fusion.filter.ok : star/secondpass/$1.Chimeric.out.junction
+star_fusion/$1/star-fusion.STAR-Fusion.filter.ok : star/$1.Chimeric.out.junction
 	$$(call RUN,1,$$(RESOURCE_REQ_LOW_MEM),$$(RESOURCE_REQ_VSHORT),$$(STAR_FUSION_MODULE),"\
 	$$(STAR_FUSION) --genome_lib_dir $$(STAR_CTAT_DIR) \
 	-J $$< --output_dir star_fusion/$1 --max_promiscuity $$(STAR_FUSION_MAX_PROMISCUITY) \
@@ -30,3 +29,5 @@ star_fusion/all.star-fusion.STAR-Fusion.final : $(foreach sample,$(SAMPLES),star
 		sed "/^#/d; s/^/$$samplename\t/" $$fusion; \
 	done; \
 	} > $@
+
+include usb-modules-v2/aligners/starAligner.mk

@@ -10,14 +10,26 @@ LOGDIR ?= log/contest.$(NOW)
 .DELETE_ON_ERROR:
 .PHONY: contest
 
-contest : contest/snp_vcf/all$(PROJECT_PREFIX)_contamination.txt $(foreach sample,$(SAMPLES),contest/snp_vcf/$(sample)_contamination.txt)
+contest : contest/all$(PROJECT_PREFIX).contest.txt 
 
 # ContEst on gatk snp_vcf folder
 ifeq ($(findstring ILLUMINA,$(SEQ_PLATFORM)),ILLUMINA)
-contest/snp_vcf/%_contamination.txt : bam/%.bam gatk/dbsnp/%.gatk_snps.vcf
-	$(call RUN,1,$(RESOURCE_REQ_MEDIUM_MEM),$(RESOURCE_REQ_VSHORT),$(JAVA8_MODULE),"\
-	$(MKDIR) contest/snp_vcf; \
-	$(call GATK,ContEst,$(RESOURCE_REQ_MEDIUM_MEM_JAVA)) -I $(<) -B:genotypes$(,)vcf $(<<) -o $(@)")
+define contest-tumor-normal
+contest/$1_$2.contest.txt : bam/$1.bam bam/$2.bam
+	$$(call RUN,1,$$(RESOURCE_REQ_MEDIUM_MEM),$$(RESOURCE_REQ_SHORT),$$(JAVA8_MODULE),"\
+	$$(call GATK,ContEst,$$(RESOURCE_REQ_MEDIUM_MEM_JAVA)) -R $$(REF_FASTA) \
+	-I:eval $$(<) -I:genotype $$(<<) --popfile $$(CONTEST_POP_FILE) \
+	--min_mapq $$(MIN_MQ) --min_qscore 20 \
+	$$(if $(TARGETS_FILE_INTERVALS),-L $$(TARGETS_FILE_INTERVALS)) \
+	-isr INTERSECTION -o $$@")
+endef
+$(foreach pair,$(SAMPLE_PAIRS), \
+	$(eval $(call contest-tumor-normal,$(tumor.$(pair)),$(normal.$(pair)))))
+
+#contest/snp_vcf/%_contamination.txt : bam/%.bam gatk/dbsnp/%.gatk_snps.vcf
+#	$(call RUN,1,$(RESOURCE_REQ_MEDIUM_MEM),$(RESOURCE_REQ_VSHORT),$(JAVA8_MODULE),"\
+#	$(MKDIR) contest/snp_vcf; \
+#	$(call GATK,ContEst,$(RESOURCE_REQ_MEDIUM_MEM_JAVA)) -I $(<) -B:genotypes$(,)vcf $(<<) -o $(@)")
 endif
 ifeq ($(findstring IONTORRENT,$(SEQ_PLATFORM)),IONTORRENT)
 contest/snp_vcf/%_contamination.txt : bam/%.bam tvc/dbsnp/%/TSVC_variants.vcf
@@ -26,11 +38,11 @@ contest/snp_vcf/%_contamination.txt : bam/%.bam tvc/dbsnp/%/TSVC_variants.vcf
 	$(call GATK,ContEst,$(RESOURCE_REQ_MEDIUM_MEM_JAVA)) -I $(<) -B:genotypes$(,)vcf $(<<) -o $(@)")
 endif
 
-contest/snp_vcf/all$(PROJECT_PREFIX)_contamination.txt : $(foreach sample,$(SAMPLES),contest/snp_vcf/$(sample)_contamination.txt)
+contest/all$(PROJECT_PREFIX).contest.txt : $(foreach pair,$(SAMPLE_PAIRS),contest/$(pair).contest.txt)
 	( \
 		head -1 $< | sed "s/^/sample\t/"; \
 		for s in $(^); do \
-			grep -P "META\t" $$s | sed "s/^/`basename $$s _contamination.txt`/"; \
+			grep -P "META\t" $$s | sed "s/^/`basename $$s _contest.txt`/"; \
 		done | sort -rnk5,5; \
 	) > $@
 

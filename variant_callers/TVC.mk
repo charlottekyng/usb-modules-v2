@@ -1,6 +1,9 @@
 include usb-modules-v2/Makefile.inc
 include usb-modules-v2/variant_callers/variantCaller.inc
 
+MUT_CALLER = tvc
+TVC_NUM_CORES ?= 4
+
 LOGDIR ?= log/tvc.$(NOW)
 
 VPATH ?= bam
@@ -8,10 +11,9 @@ VARIANT_TYPES ?= tvc_snps tvc_indels
 
 PHONY += tvc tvc_vcfs tvc_tables
 tvc : tvc_vcfs tvc_tables
-tvc_vcfs : $(foreach type,$(VARIANT_TYPES),$(call VCFS,$(type)) $(addsuffix .idx,$(call VCFS,$(type))))
-tvc_tables : $(foreach type,$(VARIANT_TYPES),$(call TABLES,$(type)))
+tvc_vcfs : $(foreach type,$(VARIANT_TYPES),$(call MAKE_VCF_FILE_LIST,$(type)) $(addsuffix .idx,$(call MAKE_VCF_FILE_LIST,$(type))))
+tvc_tables : $(foreach type,$(VARIANT_TYPES),$(call MAKE_TABLE_FILE_LIST,$(type)))
 
-MUT_CALLER = tvc
 
 tvc/dbsnp/%/TSVC_variants.vcf : bam/%.bam
 	$(call RUN,$(TVC_NUM_CORES),$(RESOURCE_REQ_MEDIUM_MEM),$(RESOURCE_REQ_LONG),$(OPENBLAS_MODULE) $(PYTHON_MODULE),"\

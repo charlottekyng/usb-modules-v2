@@ -53,7 +53,14 @@ $(foreach cval1,$(FACETS_CVAL1),$(foreach sample,$(SAMPLES),$(eval $(call facets
 
 define facets-merge-poolednorm
 facets/cncf_poolednorm_$1/all$(PROJECT_PREFIX).summary.txt : $$(foreach sample,$$(SAMPLES),facets/cncf_poolednorm_$1/$$(sample)_poolednorm.out)
-	$$(INIT) paste $$^ > $$@;
+	$$(INIT) \
+	{ \
+	cut -f2 -d' ' $$< | tr '\n' '\t'; echo ""; \
+	for metrics in $$^; do \
+		cut -f4 -d' ' $$$$metrics | tr '\n' '\t'; echo ""; \
+	done;\
+} >$$@
+#	$$(INIT) paste $$^ > $$@;
 
 facets/cncf_poolednorm_$1/all$(PROJECT_PREFIX).geneCN.filled.txt : $$(foreach sample,$$(SAMPLES),facets/cncf_poolednorm_$1/$$(sample)_poolednorm.cncf.txt)
 	$$(call RUN,1,$$(RESOURCE_REQ_MEDIUM_MEM),$$(RESOURCE_REQ_SHORT),$$(R_MODULE),"\
@@ -61,11 +68,10 @@ facets/cncf_poolednorm_$1/all$(PROJECT_PREFIX).geneCN.filled.txt : $$(foreach sa
 endef
 $(foreach cval1,$(FACETS_CVAL1),$(eval $(call facets-merge-poolednorm,$(cval1))))
 
-#--cval2 $(FACETS_CVAL2) --pre_cval $(FACETS_PRE_CVAL)
-include usb-modules-v2/copy_number/facets.mk
-include usb-modules-v2/variant_callers/gatk.mk
+#include usb-modules-v2/copy_number/facets.mk
+#include usb-modules-v2/variant_callers/gatk.mk
 include usb-modules-v2/variant_callers/TVC.mk
 include usb-modules-v2/bam_tools/processBam.mk
 include usb-modules-v2/bam_tools/poolednormBam.mk
-include usb-modules-v2/vcf_tools/vcftools.mk
+#include usb-modules-v2/vcf_tools/vcftools.mk
 include usb-modules-v2/variant_callers/gatkVariantCaller.mk
