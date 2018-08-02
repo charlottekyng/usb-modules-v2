@@ -21,8 +21,9 @@ sufamscreen/%.sufamscreen.vcf : bam/%.bam sufamscreen/%.sites.to.screen.vcf
 	$(call RUN,8,$(RESOURCE_REQ_MEDIUM_MEM),$(RESOURCE_REQ_SHORT),$(JAVA8_MODULE),"\
 	$(call GATK,UnifiedGenotyper,$(RESOURCE_REQ_MEDIUM_MEM)) -nt 8 -R $(REF_FASTA) \
 	--dbsnp $(DBSNP) $(foreach bam,$(filter %.bam,$<),-I $(bam) ) \
-	--downsampling_type NONE -o $@ --output_mode EMIT_ALL_SITES \
-	--genotyping_mode GENOTYPE_GIVEN_ALLELES -alleles $(word 2,$^) -L $(word 2,$^)")
+	--downsampling_type NONE -o $@.tmp --output_mode EMIT_ALL_SITES \
+	--genotyping_mode GENOTYPE_GIVEN_ALLELES -alleles $(word 2,$^) -L $(word 2,$^) && \
+	$(FIX_GATK_VCF) < $@.tmp > $@")
 endif
 
 ifeq ($(findstring IONTORRENT,$(SEQ_PLATFORM)),IONTORRENT)
