@@ -34,7 +34,7 @@ endif
 ifeq ($(findstring IONTORRENT,$(SEQ_PLATFORM)),IONTORRENT)
 define varscan-copynum-tumor-normal
 varscan/copynum/$1_$2.$$(notdir $3).copynumber : bam/$1.bam bam/$2.bam $3
-	$$(call RUN,1,$$(RESOURCE_REQ_MEDIUM_MEM),$$(RESOURCE_REQ_VSHORT),$$(SAMTOOLS_MODULE) $$(JAVA7_MODULE) $$(BEDTOOLS_MODULE),"\
+	$$(call RUN,1,$$(RESOURCE_REQ_MEDIUM_MEM),$$(RESOURCE_REQ_SHORT),$$(SAMTOOLS_MODULE) $$(JAVA7_MODULE) $$(BEDTOOLS_MODULE),"\
 	TMP1=`mktemp`.bam && $$(BEDTOOLS) intersect -wa -F 1 -a $$< -b $$(word 3, $$^) > \$$$$TMP1 && \
 	$$(SAMTOOLS) index \$$$$TMP1 && \
 	TMP2=`mktemp`.bam && $$(BEDTOOLS) intersect -wa -F 1 -a $$(word 2,$$^) -b $$(word 3, $$^) > \$$$$TMP2 && \
