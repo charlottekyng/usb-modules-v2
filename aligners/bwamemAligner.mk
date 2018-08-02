@@ -64,3 +64,4 @@ endif
 include usb-modules-v2/fastq_tools/fastq.mk
 include usb-modules-v2/bam_tools/processBam.mk
 include usb-modules-v2/aligners/align.mk
+include usb-modules-v2/variant_callers/gatk.mk
