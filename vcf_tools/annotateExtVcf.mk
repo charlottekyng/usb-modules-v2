@@ -1,29 +1,28 @@
 include usb-modules-v2/Makefile.inc
 
-ifeq ($(findstring true,$(SOMATIC_ANN)),true)
+ifeq ($(findstring SOMATIC,$(ANALYSIS_TYPE)),SOMATIC)
+USE_SUFAM = false
 include usb-modules-v2/variant_callers/somatic/somaticVariantCaller.inc
 else
 include usb-modules-v2/variant_callers/variantCaller.inc
 endif
 
+# CALLER_PREFIX should be mutect or anything that goes before the filtering suffix
+# if filtering is required then set FILTER_VARIANTS to true
+# or if custom filtering is required then specify VCF_FILTER_SUFFIX
+# if annotation is required then set ANNOTATE_VARIANTS to true
+# or for custom annotation, specificy VCF_ANNS_SUFFIX
+
+CALLER_PREFIX ?=
+FILTER_VARIANTS = false
+ANNOTATE_VARIANTS ?= true
+
 LOGDIR ?= log/ann_ext_vcf.$(NOW)
-
-EXT_NAMES ?=
-
-SOMATIC_FILTERS := 
-
 
 ann_ext_vcf : ext_vcfs ext_tables
 
-ifeq ($(findstring true,$(SOMATIC_ANN)),true)
-ext_vcfs : $(foreach ext_name,$(EXT_NAMES),$(call SOMATIC_VCFS,$(ext_name)))
-ext_tables : $(foreach ext_name,$(EXT_NAMES),$(call SOMATIC_TABLES,$(ext_name)))
-else
-ext_vcfs : $(foreach ext_name,$(EXT_NAMES),$(call VCFS,$(EXT_NAME)))
-ext_tables : $(foreach ext_name,$(EXT_NAMES),$(call TABLES,$(EXT_NAME)))
-endif
-
-$(info $(EXT_NAMES))
+ext_vcfs : $(foreach ext_name,$(CALLER_PREFIX),$(call MAKE_VCF_FILE_LIST,$(ext_name)))
+ext_tables : $(foreach ext_name,$(CALLER_PREFIX),$(call MAKE_TABLE_FILE_LIST,$(ext_name)))
 
 .DELETE_ON_ERROR:
 .SECONDARY:

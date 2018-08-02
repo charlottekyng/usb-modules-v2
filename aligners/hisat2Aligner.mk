@@ -4,6 +4,16 @@ include usb-modules-v2/aligners/align.inc
 
 ALIGNER := hisat2
 
+HISAT2_NUM_CORES ?= 8
+
+ifeq ($(STRAND_SPECIFICITY),FIRST_READ_TRANSCRIPTION_STRAND)
+HISAT2_OPTS += --rna-strandness FR
+endif
+ifeq ($(STRAND_SPECIFICITY),SECOND_READ_TRANSCRIPTION_STRAND)
+HISAT2_OPTS += --rna-strandness RF
+endif
+
+
 LOGDIR ?= log/hisat2.$(NOW)
 
 ..DUMMY := $(shell mkdir -p version; $(HISAT2) --version &> version/hisat2.txt; echo "options: $(HISAT2_OPTS)" >> version/hisat2.txt)
@@ -26,7 +36,7 @@ hisat2/bam/%.raw.bam hisat2/unmapped_bam/%.raw_unmapped.bam : fastq/%.1.fastq.gz
 	$(call RUN,$(HISAT2_NUM_CORES),$(RESOURCE_REQ_MEDIUM_MEM),$(RESOURCE_REQ_SHORT),$(HISAT2_MODULE) $(SAMTOOLS_MODULE),"\
 	$(MKDIR) hisat2/bam hisat2/unmapped_bam; \
 	LBID=`echo \"$*\" | sed 's/_.\+//'`; \
-	$(HISAT2) $(HISAT2_OPTS) -p $(HISAT2_NUM_CORES) \
+	$(HISAT2) $(HISAT2_OPTS) -x $(HISAT2_REF) -p $(HISAT2_NUM_CORES) \
 	--rg-id $* --rg \"SM:\$${LBID}\" \
 	--rg PL:${SEQ_PLATFORM} --rg \"LB:\$${LBID}\" \
 	-S hisat2/bam/$*.raw.sam --un hisat2/unmapped_bam/$*.raw_unmapped.sam \

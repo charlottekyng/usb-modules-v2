@@ -1,18 +1,15 @@
-# vim: set ft=make :
-# BWA-mem alignment of short reads
-# OPTIONS: NO_MARKDUP = true/false (default: false)
-# 		   EXTRACT_FASTQ = true/false (default: false)
-# 		   BAM_NO_RECAL = true/false (default: false)
-ALIGNER := bwamem
 
 include usb-modules-v2/Makefile.inc
 include usb-modules-v2/aligners/align.inc
+
+ALIGNER := bwamem
+BWA_MEM_OPTS ?= -M
+BWA_NUM_CORES ?= 8
 
 LOGDIR ?= log/bwamem.$(NOW)
 
 VPATH ?= unprocessed_bam
 
-..DUMMY := $(shell mkdir -p version; $(BWA) &> version/bwamem.txt; echo "options: $(BWA_MEM_OPTS)" >> version/bwamem.txt )
 .SECONDARY:
 .DELETE_ON_ERROR: 
 .PHONY: bwamem

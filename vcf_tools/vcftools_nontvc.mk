@@ -11,6 +11,16 @@ ifndef VCFTOOLS_MK_NONTVC
 		$(call GATK,VariantFiltration,$(RESOURCE_REQ_MEDIUM_MEM_JAVA)) \
 		-R $(REF_FASTA) -V $< -o $@ --maskName 'PoN' --mask $(word 2,$^) && $(RM) $< $<.idx")
 
+%.lowFreq_ft.vcf : %.vcf
+	$(call RUN,1,$(RESOURCE_REQ_MEDIUM_MEM),$(RESOURCE_REQ_SHORT),$(JAVA8_MODULE),"\
+		$(call GATK,VariantFiltration,$(RESOURCE_REQ_MEDIUM_MEM_JAVA)) -R $$(REF_FASTA) -V $< -o $@ \
+		--filterExpression 'vc.getGenotype(\"$1\").getAD().1 * 1.0 > 0' --filterName interrogation \
+		--filterExpression 'vc.getGenotype(\"$1\").getAD().1 * 1.0 == 0' --filterName interrogation_Absent")
+
+%.pass.vcf : %.vcf
+	$(call CHECK_VCF,$<,$@,\
+	$(call RUN,1,$(RESOURCE_REQ_LOW_MEM),$(RESOURCE_REQ_VSHORT),,"\
+		$(VCF_PASS) $< $@ $(subst pass,fail,$@)"))
 
 ifdef SAMPLE_PAIRS
 define som-ad-ft-tumor-normal
@@ -66,14 +76,16 @@ else
 vcf/$3.%.sufam.tmp : $$(foreach tumor,$$(wordlist 1,$$(shell expr $$(words $$(subst _,$$( ),$3)) - 1),$$(subst _,$$( ),$3)),vcf/$$(tumor)_$$(lastword $$(subst _,$$( ),$3)).%.vcf)
 	$$(call RUN,1,$$(RESOURCE_REQ_HIGH_MEM),$$(RESOURCE_REQ_SHORT),$$(JAVA8_MODULE),"\
 		$$(call GATK,CombineVariants,$$(RESOURCE_REQ_HIGH_MEM_JAVA)) \
-		$$(foreach vcf,$$^,--variant $$(vcf) ) -o $$@ --genotypemergeoption UNSORTED -R $$(REF_FASTA)")
+		$$(foreach vcf,$$^,--variant $$(vcf) ) -o $$@.tmp --genotypemergeoption UNSORTED \
+		-sites_only -R $$(REF_FASTA) && grep \"#\" $$@.tmp > $$@ && \
+		 grep -v \"#\" $$@.tmp | awk '{OFS=\"\t\"; \$$$$7=\"PASS\" ; print ;}' >> $$@")
 
 ifeq ($$(findstring varscan,$$(MUT_CALLER)),varscan)
 vcf/$1_$2.%.sufam.vcf : vcf/$1_$2.%.vcf vcf/$3.%.sufam.tmp bam/$1.bam bam/$2.bam
-	$$(call CHECK_VCF_CMD,$$(word 2,$$^),cp $$(word 1,$$^) $$@,
+	$$(call CHECK_VCF_CMD,$$(word 2,$$^),cp $$(word 1,$$^) $$@,\
 		$$(call RUN,1,$$(RESOURCE_REQ_HIGH_MEM),$$(RESOURCE_REQ_MEDIUM),$$(JAVA8_MODULE) $$(SAMTOOLS_MODULE),"\
 		$$(call GATK,SelectVariants,$$(RESOURCE_REQ_MEDIUM_MEM_JAVA)) -R $$(REF_FASTA) \
-		--variant $$(word 2,$$^) --discordance $$(word 1,$$^) | grep -v \"#\" | \
+		--variant $$(word 2,$$^) --discordance $$(word 1,$$^) -sites_only | grep -v \"#\" | \
 		awk 'BEGIN { OFS=\"\t\"} { print \$$$$1$$(,)\$$$$2-10$$(,)\$$$$2+10 }' > $$@.tmp1 && \
 		$$(SAMTOOLS) mpileup -l $$@.tmp1 -d 10000 -q $$(MIN_MQ) -f $$(REF_FASTA) $$(word 4,$$^) $$(word 3,$$^) | \
 		$$(VARSCAN) somatic - $$@.tmp2 --output-vcf 1 --mpileup 1 --validation && \
@@ -82,8 +94,10 @@ vcf/$1_$2.%.sufam.vcf : vcf/$1_$2.%.vcf vcf/$3.%.sufam.tmp bam/$1.bam bam/$2.bam
 		--variant $$@.tmp3 --concordance $$(word 2,$$^) > $$@.tmp4 && \
 		$$(call GATK,VariantFiltration,$$(RESOURCE_REQ_MEDIUM_MEM_JAVA)) -R $$(REF_FASTA) -V $$@.tmp4 -o $$@.tmp5 \
 		--filterExpression 'vc.getGenotype(\"$1\").getAD().1 * 1.0 > 0' --filterName interrogation && \
-		$$(call PURGE_AND_LOAD, $$(SNP_EFF_MODULE)) && \
-		$$(SNP_SIFT) filter $$(SNP_SIFT_OPTS) -f $$@.tmp5 \"(FILTER has 'interrogation')\" > $$@.tmp6 && \
+		--filterExpression 'vc.getGenotype(\"$1\").getAD().1 * 1.0 == 0' --filterName interrogation_Absent && \
+		$$(call PURGE_AND_LOAD, $$(SNP_EFF_43_MODULE)) && \
+		$$(SNP_SIFT) filter $$(SNP_SIFT_OPTS) -f $$@.tmp5 \
+		\"(FILTER has 'interrogation') | (FILTER has 'interrogation_Absent')\" > $$@.tmp6 && \
 		$$(call PURGE_AND_LOAD, $$(JAVA8_MODULE)) && \
 		$$(call GATK,CombineVariants,$$(RESOURCE_REQ_HIGH_MEM_JAVA)) --variant $$< --variant $$@.tmp6 -o $$@ \
 		--genotypemergeoption UNSORTED -R $$(REF_FASTA) && \
@@ -93,19 +107,23 @@ vcf/$1_$2.%.sufam.vcf : vcf/$1_$2.%.vcf vcf/$3.%.sufam.tmp bam/$1.bam bam/$2.bam
 	$$(call CHECK_VCF_CMD,$$(word 2,$$^),cp $$(word 1,$$^) $$@,\
 		$$(call RUN,1,$$(RESOURCE_REQ_HIGH_MEM),$$(RESOURCE_REQ_MEDIUM),$$(JAVA8_MODULE),"\
 		$$(call GATK,SelectVariants,$$(RESOURCE_REQ_MEDIUM_MEM_JAVA)) -R $$(REF_FASTA) \
-		--variant $$(word 2,$$^) --discordance $$(word 1,$$^) -o $$@.tmp1 && \
-		$$(call GATK,HaplotypeCaller,$$(RESOURCE_REQ_MEDIUM_MEM_JAVA)) -R $$(REF_FASTA) -I $$(word 3,$$^) -I $$(word 4,$$^) \
-		--downsampling_type NONE --dbsnp $$(DBSNP_TARGETS_INTERVALS) \
+		--variant $$(word 2,$$^) --discordance $$(word 1,$$^) -sites_only -o $$@.tmp1 && \
+		$$(call GATK,UnifiedGenotyper,$$(RESOURCE_REQ_HIGH_MEM_JAVA)) -R $$(REF_FASTA) -I $$(word 3,$$^) -I $$(word 4,$$^) \
+		--downsampling_type NONE --dbsnp $$(DBSNP_TARGETS_INTERVALS) -L $$@.tmp1 --max_deletion_fraction 2 \
 		--genotyping_mode GENOTYPE_GIVEN_ALLELES --output_mode EMIT_ALL_SITES -alleles $$@.tmp1 -o $$@.tmp2 && \
 		$$(FIX_GATK_VCF) $$@.tmp2 > $$@.tmp2fixed && \
 		$$(call GATK,VariantFiltration,$$(RESOURCE_REQ_MEDIUM_MEM_JAVA)) -R $$(REF_FASTA) -V $$@.tmp2fixed -o $$@.tmp3 \
-		--filterExpression 'vc.getGenotype(\"$1\").getAD().1 * 1.0 > 0' --filterName interrogation && \
-		$$(call PURGE_AND_LOAD, $$(SNP_EFF_MODULE)) && \
-		$$(SNP_SIFT) filter $$(SNP_SIFT_OPTS) -f $$@.tmp3 \"(FILTER has 'interrogation')\" > $$@.tmp4 && \
+		--filterExpression 'vc.getGenotype(\"$1\").getAD().1 * 1.0 > 0' --filterName interrogation \
+		--filterExpression 'vc.getGenotype(\"$1\").getAD().1 * 1.0 == 0' --filterName interrogation_Absent && \
+		$$(call PURGE_AND_LOAD, $$(SNP_EFF_43_MODULE)) && \
+		$$(SNP_SIFT) filter $$(SNP_SIFT_OPTS) -f $$@.tmp3 \
+		\"(FILTER has 'interrogation') | (FILTER has 'interrogation_Absent')\" > $$@.tmp4 && \
 		$$(call PURGE_AND_LOAD, $$(JAVA8_MODULE)) && \
 		$$(call GATK,CombineVariants,$$(RESOURCE_REQ_HIGH_MEM_JAVA)) --variant $$< --variant $$@.tmp4 -o $$@ \
-		--genotypemergeoption UNSORTED -R $$(REF_FASTA) && \
-		$$(RM) $$@.tmp1 $$@.tmp2 $$@.tmp3 $$@.tmp4 $$(word 2,$$^) $$@.tmp1.idx $$@.tmp2.idx $$@.tmp3.idx $$@.tmp4.idx $$(word 2,$$^).idx"))
+		--genotypemergeoption UNSORTED -R $$(REF_FASTA)"))
+# && \
+#		$$(RM) $$@.tmp1 $$@.tmp2 $$@.tmp3 $$(word 2,$$^) $$@.tmp1.idx $$@.tmp2.idx $$@.tmp3.idx $$(word 2,$$^).idx \
+#		$$@.tmp2fixed $$@.tmp2fixed.idx"))
 endif
 endif #ifeq ($3,$2)
 endef #define sufam

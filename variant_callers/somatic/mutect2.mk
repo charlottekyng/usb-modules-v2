@@ -10,8 +10,8 @@ PHONY += mutect2 #mutect_vcfs mutect_tables ext_output #mut_report
 MUT_CALLER = mutect2
 
 mutect2 : mutect2_vcfs mutect2_tables #mutect2_vcfs_hotspotgt mutect2_tables_hotspotgt #ext_output
-mutect2_vcfs : $(call SOMATIC_VCFS,mutect2) $(addsuffix .idx,$(call SOMATIC_VCFS,mutect2))
-mutect2_tables : $(call SOMATIC_TABLES,mutect2)
+mutect2_vcfs : $(call MAKE_VCF_FILE_LIST,mutect2) $(addsuffix .idx,$(call MAKE_VCF_FILE_LIST,mutect2))
+mutect2_tables : $(call MAKE_TABLE_FILE_LIST,mutect2)
 
 .DELETE_ON_ERROR:
 .SECONDARY:

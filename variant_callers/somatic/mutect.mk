@@ -7,8 +7,8 @@ PHONY += mutect mutect_vcfs mutect_tables ext_output #mut_report
 ..DUMMY := $(shell mkdir -p version; echo "$(MUTECT) &> version/mutect.txt")
 
 mutect : mutect_vcfs mutect_tables ext_output
-mutect_vcfs : $(call SOMATIC_VCFS,mutect) $(addsuffix .idx,$(call SOMATIC_VCFS,mutect))
-mutect_tables : $(call SOMATIC_TABLES,mutect)
+mutect_vcfs : $(call MAKE_VCF_FILE_LIST,mutect) $(addsuffix .idx,$(call MAKE_VCF_FILE_LIST,mutect))
+mutect_tables : $(call MAKE_TABLE_FILE_LIST,mutect)
 ext_output : $(foreach pair,$(SAMPLE_PAIRS),mutect/tables/$(pair).mutect.txt)
 
 MUT_CALLER = mutect
@@ -46,8 +46,10 @@ $(foreach pair,$(SAMPLE_PAIRS),$(eval $(call ext-mutect-tumor-normal,$(pair))))
 # merge variants 
 define mutect-tumor-normal
 vcf/$1_$2.mutect.vcf : $$(foreach chr,$$(CHROMOSOMES),mutect/chr_vcf/$1_$2.$$(chr).mutect.vcf)
-	$$(INIT) module load $$(PERL_MODULE); grep '^#' $$< > $$@; cat $$^ | grep -v '^#' | \
-	$$(VCF_SORT) $$(REF_DICT) - >> $$@ 2> $$(LOG)
+	$$(call RUN,1,$$(RESOURCE_REQ_MEDIUM_MEM),$$(RESOURCE_REQ_VSHORT),$$(PERL_MODULE),"\
+	grep '^#' $$< > $$@; cat $$^ | grep -v '^#' | $$(VCF_SORT) $$(REF_DICT) - >> $$@")
+#	$$(INIT) module load $$(PERL_MODULE); grep '^#' $$< > $$@; cat $$^ | grep -v '^#' | \
+#	$$(VCF_SORT) $$(REF_DICT) - >> $$@ 2> $$(LOG)
 endef
 $(foreach pair,$(SAMPLE_PAIRS),\
 		$(eval $(call mutect-tumor-normal,$(tumor.$(pair)),$(normal.$(pair)))))

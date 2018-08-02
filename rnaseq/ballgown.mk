@@ -1,5 +1,8 @@
 include usb-modules-v2/Makefile.inc
 
+STRINGTIE_NUM_CORES ?= 4
+
+
 LOGDIR ?= log/ballgown.$(NOW)
 
 .PHONY: ballgown
