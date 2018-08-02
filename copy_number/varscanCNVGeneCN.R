@@ -13,7 +13,7 @@ suppressPackageStartupMessages(library("foreach"));
 suppressPackageStartupMessages(library("Cairo"));
 suppressPackageStartupMessages(library("RMySQL"))
 suppressPackageStartupMessages(library("rtracklayer"))
-suppressPackageStartupMessages(library("CGHbase"))
+#suppressPackageStartupMessages(library("CGHbase"))
 suppressPackageStartupMessages(library("Biobase"))
 
 optList <- list(
@@ -107,21 +107,15 @@ mm <- lapply(varscanCNVFiles, function(f) {
     noise <- median(abs(assayDataElement(segmented,"copynumber")-assayDataElement(segmented,"segmented")))
 
     lrr <- sort(assayDataElement(segmented,"copynumber"))
-#    if (noise <= 0.2) { lrr <- lrr[round(0.25*length(lrr)):round(0.75*length(lrr))]
-#    } else if ( noise <= 0.3 ) { lrr <- lrr[round(0.275*length(lrr)):round(0.725*length(lrr))]
-#    } else { lrr <- lrr[round(0.3*length(lrr)):round(0.7*length(lrr))]}
+    lrr <- lrr[round(0.25*length(lrr)):round(0.75*length(lrr))]
 
-#	if (noise <= 0.2) { lrr <- lrr[round(0.3*length(lrr)):round(0.7*length(lrr))]
-#	} else if ( noise <= 0.3 ) { lrr <- lrr[round(0.275*length(lrr)):round(0.725*length(lrr))]
-#	} else { 
-	lrr <- lrr[round(0.25*length(lrr)):round(0.75*length(lrr))]
-    df$GL2 <- 0
-    df$GL2[df$log2Ratio < median(lrr)-(2.5*sd(lrr))] <- -1
-    df$GL2[df$log2Ratio < median(lrr)-(7*sd(lrr))] <- -2
-    df$GL2[df$log2Ratio > median(lrr)+(2*sd(lrr))] <- 1
-    df$GL2[df$log2Ratio > median(lrr)+(6*sd(lrr))] <- 2
+    df$GL_LRR <- 0
+    df$GL_LRR[df$log2Ratio < median(lrr)-(2.5*sd(lrr))] <- -1
+    df$GL_LRR[df$log2Ratio < median(lrr)-(7*sd(lrr))] <- -2
+    df$GL_LRR[df$log2Ratio > median(lrr)+(2*sd(lrr))] <- 1
+    df$GL_LRR[df$log2Ratio > median(lrr)+(6*sd(lrr))] <- 2
 
-    df %>% select(hgnc, GL2, log2Ratio) %>% ungroup
+    df %>% select(hgnc, GL_LRR, log2Ratio) %>% ungroup
 })
 names(mm) <- varscanCNVFiles
 for (f in varscanCNVFiles) {

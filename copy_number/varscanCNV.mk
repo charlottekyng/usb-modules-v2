@@ -34,7 +34,7 @@ endif
 ifeq ($(findstring IONTORRENT,$(SEQ_PLATFORM)),IONTORRENT)
 define varscan-copynum-tumor-normal
 varscan/copynum/$1_$2.$$(notdir $3).copynumber : bam/$1.bam bam/$2.bam $3
-	$$(call RUN,1,$$(RESOURCE_REQ_MEDIUM_MEM),$$(RESOURCE_REQ_VSHORT),$$(SAMTOOLS_MODULE) $$(JAVA7_MODULE) $$(BEDTOOLS_MODULE),"\
+	$$(call RUN,1,$$(RESOURCE_REQ_MEDIUM_MEM),$$(RESOURCE_REQ_SHORT),$$(SAMTOOLS_MODULE) $$(JAVA7_MODULE) $$(BEDTOOLS_MODULE),"\
 	TMP1=`mktemp`.bam && $$(BEDTOOLS) intersect -wa -F 1 -a $$< -b $$(word 3, $$^) > \$$$$TMP1 && \
 	$$(SAMTOOLS) index \$$$$TMP1 && \
 	TMP2=`mktemp`.bam && $$(BEDTOOLS) intersect -wa -F 1 -a $$(word 2,$$^) -b $$(word 3, $$^) > \$$$$TMP2 && \
@@ -74,6 +74,7 @@ varscan/segment/$1_$2.segment.Rdata : $$(foreach pool,$$(TARGETS_FILE_INTERVALS_
 	$$(call RUN,1,$$(RESOURCE_REQ_LOW_MEM),$$(RESOURCE_REQ_VSHORT),$$(R_MODULE),"\
 	$$(CBS_SEGMENTCNV) --alpha $$(CBS_SEG_ALPHA) --smoothRegion $$(CBS_SEG_SMOOTH) \
 	--trim $$(CBS_TRIM) --clen $$(CBS_CLEN) --undoSD $$(CBS_SEG_SD) --separate_arm_seg TRUE \
+	--excl_N_outlier_pc $$(CBS_EXCL_N_OUTLIER_PC) --minNdepth $$(CBS_MIN_N_DEPTH) \
 	$$(if $$(CENTROMERE_TABLE),--centromereFile=$$(CENTROMERE_TABLE)) --prefix=$$(@D)/$1_$2 $$^")
 endef
 $(foreach pair,$(SAMPLE_PAIRS),\
