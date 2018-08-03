@@ -26,17 +26,18 @@ LOGDIR ?= log/vcf.$(NOW)
 
 %.target_ft.vcf : %.vcf
 	$(call CHECK_VCF,$<,$@,\
-	$(call RUN,1,$(RESOURCE_REQ_MEDIUM_MEM),$(RESOURCE_REQ_SHORT),$(JAVA8_MODULE),"\
-	$(call GATK,VariantFiltration,$(RESOURCE_REQ_MEDIUM_MEM_JAVA)) \
-	-R $(REF_FASTA) -V $< -o $@ --mask $(TARGETS_FILE_INTERVALS) \
-	--maskName targetInterval --filterNotInMask && $(RM) $< $<.idx"))
+	$(call RUN,1,$(RESOURCE_REQ_MEDIUM_MEM),$(RESOURCE_REQ_SHORT),$(GATK40_MODULE),"\
+	$(call GATK40,VariantFiltration,$(RESOURCE_REQ_MEDIUM_MEM_JAVA)) \
+	-R $(REF_FASTA) -V $< -O $@ \
+	--mask $(TARGETS_FILE_INTERVALS) --mask-name targetInterval \
+	--filter-not-in-mask && $(RM) $< $<.idx"))
 
 %.het_ft.vcf : %.vcf
 	$(call CHECK_VCF,$<,$@,\
-	$(call RUN,1,$(RESOURCE_REQ_MEDIUM_MEM),$(RESOURCE_REQ_SHORT),$(JAVA8_MODULE),"\
-	$(call GATK,VariantFiltration,$(RESOURCE_REQ_MEDIUM_MEM_JAVA)) \
-	-R $(REF_FASTA) -V $< -o $@ \
-	--genotypeFilterExpression 'isHet == 1' --genotypeFilterName 'Heterozygous positions'"))
+	$(call RUN,1,$(RESOURCE_REQ_MEDIUM_MEM),$(RESOURCE_REQ_SHORT),$(GATK40_MODULE),"\
+	$(call GATK40,VariantFiltration,$(RESOURCE_REQ_MEDIUM_MEM_JAVA)) \
+	-R $(REF_FASTA) -V $< -O $@ \
+	--genotype-filter-expression 'isHet == 1' --genotype-filter-name 'Heterozygous positions'"))
 
 %.biallelic_ft.vcf : %.vcf.gz
 	$(call CHECK_VCF,$<,$@,\
@@ -55,18 +56,19 @@ LOGDIR ?= log/vcf.$(NOW)
 
 %.strelka_ft.vcf : %.vcf
 	$(call CHECK_VCF,$<,$@,\
-	$(call RUN,1,$(RESOURCE_REQ_MEDIUM_MEM),$(RESOURCE_REQ_SHORT),$(JAVA8_MODULE),"\
-	$(call GATK,VariantFiltration,$(RESOURCE_REQ_MEDIUM_MEM_JAVA)) \
-	-R $(REF_FASTA) -V $< -o $@ \
-	--filterExpression 'QSI_NT < 30' --filterName QSI_ref \
-	--filterExpression 'IHP > 14' --filterName iHpol \
-	--filterExpression 'MQ0 > 1' --filterName MQ0 && $(RM) $<"))
+	$(call RUN,1,$(RESOURCE_REQ_MEDIUM_MEM),$(RESOURCE_REQ_SHORT),$(GATK40_MODULE),"\
+	$(call GATK40,VariantFiltration,$(RESOURCE_REQ_MEDIUM_MEM_JAVA)) \
+	-R $(REF_FASTA) -V $< -O $@ \
+	--filter-expression 'QSI_NT < 30' --filter-name QSI_ref \
+	--filter-expression 'IHP > 14' --filter-name iHpol \
+	--filter-expression 'MQ0 > 1' --filter-name MQ0 && $(RM) $<"))
 
 %.hotspot.vcf : %.vcf
 	$(call CHECK_VCF,$<,$@,\
-	$(call RUN,1,$(RESOURCE_REQ_MEDIUM_MEM),$(RESOURCE_REQ_SHORT),$(JAVA8_MODULE),"\
-		$(call GATK,VariantFiltration,$(RESOURCE_REQ_MEDIUM_MEM_JAVA)) -R $(REF_FASTA) -V $< -o $@ \
-		--maskName HOTSPOT --mask $(CANCER_HOTSPOT_VCF) && $(RM) $< $<.idx"))
+	$(call RUN,1,$(RESOURCE_REQ_MEDIUM_MEM),$(RESOURCE_REQ_SHORT),$(GATK40_MODULE),"\
+		$(call GATK40,VariantFiltration,$(RESOURCE_REQ_MEDIUM_MEM_JAVA)) \
+		-R $(REF_FASTA) -V $< -O $@ \
+		--mask $(CANCER_HOTSPOT_VCF)--mask-name HOTSPOT && $(RM) $< $<.idx"))
 
 ## This is definitely broken
 # somatic filter for structural variants

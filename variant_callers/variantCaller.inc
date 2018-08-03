@@ -5,6 +5,8 @@ ifndef VARIANT_CALLER_INC
 ifeq ($(findstring true,$(FILTER_VARIANTS)),true)
 VCF_FILTERS += $(if $(TARGETS_FILE_INTERVALS),target_ft) dp_ft
 VCF_FILTERS += $(if $(or $(findstring GRCm38,$(REF)),$(findstring SOMATIC,$(ANALYSIS_TYPE))),hotspot,) pass
+else
+VCF_FILTERS =
 endif
 VCF_FILTER_SUFFIX = $(subst $( ),.,$(strip $(call VCF_FILTERS)))
 
@@ -28,7 +30,6 @@ VCF_SUFFIXES = $(foreach type,$1,$(call VCF_SUFFIX,$(type)))
 MAKE_VCF_FILE_LIST = $(foreach sample,$(SAMPLES),\
 	$(foreach suff,$(call VCF_SUFFIXES,$1), \
 	vcf/$(sample).$(suff).vcf))
-
 
 ifeq ($(findstring false,$(INCLUDE_LNCRNA_IN_SUMMARY)),false)
 TABLE_EFF_TYPES ?= nonsynonymous_synonymous_hotspot

@@ -162,8 +162,9 @@ endef
 ##### DEFINE THE MAIN RUN FUNCTION #######
 ##########################################
 
-RUN_OPTS = $(if $(findstring false,$(USE_CLUSTER)),-l) -o $@ $(if $(CLUSTER_ENGINE),-g $(CLUSTER_ENGINE)) \
-  -S $(SHELL) --log_file $(LOG) $(if $(PROJECT_NAME),-p $(PROJECT_NAME)) -c
+RUN_OPTS = $(if $(findstring false,$(USE_CLUSTER)),-l) -o $@ \
+$(if $(CLUSTER_ENGINE),-g $(CLUSTER_ENGINE)) $(if $(EXCLUDE_NODE),-x $(EXCLUDE_NODE)) \
+-S $(SHELL) --log_file $(LOG) $(if $(PROJECT_NAME),-p $(PROJECT_NAME)) -c 
 
 ## RUN is the main function!!
 ## arg1 = number of cores
@@ -198,6 +199,7 @@ export LD_LIBRARY_PATH := $(LD_LIBRARY_PATH)
 SHELL ?= /bin/bash
 UNZIP ?= /usr/bin/unzip
 GZIP ?= gzip -f
+GUNZIP ?= gunzip -c
 
 PERL_MODULE ?= Perl/5.22.2-goolf-1.7.20
 R_MODULE ?= R/3.5.0-goolf-1.7.20
@@ -230,7 +232,7 @@ STRINGTIE_MODULE ?= StringTie/1.3.3-goolf-1.7.20
 RSEM_MODULE ?= RSEM/1.2.31-goolf-1.7.20
 OPENBLAS_MODULE ?= OpenBLAS/0.2.13-GCC-4.8.4-LAPACK-3.5.0
 GATK36_MODULE ?= GATK/3.6-Java-1.8.0_92
-GATK40_MODULE ?= GATK/4.0.1.2-Java-1.8.0_92
+GATK40_MODULE ?= GATK/4.0.7.0-Java-1.8.0_92
 MUTECT_MODULE ?= MuTect/1.1.7-Java-1.7.0_80
 PICARD_MODULE ?= picard/2.9.2
 VARSCAN_MODULE ?= VarScan/2.4.1-Java-1.7.0_80
@@ -314,8 +316,7 @@ GATK37 = $(JAVA) -Xmx$(2) -jar $(JAR_DIR)/GenomeAnalysisTK-3.7/GenomeAnalysisTK-
 GATK37 += -S LENIENT -T $(1) -filterNoBases
 
 ## For the future
-#GATK = java -Xmx$(2) -jar \$$EBROOTGATK/GenomeAnalysisTK.jar
-#GATK += -S LENIENT -T $(1) -filterNoBases
+GATK40 = gatk --java-options \"-Xmx$(2) -Xms$(2)\" $(1)
 
 FIX_GATK_VCF = $(PERL) usb-modules-v2/variant_callers/fix_vcf_scripts/fix_gatk_vcf.pl
 FIX_VARSCAN_VCF = $(PERL) usb-modules-v2/variant_callers/fix_vcf_scripts/fix_varscan_vcf.pl
