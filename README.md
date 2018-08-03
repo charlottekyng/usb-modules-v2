@@ -15,22 +15,22 @@ Clone the code base
 You will need to Makefiles. The first is the one usb-modules-v2/Makefile (hereafter known as module-level Makefile), and a project-level Makefile (described below in **set-up** files).
 
 There are the mandatory/optional **set-up** files:
-1. Project-level Makefile (required, has to called Makefile), see **usb-modules-v2/Makefile_template** for an example and **usb-modules-v2/config** for options
+1. Project-level Makefile (required, has to called Makefile), see **usb-modules-v2/Makefile\_template** for an example and **usb-modules-v2/config** for options
 1. sample sheet (required, default: samples.txt), consisting of a single column of sample names. 
 1. sample sets (required for ANALYSIS_TYPE = SOMATIC, default: sample_sets.txt, consisting of samples within sample sheet above, each row contains all samples from a given individual, with the germline sample last, tab or space delimited
 1. sample splits (required for 
-  1. multiple sets of fastqs per sample, in which case the first column is the <SAMPLE_NAME>, the second column is <SAMPLE_NAME>_<RUN_NAME>. See below on setting up the unprocessed_fastq directory; or 
+  1. multiple sets of fastqs per sample, in which case the first column is the <SAMPLE_NAME>, the second column is <SAMPLE_NAME>\_<RUN_NAME>. See below on setting up the unprocessed\_fastq directory; or 
   1. multiple bam files per samples that need to be merged. In which case, the first column is the <SAMPLE_NAME>, the second column is the <SAMPLE_NAME> of one of the bam files that need to be merged
 
 **NOTE**: sample names must be [A-Za-z0-9\-] that starts with an alphabet.
 
 There are several options in terms of **data** files:
 1. If you start from FASTQs and you have a single or a single pair of fastqs per sample, then you put your files as **fastq/<SAMPLE_NAME>.1.fastq.gz (and fastq/<SAMPLE_NAME>.2.fastq.gz**). Then you are ready to run alignment.
-1. If you start from FASTQs and you have more than a single or more than a single pair of fastqs per sample, then you put your files as **unprocessed_fastq/<SAMPLE_NAME>_<RUN_NAME>.1.fastq.gz (and **unprocessed_fastq/<SAMPLE_NAME>_<RUN_NAME>.2.fastq.gz**). Then you are ready to run alignment.
-1. If you start from BAMs (one bam per sample), you should put all your bams as **unprocessed_bam/<SAMPLE_NAME>.bam**. Then you do **make fix_rg** then you will have analysis-ready BAMs.
+1. If you start from FASTQs and you have more than a single or more than a single pair of fastqs per sample, then you put your files as **unprocessed\_fastq/<SAMPLE_NAME>\_<RUN_NAME>.1.fastq.gz (and **unprocessed\_fastq/<SAMPLE_NAME>\_<RUN_NAME>.2.fastq.gz**). Then you are ready to run alignment.
+1. If you start from BAMs (one bam per sample), you should put all your bams as **unprocessed\_bam/<SAMPLE\_NAME>.bam**. Then you do **make fix\_rg** then you will have analysis-ready BAMs.
 
 This analysis pipeline is designed to be modular and highly configurable. The names of the modules are found in module-level Makefile (not project-level Makefile). To execute a nodule, you type
-> make <MODULE>
+> make \<MODULE\>
 
 Most user-configurable parameters are in the config.inc file. You can specify as many parameters as required in your project-level Makefile.
 
