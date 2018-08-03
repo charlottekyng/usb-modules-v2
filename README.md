@@ -1,101 +1,83 @@
-###############################################################
-## Basic project set up
+# Basic project set up
 
-## git clone https://github.com/charlottekyng/usb-modules-v2.git
+Assuming the new project is called PROJ
+> PROJ_DIR=/scicore/home/terracci/GROUP/data/PROJ
 
-## There are the mandatory/optional files:
-## Makefile (required, has to called Makefile), see 
-##      **usb-modules-v2/Makefile_template** for an example and
-##      **usb-modules-v2/config** for options
-## sample sheet (required, default: samples.txt), consisting of a single 
-##      column of sample names. 
-## NOTE: sample names must be [A-Za-z0-9\-] that starts with an alphabet. 
-##     
-## sample sets (required for ANALYSIS_TYPE = SOMATIC,
-##      default: sample_sets.txt, consisting of samples within
-##      sample sheet above, each row contains all samples from
-##      a given individual, with the germline sample last,
-##      tab or space delimited
-## sample splits (required for 
-##      1, multiple sets of fastqs per sample, in which case 
-##           the first column is the <SAMPLE_NAME>, 
-##           the second column is <SAMPLE_NAME>_<RUN_NAME>
-##           See below on setting up the unprocessed_fastq directory
-##      or 
-##      2, multiple bam files per samples that need to be merged.
-##           in which case,
-##           the first column is the <SAMPLE_NAME>
-##           the second column is the <SAMPLE_NAME> of one of the
-##                bam files that need to be merged
+Make a project directory under /scicore/home/terracci/GROUP/data
+> mkdir $PROJ_DIR
+> cd $PROJ_DIR
 
-## If starting from FASTQs and you have a single or a single pair
-##      of fastqs, then you put your files as
-##      **fastq/<SAMPLE_NAME>.1.fastq.gz fastq/<SAMPLE_NAME>.2.fastq.gz**
-## If starting from FASTQs and you have more than a single or more
-##      than a single pair of fastqs, then you put your files as
-##      **unprocessed_fastq/<SAMPLE_NAME>_<RUN_NAME>.1.fastq.gz**
-##      **unprocessed_fastq/<SAMPLE_NAME>_<RUN_NAME>.2.fastq.gz**
-## Then you just run alignment (see below)
+From here on, we will assume that you are in this $PROJ_DIR.
 
-## If you start from BAMs, you should put all your bams as
-##      **unprocessed_bam/<SAMPLE_NAME>.bam**
-## Then you do **make fix_rg** then you will have
-##     analysis-ready BAMs
+Clone the code base
+> git clone https://github.com/charlottekyng/usb-modules-v2.git
+
+You will need to Makefiles. The first is the one usb-modules-v2/Makefile (hereafter known as module-level Makefile), and a project-level Makefile (described below in **set-up** files).
+
+There are the mandatory/optional **set-up** files:
+1. Project-level Makefile (required, has to called Makefile), see **usb-modules-v2/Makefile_template** for an example and **usb-modules-v2/config** for options
+1. sample sheet (required, default: samples.txt), consisting of a single column of sample names. 
+1. sample sets (required for ANALYSIS_TYPE = SOMATIC, default: sample_sets.txt, consisting of samples within sample sheet above, each row contains all samples from a given individual, with the germline sample last, tab or space delimited
+1. sample splits (required for 
+  1. multiple sets of fastqs per sample, in which case the first column is the <SAMPLE_NAME>, the second column is <SAMPLE_NAME>_<RUN_NAME>. See below on setting up the unprocessed_fastq directory; or 
+  1. multiple bam files per samples that need to be merged. In which case, the first column is the <SAMPLE_NAME>, the second column is the <SAMPLE_NAME> of one of the bam files that need to be merged
+
+**NOTE**: sample names must be [A-Za-z0-9\-] that starts with an alphabet.
+
+There are several options in terms of **data** files:
+1. If you start from FASTQs and you have a single or a single pair of fastqs per sample, then you put your files as **fastq/<SAMPLE_NAME>.1.fastq.gz (and fastq/<SAMPLE_NAME>.2.fastq.gz**). Then you are ready to run alignment.
+1. If you start from FASTQs and you have more than a single or more than a single pair of fastqs per sample, then you put your files as **unprocessed_fastq/<SAMPLE_NAME>_<RUN_NAME>.1.fastq.gz (and **unprocessed_fastq/<SAMPLE_NAME>_<RUN_NAME>.2.fastq.gz**). Then you are ready to run alignment.
+1. If you start from BAMs (one bam per sample), you should put all your bams as **unprocessed_bam/<SAMPLE_NAME>.bam**. Then you do **make fix_rg** then you will have analysis-ready BAMs.
+
+This analysis pipeline is designed to be modular and highly configurable. The names of the modules are found in module-level Makefile (not project-level Makefile). To execute a nodule, you type
+> make <MODULE>
+
+Most user-configurable parameters are in the config.inc file. You can specify as many parameters as required in your project-level Makefile.
 
 
 
+## Example use case 1: What to do when you get a set of Ion Torrent genomic data ##
 
+Assuming the new project is called PROJ
+> PROJ_DIR=/scicore/home/terracci/GROUP/data/PROJ
 
+Make a project directory under /scicore/home/terracci/GROUP/data
+> mkdir $PROJ_DIR
+> cd $PROJ_DIR
 
+Get the code base
+> git clone https://github.com/charlottekyng/usb-modules-v2.git
 
-###############################################################
-## What to do when you get a set of Ion Torrent genomic data ##
-###############################################################
+Copy the Makefile_template to $PROJ (don't move or the file would disappear from the repo)
+> cp usb-modules-v2/Makefile_template Makefile
 
-# assuming the new project is called PROJ
-PROJ_DIR=/scicore/home/terracci/GROUP/data/PROJ
+Rename the bam files to <sample_name>.bam and put them in $PROJ_DIR/unprocessed_bam
+> mkdir $PROJ_DIR/unprocessed_bam
+> cd $PROJ_DIR/unprocessed_bam
 
-# make a project directory under /scicore/home/terracci/GROUP/data
-mkdir $PROJ_DIR
-cd $PROJ_DIR
+Make samples.txt
+> ls *bam | perl -p -e "s/\.bam//g;" > ../samples.txt
+> cd ..
 
-# get usb-modules-v2 code from github
-git clone git@github.com:charlottekyng/usb-modules-v2.git; 
+Make sample_sets.txt. This file should be one patient per row. Each row should consist of the tumor samples, tab-delimited, followed by the matched normal sample as the last name on the row
 
-# copy the Makefile_template to $PROJ (don't move or the file would disappear from the repo)
-cp usb-modules-v2/Makefile_template Makefile
+Now fix read groups to ensure downstream processing do not fall over
+> make fix_rg
 
-# rename the bam files to <sample_name>.bam and put them in $PROJ_DIR/unprocessed_bam
-mkdir $PROJ_DIR/unprocessed_bam
-cd $PROJ_DIR/unprocessed_bam
-# dump the files in the directory
+Generate some sequencing statistics
+> make bam_metrics
 
-# make samples.txt
-ls *bam | perl -p -e "s/\.bam//g;" > ../samples.txt
-cd ..
+Genotype to make sure there are no mismatched samples
+> make genotype
 
-# make sample_sets.txt
-# this file should be one patient per row
-# each row should consist of the tumor samples, tab-delimited, 
-# followed by the matched normal sample as the last name on the row
+Call somatic mutations
+> make tvc_somatic
 
-# now fix read groups to ensure downstream processing do not fall over
-make fix_rg
+Screen hotspots (for TERT) and for QC
+> make hotspot_screen
 
-# generate some sequencing statistics
-make bam_metrics
+Make an Excel table of the mutations
+> make mutation_summary
 
-# genotype to make sure there are no mismatched samples
-make genotype
-
-# call somatic mutations
-make tvc_somatic
-
-# screen hotspots (for TERT) and for QC
-make hotspot_screen
-
-# make an Excel table of the mutations
-make mutation_summary
-
-### or do everything at once, if nothing falls over, this will do everything sequentially
-make fix_rg bam_metrics genotype tvc_somatic hotspot_screen mutation_summary
+Or do everything at once, if nothing falls over, this will do everything sequentially
+> make fix_rg bam_metrics genotype tvc_somatic hotspot_screen mutation_summary
