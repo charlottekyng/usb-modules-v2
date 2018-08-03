@@ -114,9 +114,9 @@ include usb-modules-v2/Makefile
 ```
 Most parameters are automatically set to the appropriate values if you set these above parameters correctly. 
 
-Not all combinations are permissible. 'REF' and 'PANEL' combinations are valid if you can find a `genome_includes/<REF>.<PANEL>.inc` file.
+Not all combinations are permissible. (In the near future, valid combinations of 'REF' and 'PANEL' will be found as an existing `genome_includes/<REF>.<PANEL>.inc` file.)
 
-Additional user-configurable parameters are defined (with default values) in the `usb-modules-v2/config.inc` file. 
+Additional user-configurable parameters are defined (with default values) in the `usb-modules-v2/config.inc` file. (In the near future, the parameters will be better documented in the config file.)
 
 ---
 # Executing the modules
@@ -192,6 +192,56 @@ make mosaics
 There are a lot more...
 
 ---
+
+# If something falls over...
+
+You should look in `$PROJ_DIR/log`. The log file will be named in the format `$PROJ_DIR/log/<module>.<date>.<attempt>.log`.
+For example in `log/gatk.2018-08-03.2.log`, you should find lines like these.
+```
+make[1]: *** [gatk/intervals_gvcf/0030/ESBIPGRA00245.variants.vcf.gz] Error 1
+make[1]: *** [gatk/intervals_gvcf/0030/ESBIPGRA00237.variants.vcf.gz] Error 1
+make[1]: *** [gatk/intervals_gvcf/0030/ESBIPGRA00303.variants.vcf.gz] Error 1
+```
+
+Each step in the pipeline spits out a log file. The individual log file for the 1st line in the example above is then
+```
+log/gatk.2018-08-03.2/gatk/intervals_gvcf/0030/ESBIPGRA00245.variants.vcf.gz.log
+```
+
+This is where you go looking for the error. Most errors are related to incorrect parameters, empty or invalid input files or running out of resources (time or memory).
+If it is related to an invalid/empty input file, then go one step back in the pipeline to see if a previous step fell over without throwing and error (it happens).
+
+If the reason is not obvious, try deleting any invalid/empty files, then re-run it. Sometimes there are transient system glitches and a simple re-run is enough to fix it.
+
+---
+
+# Example recipes
+Assuming that you have set up the above correctly. Here are some common recipes
+
+#### Whole-exome sequencing on Illumina
+```
+make bwamem genotype fastqc bam_metrics facets mutect strelka mutation_summary deconstructSigs
+```
+#### RNA-sequencing on Illumina
+```
+make star bam_metrics rsem
+```
+#### ChIP-seq on Illumina (75bp reads or longer)
+```
+make bwamem mosaics
+```
+#### ChIP-seq on Illumina (<75bp reads)
+```
+make bwaaln mosaics
+```
+#### Targeted panel sequencing on Ion Torrent (from bam files)
+```
+make fix_rg genotype bam_metrics tvc_somatic varscan_cnv hotspot_screen
+```
+#### Whole-genome sequencing on Illumina
+```
+make bwamem bam_metrics gatk
+```
 
 ## Example use case 1: What to do when you get a set of Ion Torrent genomic data ##
 
