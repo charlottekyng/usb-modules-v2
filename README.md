@@ -35,7 +35,7 @@ git clone https://github.com/charlottekyng/usb-modules-v2.git
     SAMPLE3T1 SAMPLE3T2 SAMPLE3N
     ```
 1. Sample splits (required for one of these two scenarios, depending on your data, default: `samples.split.txt`)
-    * multiple sets of fastqs per sample, in which case the first column is the <SAMPLE_NAME>, the second column is <SAMPLE_NAME>\_<RUN_NAME>. See below on setting up the `unprocessed\_fastq` directory; or 
+    1. multiple sets of fastqs per sample, in which case the first column is the <SAMPLE_NAME>, the second column is <SAMPLE_NAME>\_<RUN_NAME>. See below on setting up the `unprocessed_fastq` directory; or 
         ```
         >head samples.split.txt
         SAMPLE1N SAMPLE1N_RUN1
@@ -45,7 +45,7 @@ git clone https://github.com/charlottekyng/usb-modules-v2.git
         SAMPLE3N SAMPLE3N_RUN1
         SAMPLE3N SAMPLE3N_RUN2
         ```	
-    * multiple bam files per samples that need to be merged. In which case, the first column is the <SAMPLE_NAME>, the second column is the <SAMPLE_NAME> of one of the bam files that need to be merged. See below on setting up the `unprocessed\_bam` directory
+    1. multiple bam files per samples that need to be merged. In which case, the first column is the <SAMPLE_NAME>, the second column is the <SAMPLE_NAME> of one of the bam files that need to be merged. See below on setting up the `unprocessed_bam` directory
         ```
         >head samples.split.txt
         SAMPLE1T SAMPLE1A
@@ -54,7 +54,7 @@ git clone https://github.com/charlottekyng/usb-modules-v2.git
         SAMPLE2T SAMPLE2B
         ```
 
-**NOTE**: sample names must be [A-Za-z0-9\-] that starts with an alphabet.
+**NOTE**: sample names must be [A-Za-z0-9] (may include '-' but no other symbols allowed) that starts with an alphabet.
 
 ### Setting up data directories
 
@@ -71,7 +71,7 @@ There are several options in terms of data files:
     ```
 1. If you start from BAMs (one bam per sample), you should put all your bams as `unprocessed_bam/<SAMPLE_NAME>.bam`. Then you do `make fix_rg` then you will have analysis-ready BAMs.
     ```
-    >ls bam
+    >ls unprocessed_bam
     SAMPLE1A.bam SAMPLE1B.bam SAMPLE2A.bam SAMPLE2B.bam
     ```
 
@@ -92,24 +92,29 @@ You can specify as many parameters as required in your project-level `Makefile`,
 
 Here are a few basic ones
 ```
-# default reference:
 # possible values: mm10, hg19, b37, hg19_ionref, b37_hbv_hcv, hg38
 REF = b37
+
 # possible values: ILLUMINA, IONTORRENT
 SEQ_PLATFORM = ILLUMINA
-# possible values: NONE, BAITS, PCR, RNA, CHIP
+
+# possible values: NONE (e.g. WGS), BAITS (bait-capture enrichment), PCR (amplicon-based enrichment), RNA (cDNA enrichment), CHIP
 CAPTURE_METHOD = NONE
-# possible values: NONE, AGILENT_CLINICAL_EXOME, IMPACTv5, CCP, CHPv2, IMPACT410, IMPACT341, AGILENT_ALLEXON_MOUSE, HCC, NOVARTIS_PC2, WXS
+
+# e.g. HCC20160511, WXS
 PANEL = NONE
+
 # Single-end or paired-end, set to false if single-end
 PAIRED_END = true
 
 # possible values: SOMATIC,GERMLINE
-ANALYSIS_TYPE ?= SOMATIC
+ANALYSIS_TYPE = SOMATIC
 
 include usb-modules-v2/Makefile
 ```
 Most parameters are automatically set to the appropriate values if you set these above parameters correctly. 
+
+Not all combinations are permissible. 'REF' and 'PANEL' combinations are valid if you can find a `genome_includes/<REF>.<PANEL>.inc` file.
 
 Additional user-configurable parameters are defined (with default values) in the `usb-modules-v2/config.inc` file. 
 
@@ -120,6 +125,71 @@ This analysis pipeline is designed to be modular. The names of the modules are f
 make <MODULE>
 ```
 This will set the parameters you set up in the project-level Makefile, then it will go through the code to set the remaining parameters with default-values, then run your desired module. 
+It is highly advisable to run this with either `nohup`, `screen` or `tmux`.
+
+Here are some very common ones.
+
+#### Alignment
+For alignment, the following are implemented and tested.
+```
+make bwaaln
+make bwamem
+make hisat2
+make star
+```
+
+#### QC
+These will work for both Illumina and Ion Torrent sequencing, and will collect the appropriate metrics based on capture method and target panel.
+```
+make bam_metrics
+make fastqc
+make genotype
+```
+
+#### Germline variant calling
+For Illumina, GATK v4, following the Best Practice guidelines is implemented and tested.
+```
+make gatk
+```
+
+For Ion Torrent, TVC is implemented but not well tested.
+```
+make tvc
+```
+
+#### Somatic variant calling
+For Illumina, mutect (SNVs) and strelka (indels) are implemented and tested.
+```
+make mutect
+make strelka
+make mutation_summary
+```
+
+For Ion Torrent, TVC is implemented and tested.
+```
+make tvc_somatic
+make mutation_summary
+```
+
+#### Somatic CNA detection
+For Illumina, facets is implemented and tested.
+```
+make facets
+```
+
+For Ion Torrent, varscan is implemented and tested.
+```
+make varscan_cnv
+```
+
+#### ChIP-seq peak detection
+MOSAICS is implemeted but not very well tested.
+```
+make mosaics
+```
+
+#### Others/ downstream tools
+There are a lot more...
 
 ---
 
@@ -175,7 +245,7 @@ Call somatic mutations
 ```
 make tvc_somatic
 ```
-Screen hotspots (for TERT) and for QC
+Screen hotspots (for _TERT_ promoter) and for QC
 ```
 make hotspot_screen
 ```
