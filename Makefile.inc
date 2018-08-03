@@ -4,12 +4,6 @@ include usb-modules-v2/config.inc
 ######## DEFINE SAMPLES/SETS ###############
 ############################################
 
-SAMPLE_SET_FILE ?= sample_sets.txt
-SAMPLE_FILE ?= samples.txt
-SAMPLE_SPLIT_FILE ?= samples.split.txt # generate using scripts/prepareFastq.sh [remove underscores from sample names]
-SAMPLE_PON_FILE ?= samples.pon.txt
-SAMPLE_POOLEDNORM_FILE ?= samples.poolednorm.txt
-MERGE_SAMPLE_FILE ?= merge_samples.txt
 
 ifndef MAKEFILE_INC
 
@@ -19,10 +13,10 @@ ifneq ($(wildcard $(SAMPLE_FILE)),)
   SAMPLES ?= $(shell sed '/^\#/d' $(SAMPLE_FILE))
 endif
 ifneq ($(wildcard $(SAMPLE_PON_FILE)),)
-  PANEL_OF_NORMAL_SAMPLES = $(shell sed '/^\#/d' $(SAMPLE_PON_FILE))
+  PANEL_OF_NORMAL_SAMPLES ?= $(shell sed '/^\#/d' $(SAMPLE_PON_FILE))
 endif
 ifneq ($(wildcard $(SAMPLE_POOLEDNORM_FILE)),)
-  POOLED_NORM_SAMPLES = $(shell sed '/^\#/d' $(SAMPLE_POOLEDNORM_FILE))
+  POOLED_NORM_SAMPLES ?= $(shell sed '/^\#/d' $(SAMPLE_POOLEDNORM_FILE))
 endif
 ifneq ($(wildcard $(MERGE_SAMPLE_FILE)),)
   MERGE_SAMPLES ?= $(shell sed '/^\#/d' $(MERGE_SAMPLE_FILE))
@@ -91,9 +85,9 @@ endif
 ALL_SAMPLES = $(SAMPLE_PAIRS) $(SAMPLES)
 COUNT_SAMPLES = $(shell expr `sed 's/\..*//; s:.*/::' <<< $1 | grep -o "_" | wc -l` + 1)
 
-############################################
-########### DEFINE RESOURCES ###############
-############################################
+#######################################################
+########### DEFINE GENOME AND RESOURCES ###############
+#######################################################
 
 RESOURCE_REQ ?= medium
 include usb-modules-v2/genome_inc/$(REF).inc
@@ -149,9 +143,7 @@ CHECK_VCF_CMD = if [ `grep -v '^\#' $1 | wc -l` -eq 0 ] && [ `grep '^\#CHROM' $1
 << = $(word 2,$^)
 <<< = $(word 3,$^)
 <<<< = $(word 4,$^)
-4< = $(word 4,$^)
 <<<<< = $(word 5,$^)
-5< = $(word 5,$^)
 
 define R_INIT
 dir.create('$(@D)', showWarnings = F, recursive = T)
@@ -268,9 +260,6 @@ VCF_SORT ?= $(PERL) $(SCRIPTS_DIR)/vcfsorter.pl
 FASTQ_TRIMMER = $(PERL) usb-modules-v2/fastq_tools/trimFastq.pl
 VCF_PASS ?= usb-modules-v2/vcf_tools/extract_pass_vcf.pl
 
-FASTQ_CHUNKS := 10
-FASTQ_CHUNK_SEQ := $(shell seq 1 $(FASTQ_CHUNKS))
-
 ifeq ($(ADAPTOR_POS),3prime)
 CUTADAPT_OPTS ?= -a $(ADAPTOR_SEQ) $(if $(findstring true,$(PAIRED_END)),-A $(ADAPTOR_SEQ))
 endif
@@ -281,7 +270,6 @@ ifeq ($(NEXTSEQ_TRIM),true)
 CUTADAPT_OPTS += --nextseq-trim=20
 endif
 CUTADAPT_OPTS += -q 20,20 --trim-n -m 35 --max-n=3 
-
 
 FASTQC ?= fastqc
 FASTQC_SUMMARY_PLOT = $(RSCRIPT) usb-modules-v2/qc/fastqcSummaryPlot.R
@@ -315,7 +303,6 @@ GATK += -S LENIENT -T $(1) -filterNoBases
 GATK37 = $(JAVA) -Xmx$(2) -jar $(JAR_DIR)/GenomeAnalysisTK-3.7/GenomeAnalysisTK-3.7.jar 
 GATK37 += -S LENIENT -T $(1) -filterNoBases
 
-## For the future
 GATK40 = gatk --java-options \"-Xmx$(2) -Xms$(2)\" $(1)
 
 FIX_GATK_VCF = $(PERL) usb-modules-v2/variant_callers/fix_vcf_scripts/fix_gatk_vcf.pl
@@ -388,9 +375,6 @@ ABSOLUTE_STEP3 ?= $(RSCRIPT) usb-modules-v2/clonality/absolute_step3.R
 ABSOLUTE_NUM_CORE ?= 1
 
 
-
-
-
 CBS_SEGMENTCNV = $(RSCRIPT) usb-modules-v2/copy_number/varscanCNVSegment.R
 VARSCAN_GENE_CN = $(RSCRIPT) usb-modules-v2/copy_number/varscanCNVGeneCN.R
 
@@ -417,22 +401,6 @@ MOSAICS_RUN ?= $(RSCRIPT) usb-modules-v2/chipseq/mosaics_run.R
 MOSAICS_CONSTRUCTBINS ?= $(RSCRIPT) usb-modules-v2/chipseq/mosaics_constructBins.R
 
 MSISENSOR ?= $(BIN_DIR)/msisensor_Linux_x86_64
-
-##VCF2MAF ?= $(PERL) $(SCRIPTS_DIR)/vcf2maf.pl
-#MAF2MAF ?= $(PERL) $(SCRIPTS_DIR)/maf2maf.pl
-#MAF2VCF ?= $(PERL) $(SCRIPTS_DIR)/maf2vcf.pl
-#VEP_PATH ?= /opt/common/CentOS_6/vep/v82
-#VEP_DATA ?= /opt/common/CentOS_6/vep/v82
-
-#BAM2FASTX = $(HOME)/usr/bin/bam2fastx
-#GET_INSERT_SIZE ?= $(HOME)/share/usr/bin/getInsertSize.py
-
-#TMAP = $(HOME)/share/usr/bin/tmap
-
-#MUT_FREQ_REPORT = modules/variant_callers/somatic/mutectReport.Rmd
-
-#VARIANT_EVAL_GATK_REPORT = $(RSCRIPT) usb-modules-v2/variant_callers/variantEvalGatkReport.R
-
 
 endif
 MAKEFILE_INC = true
