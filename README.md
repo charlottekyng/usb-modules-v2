@@ -14,14 +14,11 @@ Clone the code base
 git clone https://github.com/charlottekyng/usb-modules-v2.git
 ```
 
-You will need to Makefiles. The first is the one `${PROJ_DIR}/usb-modules-v2/Makefile` (hereafter known as module-level Makefile), and `${PROJ_DIR}/Makefile` (here after the project-level Makefile, described below in **set-up** files).
+### Setting up sample sheets
 
-There are the mandatory/optional **set-up** files:
-1. Project-level Makefile (required, has to called Makefile), see **usb-modules-v2/Makefile\template** for an example and **usb-modules-v2/config** for options. As a bare minimal, it only needs to contain the line `include usb-modules-v2/Makefile`
-
-2. sample sheet (required, default: samples.txt), consisting of a single column of sample names. 
+1. Sample sheet (required, default: `samples.txt`), consisting of a single column of sample names. 
     ```
-    >head samples.txt
+    head samples.txt
     SAMPLE1T
     SAMPLE1N
     SAMPLE2T
@@ -30,15 +27,15 @@ There are the mandatory/optional **set-up** files:
     SAMPLE3T2
     SAMPLE3N
     ```
-1. sample sets (required for ANALYSIS_TYPE = SOMATIC, default: sample_sets.txt, consisting of samples within sample sheet above, each row contains all samples from a given individual, with the germline sample last, tab or space delimited
+1. Sample sets (required for `ANALYSIS_TYPE = SOMATIC`, default: `sample_sets.txt`, consisting of samples within sample sheet above, each row contains all samples from a given individual, with the germline sample last, tab or space delimited
     ```
     >head sample_sets.txt
     SAMPLE1T SAMPLE1N
     SAMPLE2T SAMPLE2N
     SAMPLE3T1 SAMPLE3T2 SAMPLE3N
     ```
-1. sample splits (required for 
-    * multiple sets of fastqs per sample, in which case the first column is the <SAMPLE_NAME>, the second column is <SAMPLE_NAME>\_<RUN_NAME>. See below on setting up the unprocessed\_fastq directory; or 
+1. Sample splits (required for one of these two scenarios, depending on your data, default: `samples.split.txt`)
+    * multiple sets of fastqs per sample, in which case the first column is the <SAMPLE_NAME>, the second column is <SAMPLE_NAME>\_<RUN_NAME>. See below on setting up the `unprocessed\_fastq` directory; or 
         ```
         >head samples.split.txt
         SAMPLE1N SAMPLE1N_RUN1
@@ -48,8 +45,9 @@ There are the mandatory/optional **set-up** files:
         SAMPLE3N SAMPLE3N_RUN1
         SAMPLE3N SAMPLE3N_RUN2
         ```	
-    * multiple bam files per samples that need to be merged. In which case, the first column is the <SAMPLE_NAME>, the second column is the <SAMPLE_NAME> of one of the bam files that need to be merged
-        ```>head samples.split.txt
+    * multiple bam files per samples that need to be merged. In which case, the first column is the <SAMPLE_NAME>, the second column is the <SAMPLE_NAME> of one of the bam files that need to be merged. See below on setting up the `unprocessed\_bam` directory
+        ```
+        >head samples.split.txt
         SAMPLE1T SAMPLE1A
         SAMPLE1T SAMPLE1B
         SAMPLE2T SAMPLE2A
@@ -58,7 +56,9 @@ There are the mandatory/optional **set-up** files:
 
 **NOTE**: sample names must be [A-Za-z0-9\-] that starts with an alphabet.
 
-There are several options in terms of **data** files:
+### Setting up data directories
+
+There are several options in terms of data files:
 1. If you start from FASTQs and you have a single or a single pair of fastqs per sample, then you put your files as `fastq/<SAMPLE_NAME>.1.fastq.gz` (and `fastq/<SAMPLE_NAME>.2.fastq.gz`). Then you are ready to run alignment.
     ```
     >ls fastq
@@ -74,13 +74,52 @@ There are several options in terms of **data** files:
     >ls bam
     SAMPLE1A.bam SAMPLE1B.bam SAMPLE2A.bam SAMPLE2B.bam
     ```
+
+### Setting up analysis parameters
+
+You will need a project-level Makefile (`$PROJ_DIR/Makefile`). Note that this is different from the module-level Makefile (`${PROJ_DIR}/usb-modules-v2/Makefile`).
+In its most basic form, it only needs one line
+```
+include usb-modules-v2/Makefile
+```
+Any additional parameters should go _before_ the line above.
+
+
+This analysis pipeline is designed to be highly configurable. This also means that there are many possible combinations of parameters. 
+The project-level Makefile is where user-configurable parameters are specified. 
+
+You can specify as many parameters as required in your project-level `Makefile`, before the `include usb-modules-v2/Makefile` line.
+
+Here are a few basic ones
+```
+# default reference:
+# possible values: mm10, hg19, b37, hg19_ionref, b37_hbv_hcv, hg38
+REF = b37
+# possible values: ILLUMINA, IONTORRENT
+SEQ_PLATFORM = ILLUMINA
+# possible values: NONE, BAITS, PCR, RNA, CHIP
+CAPTURE_METHOD = NONE
+# possible values: NONE, AGILENT_CLINICAL_EXOME, IMPACTv5, CCP, CHPv2, IMPACT410, IMPACT341, AGILENT_ALLEXON_MOUSE, HCC, NOVARTIS_PC2, WXS
+PANEL = NONE
+# Single-end or paired-end, set to false if single-end
+PAIRED_END = true
+
+# possible values: SOMATIC,GERMLINE
+ANALYSIS_TYPE ?= SOMATIC
+
+include usb-modules-v2/Makefile
+```
+Most parameters are automatically set to the appropriate values if you set these above parameters correctly. 
+
+Additional user-configurable parameters are defined (with default values) in the `usb-modules-v2/config.inc` file. 
+
 ---
 # Executing the modules
-This analysis pipeline is designed to be modular and highly configurable. The names of the modules are found in module-level Makefile (not project-level Makefile). To execute a nodule, you type
+This analysis pipeline is designed to be modular. The names of the modules are found in module-level Makefile (not project-level Makefile). To execute a nodule, you type
 ```
 make <MODULE>
 ```
-Most user-configurable parameters are in the config.inc file. You can specify as many parameters as required in your project-level Makefile.
+This will set the parameters you set up in the project-level Makefile, then it will go through the code to set the remaining parameters with default-values, then run your desired module. 
 
 ---
 
