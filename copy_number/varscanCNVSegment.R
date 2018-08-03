@@ -8,6 +8,8 @@ options(warn = -1, error = quote({ traceback(); q('no', status = 1) }))
 
 optList <- list(
                 make_option("--centromereFile", default = NULL, type = "character", action = "store", help ="centromere file"),
+		make_option("--minNdepth", default = NULL, type="double", action = "store", help = "minNdepth"),
+		make_option("--excl_N_outlier_pc", default = NULL, type="double", action = "store", help = "excl_N_outlier_pc"),
                 make_option("--alpha", default = 0.000001, type = "double", action = "store", help ="alpha"),
 		make_option("--trim", default = 0.025, type="double", action = "store", help = "trim"),
 		make_option("--clen", default = 10, type="double", action = "store", help = "clen"),
@@ -52,6 +54,15 @@ if (!is.null(opt$centromereFile)) {
 cn <- lapply(cnFile, read.table, header=T, as.is=T)
 cn <- do.call("rbind", cn)
 
+if (!is.null(opt$excl_N_outlier_pc)) { 
+	min=quantile(cn$normal_depth, opt$excl_N_outlier_pc/2)
+	max=quantile(cn$normal_depth, 1-(opt$excl_N_outlier_pc/2))
+	cn <- subset(cn, normal_depth > min & normal_depth < max)
+}
+if (!is.null(opt$minNdepth)) {
+	cn <- subset(cn, normal_depth > opt$minNdepth)
+}
+
 cn[,1] <- gsub("chr", "", cn[,1])
 cn[which(cn[,1]=="X"),1] <- 23
 cn <- cn[which(cn[,1] %in% chroms),]
@@ -81,7 +92,7 @@ fData(segmented)$Chromosome <- floor(fData(segmented)$Chromosome)
 fData(segmented)$Chromosome[which(fData(segmented)$Chromosome==23)] <- "X"
 
 fn <- paste(opt$prefix, '.segment.Rdata', sep = '')
-save(segmented, file = fn)
+save(normalized, segmented, file = fn)
 
 Data <- cbind(fData(segmented), copynumber(segmented), segmented(segmented))
 colnames(Data)[5] <- "log2_ratio_seg"

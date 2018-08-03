@@ -176,12 +176,6 @@ ifeq ($(findstring IONTORRENT,$(SEQ_PLATFORM)),IONTORRENT)
 	$(SAMTOOLS) reheader $<.header $< > $@")
 endif
 
-%.read_len : %.bam
-	$(call RUN,1,$(RESOURCE_REQ_LOW_MEM),$(RESOURCE_REQ_VSHORT),$(SAMTOOLS_MODULE),"\
-	$(SAMTOOLS) view $< | awk '{ print length($$10) }' | sort -n | uniq -c | sort -rn | sed 's/^ \+//' | awk ' > $@")
-
-
-
 ifeq ($(SPLIT_CHR),true)
 define chr-splitchr
 %.$1.splitchr.bam : %.bam %.bam.bai
