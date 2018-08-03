@@ -79,11 +79,11 @@ There are several options in terms of data files:
     ```
 1. If you start from FASTQs, you have more than a single or more than a single pair of fastqs per sample, or your reads need trimming (e.g. adaptors) then you put your files as `unprocessed_fastq/<SAMPLE_NAME>_<RUN_NAME>.1.fastq.gz` or `unprocessed_fastq/<SAMPLE_NAME>.1.fastq.gz` (and `unprocessed_fastq/<SAMPLE_NAME>_<RUN_NAME>.2.fastq.gz` or `unprocessed_fastq/<SAMPLE_NAME>.2.fastq.gz`). Then you are ready to run alignment.
     ```
-    >ls unprocessed_fasta
+    >ls unprocessed_fastq
     SAMPLE1N_RUN1.1.fastq.gz SAMPLE1N_RUN1.2.fastq.gz SAMPLE1N_RUN2.1.fastq.gz SAMPLE1N_RUN2.2.fastq.gz (...)
     ```
     ```
-    >ls unprocessed_fasta
+    >ls unprocessed_fastq
     SAMPLE1T.1.fastq.gz SAMPLE1T.2.fastq.gz SAMPLE2T.1.fastq.gz SAMPLE2T.2.fastq.gz (...)
     ```
 1. If you start from BAMs (one bam per sample), you should put all your bams as `unprocessed_bam/<SAMPLE_NAME>.bam`. Then you do `make fix_rg` then you will have analysis-ready BAMs.
@@ -102,7 +102,6 @@ include usb-modules-v2/Makefile
 ```
 Any additional parameters should go _before_ the line above.
 
-
 This analysis pipeline is designed to be highly configurable. 
 This also means that there are many possible combinations of parameters. 
 The project-level Makefile is where user-configurable parameters are specified. 
@@ -110,9 +109,9 @@ The project-level Makefile is where user-configurable parameters are specified.
 You can specify as many parameters as required in your project-level `Makefile`, 
 before the `include usb-modules-v2/Makefile` line.
 
-Here are a few basic ones
+Here are the most basic ones and these should almost always be specified.
 ```
-# possible values: mm10, hg19, b37, hg19_ionref, b37_hbv_hcv, hg38
+# possible values: mm10, b37, hg19_ionref, b37_hbv_hcv, hg38, b37_GRCm38 etc
 REF = b37
 
 # possible values: ILLUMINA, IONTORRENT
@@ -121,20 +120,20 @@ SEQ_PLATFORM = ILLUMINA
 # possible values: NONE (e.g. WGS), BAITS (bait-capture enrichment), PCR (amplicon-based enrichment), RNA (cDNA enrichment), CHIP
 CAPTURE_METHOD = NONE
 
-# e.g. HCC20160511, WXS
+# e.g. HCC20160511, WXS etc
 PANEL = NONE
 
 # Single-end or paired-end, set to false if single-end
 PAIRED_END = true
 
-# possible values: SOMATIC,GERMLINE
+# possible values: SOMATIC, GERMLINE
 ANALYSIS_TYPE = SOMATIC
 
 include usb-modules-v2/Makefile
 ```
-Most parameters are automatically set to the appropriate values if you set these above parameters correctly. 
+Most parameters are automatically set to the basic appropriate values if you set these above parameters correctly. 
 
-Not all combinations are permissible. 
+Not all combinations of REF and PANEL are permissible. 
 (In the near future, valid combinations of 'REF' and 'PANEL' will be found as a `usb-modules-v2/genome_inc/<REF>/<PANEL>.inc` file.)
 
 Additional user-configurable parameters are defined (with default values) in the `usb-modules-v2/config.inc` file. 
@@ -149,27 +148,30 @@ To execute a nodule, you type
 make <MODULE>
 ```
 This will set the parameters you set up in the project-level Makefile, 
-then it will go through the code to set the remaining parameters with default-values, 
+then it will go through the code to set the remaining parameters with the appropriate default values, 
 then run your desired module. 
-It is highly advisable to run this with either `nohup`, `screen` or `tmux`.
+It is highly advisable to run this with either `nohup`, or within `screen` or `tmux`.
 
-Here are some very common ones. 
+Here are some very common modules. 
 **Note:** Some of them have dependencies that are not well-documented 
 (hopefully this will be improved in the future). 
 The sequences in "Example recipes" section below are valid sequences.
 
 #### Alignment
-For alignment, the following are implemented and tested.
+For genomic Illumina alignment, the following are implemented and tested.
 ```
 make bwaaln
 make bwamem
+```
+For transcriptomic Illumina sequencing, the following are implemented and tested.
+```
 make hisat2
 make star
 ```
 
 #### QC
-These will work for both Illumina and Ion Torrent sequencing, and will collect the 
-appropriate metrics based on capture method and target panel.
+The following will work for both Illumina and Ion Torrent sequencing, 
+and will collect the appropriate metrics based on capture method and target panel.
 ```
 make bam_metrics
 make fastqc
@@ -177,7 +179,7 @@ make genotype
 ```
 
 #### Germline variant calling
-For Illumina, GATK v4, following the Best Practice guidelines is implemented and tested.
+For Illumina, GATK v4 following the Best Practice guidelines is implemented and tested.
 ```
 make gatk
 ```
@@ -213,7 +215,7 @@ make varscan_cnv
 ```
 
 #### ChIP-seq peak detection
-MOSAICS is implemeted but not very well tested.
+MOSAICS is implemented but not very well tested.
 ```
 make mosaics
 ```
@@ -250,11 +252,11 @@ Sometimes there are transient system glitches and a simple re-run is enough to f
 
 # Example recipes
 Assuming that you have set up the above correctly, 
-here are some common recipes that are valid sequences.
+here are some suggested recipes that are valid sequences.
 
 #### Whole-exome sequencing on Illumina
 ```
-make bwamem genotype fastqc bam_metrics facets mutect strelka mutation_summary deconstructSigs
+make bwamem genotype fastqc bam_metrics facets mutect strelka mutation_summary
 ```
 #### RNA-sequencing on Illumina
 ```

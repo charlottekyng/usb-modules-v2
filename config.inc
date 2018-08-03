@@ -9,35 +9,46 @@ ifndef CONFIG_INC
 # default reference:
 # possible values: mm10, hg19, b37, hg19_ionref, b37_hbv_hcv
 REF ?= b37
+
 # possible values: ILLUMINA, IONTORRENT
 SEQ_PLATFORM ?= ILLUMINA
+
 # possible values: NONE, BAITS, PCR, RNA, CHIP
 CAPTURE_METHOD ?= NONE
-# possible values: NONE, AGILENT_CLINICAL_EXOME, IMPACTv5, CCP, CHPv2, IMPACT410, 
-# IMPACT341, AGILENT_ALLEXON_MOUSE, HCC, NOVARTIS_PC2, SEQCAP_EXOME_V3, WXS
+
+# possible values: NONE, AGILENT_CLINICAL_EXOME, CCP, AGILENT_ALLEXON_MOUSE, HCC, WXS
+# For WGS, RNA-seq and ChiP-seq, this should be NONE.
 PANEL ?= NONE
+
 # Single-end or paired-end, set to false if single-end
 PAIRED_END ?= true
+
 # for RNA-seq, possible values NONE, FIRST_READ_TRANSCRIPTION_STRAND, SECOND_READ_TRANSCRIPTION_STRAND
 STRAND_SPECIFICITY ?= NONE
+
 # also for RNA-seq, if mutation calls will eventually be needed, 
 # then post-process, otherwise just dont, it takes a long time and creates hard-clipped
 # reads that may be problematic
 POST_PROCESS_RNA_BAM ?= false
 
-
 # possible values: SOMATIC, GERMLINE
 ANALYSIS_TYPE ?= SOMATIC
 
+# if you anticipate a complex project requiring analyzing subsets of samples
+# this is useful for distinguishing them
 PROJECT_PREFIX ?=
 
 # Normal samples to use for pooled_norm and panel_of_normals: 
-#particularly useful for when samples are being added...
+# particularly useful for when samples are being added to specify a fixed set of normals to use.
+# Otherwise, if one single new normal sample is added, everything re-runs.
 PANEL_OF_NORMAL_SAMPLES ?= $(NORMAL_SAMPLES)
 POOLED_NORM_SAMPLES ?= $(NORMAL_SAMPLES)
 
 INCLUDE_CHR_Y ?= true
 
+# This parameter determines which aligned BAM files get put into the bam/ directory
+# This is useful when multiple aligners are used and you want to specify the
+# set that goes into bam/, since most downstream tools get the data from bam/
 ifeq ($(strip $(CAPTURE_METHOD)),RNA)
 PRIMARY_ALIGNER ?= star
 else
@@ -95,9 +106,9 @@ BAM_RECAL ?= none
 GENOTYPE_WITH_CHR2 = ?= false
 endif
 
+## default parameters if not set above
 FASTQ_FILTER ?=
 MERGE_SPLIT_FASTQ ?= false 
-
 BAM_REPROCESS ?= false
 BAM_PHRED64 ?= false
 MERGE_SPLIT_BAMS ?= false  # merge processed split bams
@@ -127,12 +138,7 @@ EXTRACT_TOOL ?= PICARD
 ########## Aligners ##############
 ##################################
 
-
 HISAT2_OPTS = --dta 
-
-
-#COVARIATES = -cov ReadGroupCovariate -cov QualityScoreCovariate -cov DinucCovariate -cov CycleCovariate
-#REPORT_STRATIFICATION := Filter
 
 ################################################
 ########## Variant callers and filtering #######
@@ -164,11 +170,9 @@ MUTECT_MAX_ALT_IN_NORMAL_FRACTION ?= 0.05
 MUTECT_GT_MAX_ALT_IN_NORMAL_FRACTION ?= 0.5
 
 
-#HAPCALL_CALL_THRESHOLD = 30
 GATK_INTERVALS_COUNT = 200
 GATK_HARD_FILTER_SNPS ?= false
 GATK_HARD_FILTER_INDELS ?= false
-#GATK_POOL_VARIANT_RECAL ?= false
 
 VARIANT_RECAL_TRUTH_SENSITIVITY_LEVEL_SNPS = 99.5
 VARIANT_RECAL_TRUTH_SENSITIVITY_LEVEL_INDELS = 99.0
@@ -349,6 +353,8 @@ PYCLONE_PRIOR ?= parental_copy_number
 ################################
 ###### Miscellaneous ###########
 ###############################
+
 DECONSTRUCTSIGS_NUMITER ?= 100
+
 endif
 CONFIG_INC = true
