@@ -109,7 +109,7 @@ LOGDIR ?= log/vcf.$(NOW)
 %.post_bcftools.vcf : %.vcf
 	$(call CHECK_VCF,$<,$@,\
 	$(call RUN,1,$(RESOURCE_REQ_LOW_MEM),$(RESOURCE_REQ_VSHORT),,"\
-	grep -v "##contig" $< | $(VCF_SORT) $(REF_DICT) - > $@"))
+	grep -v '##contig' $< | $(VCF_SORT) $(REF_DICT) - > $@"))
 
 %.sorted.vcf : %.vcf
 	$(call CHECK_VCF,$<,$@,\
