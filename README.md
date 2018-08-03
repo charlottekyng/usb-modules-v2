@@ -13,12 +13,16 @@ Clone the code base
 ```
 git clone https://github.com/charlottekyng/usb-modules-v2.git
 ```
+If you need to update the code based for PROJ
+```
+cd usb-modules-v2
+git pull
+```
 
 ### Setting up sample sheets
 
 1. Sample sheet (required, default: `samples.txt`), consisting of a single column of sample names. 
     ```
-    head samples.txt
     SAMPLE1T
     SAMPLE1N
     SAMPLE2T
@@ -29,15 +33,13 @@ git clone https://github.com/charlottekyng/usb-modules-v2.git
     ```
 1. Sample sets (required for `ANALYSIS_TYPE = SOMATIC`, default: `sample_sets.txt`, consisting of samples within sample sheet above, each row contains all samples from a given individual, with the germline sample last, tab or space delimited
     ```
-    >head sample_sets.txt
     SAMPLE1T SAMPLE1N
     SAMPLE2T SAMPLE2N
     SAMPLE3T1 SAMPLE3T2 SAMPLE3N
     ```
 1. Sample splits (required for one of these two scenarios, depending on your data, default: `samples.split.txt`)
-    1. multiple sets of fastqs per sample, in which case the first column is the <SAMPLE_NAME>, the second column is <SAMPLE_NAME>\_<RUN_NAME>. See below on setting up the `unprocessed_fastq` directory; or 
+    1. multiple sets of fastqs per sample, in which case the first column is the <SAMPLE_NAME>, the second column is <SAMPLE_NAME>\_<RUN_NAME>. This is usually required with Illumina sequencing, since the samples are usually multiplexed and sequenced over several lanes/runs. See below on setting up the `unprocessed_fastq` directory; or 
         ```
-        >head samples.split.txt
         SAMPLE1N SAMPLE1N_RUN1
         SAMPLE1N SAMPLE1N_RUN2
         SAMPLE1N SAMPLE1N_RUN3
@@ -45,16 +47,27 @@ git clone https://github.com/charlottekyng/usb-modules-v2.git
         SAMPLE3N SAMPLE3N_RUN1
         SAMPLE3N SAMPLE3N_RUN2
         ```	
-    1. multiple bam files per samples that need to be merged. In which case, the first column is the <SAMPLE_NAME>, the second column is the <SAMPLE_NAME> of one of the bam files that need to be merged. See below on setting up the `unprocessed_bam` directory
+    1. multiple bam files per samples that need to be merged. In which case, the first column is the <SAMPLE_NAME>, the second column is the <SAMPLE_NAME> of one of the bam files that need to be merged. This may be required when the a given sample was sequenced twice and you have 2 separately aligned BAMs. See below on setting up the `unprocessed_bam` directory
         ```
-        >head samples.split.txt
         SAMPLE1T SAMPLE1A
         SAMPLE1T SAMPLE1B
         SAMPLE2T SAMPLE2A
         SAMPLE2T SAMPLE2B
         ```
+#### Important note on sample names
 
-**NOTE**: sample names must be [A-Za-z0-9] (may include '-' but no other symbols allowed) that starts with an alphabet.
+The preferred format is XXXnnn[TN]mm, where 
+* XXX is a short project code (e.g. "HPU" for HCC plasma and urine.)
+* nnn is the patient/individual identifier (e.g. 001)
+* [TN] is tumor or normal
+* mm is sample identifier (e.g. if there are more than one tumor sample).
+
+Obviously, this format does not apply to all types of projects, and some variation is of course permissible.
+Here are the rules
+* all alphanumeric characters are allowed `[A-Za-z0-9]` 
+* absolutely no space
+* the only (tested) permissible symbol is `-`. Most other symbols are either known to break the pipeline or are untested.
+* sample names should start with an alphabet [A-Za-z], although it is not know if the pipeline would actually fall over otherwise.
 
 ### Setting up data directories
 
@@ -118,7 +131,7 @@ include usb-modules-v2/Makefile
 Most parameters are automatically set to the appropriate values if you set these above parameters correctly. 
 
 Not all combinations are permissible. 
-(In the near future, valid combinations of 'REF' and 'PANEL' will be found as a `genome_includes/<REF>.<PANEL>.inc` file.)
+(In the near future, valid combinations of 'REF' and 'PANEL' will be found as a `usb-modules-v2/genome_inc/<REF>/<PANEL>.inc` file.)
 
 Additional user-configurable parameters are defined (with default values) in the `usb-modules-v2/config.inc` file. 
 (In the near future, the parameters will be better documented in the config file.)
