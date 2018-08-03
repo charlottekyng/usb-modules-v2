@@ -13,7 +13,7 @@ Clone the code base
 ```
 git clone https://github.com/charlottekyng/usb-modules-v2.git
 ```
-If you need to update the code based for PROJ
+If you need to update the code base for PROJ
 ```
 cd usb-modules-v2
 git pull
@@ -69,6 +69,8 @@ Here are the rules
 * the only (tested) permissible symbol is `-`. Most other symbols are either known to break the pipeline or are untested.
 * sample names should start with an alphabet [A-Za-z], although it is not know if the pipeline would actually fall over otherwise.
 
+Adhere to these guidelines to avoid unnecessary troubleshooting.
+
 ### Setting up data directories
 
 There are several options in terms of data files:
@@ -91,6 +93,7 @@ There are several options in terms of data files:
     >ls unprocessed_bam
     SAMPLE1A.bam SAMPLE1B.bam SAMPLE2A.bam SAMPLE2B.bam
     ```
+**Note**: for single-end FASTQs, use `.1.fastq.gz` (i.e. include the `.1`).
 
 ### Setting up analysis parameters
 
@@ -100,38 +103,36 @@ In its most basic form, it only needs one line
 ```
 include usb-modules-v2/Makefile
 ```
-Any additional parameters should go _before_ the line above.
-
 This analysis pipeline is designed to be highly configurable. 
 This also means that there are many possible combinations of parameters. 
 The project-level Makefile is where user-configurable parameters are specified. 
 
 You can specify as many parameters as required in your project-level `Makefile`, 
-before the `include usb-modules-v2/Makefile` line.
+_before_ the `include usb-modules-v2/Makefile` line.
 
 Here are the most basic ones and these should almost always be specified.
 ```
-# possible values: mm10, b37, hg19_ionref, b37_hbv_hcv, hg38, b37_GRCm38 etc
+# example values:  b37, hg19_ionref, b37_hbv_hcv, hg38, b37_GRCm38 etc
 REF = b37
 
-# possible values: ILLUMINA, IONTORRENT
+# possible values: [ILLUMINA|IONTORRENT]
 SEQ_PLATFORM = ILLUMINA
 
 # possible values: NONE (e.g. WGS), BAITS (bait-capture enrichment), PCR (amplicon-based enrichment), RNA (cDNA enrichment), CHIP
 CAPTURE_METHOD = NONE
 
-# e.g. HCC20160511, WXS etc
+# example values: HCC20160511, WXS etc
 PANEL = NONE
 
-# Single-end or paired-end, set to false if single-end
+# Single-end or paired-end, set to false if single-end [true|false]
 PAIRED_END = true
 
-# possible values: SOMATIC, GERMLINE
+# possible values: [SOMATIC|GERMLINE]
 ANALYSIS_TYPE = SOMATIC
 
 include usb-modules-v2/Makefile
 ```
-Most parameters are automatically set to the basic appropriate values if you set these above parameters correctly. 
+Most parameters are automatically set to the basic appropriate values if you set these above parameters correctly, but there is a lot of room for customization.
 
 Not all combinations of REF and PANEL are permissible. 
 (In the near future, valid combinations of 'REF' and 'PANEL' will be found as a `usb-modules-v2/genome_inc/<REF>/<PANEL>.inc` file.)
@@ -197,7 +198,7 @@ make strelka
 make mutation_summary
 ```
 
-For Ion Torrent, TVC is implemented and tested.
+For Ion Torrent, TVC (both SNVs and indels) is implemented and tested.
 ```
 make tvc_somatic
 make mutation_summary
@@ -223,6 +224,9 @@ make mosaics
 #### Others/ downstream tools
 There are a lot more...
 
+
+#### Note regarding sanity checks
+At the moment, there are no checks in place to see if what you are attempting to run is a sensible thing to do given your parameters.
 ---
 
 # If something falls over...
