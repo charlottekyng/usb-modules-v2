@@ -77,7 +77,8 @@ There are several options in terms of data files:
 
 ### Setting up analysis parameters
 
-You will need a project-level Makefile (`$PROJ_DIR/Makefile`). Note that this is different from the module-level Makefile (`${PROJ_DIR}/usb-modules-v2/Makefile`).
+You will need a project-level Makefile (`$PROJ_DIR/Makefile`). 
+Note that this is different from the module-level Makefile (`${PROJ_DIR}/usb-modules-v2/Makefile`).
 In its most basic form, it only needs one line
 ```
 include usb-modules-v2/Makefile
@@ -85,10 +86,12 @@ include usb-modules-v2/Makefile
 Any additional parameters should go _before_ the line above.
 
 
-This analysis pipeline is designed to be highly configurable. This also means that there are many possible combinations of parameters. 
+This analysis pipeline is designed to be highly configurable. 
+This also means that there are many possible combinations of parameters. 
 The project-level Makefile is where user-configurable parameters are specified. 
 
-You can specify as many parameters as required in your project-level `Makefile`, before the `include usb-modules-v2/Makefile` line.
+You can specify as many parameters as required in your project-level `Makefile`, 
+before the `include usb-modules-v2/Makefile` line.
 
 Here are a few basic ones
 ```
@@ -114,20 +117,29 @@ include usb-modules-v2/Makefile
 ```
 Most parameters are automatically set to the appropriate values if you set these above parameters correctly. 
 
-Not all combinations are permissible. (In the near future, valid combinations of 'REF' and 'PANEL' will be found as an existing `genome_includes/<REF>.<PANEL>.inc` file.)
+Not all combinations are permissible. 
+(In the near future, valid combinations of 'REF' and 'PANEL' will be found as a `genome_includes/<REF>.<PANEL>.inc` file.)
 
-Additional user-configurable parameters are defined (with default values) in the `usb-modules-v2/config.inc` file. (In the near future, the parameters will be better documented in the config file.)
+Additional user-configurable parameters are defined (with default values) in the `usb-modules-v2/config.inc` file. 
+(In the near future, the parameters will be better documented in the config file.)
 
 ---
 # Executing the modules
-This analysis pipeline is designed to be modular. The names of the modules are found in module-level Makefile (not project-level Makefile). To execute a nodule, you type
+This analysis pipeline is designed to be modular. 
+The names of the modules are found in module-level Makefile (not project-level Makefile). 
+To execute a nodule, you type
 ```
 make <MODULE>
 ```
-This will set the parameters you set up in the project-level Makefile, then it will go through the code to set the remaining parameters with default-values, then run your desired module. 
+This will set the parameters you set up in the project-level Makefile, 
+then it will go through the code to set the remaining parameters with default-values, 
+then run your desired module. 
 It is highly advisable to run this with either `nohup`, `screen` or `tmux`.
 
-Here are some very common ones.
+Here are some very common ones. 
+**Note:** Some of them have dependencies that are not well-documented 
+(hopefully this will be improved in the future). 
+The sequences in "Example recipes" section below are valid sequences.
 
 #### Alignment
 For alignment, the following are implemented and tested.
@@ -139,7 +151,8 @@ make star
 ```
 
 #### QC
-These will work for both Illumina and Ion Torrent sequencing, and will collect the appropriate metrics based on capture method and target panel.
+These will work for both Illumina and Ion Torrent sequencing, and will collect the 
+appropriate metrics based on capture method and target panel.
 ```
 make bam_metrics
 make fastqc
@@ -208,15 +221,19 @@ Each step in the pipeline spits out a log file. The individual log file for the 
 log/gatk.2018-08-03.2/gatk/intervals_gvcf/0030/ESBIPGRA00245.variants.vcf.gz.log
 ```
 
-This is where you go looking for the error. Most errors are related to incorrect parameters, empty or invalid input files or running out of resources (time or memory).
-If it is related to an invalid/empty input file, then go one step back in the pipeline to see if a previous step fell over without throwing and error (it happens).
+This is where you go looking for the error. 
+Most errors are related to incorrect parameters, empty or invalid input files or running out of resources (time or memory).
+If it is related to an invalid/empty input file, then go one step back in the pipeline to see 
+if a previous step fell over without throwing and error (it happens).
 
-If the reason is not obvious, try deleting any invalid/empty files, then re-run it. Sometimes there are transient system glitches and a simple re-run is enough to fix it.
+If the reason is not obvious, try deleting any invalid/empty files, then re-run it. 
+Sometimes there are transient system glitches and a simple re-run is enough to fix it.
 
 ---
 
 # Example recipes
-Assuming that you have set up the above correctly. Here are some common recipes
+Assuming that you have set up the above correctly, 
+here are some common recipes that are valid sequences.
 
 #### Whole-exome sequencing on Illumina
 ```
@@ -274,7 +291,9 @@ Make samples.txt
 ls *bam | perl -p -e "s/\.bam//g;" > ../samples.txt
 cd ..
 ```
-Make sample_sets.txt. This file should be one patient per row. Each row should consist of the tumor samples, tab-delimited, followed by the matched normal sample as the last name on the row
+Make sample_sets.txt. This file should be one patient per row. 
+Each row should consist of the tumor samples, tab-delimited, 
+followed by the matched normal sample as the last name on the row
 
 Now fix read groups to ensure downstream processing do not fall over
 ```
