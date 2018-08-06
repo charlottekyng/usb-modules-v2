@@ -261,13 +261,20 @@ MIN_MQ ?= 10
 MIN_AF_SNP ?= 0.01
 MIN_AF_INDEL ?= 0.02
 
+ifeq ($(findstring IONTORRENT,$(SEQ_PLATFORM)),IONTORRENT)
+MUT_CALLER ?= tvc
+endif
+
 ifeq ($(findstring tvc,$(MUT_CALLER)),tvc)
 USE_NFT ?= false
+ANN_NFT ?= true
 PON_VCF ?= tvc/pon.tvc.vcf
 else
 USE_NFT ?= true
+ANN_NFT ?= false
 PON_VCF ?= mutect2/pon.mutect2.vcf
 endif
+
 
 #################################################
 ###### Germline variant callers #################
