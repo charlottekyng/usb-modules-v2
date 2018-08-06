@@ -159,6 +159,10 @@ Here are some very common modules.
 The sequences in "Example recipes" section below are valid sequences.
 
 #### Alignment
+
+This runs the chosen aligner on FASTQ files, including preprocessing (e.g. adaptor trimming) and postprocessing (e.g. sorting, deduplication).\
+*Pre-requisites:* FASTQs in fastq/ or unprocessed_fastq/ (see 'Setting up data directories' above).\
+
 For genomic Illumina alignment, the following are implemented and tested.
 ```
 make bwaaln
@@ -172,7 +176,10 @@ make star
 
 #### QC
 The following will work for both Illumina and Ion Torrent sequencing, 
-and will collect the appropriate metrics based on capture method and target panel.
+and will collect the appropriate metrics based on capture method and target panel.\
+
+*Pre-requisites:* BAMs in bam/ after alignment with an appropriate aligner.\
+
 ```
 make bam_metrics
 make fastqc
@@ -180,6 +187,9 @@ make genotype
 ```
 
 #### Germline variant calling
+
+*Pre-requisites:* BAMs in bam/ after alignment with an appropriate aligner.\
+
 For Illumina, GATK v4 following the Best Practice guidelines is implemented and tested.
 ```
 make gatk
@@ -191,6 +201,9 @@ make tvc
 ```
 
 #### Somatic variant calling
+
+*Pre-requisites:* BAMs in bam/ after alignment with an appropriate aligner.\
+
 For Illumina, mutect (SNVs) and strelka (indels) are implemented and tested.
 ```
 make mutect
@@ -205,6 +218,9 @@ make mutation_summary
 ```
 
 #### Somatic CNA detection
+
+*Pre-requisites:* BAMs in bam/ after alignment with an appropriate aligner.\
+
 For Illumina, facets is implemented and tested.
 ```
 make facets
@@ -217,6 +233,7 @@ make varscan_cnv
 
 #### ChIP-seq peak detection
 MOSAICS is implemented but not very well tested.
+*Pre-requisites:* BAMs in bam/ after alignment with an appropriate aligner (bwaaln or bwamem).\
 ```
 make mosaics
 ```
@@ -226,7 +243,9 @@ There are a lot more...
 
 
 #### Note regarding sanity checks
+
 At the moment, there are no checks in place to see if what you are attempting to run is a sensible thing to do given your parameters.
+
 ---
 
 # If something falls over...

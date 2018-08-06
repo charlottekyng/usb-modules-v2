@@ -67,7 +67,7 @@ LOGDIR ?= log/vcf.$(NOW)
 	$(call RUN,1,$(RESOURCE_REQ_MEDIUM_MEM),$(RESOURCE_REQ_SHORT),$(GATK40_MODULE),"\
 		$(call GATK40,VariantFiltration,$(RESOURCE_REQ_MEDIUM_MEM_JAVA)) \
 		-R $(REF_FASTA) -V $< -O $@ \
-		--mask $(CANCER_HOTSPOT_VCF)--mask-name HOTSPOT && $(RM) $< $<.idx"))
+		--mask $(CANCER_HOTSPOT_VCF) --mask-name HOTSPOT && $(RM) $< $<.idx"))
 
 ## This is definitely broken
 # somatic filter for structural variants
