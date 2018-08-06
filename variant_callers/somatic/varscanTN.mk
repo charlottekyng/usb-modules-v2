@@ -5,11 +5,11 @@
 MUT_CALLER := varscan
 
 
-LOGDIR ?= log/varscanTN.$(NOW)
-
 ##### MAKE INCLUDES #####
 include usb-modules-v2/Makefile.inc
 include usb-modules-v2/variant_callers/somatic/somaticVariantCaller.inc
+
+LOGDIR ?= log/varscanTN.$(NOW)
 
 VPATH ?= bam
 

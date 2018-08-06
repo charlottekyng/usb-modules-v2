@@ -84,6 +84,8 @@ endif
 
 ALL_SAMPLES = $(SAMPLE_PAIRS) $(SAMPLES)
 COUNT_SAMPLES = $(shell expr `sed 's/\..*//; s:.*/::' <<< $1 | grep -o "_" | wc -l` + 1)
+PANEL_OF_NORMAL_SAMPLES ?= $(NORMAL_SAMPLES)
+POOLED_NORM_SAMPLES ?= $(NORMAL_SAMPLES)
 
 #######################################################
 ########### DEFINE GENOME AND RESOURCES ###############

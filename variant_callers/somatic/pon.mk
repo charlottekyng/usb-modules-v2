@@ -3,19 +3,16 @@ include usb-modules-v2/Makefile.inc
 
 LOGDIR ?= log/pon.$(NOW)
 
-#PHONY : pon
-#pon : $(foreach chr,$(CHROMOSOMES),mutect2/chr_vcf_pon/pon.$(chr).mutect2.vcf)
-
 ifeq ($(findstring tvc,$(MUT_CALLER)),tvc)
 
 tvc/pon.tvc.vcf : $(foreach sample,$(PANEL_OF_NORMAL_SAMPLES),tvc/vcf_pon/$(sample)/TSVC_variants.vcf)
 	$(call RUN,1,$(RESOURCE_REQ_HIGH_MEM),$(RESOURCE_REQ_SHORT),$(JAVA8_MODULE),"\
 	$(call GATK,CombineVariants,$(RESOURCE_REQ_HIGH_MEM_JAVA)) --reference_sequence $(REF_FASTA) \
-	$(foreach sample,$(NORMAL_SAMPLES),--variant tvc/vcf_pon/$(sample)/TSVC_variants.vcf) \
+	$(foreach vcf,$^,--variant $(vcf) ) \
 	--genotypemergeoption UNIQUIFY --out $@")
 
 tvc/vcf_pon/%/TSVC_variants.vcf : bam/%.bam bam/%.bam.bai
-	$(call RUN,4,$(RESOURCE_REQ_MEDIUM_MEM),$(RESOURCE_REQ_SHORT),,"\
+	$(call RUN,4,$(RESOURCE_REQ_MEDIUM_MEM),$(RESOURCE_REQ_SHORT),$(OPENBLAS_MODULE) $(PYTHON_MODULE),"\
 	$(TVC) -i $< -r $(REF_FASTA) -o $(@D) -N 4 \
 	$(if $(TARGETS_FILE_INTERVALS),-b $(TARGETS_FILE_INTERVALS)) \
 	-m $(TVC_MOTIF) -p $(TVC_SOMATIC_JSON) \

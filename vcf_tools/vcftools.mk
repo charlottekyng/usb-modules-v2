@@ -6,7 +6,6 @@ ifndef VCFTOOLS_MK
 include usb-modules-v2/Makefile.inc
 
 LOGDIR ?= log/vcf.$(NOW)
-
 ..DUMMY := $(shell mkdir -p version; echo "$(SNP_EFF) &> version/snp_eff.txt")
 
 ######### GZ & INDEX #####

@@ -1,3 +1,5 @@
+MUT_CALLER = strelka
+
 # Run strelka on tumour-normal matched pairs
 
 include usb-modules-v2/Makefile.inc
@@ -5,7 +7,6 @@ include usb-modules-v2/variant_callers/somatic/somaticVariantCaller.inc
 
 ##### DEFAULTS ######
 STRELKA_NUM_CORES ?= 8
-MUT_CALLER := strelka
 
 
 LOGDIR ?= log/strelka.$(NOW)
