@@ -92,7 +92,7 @@ gatk/gvcf/genomics.variants.vcf.gz : $(foreach interval,$(shell seq 0 $(MAX_INTE
 
 
 gatk/gatk_snps.vcf.gz : gatk/gvcf/genomics.variants.vcf.gz gatk/gvcf/genomics.variants.vcf.gz.tbi
-	$(call RUN,1,$(RESOURCE_REQ_MEDIUM_MEM),$(RESOURCE_REQ_VSHORT),$(GATK40_MODULE),"\
+	$(call RUN,1,$(RESOURCE_REQ_MEDIUM_MEM),$(RESOURCE_REQ_SHORT),$(GATK40_MODULE),"\
 	$(call GATK40,SelectVariants,$(RESOURCE_REQ_MEDIUM_MEM_JAVA)) \
 	-R $(REF_FASTA) -V $< -O $@ -select-type SNP")
 
@@ -140,6 +140,7 @@ define VARIANT_RECAL_SNPS
 	--resource 1000G$(,)known=false$(,)training=true$(,)truth=false$(,)prior=10.0:$(R1000G) \
 	--resource dbsnp$(,)known=true$(,)training=false$(,)truth=false$(,)prior=2.0:$(DBSNP) \
 	$(foreach i,$(VARIANT_RECAL_ANNOTATIONS_SNPS), -an $i) \
+	-tranche 100.0 -tranche 99.9 -tranche 99.5 -tranche 99.0 -tranche 95.0 -tranche 90.0 \
 	--tranches-file $(basename $2).tranches")
 endef
 
@@ -150,15 +151,16 @@ define VARIANT_RECAL_INDELS
 	--resource mills$(,)known=false$(,)training=true$(,)truth=true$(,)prior=12.0:$(KNOWN_INDELS) \
 	--resource dbsnp$(,)known=true$(,)training=false$(,)truth=false$(,)prior=2.0:$(DBSNP) \
 	$(foreach i,$(VARIANT_RECAL_ANNOTATIONS_INDELS), -an $i) \
+	-tranche 100.0 -tranche 99.9 -tranche 99.5 -tranche 99.0 -tranche 95.0 -tranche 90.0 \
 	--tranches-file $(basename $2).tranches")
 endef
 
 define APPLY_VARIANT_RECAL_SNPS
-	$(call RUN,1,$(RESOURCE_REQ_MEDIUM_MEM),$(RESOURCE_REQ_VSHORT),$(GATK40_MODULE) $(R_MODULE),"\
+	$(call RUN,1,$(RESOURCE_REQ_MEDIUM_MEM),$(RESOURCE_REQ_SHORT),$(GATK40_MODULE) $(R_MODULE),"\
 	$(call GATK40,ApplyVQSR,$(RESOURCE_REQ_MEDIUM_MEM_JAVA)) \
 	-R $(REF_FASTA) -V $1 --recal-file $2 -O $3 -mode SNP \
 	--truth-sensitivity-filter-level $(VARIANT_RECAL_TRUTH_SENSITIVITY_LEVEL_SNPS) \
-	--tranches-file $(basename $1).tranches")
+	--tranches-file $(basename $2).tranches")
 endef
 
 define APPLY_VARIANT_RECAL_INDELS
@@ -166,7 +168,7 @@ define APPLY_VARIANT_RECAL_INDELS
 	$(call GATK40,ApplyVQSR,$(RESOURCE_REQ_MEDIUM_MEM_JAVA)) \
 	-R $(REF_FASTA) -V $1 --recal-file $2 -O $3 -mode INDEL\
 	--truth-sensitivity-filter-level $(VARIANT_RECAL_TRUTH_SENSITIVITY_LEVEL_INDELS) \
-	--tranches-file $(basename $1).tranches")
+	--tranches-file $(basename $2).tranches")
 endef
 
 ## recipes for SNPs
@@ -223,12 +225,12 @@ endif # end GATK_HARD_FILTER_INDELS
 	$(INIT) /bin/awk 'NR == 1 || $$4 == "."' $< > $@
 
 vcf/all$(PROJECT_PREFIX).gatk_snps.vcf : gatk/gatk_snps.filtered.vcf.gz
-	$(call RUN,1,$(RESOURCE_REQ_MEDIUM_MEM),$(RESOURCE_REQ_VSHORT),"\
+	$(call RUN,1,$(RESOURCE_REQ_MEDIUM_MEM),$(RESOURCE_REQ_VSHORT),,"\
 	$(GUNZIP) $< > $@")
 #	$(INIT) $(FIX_GATK_VCF) $< > $@
 
 vcf/all$(PROJECT_PREFIX).gatk_indels.vcf : gatk/gatk_indels.filtered.vcf.gz
-	$(call RUN,1,$(RESOURCE_REQ_MEDIUM_MEM),$(RESOURCE_REQ_VSHORT),"\
+	$(call RUN,1,$(RESOURCE_REQ_MEDIUM_MEM),$(RESOURCE_REQ_VSHORT),,"\
 	$(GUNZIP) $< > $@")
 #	$(INIT) $(FIX_GATK_VCF) $< > $@
 
