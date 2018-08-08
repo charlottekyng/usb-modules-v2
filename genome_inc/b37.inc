@@ -151,7 +151,7 @@ MOSAICS_CHRFILE = $(GSA_REF_DIR)/human_g1k_v37_decoy.mosaics.chrfile
 GISTIC_REF ?= /scicore/home/terracci/GROUP/usr_nobackup/local/gistic_2.0.23/refgenefiles/hg19.UCSC.add_miR.140312.refgene.mat
 
 STAR_GENOME_DIR = $(REF_DIR)/genome_index/star_b37
-STAR_CTAT_DIR = $(ANN_DIR)/GRCh37_gencode_v19_CTAT_lib
+STAR_CTAT_DIR = $(ANN_DIR)/GRCh37_gencode_v19_CTAT_lib_July272016_prebuilt
 
 RSEM_INDEX = $(REF_DIR)/genome_index/rsem_b37/rsem_index
 
