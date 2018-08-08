@@ -34,7 +34,7 @@ if __name__ == '__main__':
     parser.add_argument('-S', '--shell', default='/bin/bash', help='shell')
     parser.add_argument('--servers', default=None, nargs='*',
                         help='use these servers for checking non-zero output file size')
-    
+    parser.add_argument('-x', '--exclude_node', default=None, help='exclude node list') 
     parser.add_argument('--qos', default='6hours', help='Quality of Service')
     parser.add_argument('--mail-type', default=None, help='Mail Type')
     parser.add_argument('--mail-user', default=None, help='Mail User')
@@ -89,7 +89,10 @@ if __name__ == '__main__':
     elif args.job_name is not None:
         job_name = args.job_name
     elif args.project_name is not None and args.out_file is not None:
-        job_name = "{}_{}".format(args.project_name, os.path.basename(args.out_file))
+        job_name = "{}/{}".format(args.project_name,args.out_file)
+        """
+        job_name = "{}/{}".format(args.project_name, os.path.basename(args.out_file))
+        """
 
     if args.local or (args.internet and args.cluster_engine != 'lsf'):
         my_job = job.LocalJob(job_script=job_script, out_file=args.out_file, log_file=args.log_file, shell=args.shell)
@@ -160,7 +163,8 @@ if __name__ == '__main__':
             qsub_args += " --mem-per-cpu {hard_mem_gb}".format(hard_mem_gb=args.hard_memory)             
         if args.walltime is not None and args.qos is not None:
             qsub_args += " --time {time} --qos {qos}".format(time=args.walltime, qos=args.qos)
-            
+        if args.exclude_node is not None:
+            qsub_args += " --exclude {}".format(args.exclude_node)          
         if args.log_file is not None:
             qsub_args += " --error {error} --output {output}".format(error=args.log_file, output=args.log_file)  
                     

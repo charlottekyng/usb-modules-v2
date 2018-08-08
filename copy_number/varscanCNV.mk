@@ -6,15 +6,15 @@ LOGDIR ?= log/varscanCNV.$(NOW)
 
 ##### MAKE INCLUDES #####
 include usb-modules-v2/Makefile.inc
-
+$(info TARGETS_FILE_INTERVALS_POOLS_CNA $(TARGETS_FILE_INTERVALS_POOLS_CNA))
 .DELETE_ON_ERROR:
 .SECONDARY: 
 .PHONY: all
 
 all : copynum copycalls segments geneCN 
 
-copynum : $(foreach pair,$(SAMPLE_PAIRS),$(foreach pool,$(TARGETS_FILE_INTERVALS_POOLS),varscan/copynum/$(pair).$(notdir $(pool)).copynumber))
-copycalls : $(foreach pair,$(SAMPLE_PAIRS),$(foreach pool,$(TARGETS_FILE_INTERVALS_POOLS),varscan/copycall/$(pair).$(notdir $(pool)).copycall))
+copynum : $(foreach pair,$(SAMPLE_PAIRS),$(foreach pool,$(TARGETS_FILE_INTERVALS_POOLS_CNA),varscan/copynum/$(pair).$(notdir $(pool)).copynumber))
+copycalls : $(foreach pair,$(SAMPLE_PAIRS),$(foreach pool,$(TARGETS_FILE_INTERVALS_POOLS_CNA),varscan/copycall/$(pair).$(notdir $(pool)).copycall))
 segments : $(foreach pair,$(SAMPLE_PAIRS),varscan/segment/$(pair).segment.Rdata)
 geneCN : varscan/segment/geneCN.txt
 
@@ -34,7 +34,7 @@ endif
 ifeq ($(findstring IONTORRENT,$(SEQ_PLATFORM)),IONTORRENT)
 define varscan-copynum-tumor-normal
 varscan/copynum/$1_$2.$$(notdir $3).copynumber : bam/$1.bam bam/$2.bam $3
-	$$(call RUN,1,$$(RESOURCE_REQ_MEDIUM_MEM),$$(RESOURCE_REQ_VSHORT),$$(SAMTOOLS_MODULE) $$(JAVA7_MODULE) $$(BEDTOOLS_MODULE),"\
+	$$(call RUN,1,$$(RESOURCE_REQ_MEDIUM_MEM),$$(RESOURCE_REQ_SHORT),$$(SAMTOOLS_MODULE) $$(JAVA7_MODULE) $$(BEDTOOLS_MODULE),"\
 	TMP1=`mktemp`.bam && $$(BEDTOOLS) intersect -wa -F 1 -a $$< -b $$(word 3, $$^) > \$$$$TMP1 && \
 	$$(SAMTOOLS) index \$$$$TMP1 && \
 	TMP2=`mktemp`.bam && $$(BEDTOOLS) intersect -wa -F 1 -a $$(word 2,$$^) -b $$(word 3, $$^) > \$$$$TMP2 && \
@@ -45,7 +45,7 @@ varscan/copynum/$1_$2.$$(notdir $3).copynumber : bam/$1.bam bam/$2.bam $3
 	$$(RM) \$$$$TMP1 \$$$$TMP2")
 endef
 $(foreach pair,$(SAMPLE_PAIRS),\
-	$(foreach pool,$(TARGETS_FILE_INTERVALS_POOLS),\
+	$(foreach pool,$(TARGETS_FILE_INTERVALS_POOLS_CNA),\
 		$(eval $(call varscan-copynum-tumor-normal,$(tumor.$(pair)),$(normal.$(pair)),$(pool)))))
 endif
 
@@ -70,10 +70,11 @@ endif
 
 ifeq ($(findstring IONTORRENT,$(SEQ_PLATFORM)),IONTORRENT)
 define varscan-segment
-varscan/segment/$1_$2.segment.Rdata : $$(foreach pool,$$(TARGETS_FILE_INTERVALS_POOLS),varscan/copycall/$1_$2.$$(notdir $$(pool)).copycall)
+varscan/segment/$1_$2.segment.Rdata : $$(foreach pool,$$(TARGETS_FILE_INTERVALS_POOLS_CNA),varscan/copycall/$1_$2.$$(notdir $$(pool)).copycall)
 	$$(call RUN,1,$$(RESOURCE_REQ_LOW_MEM),$$(RESOURCE_REQ_VSHORT),$$(R_MODULE),"\
 	$$(CBS_SEGMENTCNV) --alpha $$(CBS_SEG_ALPHA) --smoothRegion $$(CBS_SEG_SMOOTH) \
 	--trim $$(CBS_TRIM) --clen $$(CBS_CLEN) --undoSD $$(CBS_SEG_SD) --separate_arm_seg TRUE \
+	--excl_N_outlier_pc $$(CBS_EXCL_N_OUTLIER_PC) --minNdepth $$(CBS_MIN_N_DEPTH) \
 	$$(if $$(CENTROMERE_TABLE),--centromereFile=$$(CENTROMERE_TABLE)) --prefix=$$(@D)/$1_$2 $$^")
 endef
 $(foreach pair,$(SAMPLE_PAIRS),\

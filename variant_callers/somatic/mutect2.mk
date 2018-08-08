@@ -1,3 +1,5 @@
+MUT_CALLER = mutect2
+
 #### MAKE INCLUDES #####
 include usb-modules-v2/Makefile.inc
 #include usb-modules-v2/variant_callers/somatic/somaticVariantCaller.inc
@@ -6,8 +8,6 @@ LOGDIR ?= log/mutect2.$(NOW)
 
 PHONY += mutect2 #mutect_vcfs mutect_tables ext_output #mut_report
 ..DUMMY := $(shell mkdir -p version; echo "$(MUTECT2) &> version/mutect2.txt")
-
-MUT_CALLER = mutect2
 
 mutect2 : mutect2_vcfs mutect2_tables #mutect2_vcfs_hotspotgt mutect2_tables_hotspotgt #ext_output
 mutect2_vcfs : $(call MAKE_VCF_FILE_LIST,mutect2) $(addsuffix .idx,$(call MAKE_VCF_FILE_LIST,mutect2))

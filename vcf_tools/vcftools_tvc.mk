@@ -35,8 +35,6 @@ vcf/$1_$2.%.som_ad_ft.vcf : vcf/$1_$2.%.vcf
 		--filterName tumorDepthFilter_flow \
 		--filterExpression 'vc.getGenotype(\"$2\").getAnyAttribute(\"DP\") * 1.0 <= $(MIN_NORMAL_DEPTH)' \
 		--filterName normalDepthFilter_raw \
-		--filterExpression 'vc.getGenotype(\"$2\").getAnyAttribute(\"FDP\") * 1.0 <= $(MIN_NORMAL_DEPTH)' \
-		--filterName normalDepthFilter_flow \
 		--filterExpression '( vc.getGenotype(\"$2\").getAnyAttribute(\"AO\") * 1.0 / vc.getGenotype(\"$2\").getAnyAttribute(\"DP\") * 1.0  ) \
 			> ( vc.getGenotype(\"$1\").getAnyAttribute(\"AO\") * 1.0 / vc.getGenotype(\"$1\").getAnyAttribute(\"DP\") * 1.0  ) / $(MIN_TN_AD_RATIO)' \
 		--filterName somAD_raw \

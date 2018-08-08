@@ -21,7 +21,8 @@ ifeq ($(findstring true,$(ANNOTATE_VARIANTS)),true)
 
 VCF_ANNS = $(if $(findstring true,$(USE_SUFAM)),sufam) \
 	$(if $(findstring GRCm38,$(REF)),eff dbsnp,\
-	eff dbsnp cosmic exac_nontcga clinvar gene_ann nsfp)
+	eff dbsnp cosmic exac_nontcga clinvar gene_ann nsfp) \
+	$(if $(findstring true,$(ANN_NFT)),nft)
 
 ifeq ($(findstring IONTORRENT,$(SEQ_PLATFORM)),IONTORRENT)
 	VCF_ANNS += amplicons

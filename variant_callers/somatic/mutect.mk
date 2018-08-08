@@ -1,3 +1,6 @@
+MUT_CALLER = mutect
+
+
 include usb-modules-v2/Makefile.inc
 include usb-modules-v2/variant_callers/somatic/somaticVariantCaller.inc
 
@@ -10,8 +13,6 @@ mutect : mutect_vcfs mutect_tables ext_output
 mutect_vcfs : $(call MAKE_VCF_FILE_LIST,mutect) $(addsuffix .idx,$(call MAKE_VCF_FILE_LIST,mutect))
 mutect_tables : $(call MAKE_TABLE_FILE_LIST,mutect)
 ext_output : $(foreach pair,$(SAMPLE_PAIRS),mutect/tables/$(pair).mutect.txt)
-
-MUT_CALLER = mutect
 
 .DELETE_ON_ERROR:
 .SECONDARY:
