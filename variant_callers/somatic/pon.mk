@@ -9,6 +9,7 @@ tvc/pon.tvc.vcf : $(foreach sample,$(PANEL_OF_NORMAL_SAMPLES),tvc/vcf_pon/$(samp
 	$(call RUN,1,$(RESOURCE_REQ_HIGH_MEM),$(RESOURCE_REQ_SHORT),$(JAVA8_MODULE),"\
 	$(call GATK,CombineVariants,$(RESOURCE_REQ_HIGH_MEM_JAVA)) --reference_sequence $(REF_FASTA) \
 	$(foreach vcf,$^,--variant $(vcf) ) \
+	-minN 2 --setKey \"null\" --filteredAreUncalled --filteredrecordsmergetype KEEP_IF_ANY_UNFILTERED \
 	--genotypemergeoption UNIQUIFY --out $@")
 
 tvc/vcf_pon/%/TSVC_variants.vcf : bam/%.bam bam/%.bam.bai
