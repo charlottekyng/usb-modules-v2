@@ -97,9 +97,8 @@ OMNI ?= $(GSA_REF_DIR)/1000G_omni2.5.hg19.sites.vcf
 HAPMAP ?= $(GSA_REF_DIR)/hapmap_3.3.hg19.sites.vcf
 
 CLINVAR ?= $(ANN_DIR)/clinvar.vcf
-EXAC_NONTCGA ?= $(ANN_DIR)/ExAC_nonTCGA.r0.3.1.sites.vep.vcf
+EXAC_NONTCGA ?= $(ANN_DIR)/ExAC_nonTCGA.r0.3.1.sites.vep.edited.vcf
 COSMIC ?= $(ANN_DIR)/CosmicCodingMuts.sorted.vcf
-#CANCER_HOTSPOT_VCF ?= $(ANN_DIR)/publication_hotspots_inclnoncoding.vcf
 CANCER_HOTSPOT_VCF = $(ANN_DIR)/publication_hotspots_inclnoncoding_incl3d.vcf
 
 HAPLOTYPE_INSUF_BED = $(ANN_DIR)/haploinsufficient.genes.bed

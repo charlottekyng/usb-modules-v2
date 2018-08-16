@@ -13,9 +13,11 @@ suppressMessages(library(optparse))
 #--------------
 
 optList <- list(
-                make_option("--includeChrY", action="store_true", default=F, help="Include Chromosome Y (drop by default)"),
-                make_option("--sampleColumnPostFix", default="_LRR_threshold", help="Postfix of columns that represent samples"));
-parser <- OptionParser(usage = "%prog [geneCN file] [output_plot_file]", option_list=optList);
+	make_option("--includeChrX", action="store_true", default=T, help="Include Chromosome X (include by default)"),
+	make_option("--includeChrY", action="store_true", default=F, help="Include Chromosome Y (drop by default)"),
+	make_option("--sampleNames", action="store_true", default=NULL, help = "vector of samples/column names to include"),
+	make_option("--sampleColumnSuffix", default="", help="Suffix of columns that represent samples"));
+	parser <- OptionParser(usage = "%prog [geneCN file] [output_plot_file]", option_list=optList);
 
 arguments <- parse_args(parser, positional_arguments = T);
 opt <- arguments$options;
@@ -40,13 +42,13 @@ if ("showtext" %in% rownames(installed.packages())) {
     fontfamily <- "serif"
 }
 
-plot_heatmap <- function(facets_tab, plot_file, sample_column_postfix, fontfamily, sample_names=NULL, col=c("red", "darksalmon", "white", "lightblue", "blue"), zlim=c(-2,2)) {
+plot_heatmap <- function(facets_tab, plot_file, sample_column_suffix, fontfamily, sample_names=NULL, col=c("red", "darksalmon", "white", "lightblue", "blue"), zlim=c(-2,2)) {
     mm <- facets_tab
-    if (is.null(sample_names)) { sample_names <- list(sort(colnames(mm)[sapply(colnames(mm), function(x) {grepl(paste(sample_column_postfix,"$",sep=""), x)})])) }
+    if (is.null(sample_names)) { sample_names <- list(sort(colnames(mm)[sapply(colnames(mm), function(x) {grepl(paste(sample_column_suffix,"$",sep=""), x)})])) }
     chrsep <- cumsum(rle(mm$chrom)$lengths)
     chrmid <- c(0,chrsep[-length(chrsep)]) + (rle(mm$chrom)$lengths/2)
     pdf(plot_file, width=12, height=.8*length(sample_names[[1]]))
-    par(mfrow=c(length(sample_names),1), mar=c(8,.5*(max(sapply(sample_names,nchar))-nchar(sample_column_postfix)),1,2))
+    par(mfrow=c(length(sample_names),1), mar=c(8,.5*(max(sapply(sample_names,nchar))-nchar(sample_column_suffix)),1,2))
     lapply(sample_names, function(x, mm) {
         mm2 <- mm[,rev(x)]; #for (i in 1:ncol(mm2)) { mm2[,i] <- as.numeric(mm2[,i]) }
         image(as.matrix(mm2), col=col, xaxt='n', yaxt='n', zlim=zlim)
@@ -65,4 +67,7 @@ geneCN_tab <- read.table(geneCN, sep="\t", header=T, stringsAsFactors=F)
 if (!opt$includeChrY) {
     geneCN_tab <- geneCN_tab[geneCN_tab$chrom != "Y",]
 }
-plot_heatmap(geneCN_tab, outFile, opt$sampleColumnPostFix, fontfamily)
+if (!opt$includeChrX) {
+    geneCN_tab <- geneCN_tab[geneCN_tab$chrom != "X",]
+}
+plot_heatmap(geneCN_tab, outFile, opt$sampleColumnSuffix, fontfamily)

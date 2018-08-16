@@ -33,7 +33,7 @@ output_fields = c("TUMOR_SAMPLE", "NORMAL_SAMPLE", "ANN[*].GENE", "ANN[*].GENEID
 	"cancer_gene_census", "kandoth", "lawrence", "hap_insuf", "ExACnontcga_AC", "ExACnontcga_AF", 
 	"facetsCF", "facetsTCN_EM", "facetsLCN_EM", "facetsLOHCall", "facetsMultiplicity", "ccf", "clonalStatus", "ccfConfUpper", "ccfConfLower",
 	#"dbNSFP_MutationTaster_pred", "dbNSFP_Polyphen2_HVAR_pred", "dbNSFP_Interpro_domain", 
-	"AMPLICON_NUM",
+	"AMPLICON_NUM", "HRUN",
 	"CHROM", "POS", "ID", "REF", "ALT", "FILTER", "dbNSFP_Uniprot_acc")
 
 output <- lapply(files, function(file) {
