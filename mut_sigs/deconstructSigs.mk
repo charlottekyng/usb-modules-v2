@@ -20,14 +20,14 @@ deconstructSigs/all$(PROJECT_PREFIX).deconstructSigs.txt : deconstructSigs/all$(
 	
 endif
 
-deconstructSigs/all$(PROJECT_PREFIX).deconstructSigs.RData : summary/mutation_summary$(PROJECT_PREFIX).$(DOWNSTREAM_EFF_TYPES).txt
+deconstructSigs/all$(PROJECT_PREFIX).deconstructSigs.RData : summary/mutation_summary$(PROJECT_PREFIX).$(DOWNSTREAM_EFF_TYPES).detected.txt
 	$(call RUN,1,$(RESOURCE_REQ_LOW_MEM),$(RESOURCE_REQ_VSHORT),$(R_MODULE),"\
 		$(DECONSTRUCTSIGS) --outPrefix=$(subst .RData,,$@) $<")
 
 define deconstruct-sigs
-deconstructSigs/$1_$2.deconstructSigs.RData : $$(foreach prefix,$$(CALLER_PREFIX),tables/$1_$2.$$(call DOWMSTREAM_VCF_TABLE_SUFFIX,$$(prefix)).txt)
+deconstructSigs/$1_$2.deconstructSigs.RData : $$(foreach prefix,$$(CALLER_PREFIX),tables/$1_$2.$$(call DOWMSTREAM_VCF_TABLE_SUFFIX_ALLEFFTYPES,$$(prefix)).txt)
 	$$(call RUN,$$(DECONSTRUCTSIGS_NUMCORES),$$(RESOURCE_REQ_MEDIUM_MEM),$$(RESOURCE_REQ_VSHORT),$$(R_MODULE),"\
-	$$(RBIND) --tumorNormal $$^ > $$@.tmp && \
+	$$(RBIND) --tumorNormal $$^ | grep -v interrogation_Absent > $$@.tmp && \
 	$$(DECONSTRUCTSIGS) --outPrefix $$(subst .RData,,$$@) \
 	--num_iter $$(DECONSTRUCTSIGS_NUMITER) --num_cores $$(DECONSTRUCTSIGS_NUMCORES) $$@.tmp && \
 	$$(RM) $$@.tmp")

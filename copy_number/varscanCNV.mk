@@ -19,19 +19,7 @@ segments : $(foreach pair,$(SAMPLE_PAIRS),varscan/segment/$(pair).segment.Rdata)
 geneCN : varscan/segment/geneCN.txt
 
 
-ifeq ($(findstring ILLUMINA,$(SEQ_PLATFORM)),ILLUMINA)
-define varscan-copynum-tumor-normal
-varscan/copynum/$1_$2.copynumber : bam/$1.bam bam/$2.bam
-	$$(call RUN,1,$$(RESOURCE_REQ_HIGH_MEM),$$(RESOURCE_REQ_SHORT),$$(SAMTOOLS_MODULE) $$(JAVA7_MODULE),"\
-	$$(SAMTOOLS) mpileup $$(CBS_MPILEUP_OPTS) -l $$(TARGETS_FILE_INTERVALS) -f $$(REF_FASTA) $$(word 2,$$^) $$< \
-	| awk 'NF == 9 { print }' |  \
-	$$(VARSCAN) copynumber - $$(basename $$@) --mpileup 1")
-endef
-$(foreach pair,$(SAMPLE_PAIRS),\
-	$(eval $(call varscan-copynum-tumor-normal,$(tumor.$(pair)),$(normal.$(pair)))))
-endif
-
-ifeq ($(findstring IONTORRENT,$(SEQ_PLATFORM)),IONTORRENT)
+ifeq ($(CAPTURE_METHOD),PCR)
 define varscan-copynum-tumor-normal
 varscan/copynum/$1_$2.$$(notdir $3).copynumber : bam/$1.bam bam/$2.bam $3
 	$$(call RUN,1,$$(RESOURCE_REQ_MEDIUM_MEM),$$(RESOURCE_REQ_SHORT),$$(SAMTOOLS_MODULE) $$(JAVA7_MODULE) $$(BEDTOOLS_MODULE),"\
@@ -47,7 +35,18 @@ endef
 $(foreach pair,$(SAMPLE_PAIRS),\
 	$(foreach pool,$(TARGETS_FILE_INTERVALS_POOLS_CNA),\
 		$(eval $(call varscan-copynum-tumor-normal,$(tumor.$(pair)),$(normal.$(pair)),$(pool)))))
+else
+define varscan-copynum-tumor-normal
+varscan/copynum/$1_$2.copynumber : bam/$1.bam bam/$2.bam
+	$$(call RUN,1,$$(RESOURCE_REQ_HIGH_MEM),$$(RESOURCE_REQ_SHORT),$$(SAMTOOLS_MODULE) $$(JAVA7_MODULE),"\
+	$$(SAMTOOLS) mpileup $$(CBS_MPILEUP_OPTS) -l $$(TARGETS_FILE_INTERVALS) -f $$(REF_FASTA) $$(word 2,$$^) $$< \
+	| awk 'NF == 9 { print }' |  \
+	$$(VARSCAN) copynumber - $$(basename $$@) --mpileup 1")
+endef
+$(foreach pair,$(SAMPLE_PAIRS),\
+	$(eval $(call varscan-copynum-tumor-normal,$(tumor.$(pair)),$(normal.$(pair)))))
 endif
+
 
 varscan/copycall/%.copycall : varscan/copynum/%.copynumber
 	$(call RUN,1,$(RESOURCE_REQ_MEDIUM_MEM),$(RESOURCE_REQ_SHORT),$(JAVA7_MODULE),"\
@@ -60,15 +59,7 @@ varscan/copycall/%.copycall : varscan/copynum/%.copynumber
 	fi; \
 	$(VARSCAN) copyCaller $< --output-file $@ \$$recenter_opt")
 
-ifeq ($(findstring ILLUMINA,$(SEQ_PLATFORM)),ILLUMINA)
-varscan/segment/%.segment.Rdata : varscan/copycall/%.copycall
-	$(call RUN,1,$(RESOURCE_REQ_LOW_MEM),$(RESOURCE_REQ_VSHORT),$(R_MODULE),"\
-	$(CBS_SEGMENTCNV) --alpha $(CBS_SEG_ALPHA) --smoothRegion $(CBS_SEG_SMOOTH) \
-	--trim $$(CBS_TRIM) --clen $$(CBS_CLEN) --undoSD $(CBS_SEG_SD) \
-	$(if $(CENTROMERE_TABLE),--centromereFile=$(CENTROMERE_TABLE)) --prefix=$(@D)/$* $^")
-endif
-
-ifeq ($(findstring IONTORRENT,$(SEQ_PLATFORM)),IONTORRENT)
+ifeq ($(CAPTURE_METHOD),PCR)
 define varscan-segment
 varscan/segment/$1_$2.segment.Rdata : $$(foreach pool,$$(TARGETS_FILE_INTERVALS_POOLS_CNA),varscan/copycall/$1_$2.$$(notdir $$(pool)).copycall)
 	$$(call RUN,1,$$(RESOURCE_REQ_LOW_MEM),$$(RESOURCE_REQ_VSHORT),$$(R_MODULE),"\
@@ -79,7 +70,14 @@ varscan/segment/$1_$2.segment.Rdata : $$(foreach pool,$$(TARGETS_FILE_INTERVALS_
 endef
 $(foreach pair,$(SAMPLE_PAIRS),\
 	$(eval $(call varscan-segment,$(tumor.$(pair)),$(normal.$(pair)))))
+else
+varscan/segment/%.segment.Rdata : varscan/copycall/%.copycall
+	$(call RUN,1,$(RESOURCE_REQ_LOW_MEM),$(RESOURCE_REQ_VSHORT),$(R_MODULE),"\
+	$(CBS_SEGMENTCNV) --alpha $(CBS_SEG_ALPHA) --smoothRegion $(CBS_SEG_SMOOTH) \
+	-trim $(CBS_TRIM) --clen $(CBS_CLEN) --undoSD $(CBS_SEG_SD) \
+	$(if $(CENTROMERE_TABLE),--centromereFile=$(CENTROMERE_TABLE)) --prefix=$(@D)/$* $^")
 endif
+
 
 varscan/segment/%.collapsed_seg.txt : varscan/segment/%.segment.Rdata
 	

@@ -19,7 +19,7 @@ absolute/mutations/$1_$2.mutations.txt : $$(foreach prefix,$$(CALLER_PREFIX),tab
 	$$(call RUN,1,$$(RESOURCE_REQ_LOW_MEM),$$(RESOURCE_REQ_VSHORT),$$(R_MODULE),"\
 	$$(RBIND) --tumorNormal $$^ > $$@.tmp1 && \
 	$$(MUTATION_SUMMARY_RSCRIPT) --outFile $$@.tmp2 --outputFormat TXT $$@.tmp1 && \
-	$$(ABSOLUTE_MAKE_MUTS) --sample $$$$sample --outFile $$@ $$@.tmp2 && \
+	$$(ABSOLUTE_MAKE_MUTS) --sample $$$$sample --outFile $$@ $$@.tmp2 $$(ABSOLUTE_MAKE_MUTS_OPT) && \
 	$$(RM) $$@.tmp1 $$@.tmp2")
 endef
 $(foreach pair,$(SAMPLE_PAIRS),\
@@ -28,7 +28,7 @@ $(foreach pair,$(SAMPLE_PAIRS),\
 absolute/segments/%.seg.txt : facets/cncf/%.cncf.txt
 	$(INIT) $(MKDIR) absolute/segments; \
 	sample=`basename $$@ .seg.txt`; ml $(R_MODULE); \
-	$(ABSOLUTE_MAKE_SEGS) --sample $$sample --outFile $@ $<
+	$(ABSOLUTE_MAKE_SEGS) --sample $$sample --outFile $@ $(ABSOLUTE_MAKE_SEGS_OPT) $<
 
 absolute/absolute_parameters.txt : $(foreach pair,$(SAMPLE_PAIRS),absolute/mutations/$(pair).mutations.txt absolute/segments/$(pair).seg.txt)
 	$(INIT) echo "include patient sample seg.dat.fn sigma.p max.sigma.h min.ploidy max.ploidy \

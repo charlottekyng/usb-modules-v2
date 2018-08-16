@@ -63,6 +63,7 @@ MAKE_TABLE_FILE_LIST = $(foreach pair,$(SAMPLE_PAIRS),\
 MAKE_TABLE_FILE_LIST += $(foreach suff,$(call TABLE_SUFFIXES,$1),alltables/allTN$(PROJECT_PREFIX).$(suff).txt)
 
 DOWNSTREAM_EFF_TYPES ?= $(word 1,$(TABLE_EFF_TYPES))
+DOWMSTREAM_VCF_TABLE_SUFFIX_ALLEFFTYPES ?= $(call VCF_SUFFIXES,$1).tab
 DOWMSTREAM_VCF_TABLE_SUFFIX ?= $(call VCF_SUFFIXES,$1).tab.$(DOWNSTREAM_EFF_TYPES)
 
 SUFAM_ANN_SUFFIX = $(subst $( ),.,$(strip $(if $(findstring GRCm38,$(REF)),,hotspot) $(call SOMATIC_ANNS,$1)))
