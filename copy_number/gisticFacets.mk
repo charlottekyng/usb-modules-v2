@@ -31,7 +31,7 @@ gistic/$(PROJECT_PREFIX)cnv.$(CNV_SIZE).txt : gistic/$(PROJECT_PREFIX)markersfil
 	$(GISTIC_MAKE_CNV_FILE) --outFile $@ --dgvFile $(DGV_FILE) --cnvSize $(CNV_SIZE) $<")
 
 gistic/$(PROJECT_PREFIX)gistic_cnv%/timestamp : gistic/$(PROJECT_PREFIX)segmentationfile.txt gistic/$(PROJECT_PREFIX)markersfile.txt gistic/$(PROJECT_PREFIX)cnv.%.txt
-	$(call RUN,1,$(RESOURCE_REQ_LOW_MEM),$(RESOURCE_REQ_VSHORT),,"\
+	$(call RUN,1,$(RESOURCE_REQ_MEDIUM_MEM),$(RESOURCE_REQ_VSHORT),,"\
 	export MCR_DIR=/scicore/home/terracci/GROUP/usr_nobackup/local/MCR_R2014a/; \
 	export LD_LIBRARY_PATH=$(LD_LIBRARY_PATH); \
 	umask 002; $(MKDIR) $(@D); $(GISTIC) -b $(@D) -seg $< -mk $(<<) -refgene $(GISTIC_REF) \
