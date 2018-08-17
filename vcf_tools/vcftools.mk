@@ -210,11 +210,6 @@ $(foreach sample,$(SAMPLES),$(eval $(call hrun-sample,$(sample))))
 
 ifdef SAMPLE_PAIRS
 define annotate-facets-pair
-#vcf/$1_$2.%.facets.vcf : vcf/$1_$2.%.vcf facets/cncf/$1_$2.Rdata
-#	$$(call CHECK_VCF,$$<,$$@,\
-#	$$(call RUN,1,$$(RESOURCE_REQ_LOW_MEM),$$(RESOURCE_REQ_VSHORT),$$(R_MODULE),"\
-#		$$(ANNOTATE_FACETS_VCF) --genome \"$$(REF)\" --tumor \"$1\" --facetsRdata $$(<<) --outFile $$@ $$< && \
-#		$(RM) $<"))
 vcf/$1_$2.%.facets.vcf : vcf/$1_$2.%.vcf facets/cncf/$1_$2.cncf.txt facets/cncf/$1_$2.out 
 	$$(call CHECK_VCF,$$<,$$@,\
 	purity=`grep Purity $$(<<<) | cut -f2 -d'=' | sed 's/NA/0.1/; s/ //g;'` && \
@@ -289,6 +284,7 @@ $(foreach pair,$(SAMPLE_PAIRS),$(eval $(call rename-samples-tumor-normal,$(tumor
 VCF_FIELDS = CHROM POS ID REF ALT QUAL FILTER
 ANN_FIELDS = $(addprefix ANN[*].,ALLELE EFFECT IMPACT GENE GENEID FEATURE FEATUREID BIOTYPE RANK \
 	HGVS_C HGVS_P CDNA_POS CDNA_LEN CDS_POS CDS_LEN AA_POS AA_LEN DISTANCE ERRORS)
+
 tables/%.opl_tab.txt : vcf/%.vcf
 	$(call RUN,1,$(RESOURCE_REQ_MEDIUM_MEM),$(RESOURCE_REQ_VSHORT),$(SNP_EFF_MODULE),"\
 	format_fields=\$$(grep '^##FORMAT=<ID=' $< | sed 's/dbNSFP_GERP++/dbNSFP_GERP/g' | sed 's/.*ID=//; s/,.*//;' | tr '\n' ' '); \
@@ -350,9 +346,6 @@ sufamscreen/%.opl_tab.txt : sufamscreen/%.vcf
 	$(call RUN,1,$(RESOURCE_REQ_MEDIUM_MEM),$(RESOURCE_REQ_VSHORT),$(PERL_MODULE),"\
 	$(VCF_JOIN_EFF) < $< > $@")
 	
-#%.pass.txt : %.txt
-#	$(INIT) head -1 $< > $@ && awk '$$6 == "PASS" { print }' $< >> $@ || true
-
 
 # merge tables
 alltables/all$(PROJECT_PREFIX).%.txt : $(foreach sample,$(SAMPLES),tables/$(sample).%.txt)
@@ -368,6 +361,9 @@ alltables/allTN$(PROJECT_PREFIX).%.txt : $(foreach pair,$(SAMPLE_PAIRS),tables/$
 	$(call RUN,1,$(RESOURCE_REQ_HIGH_MEM),$(RESOURCE_REQ_VSHORT),$(R_MODULE),"\
 	$(RBIND) --tumorNormal $^ > $@")
 endif
+
+%.all_eff.txt : %.txt
+	$(INIT) ln -f $< $@
 
 %.high_moderate.txt : %.txt
 	col_imp=$$(head -1 $< | tr '\t' '\n' | grep -n "IMPACT" | sed 's/:.*//'); \

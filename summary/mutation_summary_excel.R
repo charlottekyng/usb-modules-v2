@@ -41,7 +41,7 @@ output <- lapply(files, function(file) {
 
 	if (!is.null(opt$filterFlags)) {
 		keep_idx <- lapply(tab$FILTER, function(x) { xx=strsplit(x, split=";")[[1]]; 
-			if (any(xx %in% opt$filterFlags) { F } else { T }})
+			if (any(xx %in% opt$filterFlags)) { F } else { T }})
 		tab <- tab[keep_idx,]
 	}
 	

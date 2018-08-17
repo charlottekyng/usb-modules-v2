@@ -25,7 +25,7 @@ deconstructSigs/all$(PROJECT_PREFIX).deconstructSigs.RData : summary/mutation_su
 		$(DECONSTRUCTSIGS) --outPrefix=$(subst .RData,,$@) $<")
 
 define deconstruct-sigs
-deconstructSigs/$1_$2.deconstructSigs.RData : $$(foreach prefix,$$(CALLER_PREFIX),tables/$1_$2.$$(call DOWMSTREAM_VCF_TABLE_SUFFIX_ALLEFFTYPES,$$(prefix)).txt)
+deconstructSigs/$1_$2.deconstructSigs.RData : $$(foreach prefix,$$(CALLER_PREFIX),tables/$1_$2.$$(call DOWMSTREAM_VCF_TABLE_SUFFIX,$$(prefix)).txt)
 	$$(call RUN,$$(DECONSTRUCTSIGS_NUMCORES),$$(RESOURCE_REQ_MEDIUM_MEM),$$(RESOURCE_REQ_VSHORT),$$(R_MODULE),"\
 	$$(RBIND) --tumorNormal $$^ | grep -v interrogation_Absent > $$@.tmp && \
 	$$(DECONSTRUCTSIGS) --outPrefix $$(subst .RData,,$$@) \
