@@ -258,7 +258,32 @@ At the moment, there are no checks in place to see if what you are attempting to
 
 # Troubleshooting
 
-#### If something falls over...
+### If it falls over immediately... (jobs not submitted)
+
+This usually happens because 1) pre-requisite not met, 2) there is a bug in the code, or 3) there is a problem with your sample sheets. 
+1) and 2) will usually be met with a `'No rule found to make <file>'`, which means make could not locate the correct recipes. 
+3) will usually be met with something like `'*** non-numeric second argument to `wordlist' function: '-1''`.
+
+1. Check your samples sheets. Make sure there are no stray spaces/tabs at the end of the lines. Make sure there are no blank lines (after the last samples).
+    ````
+    >cat -A sample_sets.txt
+    SSA001T^ISSA001N$          # OK
+    SSA002T^ISSA002N $         # stray space at the end
+    SSA005T^ISSA005N^I$        # stray tab at the end
+    SSA006T^I SSA006N$         # stray space in the middle
+    $                          # remove blank lines
+    ````
+
+1. Check your Makefile. Check for stray symbols and white spaces.
+
+1. Some downstream modules (e.g. `pyclone`, `mutation_summary`) have undocumented prerequisites. Compile the prerequiresites then try again.
+
+1. There is a bug in the code. To see where it stops find the recipes, you can try `make --debug=i -nf usb-modules-v2/aligners/bwamemAligner.mk REF=b37 SEQ_PLATFORM=ILLUMINA ...`
+(the parameters in your project-level Makefile). This will produce a verbose dry-run of the files make is attempting to generate. Here you can see where it stops finding the
+recipes. This is very useful for debugging.
+
+
+### If submitted jobs fail...
 
 You should look in `$PROJ_DIR/log`. The log file will be named in the format `$PROJ_DIR/log/<module>.<date>.<attempt>.log`.
 For example in `log/gatk.2018-08-03.2.log`, you should find lines like these.
@@ -273,25 +298,14 @@ Each step in the pipeline spits out a log file. The individual log file for the 
 log/gatk.2018-08-03.2/gatk/intervals_gvcf/0030/ESBIPGRA00245.variants.vcf.gz.log
 ```
 
-This is where you go looking for the error. 
 Most errors are related to incorrect parameters, empty or invalid input files or running out of resources (time or memory).
-If it is related to an invalid/empty input file, then go one step back in the pipeline to see 
-if a previous step fell over without throwing and error (it happens).
 
-If the reason is not obvious, try deleting any invalid/empty files, then re-run it. 
-Sometimes there are transient system glitches and a simple re-run is enough to fix it.
+1. Check your Makefile. Check the combination of genome and target panel/platform is valid (i.e. defined in `usb-modules-v2/genome_inc/`). Check for typos. Check the log to see if the parameters for individual steps are correct.
 
-#### "No rules to make..."
+1. If it is related to an invalid/empty input file, then go one step back in the pipeline to see if a previous step fell over without throwing and error (it happens).
 
-This means make could not locate the correct recipes.
+1. If the reason is not obvious, try deleting any invalid/empty files, then re-run it. Sometimes there are transient system glitches and a simple re-run is enough to fix it.
 
-1. Check your samples sheets. Make sure there are no stray spaces/tabs at the end of the lines. Make sure there are no blank lines (after the last samples).
-
-1. Check your project-level Makefile. 
-
-1. There is a bug in the code. To see where it stops find the recipes, you can try `make --debug=i -nf usb-modules-v2/aligners/bwamemAligner.mk REF=b37 SEQ_PLATFORM=ILLUMINA ...` 
-(the parameters in your project-level Makefile). This will produce a verbose dry-run of the files make is attempting to generate. Here you can see where it stops finding the
-recipes. This is very useful for debugging.
 ---
 
 # Example recipes
