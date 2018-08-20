@@ -261,8 +261,8 @@ At the moment, there are no checks in place to see if what you are attempting to
 ### If it falls over immediately... (jobs not submitted)
 
 This usually happens because 1) pre-requisite not met, 2) there is a bug in the code, or 3) there is a problem with your sample sheets. 
-1) and 2) will usually be met with a `'No rule found to make <file>'`, which means make could not locate the correct recipes. 
-3) will usually be met with something like `'*** non-numeric second argument to `wordlist' function: '-1''`.
+(1) and (2) will usually be met with a `'No rule found to make <file>'`, which means make could not locate the correct recipes. 
+(3) will usually be met with something like `'*** non-numeric second argument to `wordlist' function: '-1''`.
 
 1. Check your samples sheets. Make sure there are no stray spaces/tabs at the end of the lines. Make sure there are no blank lines (after the last samples).
     ````
