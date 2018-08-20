@@ -74,7 +74,7 @@ Adhere to these guidelines to avoid unnecessary troubleshooting.
 ### Setting up data directories
 
 There are several options in terms of data files:
-1. If you start from FASTQs, you have a single or a single pair of fastqs per sample and you know your reads do not need trimming, then you put your files as `fastq/<SAMPLE_NAME>.1.fastq.gz` (and `fastq/<SAMPLE_NAME>.2.fastq.gz`). Then you are ready to run alignment.
+1. If you start from FASTQs, you have a single or a single pair of fastqs per sample and you know your reads do not need trimming, then you put your files as `fastq/<SAMPLE_NAME>.1.fastq.gz` (and `fastq/<SAMPLE_NAME>.2.fastq.gz`). Then you are ready to run alignment. If you put your FASTQ files directly into the `fastq` directory this way, you need to set `MERGE_SPLIT_FASTQ=false`.
     ```
     >ls fastq
     SAMPLE1T.1.fastq.gz SAMPLE1T.2.fastq.gz SAMPLE2T.1.fastq.gz SAMPLE2T.2.fastq.gz (...)
@@ -250,7 +250,9 @@ At the moment, there are no checks in place to see if what you are attempting to
 
 ---
 
-# If something falls over...
+# Troubleshooting
+
+#### If something falls over...
 
 You should look in `$PROJ_DIR/log`. The log file will be named in the format `$PROJ_DIR/log/<module>.<date>.<attempt>.log`.
 For example in `log/gatk.2018-08-03.2.log`, you should find lines like these.
@@ -273,6 +275,17 @@ if a previous step fell over without throwing and error (it happens).
 If the reason is not obvious, try deleting any invalid/empty files, then re-run it. 
 Sometimes there are transient system glitches and a simple re-run is enough to fix it.
 
+#### "No rules to make..."
+
+This means make could not locate the correct recipes.
+
+1. Check your samples sheets. Make sure there are no stray spaces/tabs at the end of the lines. Make sure there are no blank lines (after the last samples).
+
+1. Check your project-level Makefile. 
+
+1. There is a bug in the code. To see where it stops find the recipes, you can try `make --debug=i -nf usb-modules-v2/aligners/bwamemAligner.mk REF=b37 SEQ_PLATFORM=ILLUMINA ...` 
+(the parameters in your project-level Makefile). This will produce a verbose dry-run of the files make is attempting to generate. Here you can see where it stops finding the
+recipes. This is very useful for debugging.
 ---
 
 # Example recipes
