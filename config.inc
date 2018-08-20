@@ -154,7 +154,7 @@ endif
 ifeq ($(CAPTURE_METHOD),CHIP)
 SPLIT_CHR ?= false
 endif
-SPLIT_CHR ?= true 
+SPLIT_CHR ?= true
 
 
 # This runs deduplication, GATK IndelRealigner and BaseRecalibrator
