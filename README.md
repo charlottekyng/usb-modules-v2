@@ -271,12 +271,13 @@ This usually happens because 1) files not found or pre-requisite not met, 2) the
 
 1. Check that your file and directory names are correct, especially if you are attempting to run the pipeline on a fresh set of data.
 
-1. Some downstream modules (e.g. `pyclone`, `mutation_summary`) have un/documented prerequisites. Check/compile the prerequiresites then try again.
+1. Many modules have un/documented, obvious or not obvious, prerequisites, e.g. `mutect` requires aligned data, `mutation_summary` requires mutations. 
+Check/compile the prerequiresites then try again.
 
-1. if there are bugs in the code, you will want to see where it stops finding the correct recipes. 
+1. If there are bugs in the code, you will want to see where it stops finding the correct recipes. 
 You can try, e.g., `make --debug=i -nf usb-modules-v2/aligners/bwamemAligner.mk REF=b37 SEQ_PLATFORM=ILLUMINA (...) | less`
 (the parameters in your project-level Makefile). This will produce a verbose dry-run of the files make is attempting to generate. 
-Here you can see where it stops finding the recipes. This is very useful for debugging.
+Here you can see where it stops finding the recipes. This is very useful for debugging, and for educational purposes if you want to know what is being done.
 
 1. Check your samples sheets. Make sure there are no stray spaces/tabs at the end of the lines. Make sure there are no blank lines (after the last samples).
     ````
@@ -288,7 +289,8 @@ Here you can see where it stops finding the recipes. This is very useful for deb
     $                          # remove blank lines
     ````
 
-1. Check your Makefile. Check for stray symbols and white spaces.
+1. Check your Makefile. Check for stray symbols and white spaces. Check for correct panel/target bed files.
+But errors from Makefile settings will more often lead to failed jobs (see below).
 
 ### If submitted jobs fail...
 
@@ -306,13 +308,15 @@ log/gatk.2018-08-03.2/gatk/intervals_gvcf/0030/ESBIPGRA00245.variants.vcf.gz.log
 
 Most errors are related to incorrect parameters, empty or invalid input files or running out of resources (time or memory).
 
-1. Check your Makefile. Check the combination of genome and target panel/platform is valid (i.e. defined in `usb-modules-v2/genome_inc/`). Check for typos. Check the log to see if the parameters for individual steps are correct.
+1. Check your Makefile. Check the combination of genome and target panel/platform is valid (i.e. defined in `usb-modules-v2/genome_inc/`). 
+Check for typos. Check the log to see if the parameters for individual steps are correct.
 
 1. If it is related to an invalid/empty input file, then go one step back in the pipeline to see if a previous step fell over without throwing and error (it happens).
 
 1. If the reason is not obvious, try deleting any invalid/empty files, then re-run it. Sometimes there are transient system glitches and a simple re-run is enough to fix it.
 
-1. If it is related to resources, re-run it once or twice more. Some tools (e.g. GATK) occasionally get stuck for unknown reasons, or there were transient system glitches that cause something to be stuck. If the tool fails on the same sample several times, then tell Charlotte...
+1. If it is related to resources, re-run it once or twice more. Some tools (e.g. GATK) occasionally get stuck for unknown reasons, 
+or there were transient system glitches that cause something to be stuck. If the tool fails on the same sample several times, then tell Charlotte...
 
 1. If your parameters seem to be correct but the commands in the log file are not correct, there could be a bug (or ten).
 ---
@@ -371,15 +375,14 @@ make bwamem bam_metrics gatk
     cd $PROJ_DIR/unprocessed_bam
     ```
 
-1.Make samples.txt
+1. Make samples.txt
     ```
     ls *bam | perl -p -e "s/\.bam//g;" > ../samples.txt
     cd ..
     ```
 
 1. Make sample_sets.txt. This file should be one patient per row. 
-Each row should consist of the tumor samples, tab-delimited, 
-followed by the matched normal sample as the last name on the row
+Each row should consist of the tumor samples, tab-delimited,  followed by the matched normal sample as the last name on the row
 
 1. Now fix read groups to ensure downstream processing do not fall over
     ```
