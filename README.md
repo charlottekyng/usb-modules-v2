@@ -74,30 +74,30 @@ Adhere to these guidelines to avoid unnecessary troubleshooting.
 ### Setting up data directories
 
 There are several options in terms of data files:
-1. If you start from FASTQs, you have a single or a single pair of fastqs per sample and you know your reads do not need trimming, then you put your files as `fastq/<SAMPLE_NAME>.1.fastq.gz` (and `fastq/<SAMPLE_NAME>.2.fastq.gz`). Then you are ready to run alignment. If you put your FASTQ files directly into the `fastq` directory this way, you need to set `MERGE_SPLIT_FASTQ=false`.
+1. If you start from FASTQs, you have a single or a single pair of fastqs per sample and you know your reads do not need trimming, then you put your files as `fastq/<SAMPLE_NAME>.1.fastq.gz` (and `fastq/<SAMPLE_NAME>.2.fastq.gz`). Then you are ready to run alignment. 
     ```
-    >ls fastq
+    >ls fastq/
     SAMPLE1T.1.fastq.gz SAMPLE1T.2.fastq.gz SAMPLE2T.1.fastq.gz SAMPLE2T.2.fastq.gz (...)
     ```
-1. If you start from FASTQs, you have more than a single or more than a single pair of fastqs per sample, or your reads need trimming (e.g. adaptors) then you put your files as `unprocessed_fastq/<SAMPLE_NAME>_<RUN_NAME>.1.fastq.gz` or `unprocessed_fastq/<SAMPLE_NAME>.1.fastq.gz` (and `unprocessed_fastq/<SAMPLE_NAME>_<RUN_NAME>.2.fastq.gz` or `unprocessed_fastq/<SAMPLE_NAME>.2.fastq.gz`). Then you are ready to run alignment.
+1. If you start from FASTQs, you have more than a single or more than a single pair of fastqs per sample, or your reads need trimming (e.g. adaptors) then you put your files as `unprocessed_fastq/<SAMPLE_NAME>_<RUN_NAME>.1.fastq.gz` or `unprocessed_fastq/<SAMPLE_NAME>.1.fastq.gz` (and `unprocessed_fastq/<SAMPLE_NAME>_<RUN_NAME>.2.fastq.gz` or `unprocessed_fastq/<SAMPLE_NAME>.2.fastq.gz`). With this option, you will need the `samples.split.txt` file (see above). Then you are ready to run alignment.
     ```
-    >ls unprocessed_fastq
+    >ls unprocessed_fastq/
     SAMPLE1N_RUN1.1.fastq.gz SAMPLE1N_RUN1.2.fastq.gz SAMPLE1N_RUN2.1.fastq.gz SAMPLE1N_RUN2.2.fastq.gz (...)
     ```
     ```
-    >ls unprocessed_fastq
+    >ls unprocessed_fastq/
     SAMPLE1T.1.fastq.gz SAMPLE1T.2.fastq.gz SAMPLE2T.1.fastq.gz SAMPLE2T.2.fastq.gz (...)
     ```
 1. If you start from BAMs (one bam per sample), you should put all your bams as `unprocessed_bam/<SAMPLE_NAME>.bam`. Then you do `make fix_rg` then you will have analysis-ready BAMs.
     ```
-    >ls unprocessed_bam
+    >ls unprocessed_bam/
     SAMPLE1A.bam SAMPLE1B.bam SAMPLE2A.bam SAMPLE2B.bam
     ```
 **Note**: for single-end FASTQs, use `.1.fastq.gz` (i.e. include the `.1`).
 
 ### Setting up analysis parameters
 
-You will need a project-level Makefile (`$PROJ_DIR/Makefile`). 
+You will need a project-level Makefile (`${PROJ_DIR}/Makefile`). 
 Note that this is different from the module-level Makefile (`${PROJ_DIR}/usb-modules-v2/Makefile`).
 In its most basic form, it only needs one line
 ```
@@ -140,10 +140,11 @@ Not all combinations of REF and PANEL are permissible.
 Additional user-configurable parameters are defined (with default values) in the `usb-modules-v2/config.inc` file. 
 (In the near future, the parameters will be better documented in the config file.)
 
-Some `Makefile` templates are provided in `Makefile_templates/`. Please *copy* them to your project directory and do not remove them from `usb-modules-v2/`.
+Some `Makefile` templates are provided in `usb-modules-v2/Makefile_templates/`. Please *copy* them to your project directory and do not remove them from `usb-modules-v2/`.
 ```
 >ls usb-modules-v2/Makefile_templates/
 Makefile_template_all_basic_options  Makefile_template_agilentallexonv6  Makefile_template_iontorrent_comprehensive_panel  Makefile_template_rnaseq_xenografts
+>cp usb-modules-v2/Makefile_templates/Makefile_template_agilentallexonv6 Makefile
 ```
 
 ---
@@ -258,11 +259,24 @@ At the moment, there are no checks in place to see if what you are attempting to
 
 # Troubleshooting
 
+You should look in `$PROJ_DIR/log/`. The log file will be named in the format `$PROJ_DIR/log/<module>.<date>.<attempt>.log`.
+If you find the file `$PROJ_DIR/log/<module>.<date>.<attempt>.log`, but not the directory `$PROJ_DIR/log/<module>.<date>.<attempt>/`, then no job was submitted. 
+If there was the log file and the log directory, then your jobs were submitted.
+
 ### If it falls over immediately... (jobs not submitted)
 
-This usually happens because 1) pre-requisite not met, 2) there is a bug in the code, or 3) there is a problem with your sample sheets. 
-(1) and (2) will usually be met with a `'No rule found to make <file>'`, which means make could not locate the correct recipes. 
-(3) will usually be met with something like `'*** non-numeric second argument to `wordlist' function: '-1''`.
+This usually happens because 1) files not found or pre-requisite not met, 2) there is a bug (or ten) in the code, or 3) there is a problem with your sample sheets. 
+(1) and (2) will usually be met with a `'No rule found to make <file>'`, which means make could not locate the correct recipes or the required file/s.
+(3) will usually be met with something like `'*** non-numeric second argument to 'wordlist' function: '-1''`.
+
+1. Check that your file and directory names are correct, especially if you are attempting to run the pipeline on a fresh set of data.
+
+1. Some downstream modules (e.g. `pyclone`, `mutation_summary`) have un/documented prerequisites. Check/compile the prerequiresites then try again.
+
+1. if there are bugs in the code, you will want to see where it stops finding the correct recipes. 
+You can try, e.g., `make --debug=i -nf usb-modules-v2/aligners/bwamemAligner.mk REF=b37 SEQ_PLATFORM=ILLUMINA (...) | less`
+(the parameters in your project-level Makefile). This will produce a verbose dry-run of the files make is attempting to generate. 
+Here you can see where it stops finding the recipes. This is very useful for debugging.
 
 1. Check your samples sheets. Make sure there are no stray spaces/tabs at the end of the lines. Make sure there are no blank lines (after the last samples).
     ````
@@ -276,17 +290,9 @@ This usually happens because 1) pre-requisite not met, 2) there is a bug in the 
 
 1. Check your Makefile. Check for stray symbols and white spaces.
 
-1. Some downstream modules (e.g. `pyclone`, `mutation_summary`) have undocumented prerequisites. Compile the prerequiresites then try again.
-
-1. There is a bug in the code. To see where it stops find the recipes, you can try `make --debug=i -nf usb-modules-v2/aligners/bwamemAligner.mk REF=b37 SEQ_PLATFORM=ILLUMINA ...`
-(the parameters in your project-level Makefile). This will produce a verbose dry-run of the files make is attempting to generate. Here you can see where it stops finding the
-recipes. This is very useful for debugging.
-
-
 ### If submitted jobs fail...
 
-You should look in `$PROJ_DIR/log`. The log file will be named in the format `$PROJ_DIR/log/<module>.<date>.<attempt>.log`.
-For example in `log/gatk.2018-08-03.2.log`, you should find lines like these.
+For example in `log/gatk.2018-08-03.2.log`, you should find lines that say "Error" like this.
 ```
 make[1]: *** [gatk/intervals_gvcf/0030/ESBIPGRA00245.variants.vcf.gz] Error 1
 make[1]: *** [gatk/intervals_gvcf/0030/ESBIPGRA00237.variants.vcf.gz] Error 1
@@ -306,6 +312,9 @@ Most errors are related to incorrect parameters, empty or invalid input files or
 
 1. If the reason is not obvious, try deleting any invalid/empty files, then re-run it. Sometimes there are transient system glitches and a simple re-run is enough to fix it.
 
+1. If it is related to resources, re-run it once or twice more. Some tools (e.g. GATK) occasionally get stuck for unknown reasons, or there were transient system glitches that cause something to be stuck. If the tool fails on the same sample several times, then tell Charlotte...
+
+1. If your parameters seem to be correct but the commands in the log file are not correct, there could be a bug (or ten).
 ---
 
 # Example recipes
@@ -339,67 +348,68 @@ make bwamem bam_metrics gatk
 
 ## Example use case 1: What to do when you get a set of Ion Torrent genomic data ##
 
-```
-PROJ_DIR=PROJ
-mkdir $PROJ_DIR
-cd $PROJ_DIR
-```
+1. Go to the project directory
+    ```
+    PROJ_DIR=PROJ
+    mkdir $PROJ_DIR
+    cd $PROJ_DIR
+    ```
 
-From here on, we will assume that you are in this $PROJ_DIR.
+1. Clone the code base
+    ```
+    git clone https://github.com/charlottekyng/usb-modules-v2.git
+    ```
 
-Clone the code base
-```
-git clone https://github.com/charlottekyng/usb-modules-v2.git
-```
+1. Copy the Makefile_template to $PROJ (don't move or the file would disappear from the repo)
+    ```
+    cp usb-modules-v2/Makefile_templates/Makefile_template_iontorrent_comprehensive_panel Makefile
+    ```
 
-Copy the Makefile_template to $PROJ (don't move or the file would disappear from the repo)
-```
-cp usb-modules-v2/Makefile_templates/Makefile_template_iontorrent_comprehensive_panel Makefile
-```
+1. Rename the bam files to <sample_name>.bam and put them in $PROJ_DIR/unprocessed_bam
+    ```
+    mkdir $PROJ_DIR/unprocessed_bam
+    cd $PROJ_DIR/unprocessed_bam
+    ```
 
-Rename the bam files to <sample_name>.bam and put them in $PROJ_DIR/unprocessed_bam
-```
-mkdir $PROJ_DIR/unprocessed_bam
-cd $PROJ_DIR/unprocessed_bam
-```
+1.Make samples.txt
+    ```
+    ls *bam | perl -p -e "s/\.bam//g;" > ../samples.txt
+    cd ..
+    ```
 
-Make samples.txt
-```
-ls *bam | perl -p -e "s/\.bam//g;" > ../samples.txt
-cd ..
-```
-Make sample_sets.txt. This file should be one patient per row. 
+1. Make sample_sets.txt. This file should be one patient per row. 
 Each row should consist of the tumor samples, tab-delimited, 
 followed by the matched normal sample as the last name on the row
 
-Now fix read groups to ensure downstream processing do not fall over
-```
-make fix_rg
-```
+1. Now fix read groups to ensure downstream processing do not fall over
+    ```
+    make fix_rg
+    ```
 
-Generate some sequencing statistics
-```
-make bam_metrics
-```
+1. Generate some sequencing statistics
+    ```
+    make bam_metrics
+    ```
 
-Genotype to make sure there are no mismatched samples
-```
-make genotype
-```
+1. Genotype to make sure there are no mismatched samples
+    ```
+    make genotype
+    ```
 
-Call somatic mutations
-```
-make tvc_somatic
-```
-Screen hotspots (for _TERT_ promoter) and for QC
-```
-make hotspot_screen
-```
+1. Call somatic mutations
+    ```
+    make tvc_somatic
+    ```
 
-Make an Excel table of the mutations
-```
-make mutation_summary
-```
+1. Screen hotspots (for _TERT_ promoter) and for QC
+    ```
+    make hotspot_screen
+    ```
+
+1. Make an Excel table of the mutations
+    ```
+    make mutation_summary
+    ```
 
 Or do everything at once, if nothing falls over, this will do everything sequentially
 ```
