@@ -4,13 +4,13 @@
 
 # default reference:
 # possible values: b37, hg19_ionref, b37_hbv_hcv, hg38 etc
-REF ?= b37
+REF ?= b37_GRCm38
 
 # possible values: ILLUMINA, IONTORRENT
 SEQ_PLATFORM ?= ILLUMINA
 
 # possible values: NONE, BAITS, PCR, RNA, CHIP
-CAPTURE_METHOD ?= NONE
+CAPTURE_METHOD ?= RNA
 
 # possible values: NONE (include WGS, CHIP and RNA), AGILENT_CLINICAL_EXOME, CCP, CHPv2, AGILENT_ALLEXON_MOUSE, HCC,  WXS
 PANEL ?= NONE

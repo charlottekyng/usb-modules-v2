@@ -140,6 +140,12 @@ Not all combinations of REF and PANEL are permissible.
 Additional user-configurable parameters are defined (with default values) in the `usb-modules-v2/config.inc` file. 
 (In the near future, the parameters will be better documented in the config file.)
 
+Some `Makefile` templates are provided in `Makefile_templates/`. Please *copy* them to your project directory and do not remove them from `usb-modules-v2/`.
+```
+>ls usb-modules-v2/Makefile_templates/
+Makefile_template_all_basic_options  Makefile_template_agilentallexonv6  Makefile_template_iontorrent_comprehensive_panel  Makefile_template_rnaseq_xenografts
+```
+
 ---
 # Executing the modules
 This analysis pipeline is designed to be modular. 
@@ -334,7 +340,7 @@ git clone https://github.com/charlottekyng/usb-modules-v2.git
 
 Copy the Makefile_template to $PROJ (don't move or the file would disappear from the repo)
 ```
-cp usb-modules-v2/Makefile_template Makefile
+cp usb-modules-v2/Makefile_templates/Makefile_template_iontorrent_comprehensive_panel Makefile
 ```
 
 Rename the bam files to <sample_name>.bam and put them in $PROJ_DIR/unprocessed_bam

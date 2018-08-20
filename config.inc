@@ -80,6 +80,9 @@ include usb-modules-v2/genome_inc/$(REF).inc
 ifeq ($(CAPTURE_METHOD),RNA)
 MERGE_SPLIT_FASTQ ?= true # merge multiple sets of fastqs from a given sample before alignment
 endif
+ifeq ($(wildcard $(SAMPLE_SPLIT_FILE)),)
+MERGE_SPLIT_FASTQ ?= true
+endif
 MERGE_SPLIT_FASTQ ?= false
 
 # Pre-processing the FASTQs, trimming bad cycles or adaptors
