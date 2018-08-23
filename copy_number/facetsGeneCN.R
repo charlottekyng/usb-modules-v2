@@ -68,7 +68,7 @@ mm <- lapply(facetsFiles, function(f) {
 	tab$chrom[which(tab$chrom==23)] <- "X"
 
 	tabGR <- tab %$% GRanges(seqnames = chrom, ranges = IRanges(start, end))
-	mcols(tabGR) <- tab %>% select(num.mark,cnlr.median:mafR.clust,cf.em:clonal.cluster)
+	mcols(tabGR) <- tab %>% select(num.mark,cnlr.median:mafR.clust,cf.em:lcn.em)
 
 	fo <- findOverlaps(tabGR, genesGR)
 
