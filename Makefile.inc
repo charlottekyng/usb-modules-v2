@@ -350,6 +350,7 @@ FACETS_GENE_CN = $(RSCRIPT) usb-modules-v2/copy_number/facetsGeneCN.R
 FACETS_PLOT_GENE_CN = $(RSCRIPT) usb-modules-v2/copy_number/facetsGeneCNPlot.R
 FACETS_CCF = $(RSCRIPT) usb-modules-v2/copy_number/facetsCCF.R
 FACETS_GENE_CN_OPTS = $(if $(TARGETS_FILE_GENES),--genesFile $(TARGETS_FILE_GENES))
+FACETS_GENE_CN_PLOT_OPTS = 
 
 MUTATION_SUMMARY_RSCRIPT = $(RSCRIPT) usb-modules-v2/summary/mutation_summary_excel.R
 DECONSTRUCTSIGS = $(RSCRIPT) usb-modules-v2/mut_sigs/deconstructSigs.R
@@ -361,7 +362,6 @@ PYCLONE ?= $(PYTHON_ENV_ACTIVATE) pyclonenv; PyClone
 PYCLONE_ITER ?= 10000
 PYCLONE_BURNIN ?= 1000
 PYCLONE_SEED ?= 1234567
-PYCLONE_PRIOR ?= parenktal_copy_number
 PYCLONE_MAKE_MUT_TXT ?= $(RSCRIPT) usb-modules-v2/clonality/pyclone_make_input.R
 PYCLONE_MAKE_CLUSTER_TABLE ?= $(RSCRIPT) usb-modules-v2/clonality/pyclone_make_cluster_table.R
 

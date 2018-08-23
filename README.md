@@ -74,12 +74,12 @@ Adhere to these guidelines to avoid unnecessary troubleshooting.
 ### Setting up data directories
 
 There are several options in terms of data files:
-1. If you start from FASTQs, you have a single or a single pair of fastqs per sample and you know your reads do not need trimming, then you put your files as `fastq/<SAMPLE_NAME>.1.fastq.gz` (and `fastq/<SAMPLE_NAME>.2.fastq.gz`). Then you are ready to run alignment. 
+1. If you start from FASTQs, you have a single fastq or a single pair of fastqs per sample and you know your reads do not need trimming, then you put your files as `fastq/<SAMPLE_NAME>.1.fastq.gz` (and `fastq/<SAMPLE_NAME>.2.fastq.gz`). Then you are ready to run alignment. 
     ```
     >ls fastq/
     SAMPLE1T.1.fastq.gz SAMPLE1T.2.fastq.gz SAMPLE2T.1.fastq.gz SAMPLE2T.2.fastq.gz (...)
     ```
-1. If you start from FASTQs, you have more than a single or more than a single pair of fastqs per sample, or your reads need trimming (e.g. adaptors) then you put your files as `unprocessed_fastq/<SAMPLE_NAME>_<RUN_NAME>.1.fastq.gz` or `unprocessed_fastq/<SAMPLE_NAME>.1.fastq.gz` (and `unprocessed_fastq/<SAMPLE_NAME>_<RUN_NAME>.2.fastq.gz` or `unprocessed_fastq/<SAMPLE_NAME>.2.fastq.gz`). With this option, you will need the `samples.split.txt` file (see above). Then you are ready to run alignment.
+1. If you start from FASTQs, you have more than a single fastq or more than a single pair of fastqs per sample, or your reads need trimming (e.g. adaptors) then you put your files as `unprocessed_fastq/<SAMPLE_NAME>_<RUN_NAME>.1.fastq.gz` or `unprocessed_fastq/<SAMPLE_NAME>.1.fastq.gz` (and `unprocessed_fastq/<SAMPLE_NAME>_<RUN_NAME>.2.fastq.gz` or `unprocessed_fastq/<SAMPLE_NAME>.2.fastq.gz`). With this option, you will need the `samples.split.txt` file (see above). Then you are ready to run alignment.
     ```
     >ls unprocessed_fastq/
     SAMPLE1N_RUN1.1.fastq.gz SAMPLE1N_RUN1.2.fastq.gz SAMPLE1N_RUN2.1.fastq.gz SAMPLE1N_RUN2.2.fastq.gz (...)
@@ -248,7 +248,12 @@ make mosaics
 ```
 
 #### Others/ downstream tools
-There are a lot more...
+There are a lot more... 
+
+For exome analysis, there are a few things that are useful. These should work if you use them in the context of the suggested recipes below.
+```
+make deconstruct_sigs pyclone
+```
 
 
 #### Note regarding sanity checks
@@ -327,7 +332,7 @@ here are some suggested recipes that are valid sequences.
 
 #### Whole-exome sequencing on Illumina
 ```
-make bwamem genotype fastqc bam_metrics facets mutect strelka mutation_summary
+make bwamem genotype fastqc bam_metrics facets mutect strelka mutation_summary (deconstruct_sigs pyclone)
 ```
 #### RNA-sequencing on Illumina
 ```
@@ -343,9 +348,9 @@ make bwaaln mosaics
 ```
 #### Targeted panel sequencing on Ion Torrent (from bam files)
 ```
-make fix_rg genotype bam_metrics tvc_somatic varscan_cnv hotspot_screen
+make fix_rg genotype bam_metrics tvc_somatic varscan_cnv hotspot_screen mutation_summary
 ```
-#### Whole-genome sequencing on Illumina
+#### Whole-genome sequencing on Illumina for germline analysis
 ```
 make bwamem bam_metrics gatk
 ```

@@ -25,7 +25,6 @@ optList <- list(
 	make_option("--cval2", default = NULL, type = 'integer', help = "starting critical value for segmentation (increases by 25 until success)"),
 	make_option("--max_cval", default = 5000, type = 'integer', help = "maximum critical value for segmentation (increases by 25 until success)"),
 	make_option("--min_nhet", default = 25, type = 'integer', help = "minimum number of heterozygote snps in a segment used for bivariate t-statistic during clustering of segment"),
-	make_option("--gene_loc_file", default = '~/share/reference/IMPACT410_genes_for_copynumber.txt', type = 'character', help = "file containing gene locations"),
 	make_option("--genome", default = 'b37', type = 'character', help = "genome of counts file"),
 	make_option("--unmatched", default=FALSE, type=NULL,  help="is it unmatched?"),
 	make_option("--minGC", default = 0, type = NULL, help = "min GC of position"),
@@ -119,7 +118,9 @@ if (opt$minGC == 0 & opt$maxGC == 1) {
 
 out1 <- preOut %>% procSample(cval = opt$cval1, min.nhet = opt$min_nhet)
 
-print ("Completed preProc and proc")
+cat ("Completed preProc and proc\n")
+cat ("procSample FLAG is", out1$FLAG, "\n")
+
 save(preOut, out1, file = str_c(opt$outPrefix, ".Rdata"), compress=T)
 
 cval <- opt$cval2
@@ -135,7 +136,7 @@ while (!success && cval < opt$max_cval) {
     })
     if (!is.null(fit)) {
         success <- T
-	fit2 <- out2 %>% emcncf2
+        cat ("emcncf was successful with cval", cval, "\n")
     } else {
         cval <- cval + 25
     }
@@ -161,7 +162,7 @@ formatSegmentOutput <- function(out,sampID) {
 }
 id <- paste(tumorName, normalName, sep = '_')
 out2$IGV = formatSegmentOutput(out2, id)
-save(preOut, out1, out2, fit, fit2, file = str_c(opt$outPrefix, ".Rdata"), compress=T)
+save(preOut, out1, out2, fit, file = str_c(opt$outPrefix, ".Rdata"), compress=T)
 
 if(sum(out2$out$num.mark)<=10000) { height=4; width=7} else { height=6; width=9}
 pdf(file = str_c(opt$outPrefix, ".cncf.pdf"), height = height, width = width)
@@ -174,17 +175,7 @@ pdf(file = str_c(opt$outPrefix, ".logR.pdf"), height = height, width = width)
 myPlotFACETS(out2, fit, plot.type="logR")
 dev.off()
 
-
-#tab <- cbind(out2$IGV[, 1:4], fit$cncf[, 2:ncol(fit$cncf)])
-#write.table(tab, str_c(opt$outPrefix, ".cncf.txt"), row.names = F, quote = F, sep = '\t')
-
-if("clonal.cluster" %in% colnames(fit2$cncf)) { clonal.cluster = fit2$cncf$clonal.cluster
-} else { clonal.cluster <- rep(NA, nrow(fit2$cncf))}
-
-writetable <- cbind(fit2$cncf[,c("chrom", "seg", "num.mark", "nhet", "cnlr.median", "mafR", "segclust", "cnlr.median.clust", "mafR.clust", "start", "end")],
-	 fit2$cncf[,c("cf.em", "tcn.em", "lcn.em")], clonal.cluster=clonal.cluster)
-
-write.table(writetable, str_c(opt$outPrefix, ".cncf.txt"), row.names = F, quote = F, sep = '\t')
+write.table(fit$cncf, str_c(opt$outPrefix, ".cncf.txt"), row.names = F, quote = F, sep = '\t')
 
 ff = str_c(opt$outPrefix, ".out")
 cat("# Version =", version, "\n", file = ff, append = T)
