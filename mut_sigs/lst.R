@@ -118,7 +118,28 @@ lst=sapply(unique(merged_segs$sample), function(s){
 		}
 	})))
 })
-names(lst) <- unique(merged_segs$sample)
+
+ploidy <- unlist(lapply(gsub("cncf.txt", "out", segfiles), function(fn) {
+	tab <- read.delim(fn, as.is=T, sep="=")
+	as.numeric(tab[which(gsub(" ", "", tab[,1])=="#Ploidy"),2])}))
+	
+lst <- data.frame(lst=lst,
+	ploidy=ploidy)
+	
+### near-diploid is <2.6
+tmp <- lst$ploidy>2.6	
+lst$class = NA
+
+lst$class[which(!tmp & lst$lst>15)] <- "high" # near-diploid
+lst$class[which(!tmp & lst$lst<=15)] <- "low" # near-diploid
+lst$class[which(tmp & lst$lst>20)] <- "high" # near-tetraploid
+lst$class[which(tmp & lst$lst<=20)] <- "low" # near-tetraploid
+
+rownames(lst) = unique(merged_segs$sample)
+
+
+	
+
 write.table(lst, file=opt$outFile, sep="\t", col.names=F, na="", quote=F)
 		
 	

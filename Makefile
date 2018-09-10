@@ -180,6 +180,9 @@ sufam_screen :
 ## or are known to be broken/obsolete.
 ##########################################################
 
+TARGETS += pvacseq
+pvacseq :
+	$(call RUN_MAKE,usb-modules-v2/neoepitopes/pvacseq.mk)
 
 TARGETS += merge_fastq
 merge_fastq : 
