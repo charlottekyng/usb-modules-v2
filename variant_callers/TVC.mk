@@ -50,11 +50,13 @@ $(foreach sample,$(SAMPLES), \
 
 tvc/vcf/%/TSVC_variants.snps.vcf : tvc/vcf/%/TSVC_variants_final.vcf
 	$(call RUN,1,$(RESOURCE_REQ_LOW_MEM),$(RESOURCE_REQ_VSHORT),$(VCFTOOLS_MODULE),"\
-	$(VCFTOOLS) --vcf $< --remove-indels --recode --recode-INFO-all --out $@ && mv $@.recode.vcf $@")
+	$(FIX_TVC_VCF) < $< | $(VCFTOOLS) --vcf - --remove-indels --recode --recode-INFO-all --out $@ && \
+	mv $@.recode.vcf $@")
 
 tvc/vcf/%/TSVC_variants.indels.vcf : tvc/vcf/%/TSVC_variants_final.vcf
 	$(call RUN,1,$(RESOURCE_REQ_LOW_MEM),$(RESOURCE_REQ_VSHORT),$(VCFTOOLS_MODULE),"\
-	$(VCFTOOLS) --vcf $< --keep-only-indels --recode --recode-INFO-all --out $@ && mv $@.recode.vcf $@")
+	$(FIX_TVC_VCF) < $< | $(VCFTOOLS) --vcf -  --keep-only-indels --recode --recode-INFO-all --out $@ && \
+	mv $@.recode.vcf $@")
 
 vcf/%.tvc_snps.vcf : tvc/vcf/%/TSVC_variants.snps.vcf
 	$(INIT) $(VCF_SORT) $(REF_DICT) $< > $@

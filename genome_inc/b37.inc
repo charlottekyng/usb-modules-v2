@@ -86,6 +86,7 @@ RESOURCE_REQ ?= low
 endif
 ifeq ($(PANEL),NONE)
 RESOURCE_REQ ?= high
+TARGETS_FILE_INTERVALS ?= $(GSA_REF_DIR)/human_g1k_v37_decoy.bed
 DBSNP_TARGETS_INTERVALS ?= $(GSA_REF_DIR)/dbsnp_138.b37_snps_monoallelic.vcf
 DBSNP_TARGETS_INTERVALS_COMMON ?= $(DBSNP_TARGETS_INTERVALS)
 
@@ -96,7 +97,8 @@ endif
 $(info RESOURCE_REQ is $(RESOURCE_REQ))
 
 FACETS_TARGETS_INTERVALS ?= $(DBSNP_TARGETS_INTERVALS)
-
+TARGETS_FILE_INTERVALS_POOLS ?= $(TARGETS_FILE_INTERVALS_POOLS_CNA)
+TARGETS_FILE_INTERVALS_POOLS_CNA ?= $(TARGETS_FILE_INTERVALS)
 
 ifeq ($(findstring bed,$(TARGETS_FILE_INTERVALS)),bed)
 CHROMOSOMES := $(shell grep -v '@' $(TARGETS_FILE_INTERVALS) | cut -f1 | sort -V | uniq)
@@ -111,6 +113,7 @@ CONTEST_POP_FILE ?= $(ANN_DIR)/hg19_population_stratified_af_hapmap_3.3.vcf
 KNOWN_INDELS ?= $(GSA_REF_DIR)/Mills_and_1000G_gold_standard.indels.b37.vcf
 OMNI ?= $(GSA_REF_DIR)/1000G_omni2.5.b37.vcf
 HAPMAP ?= $(GSA_REF_DIR)/hapmap_3.3.b37.vcf
+R1000G ?= $(GSA_REF_DIR)/1000G_phase1.snps.high_confidence.b37.vcf
 
 CLINVAR = $(ANN_DIR)/clinvar.vcf
 EXAC_NONTCGA = $(ANN_DIR)/ExAC_nonTCGA.r0.3.1.sites.vep.edited.vcf
@@ -149,7 +152,7 @@ MOSAICS_CHRFILE = $(GSA_REF_DIR)/human_g1k_v37_decoy.mosaics.chrfile
 GISTIC_REF ?= /scicore/home/terracci/GROUP/usr_nobackup/local/gistic_2.0.23/refgenefiles/hg19.UCSC.add_miR.140312.refgene.mat
 
 STAR_GENOME_DIR = $(REF_DIR)/genome_index/star_b37
-STAR_CTAT_DIR = $(ANN_DIR)/GRCh37_gencode_v19_CTAT_lib
+STAR_CTAT_DIR = $(ANN_DIR)/GRCh37_gencode_v19_CTAT_lib_July272016_prebuilt
 
 RSEM_INDEX = $(REF_DIR)/genome_index/rsem_b37/rsem_index
 

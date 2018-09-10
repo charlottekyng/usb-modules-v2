@@ -35,8 +35,6 @@ vcf/$1_$2.%.som_ad_ft.vcf : vcf/$1_$2.%.vcf
 		--filterName tumorDepthFilter_flow \
 		--filterExpression 'vc.getGenotype(\"$2\").getAnyAttribute(\"DP\") * 1.0 <= $(MIN_NORMAL_DEPTH)' \
 		--filterName normalDepthFilter_raw \
-		--filterExpression 'vc.getGenotype(\"$2\").getAnyAttribute(\"FDP\") * 1.0 <= $(MIN_NORMAL_DEPTH)' \
-		--filterName normalDepthFilter_flow \
 		--filterExpression '( vc.getGenotype(\"$2\").getAnyAttribute(\"AO\") * 1.0 / vc.getGenotype(\"$2\").getAnyAttribute(\"DP\") * 1.0  ) \
 			> ( vc.getGenotype(\"$1\").getAnyAttribute(\"AO\") * 1.0 / vc.getGenotype(\"$1\").getAnyAttribute(\"DP\") * 1.0  ) / $(MIN_TN_AD_RATIO)' \
 		--filterName somAD_raw \
@@ -71,9 +69,10 @@ vcf/$1_$2.%/TSVC_variants.vcf.gz : vcf/$1_$2.%/isec/0001.sorted.vcf bam/$1.bam b
 	$$(if $$(TARGETS_FILE_INTERVALS),-b $$(TARGETS_FILE_INTERVALS)) -m $$(TVC_MOTIF) \
 	-t $$(TVC_ROOT_DIR) --primer-trim-bed $$(PRIMER_TRIM_BED) -p $(TVC_SENSITIVE_JSON)")
 
-vcf/$1_$2.%/isec2/0002.vcf : vcf/$1_$2.%/TSVC_variants.biallelic_ft.vcf vcf/$1_$2.%/isec/0001.vcf vcf/$1_$2.%/TSVC_variants.biallelic_ft.vcf.gz vcf/$1_$2.%/isec/0001.vcf.gz vcf/$1_$2.%/TSVC_variants.biallelic_ft.vcf.gz.tbi vcf/$1_$2.%/isec/0001.vcf.gz.tbi
+vcf/$1_$2.%/isec2/0002.vcf : vcf/$1_$2.%/TSVC_variants.biallelic_ft.vcf vcf/$1_$2.%/isec/0001.sorted.vcf vcf/$1_$2.%/TSVC_variants.biallelic_ft.vcf.gz vcf/$1_$2.%/isec/0001.sorted.vcf.gz vcf/$1_$2.%/TSVC_variants.biallelic_ft.vcf.gz.tbi vcf/$1_$2.%/isec/0001.sorted.vcf.gz.tbi
 	$$(call RUN,1,$$(RESOURCE_REQ_LOW_MEM),$$(RESOURCE_REQ_VSHORT),$$(BCFTOOLS_MODULE),"\
-	$$(BCFTOOLS) isec -O v -p $$(dir $$@) $$(word 3,$$^) $$(word 4,$$^)")
+	$$(BCFTOOLS) isec -O v -p $$(dir $$@) $$(word 3,$$^) $$(word 4,$$^) && \
+	grep -v \"##contig\" $$@ > tmp && mv tmp $$@" )
 
 vcf/$1_$2.%/isec2/0001.vcf : vcf/$1_$2.%/isec2/0002.vcf
 	

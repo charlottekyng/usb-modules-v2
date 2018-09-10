@@ -4,12 +4,6 @@ include usb-modules-v2/config.inc
 ######## DEFINE SAMPLES/SETS ###############
 ############################################
 
-SAMPLE_SET_FILE ?= sample_sets.txt
-SAMPLE_FILE ?= samples.txt
-SAMPLE_SPLIT_FILE ?= samples.split.txt # generate using scripts/prepareFastq.sh [remove underscores from sample names]
-SAMPLE_PON_FILE ?= samples.pon.txt
-SAMPLE_POOLEDNORM_FILE ?= samples.poolednorm.txt
-MERGE_SAMPLE_FILE ?= merge_samples.txt
 
 ifndef MAKEFILE_INC
 
@@ -19,10 +13,10 @@ ifneq ($(wildcard $(SAMPLE_FILE)),)
   SAMPLES ?= $(shell sed '/^\#/d' $(SAMPLE_FILE))
 endif
 ifneq ($(wildcard $(SAMPLE_PON_FILE)),)
-  PANEL_OF_NORMAL_SAMPLES = $(shell sed '/^\#/d' $(SAMPLE_PON_FILE))
+  PANEL_OF_NORMAL_SAMPLES ?= $(shell sed '/^\#/d' $(SAMPLE_PON_FILE))
 endif
 ifneq ($(wildcard $(SAMPLE_POOLEDNORM_FILE)),)
-  POOLED_NORM_SAMPLES = $(shell sed '/^\#/d' $(SAMPLE_POOLEDNORM_FILE))
+  POOLED_NORM_SAMPLES ?= $(shell sed '/^\#/d' $(SAMPLE_POOLEDNORM_FILE))
 endif
 ifneq ($(wildcard $(MERGE_SAMPLE_FILE)),)
   MERGE_SAMPLES ?= $(shell sed '/^\#/d' $(MERGE_SAMPLE_FILE))
@@ -90,10 +84,12 @@ endif
 
 ALL_SAMPLES = $(SAMPLE_PAIRS) $(SAMPLES)
 COUNT_SAMPLES = $(shell expr `sed 's/\..*//; s:.*/::' <<< $1 | grep -o "_" | wc -l` + 1)
+PANEL_OF_NORMAL_SAMPLES ?= $(NORMAL_SAMPLES)
+POOLED_NORM_SAMPLES ?= $(NORMAL_SAMPLES)
 
-############################################
-########### DEFINE RESOURCES ###############
-############################################
+#######################################################
+########### DEFINE GENOME AND RESOURCES ###############
+#######################################################
 
 RESOURCE_REQ ?= medium
 include usb-modules-v2/genome_inc/$(REF).inc
@@ -149,9 +145,7 @@ CHECK_VCF_CMD = if [ `grep -v '^\#' $1 | wc -l` -eq 0 ] && [ `grep '^\#CHROM' $1
 << = $(word 2,$^)
 <<< = $(word 3,$^)
 <<<< = $(word 4,$^)
-4< = $(word 4,$^)
 <<<<< = $(word 5,$^)
-5< = $(word 5,$^)
 
 define R_INIT
 dir.create('$(@D)', showWarnings = F, recursive = T)
@@ -162,8 +156,9 @@ endef
 ##### DEFINE THE MAIN RUN FUNCTION #######
 ##########################################
 
-RUN_OPTS = $(if $(findstring false,$(USE_CLUSTER)),-l) -o $@ $(if $(CLUSTER_ENGINE),-g $(CLUSTER_ENGINE)) \
-  -S $(SHELL) --log_file $(LOG) $(if $(PROJECT_NAME),-p $(PROJECT_NAME)) -c
+RUN_OPTS = $(if $(findstring false,$(USE_CLUSTER)),-l) -o $@ \
+$(if $(CLUSTER_ENGINE),-g $(CLUSTER_ENGINE)) $(if $(EXCLUDE_NODE),-x $(EXCLUDE_NODE)) \
+-S $(SHELL) --log_file $(LOG) $(if $(PROJECT_NAME),-p $(PROJECT_NAME)) -c 
 
 ## RUN is the main function!!
 ## arg1 = number of cores
@@ -198,6 +193,7 @@ export LD_LIBRARY_PATH := $(LD_LIBRARY_PATH)
 SHELL ?= /bin/bash
 UNZIP ?= /usr/bin/unzip
 GZIP ?= gzip -f
+GUNZIP ?= gunzip -c
 
 PERL_MODULE ?= Perl/5.22.2-goolf-1.7.20
 R_MODULE ?= R/3.5.0-goolf-1.7.20
@@ -230,17 +226,22 @@ STRINGTIE_MODULE ?= StringTie/1.3.3-goolf-1.7.20
 RSEM_MODULE ?= RSEM/1.2.31-goolf-1.7.20
 OPENBLAS_MODULE ?= OpenBLAS/0.2.13-GCC-4.8.4-LAPACK-3.5.0
 GATK36_MODULE ?= GATK/3.6-Java-1.8.0_92
-GATK40_MODULE ?= GATK/4.0.1.2-Java-1.8.0_92
+GATK40_MODULE ?= GATK/4.0.7.0-Java-1.8.0_92
 MUTECT_MODULE ?= MuTect/1.1.7-Java-1.7.0_80
 PICARD_MODULE ?= picard/2.9.2
 VARSCAN_MODULE ?= VarScan/2.4.1-Java-1.7.0_80
 ANACONDA_MODULE ?= Anaconda3/5.0.1
+SINGULARITY_MODULE ?= Singularity/2.5.2
+VEP_MODULE ?= ensembl-vep/92.0-goolf-1.7.20-Perl-5.22.2
 
 PERL ?= perl
 JAVA ?= java -Djava.io.tmpdir=$(TMPDIR)
 PYTHON ?= python
 PYTHON_ENV_ACTIVATE ?= ml load $(ANACONDA_MODULE) && source activate 
 PYTHON_ENV_DEACTIVATE = source deactivate
+
+SINGULARITY_EXEC ?= singularity exec -B $(shell pwd)
+SINGULARITY_RUN ?= singularity run -B $(shell pwd)
 
 R_LIBS ?= $(USR_DIR)/$(R_MODULE)/lib64/R/library
 R ?= export R_LIBS=$(R_LIBS); R
@@ -266,9 +267,6 @@ VCF_SORT ?= $(PERL) $(SCRIPTS_DIR)/vcfsorter.pl
 FASTQ_TRIMMER = $(PERL) usb-modules-v2/fastq_tools/trimFastq.pl
 VCF_PASS ?= usb-modules-v2/vcf_tools/extract_pass_vcf.pl
 
-FASTQ_CHUNKS := 10
-FASTQ_CHUNK_SEQ := $(shell seq 1 $(FASTQ_CHUNKS))
-
 ifeq ($(ADAPTOR_POS),3prime)
 CUTADAPT_OPTS ?= -a $(ADAPTOR_SEQ) $(if $(findstring true,$(PAIRED_END)),-A $(ADAPTOR_SEQ))
 endif
@@ -279,7 +277,6 @@ ifeq ($(NEXTSEQ_TRIM),true)
 CUTADAPT_OPTS += --nextseq-trim=20
 endif
 CUTADAPT_OPTS += -q 20,20 --trim-n -m 35 --max-n=3 
-
 
 FASTQC ?= fastqc
 FASTQC_SUMMARY_PLOT = $(RSCRIPT) usb-modules-v2/qc/fastqcSummaryPlot.R
@@ -313,9 +310,7 @@ GATK += -S LENIENT -T $(1) -filterNoBases
 GATK37 = $(JAVA) -Xmx$(2) -jar $(JAR_DIR)/GenomeAnalysisTK-3.7/GenomeAnalysisTK-3.7.jar 
 GATK37 += -S LENIENT -T $(1) -filterNoBases
 
-## For the future
-#GATK = java -Xmx$(2) -jar \$$EBROOTGATK/GenomeAnalysisTK.jar
-#GATK += -S LENIENT -T $(1) -filterNoBases
+GATK40 = gatk --java-options \"-Xmx$(2) -Xms$(2)\" $(1)
 
 FIX_GATK_VCF = $(PERL) usb-modules-v2/variant_callers/fix_vcf_scripts/fix_gatk_vcf.pl
 FIX_VARSCAN_VCF = $(PERL) usb-modules-v2/variant_callers/fix_vcf_scripts/fix_varscan_vcf.pl
@@ -338,12 +333,12 @@ TVC_SENSITIVE_JSON = usb-modules-v2/variant_callers/somatic/TVC_somatic_paramete
 TVC_MOTIF ?= $(TVC_ROOT_DIR)/share/TVC/sse/ampliseqexome_germline_p1_hiq_motifset.txt
 
 VARSCAN_JAR ?= $(JAR_DIR)/varscan/VarScan.v2.4.3.jar
-VARSCAN = $(JAVA) -Xmx -jar $(VARSCAN_JAR)
+VARSCAN = $(JAVA) -Xmx$(RESOURCE_REQ_MEDIUM_MEM_JAVA) -jar $(VARSCAN_JAR)
 
 ### For the future
 # VARSCAN ?= java -Xmx$(RESOURCE_REQ_LOW_MEM_JAVA) -jar \$$EBROOTVARSCAN/VarScan.v2.4.1.jar
 
-SNP_EFF_CONFIG ?= usb-modules-v2/snpEff.config
+SNP_EFF_CONFIG ?= usb-modules-v2/vcf_tools/snpEff.config
 SNP_EFF = $(JAVA) -Xmx$(RESOURCE_REQ_LOW_MEM_JAVA) -jar \$$EBROOTSNPEFF/snpEff.jar
 SNP_EFF_OPTS = -i vcf -o vcf -c $(SNP_EFF_CONFIG) $(SNP_EFF_FLAGS)
 SNP_SIFT = $(JAVA) -Xmx$(RESOURCE_REQ_LOW_MEM_JAVA) -jar \$$EBROOTSNPEFF/SnpSift.jar
@@ -351,19 +346,33 @@ SNP_SIFT_OPTS = -c $(SNP_EFF_CONFIG)
 VCF_EFF_ONE_PER_LINE = $(PERL) \$$EBROOTSNPEFF/scripts/vcfEffOnePerLine.pl
 VCF_JOIN_EFF = $(PERL) $(MODULE_SCRIPTS_DIR)/joinEff.pl
 
+VEP_CACHE_DIR ?= /scicore/home/terracci/GROUP/ref_nobackup/vep/
+VEP ?= vep --cache --offline --dir_cache $(VEP_CACHE_DIR) --no_stats --force_overwrite --pick --format vcf --vcf --symbol --terms SO
+VEP_PLUGIN_DIR ?= /scicore/home/terracci/GROUP/usr_nobackup/downloads/VEP_plugins
+
+
 ADD_GENE_LIST_ANNOTATION = $(RSCRIPT) usb-modules-v2/vcf_tools/addGeneListAnnotationToVcf.R
 ANNOTATE_FACETS_VCF = $(RSCRIPT) usb-modules-v2/copy_number/annotateFacets2Vcf.R
 
 FACETS_SNP_PILEUP = $(BIN_DIR)/snp-pileup
 FACETS = $(RSCRIPT) usb-modules-v2/copy_number/facetsRun.R
 FACETS_GENE_CN = $(RSCRIPT) usb-modules-v2/copy_number/facetsGeneCN.R
-FACETS_PLOT_GENE_CN = $(RSCRIPT) usb-modules-v2/copy_number/facetsGeneCNPlot.R
+FACETS_GENE_CN_PLOT = $(RSCRIPT) usb-modules-v2/copy_number/facetsGeneCNPlot.R
 FACETS_CCF = $(RSCRIPT) usb-modules-v2/copy_number/facetsCCF.R
 FACETS_GENE_CN_OPTS = $(if $(TARGETS_FILE_GENES),--genesFile $(TARGETS_FILE_GENES))
+FACETS_GENE_CN_PLOT_OPTS = 
 
 MUTATION_SUMMARY_RSCRIPT = $(RSCRIPT) usb-modules-v2/summary/mutation_summary_excel.R
 DECONSTRUCTSIGS = $(RSCRIPT) usb-modules-v2/mut_sigs/deconstructSigs.R
 DECONSTRUCTSIGS_NUMCORES ?= 8
+
+
+PVACSEQ ?= pvacseq
+PVACTOOLS_IMG ?= /scicore/home/terracci/GROUP/virtual_env/pvac.img
+IEDB_PATH ?= /scicore/home/terracci/GROUP/usr_nobackup/iedb
+PVACSEQ_OPTS ?= -e 8,9,10,11 --net-chop-method cterm --netmhc-stab --top-score-metric=lowest -d full \
+$(if $(findstring true,$(PVACSEQ_USE_LOCAL_IEDB)),--iedb-install-directory $(IEDB_PATH),)
+PVACSEQ_PREPARE_VCF ?= $(PERL) usb-modules-v2/neoepitopes/pvacseq_prepare_vcf.pl
 
 LST = $(RSCRIPT) usb-modules-v2/mut_sigs/lst.R
 
@@ -371,9 +380,9 @@ PYCLONE ?= $(PYTHON_ENV_ACTIVATE) pyclonenv; PyClone
 PYCLONE_ITER ?= 10000
 PYCLONE_BURNIN ?= 1000
 PYCLONE_SEED ?= 1234567
-PYCLONE_PRIOR ?= parenktal_copy_number
 PYCLONE_MAKE_MUT_TXT ?= $(RSCRIPT) usb-modules-v2/clonality/pyclone_make_input.R
 PYCLONE_MAKE_CLUSTER_TABLE ?= $(RSCRIPT) usb-modules-v2/clonality/pyclone_make_cluster_table.R
+PYCLONE_DECONSTRUCTSIGS ?= $(RSCRIPT) usb-modules-v2/clonality/pyclone_deconstuctSigs.R
 
 EXPANDS_MAKE_INPUT ?= $(RSCRIPT) usb-modules-v2/clonality/expands_make_input.R
 EXPANDS ?= $(RSCRIPT) usb-modules-v2/clonality/expandsRun.R
@@ -385,9 +394,6 @@ ABSOLUTE_STEP1 ?= $(RSCRIPT) usb-modules-v2/clonality/absolute_step1.R
 ABSOLUTE_STEP2 ?= $(RSCRIPT) usb-modules-v2/clonality/absolute_step2.R
 ABSOLUTE_STEP3 ?= $(RSCRIPT) usb-modules-v2/clonality/absolute_step3.R
 ABSOLUTE_NUM_CORE ?= 1
-
-
-
 
 
 CBS_SEGMENTCNV = $(RSCRIPT) usb-modules-v2/copy_number/varscanCNVSegment.R
@@ -416,22 +422,6 @@ MOSAICS_RUN ?= $(RSCRIPT) usb-modules-v2/chipseq/mosaics_run.R
 MOSAICS_CONSTRUCTBINS ?= $(RSCRIPT) usb-modules-v2/chipseq/mosaics_constructBins.R
 
 MSISENSOR ?= $(BIN_DIR)/msisensor_Linux_x86_64
-
-##VCF2MAF ?= $(PERL) $(SCRIPTS_DIR)/vcf2maf.pl
-#MAF2MAF ?= $(PERL) $(SCRIPTS_DIR)/maf2maf.pl
-#MAF2VCF ?= $(PERL) $(SCRIPTS_DIR)/maf2vcf.pl
-#VEP_PATH ?= /opt/common/CentOS_6/vep/v82
-#VEP_DATA ?= /opt/common/CentOS_6/vep/v82
-
-#BAM2FASTX = $(HOME)/usr/bin/bam2fastx
-#GET_INSERT_SIZE ?= $(HOME)/share/usr/bin/getInsertSize.py
-
-#TMAP = $(HOME)/share/usr/bin/tmap
-
-#MUT_FREQ_REPORT = modules/variant_callers/somatic/mutectReport.Rmd
-
-#VARIANT_EVAL_GATK_REPORT = $(RSCRIPT) usb-modules-v2/variant_callers/variantEvalGatkReport.R
-
 
 endif
 MAKEFILE_INC = true

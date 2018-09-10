@@ -31,13 +31,17 @@ while (my $l = <>) {
 	chomp $l;
 	if ($l =~ /\#\#FORMAT=\<ID=AF,/) {
 		print $l."\n";
-		print "\#\#FORMAT=\<ID=FA,Number=R,Type=Float,Description=\"Variant allele fraction based on raw counts\"\>\n";
+		print "\#\#FORMAT=\<ID=FA,Number=A,Type=Float,Description=\"Variant allele fraction based on raw counts\"\>\n";
+	} elsif ($l =~ /\#\INFO=\<ID=AF,/) {
+		print $l."\n";
+		print "\#\#INFO=\<ID=FA,Number=A,Type=Float,Description=\"Variant allele fraction based on raw counts\"\>\n";
 	} elsif ($l =~ /\#/) {
 		print $l."\n"; 
 	} else {
 		my @line = split /\t/, $l;
-		my $ao = my $dp = ""; #these are the non-flow counts
+		my $fa_info = my $ao = my $dp = ""; #these are the non-flow counts
 		my @format = split /:/, $line[8];
+		my @info = split/;/,$line[7];
 		for (my $i = 0; $i < scalar @format; $i++) {
 			if ($format[$i] eq "AO") { $ao = $i;
 			} elsif ($format[$i] eq "DP") { $dp = $i;
@@ -57,6 +61,10 @@ while (my $l = <>) {
 					} else { push @fas, "."; }
 				}
 				push @fields, (join ',',@fas);
+				if ($i==9) { 
+					push @info, "FA=".(join ',',@fas); 
+					$line[7] = join ';', @info; 
+				}
 				$line[$i] = join ':', @fields;
 			}
 		}

@@ -1,10 +1,12 @@
+MUT_CALLER := tvc
+
 include usb-modules-v2/Makefile.inc
 include usb-modules-v2/variant_callers/somatic/somaticVariantCaller.inc
 
-MUT_CALLER := tvc
 TVC_NUM_CORES ?= 4
 
 LOGDIR ?= log/tvc_somatic.$(NOW)
+
 
 PHONY += tvc_somatic tvc_somatic_vcfs tvc_somatic_tables 
 tvc_somatic : tvc_somatic_vcfs tvc_somatic_tables 
@@ -44,6 +46,6 @@ endef
 $(foreach pair,$(SAMPLE_PAIRS), \
 	$(eval $(call tvc-somatic-vcf,$(tumor.$(pair)),$(normal.$(pair)))))
 
-include usb-modules-v2/vcf_tools/vcftools.mk
+#include usb-modules-v2/vcf_tools/vcftools.mk
 include usb-modules-v2/variant_callers/TVC.mk
-include usb-modules-v2/variant_callers/somatic/pon.mk
+#include usb-modules-v2/variant_callers/somatic/pon.mk

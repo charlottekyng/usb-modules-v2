@@ -25,4 +25,9 @@ summary/mutation_summary$(PROJECT_PREFIX).$(DOWNSTREAM_EFF_TYPES).xlsx : $(ALLTA
 
 summary/mutation_summary$(PROJECT_PREFIX).$(DOWNSTREAM_EFF_TYPES).txt : $(ALLTABLES)
 	$(call RUN,1,$(RESOURCE_REQ_HIGH_MEM),$(RESOURCE_REQ_MEDIUM),$(R_MODULE),"\
-	$(MUTATION_SUMMARY_RSCRIPT) --outputFormat TXT --outFile $(@) $(^)")
+	$(MUTATION_SUMMARY_RSCRIPT) --outFile $(@) $(^) --outputFormat TXT ")
+
+summary/mutation_summary$(PROJECT_PREFIX).tab.$(DOWNSTREAM_EFF_TYPES).detected.txt : $(ALLTABLES)
+	$(call RUN,1,$(RESOURCE_REQ_HIGH_MEM),$(RESOURCE_REQ_MEDIUM),$(R_MODULE),"\
+	$(MUTATION_SUMMARY_RSCRIPT) --outFile $(@) $(^) --outputFormat TXT --filterFlags interrogation_Absent")
+

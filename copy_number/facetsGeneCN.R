@@ -52,52 +52,6 @@ if (length(arguments$args) < 1) {
 	facetsFiles <- arguments$args
 }
 
-#connect <- function() dbConnect(MySQL(), host = opt$mysqlHost, port = opt$mysqlPort, user = opt$mysqlUser, password = opt$mysqlPassword, dbname = opt$mysqlDb)
-#cat('Connecting to ensembl ... ')
-#mydb <- connect()
-#on.exit(dbDisconnect(mydb))
-
-#query <- "select r.name as chrom,
-#g.seq_region_start as start,
-#g.seq_region_end as end,
-#x.display_label as hgnc,
-#k.band as band
-#from gene as g
-#join seq_region as r on g.seq_region_id = r.seq_region_id
-#join xref as x on g.display_xref_id = x.xref_id
-#left join karyotype k on g.seq_region_id = k.seq_region_id
-#and ((g.seq_region_start >= k.seq_region_start and g.seq_region_start <= k.seq_region_end)
-#or (g.seq_region_end >= k.seq_region_start and g.seq_region_end <= k.seq_region_end))
-#where x.external_db_id = 1100;"
-#repeat {
-#	rs <- try(dbSendQuery(mydb, query), silent = T)
-#	if (is(rs, "try-error")) {
-#		cat("Lost connection to mysql db ... ")
-#		mydb <- connect()
-#		cat("reconnected\n")
-#	} else {
-#		break
-#	}
-#}
-#genes <- dbFetch(rs, -1)
-#cat(paste("Found", nrow(genes), "records\n"))
-
-#genes %<>% filter(chrom %in% as.character(c(1:22, "X", "Y"))) %>%
-#	filter(!duplicated(hgnc)) %>% 
-#	arrange(as.integer(chrom), start, end)
-
-#if (!is.null(opt$genesFile)) {
-#	g <- scan(opt$genesFile, what = 'character')
-#	genes %<>% filter(hgnc %in% g)
-#	absentGenes <- g[!g %in% genes$hgnc]
-#	if (length(absentGenes) > 0) {
-#		print("Unable to find", length(absentGenes), "in database\n");
-#		cat(absentGenes, sep = '\n');
-#	}
-#}
-
-#cat(paste("Filtering to", nrow(genes), "records\n"))
-
 genes <- read.delim(opt$genesFile, as.is=T, check.names=F)
 genes$chrom <- gsub("chr", "", genes$chrom)
 
@@ -114,7 +68,7 @@ mm <- lapply(facetsFiles, function(f) {
 	tab$chrom[which(tab$chrom==23)] <- "X"
 
 	tabGR <- tab %$% GRanges(seqnames = chrom, ranges = IRanges(start, end))
-	mcols(tabGR) <- tab %>% select(num.mark,cnlr.median:mafR.clust,cf.em:clonal.cluster)
+	mcols(tabGR) <- tab %>% select(num.mark,cnlr.median:mafR.clust,cf.em:lcn.em)
 
 	fo <- findOverlaps(tabGR, genesGR)
 

@@ -12,6 +12,7 @@ USE_CLUSTER ?= true
 NUM_JOBS ?= 100
 # possible values: SGE, SLURM
 CLUSTER_ENGINE ?= SLURM
+EXCLUDE_NODE ?=
 
 NOW := $(shell date +"%F")
 MAKELOG = log/$(@).$(NOW).log
@@ -179,6 +180,9 @@ sufam_screen :
 ## or are known to be broken/obsolete.
 ##########################################################
 
+TARGETS += pvacseq
+pvacseq :
+	$(call RUN_MAKE,usb-modules-v2/neoepitopes/pvacseq.mk)
 
 TARGETS += merge_fastq
 merge_fastq : 

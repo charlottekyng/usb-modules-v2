@@ -13,12 +13,13 @@ suppressPackageStartupMessages(library("foreach"));
 suppressPackageStartupMessages(library("Cairo"));
 suppressPackageStartupMessages(library("RMySQL"))
 suppressPackageStartupMessages(library("rtracklayer"))
-suppressPackageStartupMessages(library("CGHbase"))
+#suppressPackageStartupMessages(library("CGHbase"))
 suppressPackageStartupMessages(library("Biobase"))
 
 optList <- list(
-                make_option("--outFile", default = NULL, help = "output file"),
-                make_option("--genesFile", default = NULL, help = "list of genes to include (hgnc symbols)"))
+    make_option("--outFile", default = NULL, help = "output file"),
+ 	make_option("--summaryType", default = c("GL_LRR", "log2Ratio")),
+	make_option("--genesFile", default = NULL, help = "list of genes to include (hgnc symbols)"))
 parser <- OptionParser(usage = "%prog [options] [cbs files]", option_list = optList);
 
 arguments <- parse_args(parser, positional_arguments = T);
@@ -36,55 +37,13 @@ if (length(arguments$args) < 1) {
 	cat("Need genes file\n")
 	print_help(parser)
 	stop()
+} else if (!all(opt$summaryType %in% c("GL_LRR", "log2Ratio"))) {
+	cat("summaryType can only be one or more of GL_LRR, and log2Ratio\n")
+	print_help(prase);
+	stop();
 } else {
     varscanCNVFiles <- arguments$args
 }
-
-#connect <- function() dbConnect(MySQL(), host = "10.0.200.48", port = 38493, user = "embl", password = "embl", dbname = 'homo_sapiens_core_75_37')
-#cat('Connecting to ensembl ... ')
-#mydb <- connect()
-#on.exit(dbDisconnect(mydb))
-
-#query <- "select r.name as chrom,
-#g.seq_region_start as start,
-#g.seq_region_end as end,
-#x.display_label as hgnc,
-#k.band as band
-#from gene as g
-#join seq_region as r on g.seq_region_id = r.seq_region_id
-#join xref as x on g.display_xref_id = x.xref_id
-#left join karyotype k on g.seq_region_id = k.seq_region_id
-#and ((g.seq_region_start >= k.seq_region_start and g.seq_region_start <= k.seq_region_end)
-#or (g.seq_region_end >= k.seq_region_start and g.seq_region_end <= k.seq_region_end))
-#where x.external_db_id = 1100;"
-#repeat {
-#    rs <- try(dbSendQuery(mydb, query), silent = T)
-#    if (is(rs, "try-error")) {
-#        cat("Lost connection to mysql db ... ")
-#        mydb <- connect()
-#        cat("reconnected\n")
-#    } else {
-#        break
-#    }
-#}
-#genes <- dbFetch(rs, -1)
-#cat(paste("Found", nrow(genes), "records\n"))
-
-#genes %<>% filter(chrom %in% as.character(c(1:22, "X", "Y"))) %>%
-#    distinct(hgnc) %>%
-#    arrange(as.integer(chrom), start, end)
-
-#if (!is.null(opt$genesFile)) {
-#    g <- scan(opt$genesFile, what = 'character')
-#    genes %<>% filter(hgnc %in% g)
-#    absentGenes <- g[!g %in% genes$hgnc]
-#    if (length(absentGenes) > 0) {
-#        print("Unable to find", length(absentGenes), "in database\n");
-#        cat(absentGenes, sep = '\n');
-#    }
-#}
-
-#cat(paste("Filtering to", nrow(genes), "records\n"))
 
 genes <- read.delim(opt$genesFile, as.is=T, check.names=F)
 genes$chrom <- gsub("chr", "", genes$chrom)
@@ -103,25 +62,20 @@ mm <- lapply(varscanCNVFiles, function(f) {
     df <- as.data.frame(cbind(mcols(genesGR)[subjectHits(fo),], mcols(tabGR)[queryHits(fo),]))
     df %<>% group_by(hgnc) %>% top_n(1, abs(log2Ratio))
 
-    load(gsub("collapsed_seg.txt", "segment.Rdata", f, fixed=T))
-    noise <- median(abs(assayDataElement(segmented,"copynumber")-assayDataElement(segmented,"segmented")))
+	if ("GL_LRR" %in% opt$summaryType) {
+		load(gsub("collapsed_seg.txt", "segment.Rdata", f, fixed=T))
+		noise <- median(abs(assayDataElement(segmented,"copynumber")-assayDataElement(segmented,"segmented")))
 
-    lrr <- sort(assayDataElement(segmented,"copynumber"))
-#    if (noise <= 0.2) { lrr <- lrr[round(0.25*length(lrr)):round(0.75*length(lrr))]
-#    } else if ( noise <= 0.3 ) { lrr <- lrr[round(0.275*length(lrr)):round(0.725*length(lrr))]
-#    } else { lrr <- lrr[round(0.3*length(lrr)):round(0.7*length(lrr))]}
+		lrr <- sort(assayDataElement(segmented,"copynumber"))
+		lrr <- lrr[round(0.25*length(lrr)):round(0.75*length(lrr))]
 
-#	if (noise <= 0.2) { lrr <- lrr[round(0.3*length(lrr)):round(0.7*length(lrr))]
-#	} else if ( noise <= 0.3 ) { lrr <- lrr[round(0.275*length(lrr)):round(0.725*length(lrr))]
-#	} else { 
-	lrr <- lrr[round(0.25*length(lrr)):round(0.75*length(lrr))]
-    df$GL2 <- 0
-    df$GL2[df$log2Ratio < median(lrr)-(2.5*sd(lrr))] <- -1
-    df$GL2[df$log2Ratio < median(lrr)-(7*sd(lrr))] <- -2
-    df$GL2[df$log2Ratio > median(lrr)+(2*sd(lrr))] <- 1
-    df$GL2[df$log2Ratio > median(lrr)+(6*sd(lrr))] <- 2
-
-    df %>% select(hgnc, GL2, log2Ratio) %>% ungroup
+		df$GL_LRR <- 0
+		df$GL_LRR[df$log2Ratio < median(lrr)-(2.5*sd(lrr))] <- -1
+		df$GL_LRR[df$log2Ratio < median(lrr)-(7*sd(lrr))] <- -2
+		df$GL_LRR[df$log2Ratio > median(lrr)+(2*sd(lrr))] <- 1
+		df$GL_LRR[df$log2Ratio > median(lrr)+(6*sd(lrr))] <- 2
+	}
+	df %>% select(hgnc, GL_LRR, log2Ratio) %>% ungroup
 })
 names(mm) <- varscanCNVFiles
 for (f in varscanCNVFiles) {
@@ -130,7 +84,61 @@ for (f in varscanCNVFiles) {
 #    colnames(mm[[f]])[2] <- paste(n, c("LRR_threshold"), sep="_")
 }
 
-mm <- left_join(genes, join_all(mm, type = 'full', by="hgnc")) %>% arrange(as.integer(chrom), start, end)
-write.table(mm, file=opt$outFile, sep="\t", row.names=F, na="", quote=F)
+mm <- lapply(mm, function(x){
+	x[match(genes$hgnc, x$hgnc),-1]
+})
+mm <- cbind(genes, bind_cols(mm))
 
+save.image(paste(opt$outFile, ".RData", sep=""))
 
+seg_sample <- seg_chr <- seg_band <- seg_start <- seg_end <- seg_cnlr <- seg_genes <- seg_type <- seg_GLtype <- NA
+for (i in grep("GL", colnames(mm))) {
+	for(chr in intersect(c(1:22,"X"), unique(mm$chrom))) {
+		tt <- mm[which(mm$chrom==chr),c(1:5,i), drop=F]
+		tt[which(is.na(tt[,6])),6] <- -1000
+		rr <- rle(tt[,6]); 
+		if (rr$values[1]== -1000) {
+			rr$values[1] <- rr$values[2]
+		}
+		if (rr$values[length(rr$values)]== -1000) {
+			rr$values[length(rr$values)] <- rr$values[length(rr$values)-1]
+		}
+		for ( idx in which(rr$values== -1000)) {
+			if (rr$values[idx-1]== rr$values[idx+1]) { rr$values[idx] <- rr$values[idx-1]}
+			else {rr$values[idx] <- 0}
+		}
+		mm[which(mm$chrom==chr),i] <- as.vector(unlist(apply(cbind(rr$value,rr$length), 1, function(x){rep(x[1],x[2])})))
+
+		tt <- mm[which(mm$chrom==chr),c(1:5,i), drop=F]
+		rr <- rle(tt[,6]); 
+		if (length(rr$length)>1) {
+			cs <- cumsum(rr$lengths)
+			start <- c(1,cs[1:(length(cs)-1)]+1)
+			end <- cs
+		} else {start <- 1; end <- rr$lengths[1] }
+
+		for (idx in which(rr$values %in% c(-2,2))) {
+			if (rr$values[idx] %in% c(-2,2)) {
+				seg_sample <- c(seg_sample, colnames(mm)[i])
+				seg_chr <- c(seg_chr, chr)
+				seg_band <- c(seg_band, paste(tt[start[idx],"band"], tt[end[idx],"band"], sep="-"))
+				seg_start <- c(seg_start, tt[start[idx],"start"])
+				seg_end <- c(seg_end, tt[end[idx],"end"])
+				seg_genes <- c(seg_genes, toString(mm[start[idx]:end[idx],"hgnc"]))
+				seg_type <- c(seg_type, rr$values[idx])
+				seg_GLtype <- c(seg_GLtype, colnames(mm)[i])
+			}
+		}		
+
+	}
+}
+seg_type[which(seg_type==2)] <- "amp"
+seg_type[which(seg_type== -2)] <- "del"
+write.table(cbind(seg_sample, seg_chr, seg_band, seg_start, seg_end, seg_genes, seg_type, seg_GLtype), 
+	file=paste(opt$outFile, ".ampdel.txt", sep=""), sep="\t", row.names=F, na="", quote=F)
+
+lapply(opt$summaryType, function(c){
+	mm2 <- cbind(mm[,1:5], mm[,grep(c, colnames(mm))])
+	colnames(mm2) <- gsub(paste("_", c, sep=""), "", colnames(mm2))
+	write.table(mm2, file=paste(opt$outFile, ".", c, ".txt", sep=""), sep="\t", row.names=F, na="", quote=F)
+})

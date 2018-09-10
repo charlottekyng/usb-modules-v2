@@ -7,7 +7,8 @@ suppressPackageStartupMessages(library("xlsx"));
 
 optList <- list(
 	make_option("--outFile", default = NULL, help = "output file"),
-	make_option("--outputFormat", default = "EXCEL", help = "output Format, EXCEL or TXT")
+	make_option("--outputFormat", default = "EXCEL", help = "output Format, EXCEL or TXT"),
+	make_option("--filterFlags", default = NULL, help = "filter out these FILTER flags")
 )
 parser <- OptionParser(usage = "%prog [options] mutation_table", option_list = optList);
 arguments <- parse_args(parser, positional_arguments = T);
@@ -32,11 +33,17 @@ output_fields = c("TUMOR_SAMPLE", "NORMAL_SAMPLE", "ANN[*].GENE", "ANN[*].GENEID
 	"cancer_gene_census", "kandoth", "lawrence", "hap_insuf", "ExACnontcga_AC", "ExACnontcga_AF", 
 	"facetsCF", "facetsTCN_EM", "facetsLCN_EM", "facetsLOHCall", "facetsMultiplicity", "ccf", "clonalStatus", "ccfConfUpper", "ccfConfLower",
 	#"dbNSFP_MutationTaster_pred", "dbNSFP_Polyphen2_HVAR_pred", "dbNSFP_Interpro_domain", 
-	"AMPLICON_NUM",
+	"AMPLICON_NUM", "HRUN",
 	"CHROM", "POS", "ID", "REF", "ALT", "FILTER", "dbNSFP_Uniprot_acc")
 
 output <- lapply(files, function(file) {
 	tab <- read.delim(file, as.is=T, check.names=F)
+
+	if (!is.null(opt$filterFlags)) {
+		keep_idx <- lapply(tab$FILTER, function(x) { xx=strsplit(x, split=";")[[1]]; 
+			if (any(xx %in% opt$filterFlags)) { F } else { T }})
+		tab <- tab[keep_idx,]
+	}
 	
 	
 	missing_fields <- output_fields[which(!output_fields %in% colnames(tab))]

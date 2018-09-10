@@ -22,6 +22,9 @@ endif
 ifeq ($(PANEL),CCPv3)
 TARGETS_FILE_INTERVALS ?= $(BED_DIR)/OCAv3.20170110.designed.bed
 TARGETS_FILE_MUTATIONS ?= $(BED_DIR)/OCAv3.20170110.designed.bed
+TARGETS_FILE_INTERVALS_POOLS ?= $(BED_DIR)/OCAv3.20170110.designed_pool1.bed $(BED_DIR)/OCAv3.20170110.designed_pool2.bed
+TARGETS_FILE_INTERVALS_POOLS_CNA ?= $(BED_DIR)/OCAv3.20170110.designed_pool1_cna.bed $(BED_DIR)/OCAv3.20170110.designed_pool2_cna.bed
+TARGETS_FILE_GENES ?= $(BED_DIR)/OCAv3.20170110.genes.txt
 PRIMER_TRIM_BED ?= $(BED_DIR)/OCAv3.20170110.designed.unmerged.bed
 TARGETS_FILE_INTERVALS_MERGED ?= $(BED_DIR)/OCAv3.20170110.designed.merged.bed
 DBSNP_TARGETS_INTERVALS ?= $(BED_DIR)/OCAv3.20170110.dbsnp_138.vcf
@@ -39,6 +42,7 @@ ifeq ($(PANEL),HCC)
 INCLUDE_LINCRNA_IN_SUMMARY ?= true
 TARGETS_FILE_INTERVALS ?= $(BED_DIR)/AmpliSeqHCC_WG_IAD97706_v2.20160511.designed.bed
 TARGETS_FILE_INTERVALS_POOLS ?= $(BED_DIR)/AmpliSeqHCC_WG_IAD97706_v2.20160511.designed_pool1.bed $(BED_DIR)/AmpliSeqHCC_WG_IAD97706_v2.20160511.designed_pool2.bed
+TARGETS_FILE_INTERVALS_POOLS_CNA ?= $(BED_DIR)/AmpliSeqHCC_WG_IAD97706_v2.20160511.designed_pool1_cna.bed $(BED_DIR)/AmpliSeqHCC_WG_IAD97706_v2.20160511.designed_pool2_cna.bed
 TARGETS_FILE_MUTATIONS ?= $(BED_DIR)/AmpliSeqHCC_WG_IAD97706_v2.20160511.designed.bed
 TARGETS_FILE_GENES ?= $(BED_DIR)/AmpliSeqHCC_WG_IAD97706_v2.20160511.genes.txt
 PRIMER_TRIM_BED ?= $(BED_DIR)/AmpliSeqHCC_WG_IAD97706_v2.20160511.designed.unmerged.bed
@@ -50,6 +54,8 @@ endif
 ifeq ($(PANEL),BREAST)
 INCLUDE_LINCRNA_IN_SUMMARY ?= true
 TARGETS_FILE_INTERVALS ?= $(BED_DIR)/AmpliSeqBRCA_IAD109552_167_Designed.bed
+TARGETS_FILE_INTERVALS_POOLS ?= $(BED_DIR)/AmpliSeqBRCA_IAD109552_167_Designed_pool1.bed $(BED_DIR)/AmpliSeqBRCA_IAD109552_167_Designed_pool2.bed
+TARGETS_FILE_INTERVALS_POOLS_CNA ?= $(BED_DIR)/AmpliSeqBRCA_IAD109552_167_Designed_pool1_cna.bed $(BED_DIR)/AmpliSeqBRCA_IAD109552_167_Designed_pool2_cna.bed
 TARGETS_FILE_MUTATIONS ?= $(BED_DIR)/AmpliSeqBRCA_IAD109552_167_Designed.bed
 TARGETS_FILE_GENES ?= $(BED_DIR)/AmpliSeqBRCA_IAD109552_167.genes.txt
 PRIMER_TRIM_BED ?= $(BED_DIR)/AmpliSeqBRCA_IAD109552_167_Designed.unmerged.bed
@@ -61,6 +67,7 @@ endif
 
 RESOURCE_REQ ?= medium
 FACETS_TARGETS_INTERVALS ?= $(DBSNP_TARGETS_INTERVALS)
+TARGETS_FILE_INTERVALS_POOLS_CNA ?= $(TARGETS_FILE_INTERVALS_POOLS)
 
 #ifndef $(TARGETS_FILE_INTERVALS)
 #CHROMOSOMES ?= chr1 chr2 chr3 chr4 chr5 chr6 chr7 chr8 chr9 chr10 chr11 chr12 chr13 chr14 chr15 chr16 chr17 chr18 chr19 chr20 chr21 chr22 chrX $(if $(findstring true,$(INCLUDE_CHR_Y)),chrY) chrM
@@ -90,9 +97,8 @@ OMNI ?= $(GSA_REF_DIR)/1000G_omni2.5.hg19.sites.vcf
 HAPMAP ?= $(GSA_REF_DIR)/hapmap_3.3.hg19.sites.vcf
 
 CLINVAR ?= $(ANN_DIR)/clinvar.vcf
-EXAC_NONTCGA ?= $(ANN_DIR)/ExAC_nonTCGA.r0.3.1.sites.vep.vcf
+EXAC_NONTCGA ?= $(ANN_DIR)/ExAC_nonTCGA.r0.3.1.sites.vep.edited.vcf
 COSMIC ?= $(ANN_DIR)/CosmicCodingMuts.sorted.vcf
-#CANCER_HOTSPOT_VCF ?= $(ANN_DIR)/publication_hotspots_inclnoncoding.vcf
 CANCER_HOTSPOT_VCF = $(ANN_DIR)/publication_hotspots_inclnoncoding_incl3d.vcf
 
 HAPLOTYPE_INSUF_BED = $(ANN_DIR)/haploinsufficient.genes.bed

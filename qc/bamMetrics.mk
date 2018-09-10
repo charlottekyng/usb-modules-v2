@@ -92,7 +92,7 @@ metrics/%.wgs_metrics.txt : bam/%.bam bam/%.bam.bai
 		INPUT=$< OUTPUT=$@ COUNT_UNPAIRED=true MINIMUM_MAPPING_QUALITY=30")
 
 metrics/%.rnaseq_metrics.txt : bam/%.bam bam/%.bam.bai
-	$(call RUN,1,$(RESOURCE_REQ_MEDIUM_MEM),$(RESOURCE_REQ_SHORT),$(R_MODULE) $(JAVA8_MODULE),"\
+	$(call RUN,1,$(RESOURCE_REQ_MEDIUM_MEM),$(RESOURCE_REQ_VSHORT),$(R_MODULE) $(JAVA8_MODULE),"\
 		$(call PICARD,CollectRnaSeqMetrics,$(RESOURCE_REQ_MEDIUM_MEM_JAVA)) \
 		REF_FLAT=$(GENE_REF_FLAT) RIBOSOMAL_INTERVALS=$(RIBOSOMAL_INTERVALS) \
 		STRAND_SPECIFICITY=$(STRAND_SPECIFICITY) \
@@ -135,12 +135,16 @@ metrics/%.wgs.oxog_metrics.txt : bam/%.bam bam/%.bam.bai
 	$(call PICARD,CollectOxoGMetrics,$(RESOURCE_REQ_MEDIUM_MEM_JAVA)) INPUT=$< OUTPUT=$@ DB_SNP=$(DBSNP)")
 
 metrics/%.flagstats.txt : bam/%.bam bam/%.bam.bai
-	$(call RUN,1,$(RESOURCE_REQ_LOW_MEM),$(RESOURCE_REQ_SHORT),$(SAMTOOLS_MODULE),"\
+	$(call RUN,1,$(RESOURCE_REQ_LOW_MEM),$(RESOURCE_REQ_VSHORT),$(SAMTOOLS_MODULE),"\
 	$(SAMTOOLS) flagstat $< > $@")
 
 metrics/%.flagstatsQ30.txt : bam/%.bam bam/%.bam.bai
 	$(call RUN,1,$(RESOURCE_REQ_LOW_MEM),$(RESOURCE_REQ_SHORT),$(SAMTOOLS_MODULE),"\
 	$(SAMTOOLS) view -bh -q 30 $< | $(SAMTOOLS) flagstat - > $@")
+
+metrics/%.idxstats.txt : bam/%.bam bam/%.bam.bai
+	$(call RUN,1,$(RESOURCE_REQ_LOW_MEM),$(RESOURCE_REQ_VSHORT),$(SAMTOOLS_MODULE),"\
+	$(SAMTOOLS) idxstats $< > $@")
 
 # summarize metrics into one file
 metrics/all$(PROJECT_PREFIX).hs_metrics.txt : $(foreach sample,$(SAMPLES),metrics/$(sample).hs_metrics.txt)

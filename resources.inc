@@ -1,3 +1,6 @@
+### Streamline setting up resource requirements by 
+### setting up main groups RESOURCE_REQ
+### Usage: RESOURCE_REQ=[low|medium|high|vhigh]
 
 QOS_30min = 00:29:59
 QOS_6h = 05:59:59

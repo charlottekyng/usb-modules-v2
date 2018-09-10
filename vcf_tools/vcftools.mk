@@ -6,7 +6,6 @@ ifndef VCFTOOLS_MK
 include usb-modules-v2/Makefile.inc
 
 LOGDIR ?= log/vcf.$(NOW)
-
 ..DUMMY := $(shell mkdir -p version; echo "$(SNP_EFF) &> version/snp_eff.txt")
 
 ######### GZ & INDEX #####
@@ -26,17 +25,18 @@ LOGDIR ?= log/vcf.$(NOW)
 
 %.target_ft.vcf : %.vcf
 	$(call CHECK_VCF,$<,$@,\
-	$(call RUN,1,$(RESOURCE_REQ_MEDIUM_MEM),$(RESOURCE_REQ_SHORT),$(JAVA8_MODULE),"\
-	$(call GATK,VariantFiltration,$(RESOURCE_REQ_MEDIUM_MEM_JAVA)) \
-	-R $(REF_FASTA) -V $< -o $@ --mask $(TARGETS_FILE_INTERVALS) \
-	--maskName targetInterval --filterNotInMask && $(RM) $< $<.idx"))
+	$(call RUN,1,$(RESOURCE_REQ_MEDIUM_MEM),$(RESOURCE_REQ_SHORT),$(GATK40_MODULE),"\
+	$(call GATK40,VariantFiltration,$(RESOURCE_REQ_MEDIUM_MEM_JAVA)) \
+	-R $(REF_FASTA) -V $< -O $@ \
+	--mask $(TARGETS_FILE_INTERVALS) --mask-name targetInterval \
+	--filter-not-in-mask && $(RM) $< $<.idx"))
 
 %.het_ft.vcf : %.vcf
 	$(call CHECK_VCF,$<,$@,\
-	$(call RUN,1,$(RESOURCE_REQ_MEDIUM_MEM),$(RESOURCE_REQ_SHORT),$(JAVA8_MODULE),"\
-	$(call GATK,VariantFiltration,$(RESOURCE_REQ_MEDIUM_MEM_JAVA)) \
-	-R $(REF_FASTA) -V $< -o $@ \
-	--genotypeFilterExpression 'isHet == 1' --genotypeFilterName 'Heterozygous positions'"))
+	$(call RUN,1,$(RESOURCE_REQ_MEDIUM_MEM),$(RESOURCE_REQ_SHORT),$(GATK40_MODULE),"\
+	$(call GATK40,VariantFiltration,$(RESOURCE_REQ_MEDIUM_MEM_JAVA)) \
+	-R $(REF_FASTA) -V $< -O $@ \
+	--genotype-filter-expression 'isHet == 1' --genotype-filter-name 'Heterozygous positions'"))
 
 %.biallelic_ft.vcf : %.vcf.gz
 	$(call CHECK_VCF,$<,$@,\
@@ -55,18 +55,19 @@ LOGDIR ?= log/vcf.$(NOW)
 
 %.strelka_ft.vcf : %.vcf
 	$(call CHECK_VCF,$<,$@,\
-	$(call RUN,1,$(RESOURCE_REQ_MEDIUM_MEM),$(RESOURCE_REQ_SHORT),$(JAVA8_MODULE),"\
-	$(call GATK,VariantFiltration,$(RESOURCE_REQ_MEDIUM_MEM_JAVA)) \
-	-R $(REF_FASTA) -V $< -o $@ \
-	--filterExpression 'QSI_NT < 30' --filterName QSI_ref \
-	--filterExpression 'IHP > 14' --filterName iHpol \
-	--filterExpression 'MQ0 > 1' --filterName MQ0 && $(RM) $<"))
+	$(call RUN,1,$(RESOURCE_REQ_MEDIUM_MEM),$(RESOURCE_REQ_SHORT),$(GATK40_MODULE),"\
+	$(call GATK40,VariantFiltration,$(RESOURCE_REQ_MEDIUM_MEM_JAVA)) \
+	-R $(REF_FASTA) -V $< -O $@ \
+	--filter-expression 'QSI_NT < 30' --filter-name QSI_ref \
+	--filter-expression 'IHP > 14' --filter-name iHpol \
+	--filter-expression 'MQ0 > 1' --filter-name MQ0 && $(RM) $<"))
 
 %.hotspot.vcf : %.vcf
 	$(call CHECK_VCF,$<,$@,\
-	$(call RUN,1,$(RESOURCE_REQ_MEDIUM_MEM),$(RESOURCE_REQ_SHORT),$(JAVA8_MODULE),"\
-		$(call GATK,VariantFiltration,$(RESOURCE_REQ_MEDIUM_MEM_JAVA)) -R $(REF_FASTA) -V $< -o $@ \
-		--maskName HOTSPOT --mask $(CANCER_HOTSPOT_VCF) && $(RM) $< $<.idx"))
+	$(call RUN,1,$(RESOURCE_REQ_MEDIUM_MEM),$(RESOURCE_REQ_SHORT),$(GATK40_MODULE),"\
+		$(call GATK40,VariantFiltration,$(RESOURCE_REQ_MEDIUM_MEM_JAVA)) \
+		-R $(REF_FASTA) -V $< -O $@ \
+		--mask $(CANCER_HOTSPOT_VCF) --mask-name HOTSPOT && $(RM) $< $<.idx"))
 
 ## This is definitely broken
 # somatic filter for structural variants
@@ -109,7 +110,7 @@ LOGDIR ?= log/vcf.$(NOW)
 %.post_bcftools.vcf : %.vcf
 	$(call CHECK_VCF,$<,$@,\
 	$(call RUN,1,$(RESOURCE_REQ_LOW_MEM),$(RESOURCE_REQ_VSHORT),,"\
-	grep -v "##contig" $< | $(VCF_SORT) $(REF_DICT) - > $@"))
+	grep -v '##contig' $< | $(VCF_SORT) $(REF_DICT) - > $@"))
 
 %.sorted.vcf : %.vcf
 	$(call CHECK_VCF,$<,$@,\
@@ -209,11 +210,6 @@ $(foreach sample,$(SAMPLES),$(eval $(call hrun-sample,$(sample))))
 
 ifdef SAMPLE_PAIRS
 define annotate-facets-pair
-#vcf/$1_$2.%.facets.vcf : vcf/$1_$2.%.vcf facets/cncf/$1_$2.Rdata
-#	$$(call CHECK_VCF,$$<,$$@,\
-#	$$(call RUN,1,$$(RESOURCE_REQ_LOW_MEM),$$(RESOURCE_REQ_VSHORT),$$(R_MODULE),"\
-#		$$(ANNOTATE_FACETS_VCF) --genome \"$$(REF)\" --tumor \"$1\" --facetsRdata $$(<<) --outFile $$@ $$< && \
-#		$(RM) $<"))
 vcf/$1_$2.%.facets.vcf : vcf/$1_$2.%.vcf facets/cncf/$1_$2.cncf.txt facets/cncf/$1_$2.out 
 	$$(call CHECK_VCF,$$<,$$@,\
 	purity=`grep Purity $$(<<<) | cut -f2 -d'=' | sed 's/NA/0.1/; s/ //g;'` && \
@@ -288,6 +284,7 @@ $(foreach pair,$(SAMPLE_PAIRS),$(eval $(call rename-samples-tumor-normal,$(tumor
 VCF_FIELDS = CHROM POS ID REF ALT QUAL FILTER
 ANN_FIELDS = $(addprefix ANN[*].,ALLELE EFFECT IMPACT GENE GENEID FEATURE FEATUREID BIOTYPE RANK \
 	HGVS_C HGVS_P CDNA_POS CDNA_LEN CDS_POS CDS_LEN AA_POS AA_LEN DISTANCE ERRORS)
+
 tables/%.opl_tab.txt : vcf/%.vcf
 	$(call RUN,1,$(RESOURCE_REQ_MEDIUM_MEM),$(RESOURCE_REQ_VSHORT),$(SNP_EFF_MODULE),"\
 	format_fields=\$$(grep '^##FORMAT=<ID=' $< | sed 's/dbNSFP_GERP++/dbNSFP_GERP/g' | sed 's/.*ID=//; s/,.*//;' | tr '\n' ' '); \
@@ -349,9 +346,6 @@ sufamscreen/%.opl_tab.txt : sufamscreen/%.vcf
 	$(call RUN,1,$(RESOURCE_REQ_MEDIUM_MEM),$(RESOURCE_REQ_VSHORT),$(PERL_MODULE),"\
 	$(VCF_JOIN_EFF) < $< > $@")
 	
-#%.pass.txt : %.txt
-#	$(INIT) head -1 $< > $@ && awk '$$6 == "PASS" { print }' $< >> $@ || true
-
 
 # merge tables
 alltables/all$(PROJECT_PREFIX).%.txt : $(foreach sample,$(SAMPLES),tables/$(sample).%.txt)
@@ -368,22 +362,26 @@ alltables/allTN$(PROJECT_PREFIX).%.txt : $(foreach pair,$(SAMPLE_PAIRS),tables/$
 	$(RBIND) --tumorNormal $^ > $@")
 endif
 
+%.all_eff.txt : %.txt
+	$(INIT) ln -f $< $@
+
 %.high_moderate.txt : %.txt
-	col=$$(head -1 $< | tr '\t' '\n' | grep -n "IMPACT" | sed 's/:.*//'); \
-	$(INIT) head -1 $< > $@ && awk -v col=$$col 'match($$col, /MODERATE/) || match($$col, /HIGH/)' $< >> $@
+	col_imp=$$(head -1 $< | tr '\t' '\n' | grep -n "IMPACT" | sed 's/:.*//'); \
+	$(INIT) head -1 $< > $@ && awk -v col_imp=$$col_imp 'match($$col_imp, /MODERATE/) || match($$col_imp, /HIGH/)' $< >> $@
 
 %.low_modifier.txt : %.txt
-	col=$$(head -1 $< | tr '\t' '\n' | grep -n "IMPACT" | sed 's/:.*//'); \
-	$(INIT) head -1 $< > $@ && awk -v col=$$col '! (match($$col, /MODERATE/) || match($$col, /HIGH/)) && (match($$col, /LOW/) || match($$col,/MODIFIER/))' $< >> $@
+	col_imp=$$(head -1 $< | tr '\t' '\n' | grep -n "IMPACT" | sed 's/:.*//'); \
+	$(INIT) head -1 $< > $@ && awk -v col_imp=$$col_imp '! (match($$col_imp, /MODERATE/) || match($$col_imp, /HIGH/)) && (match($$col_imp, /LOW/) || match($$col_imp, /MODIFIER/))' $< >> $@
 
 %.synonymous.txt : %.txt
 	col_imp=$$(head -1 $< | tr '\t' '\n' | grep -n "IMPACT" | sed 's/:.*//'); \
 	col_eff=$$(head -1 $< | tr '\t' '\n' | grep -n "EFFECT" | sed 's/:.*//'); \
-	$(INIT) head -1 $< > $@ && awk -v col_imp=$$col_imp -v col_eff=$$col_eff '! (match($$col_imp, /MODERATE/) || match($$col_imp, /HIGH/)) && (match($$col_imp, /LOW/) && (match($$col_eff, /synonymous_variant/)))' $< >> $@
+	$(INIT) head -1 $< > $@ && awk -v col_imp=$$col_imp -v col_eff=$$col_eff '! (match($$col_imp, /MODERATE/) || match($$col_imp, /HIGH/)) && \
+		(match($$col_imp, /LOW/) && (match($$col_eff, /synonymous_variant/)))' $< >> $@
 
 %.nonsynonymous.txt : %.txt
-	col=$$(head -1 $< | tr '\t' '\n' | grep -n "IMPACT" | sed 's/:.*//'); \
-	$(INIT) head -1 $< > $@ && awk -v col=$$col 'match($$col, /MODERATE/) || match($$col, /HIGH/)' $< >> $@
+	col_imp=$$(head -1 $< | tr '\t' '\n' | grep -n "IMPACT" | sed 's/:.*//'); \
+	$(INIT) head -1 $< > $@ && awk -v col_imp=$$col_imp 'match($$col_imp, /MODERATE/) || match($$col_imp, /HIGH/)' $< >> $@
 
 %.nonsynonymous_hotspot.txt : %.txt
 	col_imp=$$(head -1 $< | tr '\t' '\n' | grep -n "IMPACT" | sed 's/:.*//'); \
@@ -396,7 +394,9 @@ endif
 	col_eff=$$(head -1 $< | tr '\t' '\n' | grep -n "EFFECT" | sed 's/:.*//'); \
 	col_filter=$$(head -1 $< | tr '\t' '\n' | grep -n "FILTER"); \
 	$(INIT) head -1 $< > $@ && awk -v col_imp=$$col_imp -v col_eff=$$col_eff -v col_filter=$$col_filter \
-	'(match($$col_imp, /MODERATE/) || match($$col_imp, /HIGH/) || (match($$col_imp, /LOW/) && match($$col_eff, /synonymous_variant/)) || match($$col_filter, /HOTSPOT/))' $< >> $@
+	'(match($$col_imp, /MODERATE/) || match($$col_imp, /HIGH/) || \
+	 (match($$col_imp, /LOW/) && match($$col_eff, /synonymous_variant/)) || \
+	match($$col_filter, /HOTSPOT/))' $< >> $@
 
 %.nonsynonymous_synonymous_hotspot_lincRNA.txt : %.txt
 	col_imp=$$(head -1 $< | tr '\t' '\n' | grep -n "IMPACT" | sed 's/:.*//'); \
@@ -404,7 +404,8 @@ endif
 	col_biotype=$$(head -1 $< | tr '\t' '\n' | grep -n "BIOTYPE" | sed 's/:.*//'); \
 	col_filter=$$(head -1 $< | tr '\t' '\n' | grep -n "FILTER"); \
 	$(INIT) head -1 $< > $@ && awk -v col_imp=$$col_imp -v col_eff=$$col_eff -v col_biotype=$$col_biotype -v col_filter=$$col_filter \
-	'(match($$col_imp, /MODERATE/) || match($$col_imp, /HIGH/) || (match($$col_imp, /LOW/) && match($$col_eff, /synonymous_variant/)) || (match($$col_biotype, /lincRNA/) && match($$col_eff, /non_coding_exon/)) || match($$col_filter, /HOTSPOT/))' $< >> $@
+	'(match($$col_imp, /MODERATE/) || match($$col_imp, /HIGH/) || (match($$col_imp, /LOW/) && match($$col_eff, /synonymous_variant/)) || \
+	(match($$col_biotype, /lincRNA/) && match($$col_eff, /non_coding_exon/)) || match($$col_filter, /HOTSPOT/))' $< >> $@
 
 %.nonsynonymous_synonymous_hotspot_lincRNA_upstream.txt : %.txt
 	col_imp=$$(head -1 $< | tr '\t' '\n' | grep -n "IMPACT" | sed 's/:.*//'); \
@@ -413,8 +414,8 @@ endif
 	col_filter=$$(head -1 $< | tr '\t' '\n' | grep -n "FILTER"); \
 	$(INIT) head -1 $< > $@ && awk -v col_imp=$$col_imp -v col_eff=$$col_eff -v col_biotype=$$col_biotype -v col_filter=$$col_filter \
 	'(match($$col_imp, /MODERATE/) || match($$col_imp, /HIGH/) || (match($$col_imp, /LOW/) && match($$col_eff, /synonymous_variant/)) || \
-	(match($$col_biotype, /lincRNA/) && match($$col_eff, /non_coding_exon/)) || match($$col_filter, /HOTSPOT/)) \
-	(match($$col_eff, /upstream_gene_variant/) && match($$col_imp, /MODIFIER/))' $< >> $@
+	(match($$col_biotype, /lincRNA/) && match($$col_eff, /non_coding_exon/)) || match($$col_filter, /HOTSPOT/) || \
+	(match($$col_eff, /upstream_gene_variant/) && match($$col_imp, /MODIFIER/)))' $< >> $@
 
 
 #### vcf stats
