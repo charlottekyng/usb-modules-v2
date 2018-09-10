@@ -67,19 +67,16 @@ endef
 $(foreach interval,$(shell seq 0 $(MAX_INTERVAL_IDX)),$(eval $(call hapcall-interval,$(shell printf "%04d" $(interval)))))
 
 define genomicsdb-interval
-gatk/intervals_db/$1/vcfheader.vcf : $$(foreach sample,$$(SAMPLES),gatk/intervals_gvcf/$1/$$(sample).variants.vcf.gz) gatk/intervals/$1-scattered.intervals
+gatk/intervals_db/$1.db.vcf.gz : $$(foreach sample,$$(SAMPLES),gatk/intervals_gvcf/$1/$$(sample).variants.vcf.gz) gatk/intervals/$1-scattered.intervals
 	$$(call RUN,1,$$(RESOURCE_REQ_HIGH_MEM),$$(RESOURCE_REQ_SHORT),$$(GATK40_MODULE),"\
-	$$(MKDIR) gatk/intervals_db/; $$(RMR) $$(dir $$@); \
+	$$(MKDIR) gatk/intervals_db/; $$(RMR) $$(@D)/$1; \
 	$$(call GATK40,GenomicsDBImport,$$(RESOURCE_REQ_HIGH_MEM_JAVA)) \
-	$$(foreach vcf,$$(filter %.vcf.gz,$$^),-V $$(vcf) ) --genomicsdb-workspace-path $$(dir $$@) \
-	-L $$(lastword $$^)")
+	$$(foreach vcf,$$(filter %.vcf.gz,$$^),-V $$(vcf) ) --genomicsdb-workspace-path $$(@D)/$1 \
+	-L $$(lastword $$^) && \
+	$$(call GATK40,GenotypeGVCFs,$$(RESOURCE_REQ_HIGH_MEM_JAVA)) -R $$(REF_FASTA) \
+	-V gendb://$$(@D)/$1 -O $$@ && $$(RMR) $$(@D)/$1")
 endef
 $(foreach interval,$(shell seq 0 $(MAX_INTERVAL_IDX)),$(eval $(call genomicsdb-interval,$(shell printf "%04d" $(interval)))))
-
-gatk/intervals_db/%.db.vcf.gz : gatk/intervals_db/%/vcfheader.vcf 
-	$(call RUN,1,$(RESOURCE_REQ_HIGH_MEM),$(RESOURCE_REQ_SHORT),$(GATK40_MODULE),"\
-	$(call GATK40,GenotypeGVCFs,$(RESOURCE_REQ_HIGH_MEM_JAVA)) -R $(REF_FASTA) \
-	-V gendb://$(dir $<) -O $@")
 
 gatk/gvcf/genomics.variants.vcf.gz : $(foreach interval,$(shell seq 0 $(MAX_INTERVAL_IDX)),gatk/intervals_db/$(shell printf "%04d" $(interval)).db.vcf.gz)
 	$(call RUN,1,$(RESOURCE_REQ_MEDIUM_MEM),$(RESOURCE_REQ_SHORT),$(GATK40_MODULE),"\
