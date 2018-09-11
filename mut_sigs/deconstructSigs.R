@@ -174,11 +174,11 @@ if(nrow(pointmuts)>0) {
 			if(opt$num_iter>=10){
 				signaturesSD <- do.call("rbind", lapply(ws, function(w) { w$weightsSD }))
 				colnames(signaturesSD) <- paste(colnames(signaturesSD), "SD", sep="")
-				pearson <- do.call("rbind", lapply(ws, function(w){ c(mean(w$corr), sd(w$corr))}))
-				colnames(pearson) <- c("Pearson_expected_vs_observed", "Pearson_SD")
+				corr <- do.call("rbind", lapply(ws, function(w){ c(mean(w$corr), sd(w$corr))}))
+				colnames(corr) <- c("Spearman_expected_vs_observed", "Spearman_SD")
 				error <- do.call("rbind", lapply(ws, function(w){ c(mean(w$error), sd(w$corr))}))
 				colnames(error) <- c("Error_expected_vs_observed", "Error_SD")
-				signatures <- cbind(signatures, signaturesSD, pearson, error)
+				signatures <- cbind(signatures, signaturesSD, spearman, error)
 			}	
 		}
 	}
