@@ -231,12 +231,17 @@ MUTECT_MODULE ?= MuTect/1.1.7-Java-1.7.0_80
 PICARD_MODULE ?= picard/2.9.2
 VARSCAN_MODULE ?= VarScan/2.4.1-Java-1.7.0_80
 ANACONDA_MODULE ?= Anaconda3/5.0.1
+SINGULARITY_MODULE ?= Singularity/2.5.2
+VEP_MODULE ?= ensembl-vep/92.0-goolf-1.7.20-Perl-5.22.2
 
 PERL ?= perl
 JAVA ?= java -Djava.io.tmpdir=$(TMPDIR)
 PYTHON ?= python
 PYTHON_ENV_ACTIVATE ?= ml load $(ANACONDA_MODULE) && source activate 
 PYTHON_ENV_DEACTIVATE = source deactivate
+
+SINGULARITY_EXEC ?= singularity exec -B $(shell pwd)
+SINGULARITY_RUN ?= singularity run -B $(shell pwd)
 
 R_LIBS ?= $(USR_DIR)/$(R_MODULE)/lib64/R/library
 R ?= export R_LIBS=$(R_LIBS); R
@@ -341,6 +346,11 @@ SNP_SIFT_OPTS = -c $(SNP_EFF_CONFIG)
 VCF_EFF_ONE_PER_LINE = $(PERL) \$$EBROOTSNPEFF/scripts/vcfEffOnePerLine.pl
 VCF_JOIN_EFF = $(PERL) $(MODULE_SCRIPTS_DIR)/joinEff.pl
 
+VEP_CACHE_DIR ?= /scicore/home/terracci/GROUP/ref_nobackup/vep/
+VEP ?= vep --cache --offline --dir_cache $(VEP_CACHE_DIR) --no_stats --force_overwrite --pick --format vcf --vcf --symbol --terms SO
+VEP_PLUGIN_DIR ?= /scicore/home/terracci/GROUP/usr_nobackup/downloads/VEP_plugins
+
+
 ADD_GENE_LIST_ANNOTATION = $(RSCRIPT) usb-modules-v2/vcf_tools/addGeneListAnnotationToVcf.R
 ANNOTATE_FACETS_VCF = $(RSCRIPT) usb-modules-v2/copy_number/annotateFacets2Vcf.R
 
@@ -356,6 +366,14 @@ MUTATION_SUMMARY_RSCRIPT = $(RSCRIPT) usb-modules-v2/summary/mutation_summary_ex
 DECONSTRUCTSIGS = $(RSCRIPT) usb-modules-v2/mut_sigs/deconstructSigs.R
 DECONSTRUCTSIGS_NUMCORES ?= 8
 
+
+PVACSEQ ?= pvacseq
+PVACTOOLS_IMG ?= /scicore/home/terracci/GROUP/virtual_env/pvac.img
+IEDB_PATH ?= /scicore/home/terracci/GROUP/usr_nobackup/iedb
+PVACSEQ_OPTS ?= -e 8,9,10,11 --net-chop-method cterm --netmhc-stab --top-score-metric=lowest -d full \
+$(if $(findstring true,$(PVACSEQ_USE_LOCAL_IEDB)),--iedb-install-directory $(IEDB_PATH),)
+PVACSEQ_PREPARE_VCF ?= $(PERL) usb-modules-v2/neoepitopes/pvacseq_prepare_vcf.pl
+
 LST = $(RSCRIPT) usb-modules-v2/mut_sigs/lst.R
 
 PYCLONE ?= $(PYTHON_ENV_ACTIVATE) pyclonenv; PyClone
@@ -364,6 +382,7 @@ PYCLONE_BURNIN ?= 1000
 PYCLONE_SEED ?= 1234567
 PYCLONE_MAKE_MUT_TXT ?= $(RSCRIPT) usb-modules-v2/clonality/pyclone_make_input.R
 PYCLONE_MAKE_CLUSTER_TABLE ?= $(RSCRIPT) usb-modules-v2/clonality/pyclone_make_cluster_table.R
+PYCLONE_DECONSTRUCTSIGS ?= $(RSCRIPT) usb-modules-v2/clonality/pyclone_deconstuctSigs.R
 
 EXPANDS_MAKE_INPUT ?= $(RSCRIPT) usb-modules-v2/clonality/expands_make_input.R
 EXPANDS ?= $(RSCRIPT) usb-modules-v2/clonality/expandsRun.R

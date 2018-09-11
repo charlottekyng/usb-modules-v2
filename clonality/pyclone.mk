@@ -7,7 +7,7 @@ LOGDIR ?= log/pyclone.$(NOW)
 .DELETE_ON_ERROR:
 .PHONY : pyclone
 
-pyclone : $(foreach normal_sample,$(NORMAL_SAMPLES),pyclone/tables/$(normal_sample).cluster.txt)
+pyclone : $(foreach normal_sample,$(NORMAL_SAMPLES),pyclone/tables/$(normal_sample).cluster.txt pyclone/tables/$(normal_sample).clusters.signatures.RData)
 
 # There are edge cases with no mutations...
 CHECK_PYCLONE_CONFIG = if [ `grep tumour_content $1 | wc -l` -eq 0 ] ; then touch $2; else $3; fi
@@ -26,6 +26,11 @@ pyclone/tables/%.cluster.txt : pyclone/tables/%.loci.txt
 	else \
 		touch $@; \
 	fi
+
+pyclone/tables/%.clusters.signatures.RData : pyclone/tables/%.loci.txt
+	$(call RUN,1,$(RESOURCE_REQ_LOW_MEM),$(RESOURCE_REQ_VSHORT),$(R_MODULE),"\
+	$(PYCLONE_DECONSTRUCTSIGS) --outPrefix $(subst .RData,,$@) \
+	--num_iter $(DECONSTRUCTSIGS_NUMITER) --num_cores $(DECONSTRUCTSIGS_NUMCORES) $<")
 
 pyclone/tables/%.loci.txt : pyclone/configs/%.yaml pyclone/runs/%/alpha.tsv.bz2
 	$(call CHECK_PYCLONE_CONFIG,$<,$@,\

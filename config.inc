@@ -470,6 +470,7 @@ PYCLONE_PRIOR ?= parental_copy_number
 ###############################
 
 DECONSTRUCTSIGS_NUMITER ?= 100
-
+PVACSEQ_ALGO ?= NetMHCpan
+PVACSEQ_USE_LOCAL_IEDB ?= false
 endif
 CONFIG_INC = true

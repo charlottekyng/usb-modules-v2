@@ -30,7 +30,7 @@ absolute/segments/%.seg.txt : facets/cncf/%.cncf.txt
 	sample=`basename $$@ .seg.txt`; ml $(R_MODULE); \
 	$(ABSOLUTE_MAKE_SEGS) --sample $$sample --outFile $@ $(ABSOLUTE_MAKE_SEGS_OPT) $<
 
-absolute/absolute_parameters.txt : $(foreach pair,$(SAMPLE_PAIRS),absolute/mutations/$(pair).mutations.txt absolute/segments/$(pair).seg.txt)
+absolute/absolute_parameters_$(PROJECT_PREFIX).txt : $(foreach pair,$(SAMPLE_PAIRS),absolute/mutations/$(pair).mutations.txt absolute/segments/$(pair).seg.txt)
 	$(INIT) echo "include patient sample seg.dat.fn sigma.p max.sigma.h min.ploidy max.ploidy \
 	primary.disease platform sample.name results.dir max.as.seg.count copy_num_type \
 	max.neg.genome max.non.clonal maf.fn min.mut.af output.fn.base" | perl -p -e "s/\s+/\t/g;" > $@ && \
@@ -45,7 +45,7 @@ absolute/absolute_parameters.txt : $(foreach pair,$(SAMPLE_PAIRS),absolute/mutat
 	done
 
 define absolute_step1
-absolute/step1/$1_$2/$1_$2.ABSOLUTE.RData : absolute/absolute_parameters.txt absolute/mutations/$1_$2.mutations.txt absolute/segments/$1_$2.seg.txt 
+absolute/step1/$1_$2/$1_$2.ABSOLUTE.RData : absolute/absolute_parameters_$(PROJECT_PREFIX).txt absolute/mutations/$1_$2.mutations.txt absolute/segments/$1_$2.seg.txt 
 	$$(MKDIR) absolute/step1; $$(MKDIR) $$(@D); \
 	sample=`basename $$@ .ABSOLUTE.RData`;\
 	$$(call RUN,$$(ABSOLUTE_NUM_CORE),$$(RESOURCE_REQ_MEDIUM_MEM),$$(RESOURCE_REQ_SHORT),$$(R_MODULE),"\

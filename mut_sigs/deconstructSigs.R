@@ -16,6 +16,7 @@ optList <- list(
 	make_option("--tri.count.method", default = "exome2genome", help = "tri.count.method for deconstructSigs"),
 	make_option("--num_iter", default = NA, type='integer', help = "number of re-sampling with replacement (at least 10, otherwise NA)"),
 	make_option("--num_cores", default = 1, type='integer', help = "number of cores to use"),
+	make_option("--min_muts_to_include", default = 20, type='integer', help = "minimum number of mutations required to derive signature"),
 	make_option("--seed", default = 1237, type='integer', help = "seed for randomization"),
 	make_option("--tumorSample", default = NULL, type='character', help = "tumor samples to run"),
 	make_option("--outPrefix", default = NULL, help = "output prefix"))
@@ -90,9 +91,9 @@ if(nrow(pointmuts)>0) {
 
 	rs <- rowSums(sigs)
 
-	toofewmuts <- rownames(sigs)[which(rs<20)]
+	toofewmuts <- rownames(sigs)[which(rs<opt$min_muts_to_include)]
 	if(length(toofewmuts)>0) {
-		cat ("These samples had <20 point mutations:", toofewmuts, " Removing these samples\n")
+		cat ("These samples had <", opt$min_muts_to_include, "point mutations:", toofewmuts, " Removing these samples\n")
 		sigs <- sigs[which(!rownames(sigs) %in% toofewmuts),,drop=F]
 	}
 
