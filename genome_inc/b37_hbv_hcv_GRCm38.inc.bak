@@ -1,7 +1,5 @@
 ifndef B37_HBV_HCV_GRCM38_INC
-
-include usb-modules-v2/genome_inc/b37.common.inc
-
+include usb-modules-v2/genome_inc/b37.inc
 REF = b37_hbv_hcv_GRCm38
 REF_DIR = /scicore/home/terracci/GROUP/ref_nobackup
 

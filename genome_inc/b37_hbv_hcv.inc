@@ -1,22 +1,87 @@
 ifndef B37_HBV_HCV_INC
-include usb-modules-v2/genome_inc/b37.inc
 REF = b37_hbv_hcv
+REF_DIR = /scicore/home/terracci/GROUP/ref_nobackup
+
+GENOME_DIR ?= $(REF_DIR)/genomes
+ANN_DIR ?= $(REF_DIR)/annotation_data/$(REF)
+BED_DIR ?= $(REF_DIR)/target_beds/$(REF)
+
+REF_FASTA ?= $(GENOME_DIR)/human_g1k_v37_decoy_HBV_NC_003977.2_HCV.fasta
+REF_DICT = $(REF_FASTA:.fasta=.dict)
+
+DBSNP ?= $(ANN_DIR)/dbsnp_138.b37.vcf
+
+ifeq ($(findstring NONE,$(PANEL)),NONE)
+else
+include usb-modules-v2/genome_inc/$(REF)/$(PANEL).inc
+endif
+
+RESOURCE_REQ ?= high
+TARGETS_FILE_INTERVALS ?= $(REF_FASTA:.fasta=.bed)
+DBSNP_TARGETS_INTERVALS ?= $(ANN_DIR)/dbsnp_138.b37_snps_monoallelic.vcf
+
+ifeq ($(findstring bed,$(TARGETS_FILE_INTERVALS)),bed)
+CHROMOSOMES := $(shell grep -v '@' $(TARGETS_FILE_INTERVALS) | cut -f1 | sort -V | uniq)
+else
+CHROMOSOMES ?= $(shell seq 1 22) X $(if $(findstring true,$(INCLUDE_CHR_Y)),Y) MT
+endif
+
+### ANNOTATION SETS ####
+
+CONTEST_POP_FILE ?= $(ANN_DIR)/hg19_population_stratified_af_hapmap_3.3.vcf
+
+KNOWN_INDELS ?= $(ANN_DIR)/Mills_and_1000G_gold_standard.indels.b37.vcf
+OMNI ?= $(ANN_DIR)/1000G_omni2.5.b37.vcf
+HAPMAP ?= $(ANN_DIR)/hapmap_3.3.b37.vcf
+R1000G ?= $(ANN_DIR)/1000G_phase1.snps.high_confidence.b37.vcf
+
+CLINVAR = $(ANN_DIR)/clinvar.vcf
+EXAC_NONTCGA = $(ANN_DIR)/ExAC_nonTCGA.r0.3.1.sites.vep.edited.vcf
+EXAC_NONPSYCH ?= $(ANN_DIR)/ExAC.r0.3.nonpsych.sites.edited.vcf
+CADD_SNV ?= $(ANN_DIR)/CADD_whole_genome_SNVs_header.vcf.gz
+CADD_INDEL ?= $(ANN_DIR)/CADD_Indels_1000Gphase3_indels_header_sorted.vcf.gz
+COSMIC ?= $(ANN_DIR)/CosmicCodingMuts.sorted.vcf
 
 
-ANN_DIR := $(REF_DIR)/annotation_data/b37_hbv_hcv
-REF_FASTA := $(REF_DIR)/genomes/human_g1k_v37_decoy_HBV_NC_003977.2_HCV.fasta
+HAPLOTYPE_INSUF_BED = $(ANN_DIR)/haploinsufficient.genes.bed
+CANCER_GENE_CENSUS_BED = $(ANN_DIR)/cancer_gene_census.bed
+KANDOTH_BED = $(ANN_DIR)/kandoth127smg.bed
+LAWRENCE_BED = $(ANN_DIR)/lawrence_cancer5000s.bed
+DGD_BED = $(ANN_DIR)/dgd_Hsa_all_v71.bed
+CANCER_HOTSPOT_VCF = $(ANN_DIR)/publication_hotspots_inclnoncoding_incl3d.vcf
 
-STAR_GENOME_DIR := $(REF_DIR)/genome_index/star_b37_hbv_hcv
-STAR_CTAT_DIR := $(ANN_DIR)/FusionFilter
+CENTROMERE_TABLE = $(ANN_DIR)/centromeres_b37.txt
+
+DGV_FILE = $(ANN_DIR)/DGV_GRCh37_hg19_variants_2016-05-15.txt
+
+GENCODE_GTF = $(ANN_DIR)/Homo_sapiens.GRCh37.82.chr_gsa_faidx_HBV_HCV.gtf
+GENCODE_GENE_GTF = $(ANN_DIR)/Homo_sapiens.GRCh37.82.chr_gsa_faidx_HBV_HCV.genes.gtf
+GENCODE_CODING_GENE_GTF = $(ANN_DIR)/Homo_sapiens.GRCh37.82.chr_gsa_faidx_HBV_HCV.genes.protein_coding.gtf
+GENCODE_NONCODING_GENE_GTF = $(ANN_DIR)/Homo_sapiens.GRCh37.82.chr_gsa_faidx_HBV_HCV.genes.non_coding.gtf
+
+RIBOSOMAL_INTERVALS ?= $(ANN_DIR)/ribosomalRNA.interval_list
+GENE_REF_FLAT = $(ANN_DIR)/refFlat.txt
 
 ### TOOL-SPECIFIC REF ###
 
-#CHIMERASCAN_REF ?= $(REF_DIR)/chimerascan_index
-#BOWTIE_REF = $(REF_DIR)/GATK_bundle/2.3/human_g1k_v37
+GISTIC_REF ?= /scicore/home/terracci/GROUP/usr_nobackup/local/gistic_2.0.23/refgenefiles/hg19.UCSC.add_miR.140312.refgene.mat
 
-#MAPSPLICE_REF_DIR = $(REF_DIR)/GATK_bundle/2.3/mapsplice_ref/chr
-#MAPSPLICE_REF_BASENAME = $(REF_DIR)/GATK_bundle/2.3/mapsplice_ref/hg19
+SNP_EFF_GENOME = GRCh37.75
+DB_NSFP ?= $(REF_DIR)/dbNSFP/GRCh37/dbNSFP2.9.txt.gz
 
+MOSAICS_CHRFILE = $(GENOME_DIR)/human_g1k_v37_decoy.mosaics.chrfile
+
+MUTSIGCV_REF_DIR ?= $(REF_DIR)/MutSigCV
+MUTSIGCV_COVERAGE_REF ?= $(MUTSIGCV_REF_DIR)/coverage.exome_full192.txt
+MUTSIGCV_COV_REF ?= $(MUTSIGCV_REF_DIR)/gene.covariates.txt
+MUTSIGCV_DICT_REF ?= $(MUTSIGCV_REF_DIR)/mutation_type_dictionary_file.txt
+MUTSIGCV_SEQ_REF_DIR ?= $(MUTSIGCV_REF_DIR)/chr_files_hg19/
+
+YOUN_AND_SIMON_SEQ_DATA ?= $(ANN_DIR)/youn_and_simon_sequence_data.RData
+
+MSISENSOR_REF ?= $(REF_DIR)/msi_reference/b37.txt
+
+include usb-modules-v2/genome_inc/common.inc
 endif
 B37_HBV_HCV_INC = true
 

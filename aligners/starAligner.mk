@@ -89,7 +89,7 @@ star/all$(PROJECT_PREFIX).alignment_stats.txt : $(foreach sample,$(SAMPLES),star
 	for metrics in $^; do \
 		samplename=$$(basename $${metrics%%.Log.final.out}); \
 		echo -n $$samplename;\
-		grep "|" $$metrics | cut -f2 -d '|' | perl -p -e "s/ //g; s/\n/\t/g;"; echo ""; \
+		grep "|" $$metrics | cut -f2 -d '|' | perl -p -e "s/[ \t]//g; s/\n/\t/g;"; echo ""; \
 	done; \
 	} > $@
 
