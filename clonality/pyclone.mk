@@ -42,7 +42,7 @@ pyclone/tables/%.loci.txt : pyclone/configs/%.yaml pyclone/runs/%/alpha.tsv.bz2
 pyclone/runs/%/alpha.tsv.bz2 : pyclone/configs/%.yaml
 	$(MKDIR) $(@D); \
 	$(call CHECK_PYCLONE_CONFIG,$<,$@,\
-	$(call RUN,1,$(RESOURCE_REQ_LOW_MEM),$(RESOURCE_REQ_SHORT),,"\
+	$(call RUN,1,$(RESOURCE_REQ_LOW_MEM),$(RESOURCE_REQ_LONG),,"\
 	$(PYCLONE) run_analysis --config_file $< --seed $(PYCLONE_SEED) && \
 	$(PYTHON_ENV_DEACTIVATE)"))
 

@@ -123,19 +123,28 @@ if(nrow(pointmuts)>0) {
 				cat("Summarising bootstrapped signatures\n")
 				summarise_whichSignatures <- function(x, signatures=signatures.cosmic, sampleName) {
 					weights_mat <- do.call("rbind", lapply(x, function(y){y$weights}))
+					tumor_mat <- do.call("rbind", lapply(x, function(y){y$tumor}))
+					prod_mat <- do.call("rbind", lapply(x, function(y){ y$product}))
+					diff_mat <- tumor_mat-prod_mat
+
+					error <- sqrt(rowSums(diff_mat^2))
+					corr <- unlist(lapply(1:nrow(prod_mat), function(n){cor(prod_mat[n,], tumor_mat[n,], method="spearman")}))
+
 					weights <- matrix(colMeans(weights_mat),nrow=1)
 					weightsSD <- apply(weights_mat, 2, sd)
 					colnames(weights) <- colnames(weights_mat)
 					rownames(weights) <- sampleName
 					unknown <- 1 - sum(weights)
-					product <- weights %*% as.matrix(signatures)
-					tumor_mat <- do.call("rbind", lapply(x, function(y){y$tumor}))
+
 					tumor <- matrix(colMeans(tumor_mat), nrow=1)
 					colnames(tumor) <- colnames(tumor_mat)
 					rownames(tumor) <- sampleName
+
+					product <- weights %*% as.matrix(signatures)
 					diff <- tumor - product
-					out <- list(weights, tumor, product, diff, unknown, weightsSD)
-					names(out) <- c("weights", "tumor", "product", "diff", "unknown", "weightsSD")
+					out <- list(weights, tumor, product, diff, unknown, weightsSD, weights_mat, tumor_mat, prod_mat, diff_mat, error, corr)
+					names(out) <- c("weights", "tumor", "product", "diff", "unknown", "weightsSD",
+						"weights_mat", "tumor_mat", "prod_mat", "diff_mat", "error", "corr")
 					return(out)
 				}
 				ws2 <- lapply(unique(allmuts[,opt$sample_col]), function(s){
@@ -165,7 +174,11 @@ if(nrow(pointmuts)>0) {
 			if(opt$num_iter>=10){
 				signaturesSD <- do.call("rbind", lapply(ws, function(w) { w$weightsSD }))
 				colnames(signaturesSD) <- paste(colnames(signaturesSD), "SD", sep="")
-				signatures <- cbind(signatures, signaturesSD)
+				pearson <- do.call("rbind", lapply(ws, function(w){ c(mean(w$corr), sd(w$corr))}))
+				colnames(pearson) <- c("Pearson_expected_vs_observed", "Pearson_SD")
+				error <- do.call("rbind", lapply(ws, function(w){ c(mean(w$error), sd(w$corr))}))
+				colnames(error) <- c("Error_expected_vs_observed", "Error_SD")
+				signatures <- cbind(signatures, signaturesSD, pearson, error)
 			}	
 		}
 	}

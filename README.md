@@ -200,7 +200,7 @@ make genotype
 
 For Illumina, GATK v4 following the Best Practice guidelines is implemented and tested.
 ```
-make gatk
+make gatk # IMPORTANT: limit NUM_JOBS to a small number, e.g. 3. It writes a huuuuuge number of temporary files!
 ```
 
 For Ion Torrent, TVC is implemented but not well tested.
