@@ -41,6 +41,12 @@ gatk/dbsnp/%.gatk_snps.vcf : bam/%.bam bam/%.bai
 	-nt 4 -R $(REF_FASTA) --dbsnp $(DBSNP_TARGETS_INTERVALS) $(foreach bam,$(filter %.bam,$<),-I $(bam) ) \
 	--genotyping_mode GENOTYPE_GIVEN_ALLELES -alleles $(DBSNP_TARGETS_INTERVALS) -o $@ --output_mode EMIT_ALL_SITES")
 
+gatk/vcf_ug/%.variants.vcf : bam/%.bam bam/%.bai
+	$(call RUN,4,$(RESOURCE_REQ_LOW_MEM),$(RESOURCE_REQ_SHORT),$(JAVA8_MODULE),"\
+	$(call GATK,UnifiedGenotyper,$(RESOURCE_REQ_LOW_MEM)) \
+	-nt 4 -R $(REF_FASTA) --dbsnp $(DBSNP_TARGETS_INTERVALS) $(foreach bam,$(filter %.bam,$<),-I $(bam) ) \
+	-o $@ --output_mode EMIT_ALL_SITES")
+
 #### Section for Haplotype caller for variant calling
 
 MAX_INTERVAL_IDX = $(shell expr $(GATK_INTERVALS_COUNT) - 1)
