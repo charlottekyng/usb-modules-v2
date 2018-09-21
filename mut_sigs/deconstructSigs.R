@@ -128,7 +128,6 @@ if(nrow(pointmuts)>0) {
 					diff_mat <- tumor_mat-prod_mat
 
 					error <- sqrt(rowSums(diff_mat^2))
-					corr <- unlist(lapply(1:nrow(prod_mat), function(n){cor(prod_mat[n,], tumor_mat[n,], method="spearman")}))
 
 					weights <- matrix(colMeans(weights_mat),nrow=1)
 					weightsSD <- apply(weights_mat, 2, sd)
@@ -142,9 +141,9 @@ if(nrow(pointmuts)>0) {
 
 					product <- weights %*% as.matrix(signatures)
 					diff <- tumor - product
-					out <- list(weights, tumor, product, diff, unknown, weightsSD, weights_mat, tumor_mat, prod_mat, diff_mat, error, corr)
+					out <- list(weights, tumor, product, diff, unknown, weightsSD, weights_mat, tumor_mat, prod_mat, diff_mat, error)
 					names(out) <- c("weights", "tumor", "product", "diff", "unknown", "weightsSD",
-						"weights_mat", "tumor_mat", "prod_mat", "diff_mat", "error", "corr")
+						"weights_mat", "tumor_mat", "prod_mat", "diff_mat", "error")
 					return(out)
 				}
 				ws2 <- lapply(unique(allmuts[,opt$sample_col]), function(s){
@@ -174,11 +173,9 @@ if(nrow(pointmuts)>0) {
 			if(opt$num_iter>=10){
 				signaturesSD <- do.call("rbind", lapply(ws, function(w) { w$weightsSD }))
 				colnames(signaturesSD) <- paste(colnames(signaturesSD), "SD", sep="")
-				corr <- do.call("rbind", lapply(ws, function(w){ c(mean(w$corr), sd(w$corr))}))
-				colnames(corr) <- c("Spearman_expected_vs_observed", "Spearman_SD")
-				error <- do.call("rbind", lapply(ws, function(w){ c(mean(w$error), sd(w$corr))}))
+				error <- do.call("rbind", lapply(ws, function(w){ c(mean(w$error), sd(w$error))}))
 				colnames(error) <- c("Error_expected_vs_observed", "Error_SD")
-				signatures <- cbind(signatures, signaturesSD, corr, error)
+				signatures <- cbind(signatures, signaturesSD, error)
 			}	
 		}
 	}
