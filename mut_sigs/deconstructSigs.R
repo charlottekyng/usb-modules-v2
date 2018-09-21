@@ -178,7 +178,7 @@ if(nrow(pointmuts)>0) {
 				colnames(corr) <- c("Spearman_expected_vs_observed", "Spearman_SD")
 				error <- do.call("rbind", lapply(ws, function(w){ c(mean(w$error), sd(w$corr))}))
 				colnames(error) <- c("Error_expected_vs_observed", "Error_SD")
-				signatures <- cbind(signatures, signaturesSD, spearman, error)
+				signatures <- cbind(signatures, signaturesSD, corr, error)
 			}	
 		}
 	}

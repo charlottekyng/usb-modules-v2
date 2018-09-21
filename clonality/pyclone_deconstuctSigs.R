@@ -34,51 +34,58 @@ if (length(arguments$args) < 1) {
 tab <- tryCatch({
 	read.delim(loci_file, as.is=T)}, 
 	error=function(e){print(paste("Error:",e)); return(NULL)})
-	
-tab <- data.frame(cbind(tab$cluster_id, t(sapply(tab$mutation_id, function(y){
-	strsplit(y, split="_")[[1]][1:4]}))), stringsAsFactors=F)
-colnames(tab) <- c("TUMOR_SAMPLE", "CHROM", "POS", "REF", "ALT")
-tab$TUMOR_SAMPLE <- paste("C",tab$TUMOR_SAMPLE, sep="")
-tab <- subset(tab, nchar(tab$REF)==1 & nchar(tab$ALT)==1)
 
-freq <- table(tab$TUMOR_SAMPLE)
+if(!is.null(tab)) {	
+	tab <- data.frame(cbind(tab$cluster_id, t(sapply(tab$mutation_id, function(y){
+		strsplit(y, split="_")[[1]][1:4]}))), stringsAsFactors=F)
+	colnames(tab) <- c("TUMOR_SAMPLE", "CHROM", "POS", "REF", "ALT")
+	tab$TUMOR_SAMPLE <- paste("C",tab$TUMOR_SAMPLE, sep="")
+	tab <- subset(tab, nchar(tab$REF)==1 & nchar(tab$ALT)==1)
 
-if (length(which(freq>opt$min_muts_to_include))>1) {
+	freq <- table(tab$TUMOR_SAMPLE)
 
-	tab <- subset(tab, TUMOR_SAMPLE %in% names(freq[which(freq>opt$min_muts_to_include)]))
+	if (length(which(freq>opt$min_muts_to_include))>1) {
 
-	write.table(tab, file=gsub(".txt", ".deconstructSigs.input.txt", loci_file), sep="\t", row.names=F, na="", quote=F)
+		tab <- subset(tab, TUMOR_SAMPLE %in% names(freq[which(freq>opt$min_muts_to_include)]))
 
-	cmd <- paste("ml $R_MODULE; Rscript", opt$deconstructSigs_script, "--num_iter", opt$num_iter,
-		"--min_muts_to_include", opt$min_muts_to_include, "--outPrefix", opt$outPrefix,
-		"--tri.count.method", opt$tri.count.method, "--num_cores", opt$num_cores, "--seed", opt$seed,
-		"--outPrefix", paste(opt$outPrefix, ".tmp", sep=""),
-		gsub(".txt", ".deconstructSigs.input.txt", loci_file), sep=" ")
+		write.table(tab, file=gsub(".txt", ".deconstructSigs.input.txt", loci_file), sep="\t", row.names=F, na="", quote=F)
 
-	cat ("Executing: ", cmd, "\n")
-	system(cmd)
-	file.remove(gsub(".txt", ".deconstructSigs.input.txt", loci_file))
-	load(paste(opt$outPrefix, ".tmp.RData", sep=""))
+		cmd <- paste("ml $R_MODULE; Rscript", opt$deconstructSigs_script, "--num_iter", opt$num_iter,
+			"--min_muts_to_include", opt$min_muts_to_include, "--outPrefix", opt$outPrefix,
+			"--tri.count.method", opt$tri.count.method, "--num_cores", opt$num_cores, "--seed", opt$seed,
+			"--outPrefix", paste(opt$outPrefix, ".tmp", sep=""),
+			gsub(".txt", ".deconstructSigs.input.txt", loci_file), sep=" ")
 
-	clusters <- read.delim(gsub("loci", "cluster", loci_file), as.is=T)
-	clusters$cluster_id <- paste("C", clusters$cluster_id, sep="")
-	clusters <- clusters[match(rownames(signatures), clusters$cluster_id),]
-	signatures <- cbind(clusters, signatures)
+		cat ("Executing: ", cmd, "\n")
+		system(cmd)
+		file.remove(gsub(".txt", ".deconstructSigs.input.txt", loci_file))
+		load(paste(opt$outPrefix, ".tmp.RData", sep=""))
 
-	write.table(signatures, file=paste(opt$outPrefix, ".txt", sep=""), sep="\t", row.names=F, quote=F, na="")
+		clusters <- read.delim(gsub("loci", "cluster", loci_file), as.is=T)
+		clusters$cluster_id <- paste("C", clusters$cluster_id, sep="")
+		clusters <- clusters[match(rownames(signatures), clusters$cluster_id),]
+		signatures <- cbind(clusters, signatures)
 
-	if(exists("ws")) {
- 	       save(signatures, ws, file=paste(opt$outPrefix, ".RData", sep=""))
+		write.table(signatures, file=paste(opt$outPrefix, ".txt", sep=""), sep="\t", row.names=F, quote=F, na="")
+
+		if(exists("ws")) {
+ 		       save(signatures, ws, file=paste(opt$outPrefix, ".RData", sep=""))
+		} else {
+		        save(signatures, file=paste(opt$outPrefix, ".RData", sep=""))
+		}
+
+		file.remove(paste(opt$outPrefix, ".tmp.RData", sep=""))
+		file.remove(paste(opt$outPrefix, ".tmp.pdf", sep=""))
+		file.remove(paste(opt$outPrefix, ".tmp.txt", sep=""))
 	} else {
-	        save(signatures, file=paste(opt$outPrefix, ".RData", sep=""))
+		save(file=paste(opt$outPrefix, ".RData", sep=""))
 	}
-
-	file.remove(paste(opt$outPrefix, ".tmp.RData", sep=""))
-	file.remove(paste(opt$outPrefix, ".tmp.pdf", sep=""))
-	file.remove(paste(opt$outPrefix, ".tmp.txt", sep=""))
 } else {
 	save(file=paste(opt$outPrefix, ".RData", sep=""))
 }
+
+
+	
 	
 
 
