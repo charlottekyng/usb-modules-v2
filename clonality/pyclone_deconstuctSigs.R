@@ -51,7 +51,7 @@ if(!is.null(tab)) {
 		write.table(tab, file=gsub(".txt", ".deconstructSigs.input.txt", loci_file), sep="\t", row.names=F, na="", quote=F)
 
 		cmd <- paste("ml $R_MODULE; Rscript", opt$deconstructSigs_script, "--num_iter", opt$num_iter,
-			"--min_muts_to_include", opt$min_muts_to_include, "--outPrefix", opt$outPrefix,
+			"--min_muts_to_include", opt$min_muts_to_include, #"--outPrefix", opt$outPrefix,
 			"--tri.count.method", opt$tri.count.method, "--num_cores", opt$num_cores, "--seed", opt$seed,
 			"--outPrefix", paste(opt$outPrefix, ".tmp", sep=""),
 			gsub(".txt", ".deconstructSigs.input.txt", loci_file), sep=" ")
@@ -61,7 +61,7 @@ if(!is.null(tab)) {
 		file.remove(gsub(".txt", ".deconstructSigs.input.txt", loci_file))
 		load(paste(opt$outPrefix, ".tmp.RData", sep=""))
 
-		clusters <- read.delim(gsub("loci", "cluster", loci_file), as.is=T)
+		clusters <- read.delim(gsub("loci", "clusters", loci_file), as.is=T)
 		clusters$cluster_id <- paste("C", clusters$cluster_id, sep="")
 		clusters <- clusters[match(rownames(signatures), clusters$cluster_id),]
 		signatures <- cbind(clusters, signatures)
@@ -78,9 +78,11 @@ if(!is.null(tab)) {
 		file.remove(paste(opt$outPrefix, ".tmp.pdf", sep=""))
 		file.remove(paste(opt$outPrefix, ".tmp.txt", sep=""))
 	} else {
+		cat ("At least 2 clusters of mutations required to do signatures\n")
 		save(file=paste(opt$outPrefix, ".RData", sep=""))
 	}
 } else {
+	cat ("Empty file?\n")
 	save(file=paste(opt$outPrefix, ".RData", sep=""))
 }
 

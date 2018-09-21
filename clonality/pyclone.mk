@@ -7,8 +7,8 @@ LOGDIR ?= log/pyclone.$(NOW)
 .DELETE_ON_ERROR:
 .PHONY : pyclone
 
-pyclone : $(foreach normal_sample,$(NORMAL_SAMPLES),pyclone/tables/$(normal_sample).run2.clusters.txt) 
-#pyclone/tables/$(normal_sample).clusters.signatures.RData)
+pyclone : $(foreach normal_sample,$(NORMAL_SAMPLES),pyclone/tables/$(normal_sample).run2.clusters.txt \
+pyclone/tables/$(normal_sample).run1.clusters.signatures.RData pyclone/tables/$(normal_sample).run2.clusters.signatures.RData)
 
 # There are edge cases with no mutations...
 CHECK_PYCLONE_CONFIG = if [ `grep tumour_content $1 | wc -l` -eq 0 ] ; then touch $2; else $3; fi
