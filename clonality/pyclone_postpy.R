@@ -29,11 +29,11 @@ if (is.null(opt$maxSD)) {
 files <- arguments$args;
 
 muts <- read.delim(files[1], as.is=T)
-loci <- tryCatch({files[2]}, error=function(e){print(paste("Error:",e)); return(NULL)})
+loci <- tryCatch({read.delim(files[2], as.is=T)}, error=function(e){print(paste("Error:",e)); return(NULL)})
 
-if (loci!=files[2]){
-	loci <- subset(loci, cellular_prevalence_std > opt$maxSD)
-	muts <- muts[which(!muts$mutation_id %in% loci$mutation_id),]
+if (!is.null(loci)){
+	loci <- subset(loci, cellular_prevalence_std < opt$maxSD)
+	muts <- muts[which(muts$mutation_id %in% loci$mutation_id),]
 }
 
 write.table(muts, file=opt$outFile, sep="\t", row.names=F, na="", quote=F)
