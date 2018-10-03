@@ -1,10 +1,6 @@
 ifndef HG38_INC
 REF = hg38
-REF_DIR = /scicore/home/terracci/GROUP/ref_nobackup
-
-GENOME_DIR ?= $(REF_DIR)/genomes
-ANN_DIR ?= $(REF_DIR)/annotation_data/$(REF)
-BED_DIR ?= $(REF_DIR)/target_beds/$(REF)
+include usb-modules-v2/genome_inc/common.inc
 
 REF_FASTA ?= $(GENOME_DIR)/Homo_sapiens_assembly38_gsa.fasta
 REF_DICT = $(REF_FASTA:.fasta=.dict)
@@ -81,7 +77,6 @@ DB_NSFP ?= $(REF_DIR)/dbNSFP/GRCh38/dbNSFP3.2a.txt.gz
 
 MSISENSOR_REF ?= $(REF_DIR)/msi_reference/hg38.txt
 
-include usb-modules-v2/genome_inc/common.inc
 endif
 HG38_INC = true
 

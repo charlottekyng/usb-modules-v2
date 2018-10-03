@@ -4,11 +4,7 @@
 
 ifndef HG19_IONREF_INC
 REF = hg19_ionref
-REF_DIR = /scicore/home/terracci/GROUP/ref_nobackup
-
-GENOME_DIR ?= $(REF_DIR)/genomes
-ANN_DIR ?= $(REF_DIR)/annotation_data/$(REF)
-BED_DIR ?= $(REF_DIR)/target_beds/$(REF)
+include usb-modules-v2/genome_inc/common.inc
 
 REF_FASTA ?= $(GENOME_DIR)/hg19_ionref.fasta
 REF_DICT = $(REF_FASTA:.fasta=.dict)
@@ -52,7 +48,6 @@ CENTROMERE_TABLE = $(ANN_DIR)/centromeres_hg19.txt
 SNP_EFF_GENOME = GRCh37.75
 DB_NSFP ?= $(REF_DIR)/snpeff/GRCh37/dbNSFP2.9.txt.gz
 
-include usb-modules-v2/genome_inc/common.inc
 endif
 HG19_IONREF_INC = true
 

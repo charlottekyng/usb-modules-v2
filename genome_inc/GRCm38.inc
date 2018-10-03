@@ -1,14 +1,10 @@
 ifndef GRCM38_INC
 REF = GRCm38
+include usb-modules-v2/genome_inc/common.inc
 
-REF_DIR = /scicore/home/terracci/GROUP/ref_nobackup
-
-GENOME_DIR ?= $(REF_DIR)/genomes
-ANN_DIR ?= $(REF_DIR)/annotation_data/$(REF)
-BED_DIR ?= $(REF_DIR)/target_beds/$(REF)
 
 REF_FASTA ?= $(GENOME_DIR)/GRCm38_68.resorted.fa
-REF_DICT ?= $(REF_FASTA:.fasta=.dict)
+REF_DICT = $(REF_FASTA:.fa=.dict)
 
 DBSNP := $(ANN_DIR)/mgp.v5.merged.snps_all.indels.dbSNP142_noGT.vcf
 
@@ -41,7 +37,6 @@ GENE_REF_FLAT = $(ANN_DIR)/refFlat.txt
 
 SNP_EFF_GENOME = GRCm38.86
 
-include usb-modules-v2/genome_inc/common.inc
 
 endif
 GRCM38_INC = true

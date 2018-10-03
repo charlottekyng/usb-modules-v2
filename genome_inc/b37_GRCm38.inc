@@ -1,10 +1,6 @@
 ifndef B37_GRCM38_INC
 REF = b37_GRCm38
-REF_DIR = /scicore/home/terracci/GROUP/ref_nobackup
-
-GENOME_DIR ?= $(REF_DIR)/genomes
-ANN_DIR ?= $(REF_DIR)/annotation_data/$(REF)
-BED_DIR ?= $(REF_DIR)/target_beds/$(REF)
+include usb-modules-v2/genome_inc/common.inc
 
 REF_FASTA ?= $(GENOME_DIR)/human_g1k_v37_decoy_GRCm38.fasta
 REF_DICT = $(REF_FASTA:.fasta=.dict)
@@ -75,7 +71,6 @@ YOUN_AND_SIMON_SEQ_DATA ?= $(ANN_DIR)/youn_and_simon_sequence_data.RData
 
 MSISENSOR_REF ?= $(REF_DIR)/msi_reference/b37.txt
 
-include usb-modules-v2/genome_inc/common.inc
 endif
 B37_GRCM38_INC = true
 
