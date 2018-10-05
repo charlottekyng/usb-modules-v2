@@ -120,20 +120,23 @@ cat ("Finished bind_cols...\n")
 save.image(paste(opt$outFile, ".RData", sep=""))
 
 seg_sample <- seg_chr <- seg_band <- seg_start <- seg_end <- seg_cnlr <- seg_genes <- seg_type <- seg_GLtype <- NA
+
 for (i in grep("GL", colnames(mm))) {
 	for(chr in intersect(c(1:22,"X"), unique(mm$chrom))) {
 		tt <- mm[which(mm$chrom==chr),c(1:5,i), drop=F]
 		tt[which(is.na(tt[,6])),6] <- -1000
 		rr <- rle(tt[,6]); 
-		if (rr$values[1]== -1000) {
+		if (rr$values[1]== -1000 & length(rr$values)>1) {
 			rr$values[1] <- rr$values[2]
 		}
-		if (rr$values[length(rr$values)]== -1000) {
+		if (rr$values[length(rr$values)]== -1000 & length(rr$values)>1) {
 			rr$values[length(rr$values)] <- rr$values[length(rr$values)-1]
 		}
-		for ( idx in which(rr$values== -1000)) {
-			if (rr$values[idx-1]== rr$values[idx+1]) { rr$values[idx] <- rr$values[idx-1]}
-			else {rr$values[idx] <- 0}
+		if (length(rr$values)>=3) {
+			for ( idx in which(rr$values== -1000)) {
+				if (rr$values[idx-1]== rr$values[idx+1]) { rr$values[idx] <- rr$values[idx-1]}
+				else {rr$values[idx] <- 0}
+			}
 		}
 		mm[which(mm$chrom==chr),i] <- as.vector(unlist(apply(cbind(rr$value,rr$length), 1, function(x){rep(x[1],x[2])})))
 
@@ -160,6 +163,9 @@ for (i in grep("GL", colnames(mm))) {
 
 	}
 }
+
+
+
 seg_type[which(seg_type==2)] <- "amp"
 seg_type[which(seg_type== -2)] <- "del"
 write.table(cbind(seg_sample, seg_chr, seg_band, seg_start, seg_end, seg_genes, seg_type, seg_GLtype), 
