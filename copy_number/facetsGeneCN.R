@@ -20,7 +20,7 @@ suppressPackageStartupMessages(library("facets"));
 
 optList <- list(
 	make_option("--outFile", default = NULL, help = "output file"),
-	make_option("--summaryType", default = c("GL_ASCNA", "GL_LRR", "cnlr.median")),
+	make_option("--summaryType", default = c("GL_ASCNA", "GL_LRR", "cnlr.median", "tcn.em", "lcn.em")),
 #	make_option("--mysqlHost", default = '10.0.200.48', help = "MySQL server hostname"),
 #	make_option("--mysqlPort", default = 38493, help = "MySQL server port"),
 #	make_option("--mysqlUser", default = 'embl', help = "MySQL server username"),

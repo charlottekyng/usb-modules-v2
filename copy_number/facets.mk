@@ -12,6 +12,7 @@ FACETS_SUFFIX = $(SNPPILEUP_SUFFIX)_bin$(FACETS_WINDOW_SIZE)_mingc$(FACETS_MINGC
 
 facets : facets/cncf/all$(PROJECT_PREFIX).summary.txt facets/cncf/all$(PROJECT_PREFIX).geneCN.GL_ASCNA.pdf \
 facets/cncf/all$(PROJECT_PREFIX).geneCN.GL_LRR.pdf facets/cncf/all$(PROJECT_PREFIX).geneCN.cnlr.median.pdf \
+facets/cncf/all$(PROJECT_PREFIX).geneCN.tcn.em.pdf facets/cncf/all$(PROJECT_PREFIX).geneCN.lcn.em.pdf \
 facets/cncf/all$(PROJECT_PREFIX).cncf.txt facets/cncf/all$(PROJECT_PREFIX).cncf.pdf.tar.gz
 
 ifeq ($(findstring ILLUMINA,$(SEQ_PLATFORM)),ILLUMINA)
@@ -109,7 +110,13 @@ facets/cncf/all$(PROJECT_PREFIX).geneCN.GL_LRR.txt : facets/cncf/all$(PROJECT_PR
 
 facets/cncf/all$(PROJECT_PREFIX).geneCN.cnlr.median.txt : facets/cncf/all$(PROJECT_PREFIX).geneCN.GL_ASCNA.txt
 	
+
+facets/cncf/all$(PROJECT_PREFIX).geneCN.tcn.em.txt : facets/cncf/all$(PROJECT_PREFIX).geneCN.GL_ASCAN.txt
 	
+
+facets/cncf/all$(PROJECT_PREFIX).geneCN.lcn.em.txt : facets/cncf/all$(PROJECT_PREFIX).geneCN.GL_ASCAN.txt
+	
+
 facets/cncf/all$(PROJECT_PREFIX).cncf.txt : $(foreach pair,$(SAMPLE_PAIRS),facets/cncf/$(pair).cncf.txt)
 	$(INIT) head -1 $< | sed 's/^/TUMOR_NORMAL\t/' > $@; \
 	for cncf in $^; do \

@@ -283,7 +283,7 @@ endif
 ###### Germline variant callers #################
 #################################################
 
-GATK_INTERVALS_COUNT = 200
+GATK_INTERVALS_COUNT = 25
 GATK_HARD_FILTER_SNPS ?= false
 GATK_HARD_FILTER_INDELS ?= false
 
