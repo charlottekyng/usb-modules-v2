@@ -62,7 +62,8 @@ chrom_levels <- c(chrom_levels, setdiff(chroms, chrom_levels))
 genes$chrom <- factor(genes$chrom, levels=chrom_levels)
 
 genesGR <- genes %$% GRanges(seqnames = chrom, ranges = IRanges(start, end), band = band, hgnc = hgnc)
-			
+
+cat ("Start reading CNCF files\n")			
 mm <- lapply(facetsFiles, function(f) {
 	tab <- read.delim(f, as.is=T)
 	tab$chrom[which(tab$chrom==23)] <- "X"
@@ -105,14 +106,17 @@ for (f in facetsFiles) {
 	n <- sub('\\..*', '', sub('.*/', '', f))
 	colnames(mm[[f]])[2:ncol(mm[[f]])] <- paste(n,  colnames(mm[[f]])[2:ncol(mm[[f]])], sep="_")
 }
+cat ("Finished reading CNCF files\n")
 
 save.image(paste(opt$outFile, ".RData", sep=""))
 
+cat ("Start bind_cols...\n")
 mm <- lapply(mm, function(x){
 	x[match(genes$hgnc, x$hgnc),-1]
 })
 mm <- cbind(genes, bind_cols(mm))
 
+cat ("Finished bind_cols...\n")
 save.image(paste(opt$outFile, ".RData", sep=""))
 
 seg_sample <- seg_chr <- seg_band <- seg_start <- seg_end <- seg_cnlr <- seg_genes <- seg_type <- seg_GLtype <- NA
@@ -161,8 +165,11 @@ seg_type[which(seg_type== -2)] <- "del"
 write.table(cbind(seg_sample, seg_chr, seg_band, seg_start, seg_end, seg_genes, seg_type, seg_GLtype), 
 	file=paste(opt$outFile, ".ampdel.txt", sep=""), sep="\t", row.names=F, na="", quote=F)
 
+cat ("Done writing amp/del files\n")
 lapply(opt$summaryType, function(c){
 	mm2 <- cbind(mm[,1:5], mm[,grep(c, colnames(mm))])
 	colnames(mm2) <- gsub(paste("_", c, sep=""), "", colnames(mm2))
 	write.table(mm2, file=paste(opt$outFile, ".", c, ".txt", sep=""), sep="\t", row.names=F, na="", quote=F)
 })
+
+cat ("All done\n")
