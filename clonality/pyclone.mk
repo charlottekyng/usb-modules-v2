@@ -106,7 +106,7 @@ pyclone/mutations/%.mutations.yaml : pyclone/mutations/%.mutations.txt
 #$(foreach pair,$(SAMPLE_PAIRS),\
 #	$(eval $(call pyclone_make_mutations,$(tumor.$(pair)),$(normal.$(pair)))))
 	
-pyclone/mutations/%.run1.mutations.txt : $$(foreach prefix,$$(CALLER_PREFIX),tables/%.$$(call DOWMSTREAM_VCF_TABLE_SUFFIX,$$(prefix)).txt)
+pyclone/mutations/%.run1.mutations.txt : $(foreach prefix,$(CALLER_PREFIX),tables/%.$(call DOWMSTREAM_VCF_TABLE_SUFFIX,$(prefix)).txt)
 	$(MKDIR) pyclone/mutations; \
 	$(call RUN,1,$(RESOURCE_REQ_MEDIUM_MEM),$(RESOURCE_REQ_VSHORT),$(R_MODULE),"\
 	$(RBIND) --tumorNormal $^ > $@.tmp1 && \
