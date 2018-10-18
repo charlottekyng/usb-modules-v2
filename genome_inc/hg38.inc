@@ -13,7 +13,7 @@ include usb-modules-v2/genome_inc/$(REF)/$(PANEL).inc
 endif
 
 RESOURCE_REQ ?= high
-TARGETS_FILE_INTERVALS ?= $(GENOME_DIR)/$(REF_FASTA:.fasta=.bed)
+TARGETS_FILE_INTERVALS ?= $(REF_FASTA:.fasta=.bed)
 DBSNP_TARGETS_INTERVALS ?= $(DBSNP)
 
 ifeq ($(findstring bed,$(TARGETS_FILE_INTERVALS)),bed)
