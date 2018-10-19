@@ -114,7 +114,7 @@ facets/cncf/all$(PROJECT_PREFIX).geneCN.cnlr.median.txt : facets/cncf/all$(PROJE
 facets/cncf/all$(PROJECT_PREFIX).geneCN.tcn.em.txt : facets/cncf/all$(PROJECT_PREFIX).geneCN.GL_ASCNA.txt
 	
 
-facets/cncf/all$(PROJECT_PREFIX).geneCN.lcn.em.txt : facets/cncf/all$(PROJECT_PREFIX).geneCN.GL_ASCAN.txt
+facets/cncf/all$(PROJECT_PREFIX).geneCN.lcn.em.txt : facets/cncf/all$(PROJECT_PREFIX).geneCN.GL_ASCNA.txt
 	
 
 facets/cncf/all$(PROJECT_PREFIX).cncf.txt : $(foreach pair,$(SAMPLE_PAIRS),facets/cncf/$(pair).cncf.txt)
