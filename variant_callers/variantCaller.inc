@@ -13,7 +13,7 @@ VCF_FILTER_SUFFIX = $(subst $( ),.,$(strip $(call VCF_FILTERS)))
 ### Annotation
 ifeq ($(findstring true,$(ANNOTATE_VARIANTS)),true)
 
-VCF_ANNS = $(if $(findstring GRCm38,$(REF)),eff dbsnp, \
+VCF_ANNS = norm left_align post_bcftools $(if $(findstring GRCm38,$(REF)),eff dbsnp, \
 	eff dbsnp $(if $(findstring SOMATIC,$(ANALYSIS_TYPE)),cosmic exac_nontcga gene_ann,) \
 	$(if $(findstring GERMLINE,$(ANALYSIS_TYPE)),exac_nonpsych cadd,) clinvar nsfp)
 else 

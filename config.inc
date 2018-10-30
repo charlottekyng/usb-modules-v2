@@ -236,6 +236,7 @@ HISAT2_OPTS = --dta
 MUTECT_MAX_ALT_IN_NORMAL ?= 500
 MUTECT_MAX_ALT_IN_NORMAL_FRACTION ?= 0.05
 MUTECT_GT_MAX_ALT_IN_NORMAL_FRACTION ?= 0.5
+MUTECT_OTHER_OPTS ?= 
 
 ################################################
 ###### Somatic variant filters #################

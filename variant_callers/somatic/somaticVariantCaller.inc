@@ -5,7 +5,7 @@ ifndef SOMATIC_VARIANT_CALLER_INC
 ### Filters
 
 ifeq ($(findstring true,$(FILTER_VARIANTS)),true)
-VCF_FILTERS = $(if $(TARGETS_FILE_INTERVALS),target_ft) som_ad_ft
+VCF_FILTERS = $(if $(findstring NONE,$(PANEL)),,target_ft) som_ad_ft
 ifeq ($(shell test $(words $(NORMAL_SAMPLES)) -gt 2; echo $$?),0)
 	VCF_FILTERS += $(if $(findstring true,$(USE_NFT)),nft)
 endif
