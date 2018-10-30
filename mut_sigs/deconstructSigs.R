@@ -193,13 +193,22 @@ if(nrow(pointmuts)>0) {
 				error <- do.call("rbind", lapply(ws, function(w){ c(mean(w$error), sd(w$error))}))
 				colnames(error) <- c("Error_expected_vs_observed", "Error_SD")
 				signatures <- cbind(signatures, signaturesSD, error)
-			}	
-		} else if (is.na(opt$num_iter) | opt$num_iter<10) {
+			} else {
+				error <- do.call("rbind", lapply(ws, function(w){ 
+					sqrt(rowSums((w$tumor-w$product)^2))
+				}))
+				colnames(error) <- c("Error_expected_vs_observed")
+				signatures <- cbind(signatures, error)
+			}
+			
+		} else {
 			error <- do.call("rbind", lapply(ws, function(w){ 
 				sqrt(rowSums((w$tumor-w$product)^2))
 			}))
+			colnames(error) <- c("Error_expected_vs_observed")
 			signatures <- cbind(signatures, error)
-		} else { cat ("Something is wrong\n") }
+			
+		} 
 		
 			
 	}
