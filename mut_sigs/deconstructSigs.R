@@ -153,7 +153,8 @@ if(nrow(pointmuts)>0) {
 
 					product <- weights %*% as.matrix(signatures)
 					diff <- tumor - product
-					out <- list(weights, tumor, product, diff, unknown, weightsSD, weights_mat, tumor_mat, prod_mat, diff_mat, error)
+					out <- list(weights, tumor, product, diff, unknown, weightsSD, weights_mat, 
+						tumor_mat, prod_mat, diff_mat, error)
 					names(out) <- c("weights", "tumor", "product", "diff", "unknown", "weightsSD",
 						"weights_mat", "tumor_mat", "prod_mat", "diff_mat", "error")
 					return(out)
@@ -177,6 +178,10 @@ if(nrow(pointmuts)>0) {
 			pdf(paste(opt$outPrefix, ".pdf", sep=""), height=3, width=6)
 			plot_signature_bars_sanger_style(ws[[sample]]$tumor)
 			dev.off()
+			pdf(paste(opt$outPrefix, ".altversion.pdf", sep=""), height=9, width=6)
+			plotSignatures(ws[[sample]])
+			dev.off()
+			
 		})
 
 		signatures <- do.call("rbind", lapply(ws, function(w) { w$weights }))
@@ -189,7 +194,14 @@ if(nrow(pointmuts)>0) {
 				colnames(error) <- c("Error_expected_vs_observed", "Error_SD")
 				signatures <- cbind(signatures, signaturesSD, error)
 			}	
-		}
+		} else if (is.na(opt$num_iter) | opt$num_iter<10) {
+			error <- do.call("rbind", lapply(ws, function(w){ 
+				sqrt(rowSums((w$tumor-w$product)^2))
+			}))
+			signatures <- cbind(signatures, error)
+		} else { cat ("Something is wrong\n") }
+		
+			
 	}
 
 	cat ("Computing mutational burden\n")
