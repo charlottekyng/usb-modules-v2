@@ -141,6 +141,7 @@ CHECK_MD5 = for i in {0..20}; do if md5sum -c $(filter %.md5,$^); then break; fi
 CHECK_VCF = if [ `grep -v '^\#' $1 | wc -l` -eq 0 ] && [ `grep '^\#CHROM' $1 | wc -l` -eq 1 ]; then cp $1 $2; else $3; fi
 CHECK_MAF = if [ `grep -v '^\#' $1 | wc -l` -eq 1 ] && [ `grep '^Hugo_Symbol' $1 | wc -l` -eq 1 ]; then cp $1 $2; else $3; fi
 CHECK_VCF_CMD = if [ `grep -v '^\#' $1 | wc -l` -eq 0 ] && [ `grep '^\#CHROM' $1 | wc -l` -eq 1 ]; then $2; else $3; fi
+CHECK_VCF_HIGH_MODERATE_CMD = if [ `grep -v '^\#' $1 | egrep "HIGH|MODERATE" | wc -l` -eq 0 ] && [ `grep '^\#CHROM' $1 | wc -l` -eq 1 ]; then $2; else $3; fi
 
 << = $(word 2,$^)
 <<< = $(word 3,$^)
@@ -368,10 +369,9 @@ DECONSTRUCTSIGS_NUMCORES ?= 8
 
 
 PVACSEQ ?= pvacseq
-PVACTOOLS_IMG ?= /scicore/home/terracci/GROUP/virtual_env/pvac.img
-IEDB_PATH ?= /scicore/home/terracci/GROUP/usr_nobackup/iedb
-PVACSEQ_OPTS ?= -e 8,9,10,11 --net-chop-method cterm --netmhc-stab --top-score-metric=lowest -d full \
-$(if $(findstring true,$(PVACSEQ_USE_LOCAL_IEDB)),--iedb-install-directory $(IEDB_PATH),)
+PVACTOOLS_IMG ?= /scicore/home/terracci/GROUP/virtual_env/pvactools.img
+PVACSEQ_OPTS ?= -e 8,9,10,11 \
+$(if $(findstring true,$(PVACSEQ_USE_LOCAL_IEDB)),--iedb-install-directory /MHC/,)
 PVACSEQ_PREPARE_VCF ?= $(PERL) usb-modules-v2/neoepitopes/pvacseq_prepare_vcf.pl
 
 LST = $(RSCRIPT) usb-modules-v2/mut_sigs/lst.R
