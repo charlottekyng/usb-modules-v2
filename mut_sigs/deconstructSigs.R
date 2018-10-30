@@ -17,6 +17,7 @@ optList <- list(
 	make_option("--num_iter", default = NA, type='integer', help = "number of re-sampling with replacement (at least 10, otherwise NA)"),
 	make_option("--num_cores", default = 1, type='integer', help = "number of cores to use"),
 	make_option("--min_muts_to_include", default = 20, type='integer', help = "minimum number of mutations required to derive signature"),
+	make_option("--associated", default = NULL, type='character', help = "comma-separated list of signatures to evaluate"),
 	make_option("--seed", default = 1237, type='integer', help = "seed for randomization"),
 	make_option("--tumorSample", default = NULL, type='character', help = "tumor samples to run"),
 	make_option("--outPrefix", default = NULL, help = "output prefix"))
@@ -37,6 +38,17 @@ if (length(arguments$args) < 1) {
 } else {
     muts_file <- arguments$args[1];
 }
+
+if (!is.null(opt$associated)) {
+	cat ("Checking associated signatures\n")
+	opt$associated <- unlist(lapply(unlist(strsplit(opt$associated, split=',')[[1]]), function(x){
+		paste("Signature", x, sep=".")}))
+	
+	if (!all(opt$associated %in% rownames(signatures.cosmic))) {
+			stop ("associated sigs are not all in signature.cosmic. Fix that first.\n")
+	}
+} else { opt$associated <- c() }
+
 
 cat ("Reading mutation summary file\n")
 allmuts <- read.delim(muts_file, as.is=T)
@@ -105,14 +117,14 @@ if(nrow(pointmuts)>0) {
 			ws <- parLapply(cl, rownames(sigs), function(sample,sigs, ...) {
 				library(deconstructSigs)
 				whichSignatures(tumor.ref = sigs, sample.id=sample,
-      	          signatures.ref = signatures.cosmic, contexts.needed = T, ...)
-			}, sigs, tri.counts.method = opt$tri.count.method)
+		      	          signatures.ref = signatures.cosmic, contexts.needed = T, ...)
+			}, sigs, tri.counts.method = opt$tri.count.method, associated = opt$associated)
 			stopCluster(cl)
 		} else {
 			ws <- lapply(rownames(sigs), function(sample) {
 				whichSignatures(tumor.ref = sigs, sample.id=sample,
 				signatures.ref = signatures.cosmic, contexts.needed = T,
-				tri.counts.method = opt$tri.count.method)
+				tri.counts.method = opt$tri.count.method, associated = opt$associated)
 			})
 		}
 		names(ws) <- rownames(sigs)

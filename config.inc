@@ -471,6 +471,8 @@ PYCLONE_PRIOR ?= parental_copy_number
 ###############################
 
 DECONSTRUCTSIGS_NUMITER ?= 100
+DECONSTRUCTSIGS_ASSOC_SIGS ?= 
+
 PVACSEQ_ALGO ?= NetMHCpan
 PVACSEQ_USE_LOCAL_IEDB ?= true
 endif

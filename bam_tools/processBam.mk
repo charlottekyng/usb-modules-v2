@@ -71,7 +71,7 @@ index : $(addsuffix .bai,$(BAMS))
 	$(call RUN,1,$(RESOURCE_REQ_MEDIUM_MEM),$(RESOURCE_REQ_SHORT),$(JAVA8_MODULE),"\
 	$(call PICARD,FixMateInformation,$(RESOURCE_REQ_MEDIUM_MEM_JAVA)) I=$< O=$@ && $(RM) $<")
 
-%.reordered.bam : %.bam %.bam.bai $(REF_DICT)
+%.reordered.bam : %.bam $(REF_DICT)
 	$(call RUN,1,$(RESOURCE_REQ_HIGH_MEM),$(RESOURCE_REQ_SHORT),$(JAVA8_MODULE),"\
 	$(call PICARD,ReorderSam,$(RESOURCE_REQ_HIGH_MEM_JAVA)) I=$< O=$@ REFERENCE=$(REF_FASTA) && $(RM) $<")
 

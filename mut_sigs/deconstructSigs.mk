@@ -29,7 +29,9 @@ deconstructSigs/$1_$2.deconstructSigs.RData : $$(foreach prefix,$$(CALLER_PREFIX
 	$$(call RUN,$$(DECONSTRUCTSIGS_NUMCORES),$$(RESOURCE_REQ_MEDIUM_MEM),$$(RESOURCE_REQ_VSHORT),$$(R_MODULE),"\
 	$$(RBIND) --tumorNormal $$^ | grep -v interrogation_Absent > $$@.tmp && \
 	$$(DECONSTRUCTSIGS) --outPrefix $$(subst .RData,,$$@) \
-	--num_iter $$(DECONSTRUCTSIGS_NUMITER) --num_cores $$(DECONSTRUCTSIGS_NUMCORES) $$@.tmp && \
+	--num_iter $$(DECONSTRUCTSIGS_NUMITER) --num_cores $$(DECONSTRUCTSIGS_NUMCORES) \
+	$$(if $$(DECONSTRUCTSIGS_ASSOC_SIGS),--associated $$(DECONSTRUCTSIGS_ASSOC_SIGS)) \
+	$$@.tmp && \
 	$$(RM) $$@.tmp")
 
 deconstructSigs/$1_$2.deconstructSigs.txt : deconstructSigs/$1_$2.deconstructSigs.RData
