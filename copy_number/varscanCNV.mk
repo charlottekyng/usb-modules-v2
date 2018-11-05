@@ -1,4 +1,4 @@
-# Run VarScan to detect copynumber
+	# Run VarScan to detect copynumber
 # Detect copy number
 ##### DEFAULTS ######
 
@@ -59,6 +59,15 @@ varscan/copycall/%.copycall : varscan/copynum/%.copynumber
 	fi; \
 	$(VARSCAN) copyCaller $< --output-file $@ \$$recenter_opt")
 
+define rna-logratio
+varscan/rna_logratio/$1.rna_logratio.txt : star/$1.ReadsPerGene.out.tab star/control.medianReadsPerGene.out.tab
+	$$(call RUN,1,$$(RESOURCE_REQ_LOW_MEM),$$(RESOURCE_REQ_VSHORT),$$(R_MODULE),"\
+	$$(RNA_LOGRATIO) --tumor_file $$< --normal_file $$(<<) --gtf $$(GENCODE_GENE_GTF) --outfile $$@")
+endef
+$(foreach sample,$(SAMPLES),\
+	$(eval $(call rna-logratio,$(sample))))
+
+
 ifeq ($(CAPTURE_METHOD),PCR)
 define varscan-segment
 varscan/segment/$1_$2.segment.Rdata : $$(foreach pool,$$(TARGETS_FILE_INTERVALS_POOLS_CNA),varscan/copycall/$1_$2.$$(notdir $$(pool)).copycall)
@@ -71,20 +80,34 @@ endef
 $(foreach pair,$(SAMPLE_PAIRS),\
 	$(eval $(call varscan-segment,$(tumor.$(pair)),$(normal.$(pair)))))
 else
+ifeq ($(CAPTURE_METHOD),RNA)
+varscan/segment/%.segment.Rdata : varscan/rna_logratio/%.rna_logratio.txt
+	$(call RUN,1,$(RESOURCE_REQ_LOW_MEM),$(RESOURCE_REQ_VSHORT),$(R_MODULE),"\
+	$(CBS_SEGMENTCNV) --alpha $(CBS_SEG_ALPHA) --smoothRegion $(CBS_SEG_SMOOTH) \
+	--trim $(CBS_TRIM) --clen $(CBS_CLEN) --undoSD $(CBS_SEG_SD) \
+	--excl_N_outlier_pc $(CBS_EXCL_N_OUTLIER_PC) --outlierSDscale $(CBS_OUTLIER_SD_SCALE) \
+	--minNdepth $(CBS_MIN_N_DEPTH) --maxNdepth $(CBS_MAX_N_DEPTH) --minTdepth $(CBS_MIN_T_DEPTH) \
+	$(if $(CENTROMERE_TABLE),--centromereFile=$(CENTROMERE_TABLE)) --prefix=$(@D)/$* $^")
+else
 varscan/segment/%.segment.Rdata : varscan/copycall/%.copycall
 	$(call RUN,1,$(RESOURCE_REQ_LOW_MEM),$(RESOURCE_REQ_VSHORT),$(R_MODULE),"\
 	$(CBS_SEGMENTCNV) --alpha $(CBS_SEG_ALPHA) --smoothRegion $(CBS_SEG_SMOOTH) \
 	-trim $(CBS_TRIM) --clen $(CBS_CLEN) --undoSD $(CBS_SEG_SD) \
 	$(if $(CENTROMERE_TABLE),--centromereFile=$(CENTROMERE_TABLE)) --prefix=$(@D)/$* $^")
 endif
-
+endif
 
 varscan/segment/%.collapsed_seg.txt : varscan/segment/%.segment.Rdata
 	
-
+ifeq ($(CAPTURE_METHOD),RNA)
+varscan/segment/geneCN.txt : $(foreach sample,$(SAMPLES),varscan/segment/$(sample).collapsed_seg.txt)
+	$(call RUN,1,$(RESOURCE_REQ_LOW_MEM),$(RESOURCE_REQ_VSHORT),$(R_MODULE),"\
+	$(VARSCAN_GENE_CN) $(VARSCAN_GENE_CN_OPTS) --outFile $@ $^")
+else
 varscan/segment/geneCN.txt : $(foreach pair,$(SAMPLE_PAIRS),varscan/segment/$(pair).collapsed_seg.txt)
 	$(call RUN,1,$(RESOURCE_REQ_LOW_MEM),$(RESOURCE_REQ_VSHORT),$(R_MODULE),"\
 	$(VARSCAN_GENE_CN) $(VARSCAN_GENE_CN_OPTS) --outFile $@ $^")	
+endif
 
 define varscan-segment-sd-alpha-smooth
 varscan/segment_sd$1_alpha$2_smooth$3/%.segment.Rdata : varscan/copycall/%.copycall
@@ -96,4 +119,6 @@ $(foreach sd,$(SEG_SDS),\
 	$(foreach alpha,$(SEG_ALPHAS),\
 		$(foreach smooth,$(SEG_SMOOTHS),\
 			$(eval $(call varscan-segment-sd-alpha-smooth,$(sd),$(alpha),$(smooth))))))
+
+include usb-modules-v2/aligners/starAligner.mk
 

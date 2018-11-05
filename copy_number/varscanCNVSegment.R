@@ -7,18 +7,20 @@ suppressPackageStartupMessages(library("CGHcall"));
 options(warn = -1, error = quote({ traceback(); q('no', status = 1) }))
 
 optList <- list(
-                make_option("--centromereFile", default = NULL, type = "character", action = "store", help ="centromere file"),
-		make_option("--minNdepth", default = NULL, type="double", action = "store", help = "minNdepth"),
-		make_option("--excl_N_outlier_pc", default = NULL, type="double", action = "store", help = "excl_N_outlier_pc"),
-                make_option("--alpha", default = 0.000001, type = "double", action = "store", help ="alpha"),
-		make_option("--trim", default = 0.025, type="double", action = "store", help = "trim"),
-		make_option("--clen", default = 10, type="double", action = "store", help = "clen"),
-                make_option("--smoothRegion", default = 10, type = "double", action = "store", help ="smooth region"),
-                make_option("--outlierSDscale", default = 2.5, type = "double", action = "store", help ="outlier SD scale"),
-                make_option("--undoSD", default = 2, type = "double", action = "store", help ="undo SD"),
-		make_option("--separate_arm_seg", default = FALSE, type="logical", action = "store", help = "should we treat p and q arms separately for segmentation"),
-                make_option("--prefix", default = NULL, type = "character", action = "store", help ="Output prefix (required)"),
-		make_option("--perchromplots", default = FALSE, type="logical", action = "store", help = "should be make per chrom plots"))
+	make_option("--centromereFile", default = NULL, type = "character", action = "store", help ="centromere file"),
+	make_option("--minNdepth", default = NULL, type="double", action = "store", help = "minNdepth"),
+	make_option("--maxNdepth", default = NULL, type="double", action = "store", help = "maxNdepth"),
+	make_option("--minTdepth", default = NULL, type="double", action = "store", help = "minTdepth"),
+	make_option("--excl_N_outlier_pc", default = NULL, type="double", action = "store", help = "excl_N_outlier_pc"),
+	make_option("--alpha", default = 0.000001, type = "double", action = "store", help ="alpha"),
+	make_option("--trim", default = 0.025, type="double", action = "store", help = "trim"),
+	make_option("--clen", default = 10, type="double", action = "store", help = "clen"),
+	make_option("--smoothRegion", default = 10, type = "double", action = "store", help ="smooth region"),
+	make_option("--outlierSDscale", default = 2.5, type = "double", action = "store", help ="outlier SD scale"),
+	make_option("--undoSD", default = 2, type = "double", action = "store", help ="undo SD"),
+	make_option("--separate_arm_seg", default = FALSE, type="logical", action = "store", help = "should we treat p and q arms separately for segmentation"),
+	make_option("--prefix", default = NULL, type = "character", action = "store", help ="Output prefix (required)"),
+	make_option("--perchromplots", default = FALSE, type="logical", action = "store", help = "should be make per chrom plots"))
 
 parser <- OptionParser(usage = "%prog [options] inDir", option_list = optList);
 arguments <- parse_args(parser, positional_arguments = T);
@@ -60,32 +62,37 @@ if (!is.null(opt$excl_N_outlier_pc)) {
 	cn <- subset(cn, normal_depth > min & normal_depth < max)
 }
 if (!is.null(opt$minNdepth)) {
-	cn <- subset(cn, normal_depth > opt$minNdepth)
+	cn <- subset(cn, normal_depth >= opt$minNdepth)
+}
+if (!is.null(opt$maxNdepth)) {
+	cn <- subset(cn, normal_depth <= opt$maxNdepth)
+}
+if (!is.null(opt$minTdepth)) {
+	cn <- subset(cn, tumor_depth >= opt$minTdepth)
 }
 
-cn[,1] <- gsub("chr", "", cn[,1])
-cn[which(cn[,1]=="X"),1] <- 23
-cn <- cn[which(cn[,1] %in% chroms),]
+cn[,1] <- gsub("chr", "", cn$chrom)
+cn$chrom[which(cn$chrom=="X")] <- 23
+cn <- cn[which(cn$chrom %in% chroms),]
 
 if (opt$separate_arm_seg) {
-        for (i in unique(cn[,1])){
-                cn[which(cn[,1]==i & cn[,2]>=cen[which(cen[,1]==i)[2],2]),1] <- as.numeric(i)+0.5
+        for (i in unique(cn$chrom)){
+                cn$chrom[which(cn$chrom==i & cn$chr_start>=cen[which(cen[,1]==i)[2],2])] <- as.numeric(i)+0.5
         }
 }
 
-
-
-cn <- cn[order(factor(cn[,1], levels=chroms), as.numeric(cn[,2])),,drop=F]
-keep <- which(cn[,1] %in% chroms)
+cn <- cn[order(factor(cn$chrom, levels=chroms), as.numeric(cn$chr_start)),,drop=F]
+keep <- which(cn$chrom %in% chroms)
 chroms <- unique(cn[keep,1])
 if (length(rm) > 0) { cn <- cn[keep,]}
-cn[,1] <- as.numeric(cn[,1])
-cn <- cn[order(cn[,1], cn[,2], cn[,3]),]
-cn <- cbind(name = paste(cn[,1], cn[,2], cn[,3], sep="_"), cn[,c(1:3,7)])
+cn$chrom <- as.numeric(cn$chrom)
+cn <- cn[order(cn$chrom, cn$chr_start, cn$chr_stop),]
+cn <- cbind(name = paste(cn$chrom, cn$chr_start, cn$chr_stop, sep="_"), cn[,c("chrom", "chr_start", "chr_stop", "adjusted_log_ratio")])
 cn <- cn[which(!duplicated(cn$name)),]
 
 cgh <- make_cghRaw(cn)
-normalized <- normalize(cgh, smoothOutliers=T, trim=opt$trim, smooth.region=opt$smoothRegion, outlier.SD.scale=opt$outlierSDscale)
+normalized <- normalize(cgh, smoothOutliers=T, trim=opt$trim, smooth.region=opt$smoothRegion, 
+	outlier.SD.scale=opt$outlierSDscale, smooth.SD.scale=opt$outlierSDscale)
 segmented <- segmentData(normalized, relSDlong=3, undo.splits="sdundo", undo.SD=opt$undoSD, alpha=opt$alpha, trim=opt$trim, clen=opt$clen)
 
 fData(segmented)$Chromosome <- floor(fData(segmented)$Chromosome)

@@ -27,12 +27,12 @@ if (is.null(opt$inputRSEMFile)) {
 if (!is.null(opt$gtf)){
 	gtf <- import(opt$gtf)
 	if (!is.null(opt$geneBiotype)){
-		gtf <- gtf[which(gtf$gene_biotype %in% opt$geneBiotype),]
+		gtf <- gtf[which(gtf$gene_biotype %in% opt$geneBiotype | gtf$gene_type %in% opt$geneBiotype),]
 	} else { cat("No geneBiotype provided, using all genes in the GTF.\n") }
 } else {
 	cat("GTF file not provided, not annotation will be done\n")
 }
-rsem <- read.delim(opt$inputRSEMFile, as.is=T, row.names=1)
+rsem <- read.delim(opt$inputRSEMFile, as.is=T, row.names=1, check.names=F)
 
 notingtf <- length(which(!rownames(rsem) %in% gtf$gene_id))
 if (notingtf>0) { cat ("Some genes in RSEM are not in GTF, they will be removed!\n")}
