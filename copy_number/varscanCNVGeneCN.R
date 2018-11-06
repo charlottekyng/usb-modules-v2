@@ -17,7 +17,7 @@ suppressPackageStartupMessages(library("rtracklayer"))
 suppressPackageStartupMessages(library("Biobase"))
 
 optList <- list(
-    make_option("--outFile", default = NULL, help = "output file"),
+	make_option("--outFile", default = NULL, help = "output file"),
  	make_option("--summaryType", default = c("GL_LRR", "log2Ratio")),
 	make_option("--genesFile", default = NULL, help = "list of genes to include (hgnc symbols)"))
 parser <- OptionParser(usage = "%prog [options] [cbs files]", option_list = optList);
