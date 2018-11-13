@@ -41,16 +41,16 @@ tumor <- read.delim(opt$tumor_file, as.is=T)
 normal <- read.delim(opt$normal_file, as.is=T)
 
 if (opt$format=="star") {
-	dat <- data.frame(TUMOR=tumor[-c(1:4),2],
-		NORMAL= normal[-c(1:4),2],
-		LOGRATIO=log2((tumor[-c(1:4),2]+1)/(normal[-c(1:4),2]+1)))
-	rownames(dat) <- tumor[-c(1:4),1]
-} else if (opt$format=="rsem") {
-	dat <- data.frame(TUMOR=tumor$TPM,
-		NORMAL= normal$TPM,
-		LOGRATIO=log2((tumor$TPM+1)/(normal$TPM+1)))
-	rownames(dat) <- tumor[,1]
-}
+	dat <- data.frame(TUMOR=tumor[match(normal[,1], tumor[,1]),2],
+		NORMAL= normal[,2])
+	dat$LOGRATIO = log2((dat$TUMOR+1)/(dat$NORMAL+1))
+	rownames(dat) <- normal[,1]
+} #else if (opt$format=="rsem") {
+#	dat <- data.frame(TUMOR=tumor$TPM,
+#		NORMAL= normal$TPM,
+#		LOGRATIO=log2((tumor$TPM+1)/(normal$TPM+1)))
+#	rownames(dat) <- tumor[,1]
+#}
 
 gtf <- as.data.frame(import(opt$gtf))
 

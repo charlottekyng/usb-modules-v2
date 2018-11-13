@@ -9,7 +9,9 @@ LOGDIR ?= log/rsem.$(NOW)
 .SECONDARY:
 .PHONY: rsem
 
-rsem : $(foreach type1,genes,$(foreach type2,expected_count TPM FPKM,rsem/all$(PROJECT_PREFIX).$(type1).$(type2).results)) rsem/all$(PROJECT_PREFIX).genes.expected_count.results_coding_uq
+rsem : $(foreach type1,genes,$(foreach type2,expected_count TPM FPKM,rsem/all$(PROJECT_PREFIX).$(type1).$(type2).results)) \
+$(foreach type1,genes,$(foreach type2,expected_count TPM FPKM,rsem/all$(PROJECT_PREFIX).$(type1).$(type2).results_coding)) \
+rsem/all$(PROJECT_PREFIX).genes.expected_count.results_coding_uq
 
 define rsem-calc-expression
 rsem/$1.genes.results : star/$1.Aligned.toTranscriptome.out.bam 
@@ -25,12 +27,26 @@ rsem/%.isoforms.results : rsem/%.genes.results
 define rsem-gen-dat-matrix
 rsem/all$$(PROJECT_PREFIX).$1.$2.results : $$(foreach sample,$$(SAMPLES),rsem/$$(sample).$1.results)
 	$$(call RUN,1,$$(RESOURCE_REQ_LOW_MEM),$$(RESOURCE_REQ_VSHORT),$$(PERL_MODULE) $$(R_MODULE),"\
-	$$(RSEM_GEN_DATA_MATRIX) $$(word 3,$$(subst .,$$( ),$$@)) $$^ | sed 's/rsem\///g;' | sed \"s/\.$$(word 2,$$(subst .,$$( ),$$@))\.results//g\" | tr -d \"\\\"\" > $$@.tmp && \
+	$$(RSEM_GEN_DATA_MATRIX) $$(word 3,$$(subst .,$$( ),$$@)) $$^ | sed 's/rsem\///g;' | \
+	sed \"s/\.$$(word 2,$$(subst .,$$( ),$$@))\.results//g\" | tr -d \"\\\"\" > $$@.tmp && \
 	$$(RSCRIPT) $$(RSEM_PROCCESS) --inputRSEMFile $$@.tmp --gtf $$(GENCODE_GENE_GTF) --outputFile $$@ && $$(RM) $$@.tmp")
 endef
 $(foreach type1,genes,\
 	$(foreach type2,expected_count FPKM TPM,\
 		$(eval $(call rsem-gen-dat-matrix,$(type1),$(type2)))))
+
+
+define rsem-gen-dat-matrix-coding
+rsem/all$$(PROJECT_PREFIX).$1.$2.results : $$(foreach sample,$$(SAMPLES),rsem/$$(sample).$1.results_coding)
+	$$(call RUN,1,$$(RESOURCE_REQ_LOW_MEM),$$(RESOURCE_REQ_VSHORT),$$(PERL_MODULE) $$(R_MODULE),"\
+	$$(RSEM_GEN_DATA_MATRIX) $$(word 3,$$(subst .,$$( ),$$@)) $$^ | sed 's/rsem\///g;' | \
+	sed \"s/\.$$(word 2,$$(subst .,$$( ),$$@))\.results//g\" | tr -d \"\\\"\" > $$@.tmp && \
+	$$(RSCRIPT) $$(RSEM_PROCCESS) --inputRSEMFile $$@.tmp --gtf $$(GENCODE_GENE_GTF) --outputFile $$@ --geneBiotype protein_coding \
+	&& $$(RM) $$@.tmp")
+endef
+$(foreach type1,genes,\
+	$(foreach type2,expected_count FPKM TPM,\
+	$(eval $(call rsem-gen-dat-matrix-coding,$(type1),$(type2)))))
 
 rsem/all$(PROJECT_PREFIX).genes.expected_count.results_coding_uq : $(foreach sample,$(SAMPLES),rsem/$(sample).genes.results)
 	$(call RUN,1,$(RESOURCE_REQ_LOW_MEM),$(RESOURCE_REQ_VSHORT),$(PERL_MODULE) $(R_MODULE),"\

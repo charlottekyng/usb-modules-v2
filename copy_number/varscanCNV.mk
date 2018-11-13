@@ -53,8 +53,12 @@ varscan/copycall/%.copycall : varscan/copynum/%.copynumber
 	fi; \
 	$(VARSCAN) copyCaller $< --output-file $@ \$$recenter_opt")
 
+varscan/rna_logratio/control.rna_logratio.txt : $(foreach normal,$(PANEL_OF_NORMAL_SAMPLES),star/$(normal).ReadsPerGene.out.tab)
+	$(call RUN,1,$(RESOURCE_REQ_LOW_MEM),$(RESOURCE_REQ_VSHORT),$(R_MODULE),"\
+	$(VARSCAN_CONTROL_PROFILE_FROM_STAR) --outFile $@ --gtf $(GENCODE_GENE_GTF) $^")
+
 define rna-logratio
-varscan/rna_logratio/$1.rna_logratio.txt : star/$1.ReadsPerGene.out.tab star/control.medianReadsPerGene.out.tab
+varscan/rna_logratio/$1.rna_logratio.txt : star/$1.ReadsPerGene.out.tab varscan/rna_logratio/control.rna_logratio.txt
 	$$(call RUN,1,$$(RESOURCE_REQ_LOW_MEM),$$(RESOURCE_REQ_VSHORT),$$(R_MODULE),"\
 	$$(RNA_LOGRATIO) --tumor_file $$< --normal_file $$(<<) --gtf $$(GENCODE_GENE_GTF) --outfile $$@")
 endef
@@ -121,5 +125,4 @@ $(foreach sd,$(SEG_SDS),\
 		$(foreach smooth,$(SEG_SMOOTHS),\
 			$(eval $(call varscan-segment-sd-alpha-smooth,$(sd),$(alpha),$(smooth))))))
 
-include usb-modules-v2/aligners/starAligner.mk
 

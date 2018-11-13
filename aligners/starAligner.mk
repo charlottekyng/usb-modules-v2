@@ -55,10 +55,6 @@ star/%.Unmapped.out.mate2 : star/%.Aligned.sortedByCoord.out.bam
 %.gz : %
 	$(GZIP) $<
 
-star/control.medianReadsPerGene.out.tab : $(foreach normal,$(PANEL_OF_NORMAL_SAMPLES),star/$(normal).ReadsPerGene.out.tab)
-	$(call RUN,1,$(RESOURCE_REQ_LOW_MEM),$(RESOURCE_REQ_VSHORT),$(R_MODULE),"\
-	$(STAR_CONTROL_PROFILE) --outFile $@ $^")
-
 # star/%.Unmapped.out.mate1.gz $(if $(findstring true,$(PAIRED_END)),star/%.Unmapped.out.mate2.gz) star/%.Chimeric.out.bam
 bam/%.bam : star/%.star.$(BAM_SUFFIX) 
 	$(INIT) ln -f $< $@

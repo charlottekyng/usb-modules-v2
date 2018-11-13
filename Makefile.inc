@@ -297,8 +297,6 @@ STAR_FUSION ?= STAR-Fusion
 HISAT2 ?= hisat2
 STRINGTIE ?= stringtie
 
-STAR_CONTROL_PROFILE ?= $(RSCRIPT) usb-modules-v2/aligners/star_control_profile.R
-
 PICARD = $(JAVA) -Xmx$(2) -jar $(JAR_DIR)/picard-tools-2.4.1/picard.jar $(1)
 PICARD += VALIDATION_STRINGENCY=LENIENT MAX_RECORDS_IN_RAM=4000000 TMP_DIR=$(TMPDIR)
 PICARD += REFERENCE_SEQUENCE=$(REF_FASTA) CREATE_INDEX=true
@@ -400,6 +398,7 @@ ABSOLUTE_NUM_CORE ?= 1
 
 CBS_SEGMENTCNV = $(RSCRIPT) usb-modules-v2/copy_number/varscanCNVSegment.R
 VARSCAN_GENE_CN = $(RSCRIPT) usb-modules-v2/copy_number/varscanCNVGeneCN.R
+VARSCAN_CONTROL_PROFILE_FROM_STAR ?= $(RSCRIPT) usb-modules-v2/copy_number/varscan_ekaryotyping_control_from_star.R
 RNA_LOGRATIO = $(RSCRIPT) usb-modules-v2/copy_number/varscan_input_from_RNAseq.R
 
 

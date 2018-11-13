@@ -96,6 +96,7 @@ for (i in grep("GL", colnames(mm))) {
 	for(chr in intersect(c(1:22,"X"), unique(mm$chrom))) {
 		tt <- mm[which(mm$chrom==chr),c(1:5,i), drop=F]
 		tt[which(is.na(tt[,6])),6] <- -1000
+		if (all(tt[,6]==-1000)) {next;}
 		rr <- rle(tt[,6]); 
 		if (rr$values[1]== -1000) {
 			rr$values[1] <- rr$values[2]
