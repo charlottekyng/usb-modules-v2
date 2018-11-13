@@ -62,6 +62,10 @@ TARGETS += fix_rg
 fix_rg :
 	$(call RUN_MAKE,usb-modules-v2/bam_tools/fixRG.mk)
 
+TARGETS += split_and_trim
+split_and_trim:
+	$(call RUN_MAKE,usb-modules-v2/bam_tools/splitandtrim.mk)
+
 TARGETS += downsample_bam
 downsample_bam :
 	$(call RUN_MAKE,usb-modules-v2/bam_tools/downsampleBam.mk)
