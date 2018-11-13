@@ -53,7 +53,10 @@ if (!is.null(opt$centromereFile)) {
         cen <- cen[which(cen[,1] %in% chroms),]
 }
 
+cat ("Reading these files", cnFile, "\n")
 cn <- lapply(cnFile, read.table, header=T, as.is=T)
+cat ("Done reding files, "\n")
+
 cn <- do.call("rbind", cn)
 
 if (!is.null(opt$excl_N_outlier_pc)) { 

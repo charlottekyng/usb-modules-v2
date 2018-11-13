@@ -104,7 +104,7 @@ index : $(addsuffix .bai,$(BAMS))
 %.splitntrim.bam : %.bam %.bai
 	$(call RUN,1,$(RESOURCE_REQ_MEDIUM_MEM),$(RESOURCE_REQ_MEDIUM),$(JAVA8_MODULE),"\
 	$(call GATK,SplitNCigarReads,$(RESOURCE_REQ_MEDIUM_MEM_JAVA)) -I $< -o $@ \
-	-rf ReassignOneMappingQuality -RMQF 255 -RMQT 60 -U ALLOW_N_CIGAR_READS -R $(REF_FASTA) && $(RM) $^")
+	-rf ReassignOneMappingQuality -RMQF 255 -RMQT 60 -U ALLOW_N_CIGAR_READS -R $(REF_FASTA)")
 
 %.intrachr.bam : %.bam %.bai
 	$(call RUN,1,$(RESOURCE_REQ_LOW_MEM),$(RESOURCE_REQ_SHORT),$(SAMTOOLS_MODULE),"\
