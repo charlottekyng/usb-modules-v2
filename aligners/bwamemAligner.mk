@@ -27,7 +27,7 @@ bam/%.bam : bwamem/bam/%.bwamem.$(BAM_SUFFIX)
 
 ifeq ($(MERGE_SPLIT_FASTQ),true)
 bwamem/bam/%.bwamem.bam : fastq/%.1.fastq.gz $(if $(findstring true,$(PAIRED_END)),fastq/%.2.fastq.gz)
-	LBID=`echo "$*" | sed 's/_[A-Za-z0-9]\+//'`; \
+	LBID=`echo "$*" | sed 's/_[A-Za-z0-9\-]\+//'`; \
 	$(call RUN,$(BWA_NUM_CORES),$(RESOURCE_REQ_LOW_MEM),$(RESOURCE_REQ_MEDIUM),$(BWA_MODULE) $(SAMTOOLS_MODULE),"\
 	$(BWA_MEM) -t $(BWA_NUM_CORES) $(BWA_MEM_OPTS) \
 	-R \"@RG\tID:$*\tLB:$${LBID}\tPL:${SEQ_PLATFORM}\tSM:$${LBID}\" $(REF_FASTA) $^ | \
@@ -35,7 +35,7 @@ bwamem/bam/%.bwamem.bam : fastq/%.1.fastq.gz $(if $(findstring true,$(PAIRED_END
 else
 define align-split-fastq
 bwamem/bam/$1.bwamem.bam : fastq/$1.1.fastq.gz $$(if $$(findstring true,$$(PAIRED_END)),fastq/$1.2.fastq.gz)
-	LBID=`echo "$1" | sed 's/_[A-Za-z0-9]\+//'`; \
+	LBID=`echo "$1" | sed 's/_[A-Za-z0-9\-]\+//'`; \
 	$$(call RUN,$$(BWA_NUM_CORES),$$(RESOURCE_REQ_LOW_MEM),$$(RESOURCE_REQ_MEDIUM),$$(BWA_MODULE) $$(SAMTOOLS_MODULE),"\
 	$$(BWA_MEM) -t $$(BWA_NUM_CORES) $$(BWA_MEM_OPTS) \
 	-R \"@RG\tID:$1\tLB:$$$${LBID}\tPL:$${SEQ_PLATFORM}\tSM:$$$${LBID}\" $$(REF_FASTA) $$^ | \

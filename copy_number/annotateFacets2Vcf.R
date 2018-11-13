@@ -25,7 +25,6 @@ optList <- list(
                 make_option("--facetsRdata", default = NULL, type = "character", action = "store", help ="facets Rdata file"),
                 make_option("--facetsSegTxt", default = NULL, type = "character", action = "store", help ="facets segments text file (instead of Rdata)"),
                 make_option("--outFile", default = NULL, type = "character", action = "store", help ="targeted interval bed"))
-print (optList)
 
 parser <- OptionParser(usage = "%prog [options] [vcf file]", option_list = optList);
 arguments <- parse_args(parser, positional_arguments = T);

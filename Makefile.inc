@@ -362,8 +362,6 @@ FACETS = $(RSCRIPT) usb-modules-v2/copy_number/facetsRun.R
 FACETS_GENE_CN = $(RSCRIPT) usb-modules-v2/copy_number/facetsGeneCN.R
 FACETS_GENE_CN_PLOT = $(RSCRIPT) usb-modules-v2/copy_number/facetsGeneCNPlot.R
 FACETS_CCF = $(RSCRIPT) usb-modules-v2/copy_number/facetsCCF.R
-FACETS_GENE_CN_OPTS = $(if $(TARGETS_FILE_GENES),--genesFile $(TARGETS_FILE_GENES))
-FACETS_GENE_CN_PLOT_OPTS = 
 
 MUTATION_SUMMARY_RSCRIPT = $(RSCRIPT) usb-modules-v2/summary/mutation_summary_excel.R
 DECONSTRUCTSIGS = $(RSCRIPT) usb-modules-v2/mut_sigs/deconstructSigs.R

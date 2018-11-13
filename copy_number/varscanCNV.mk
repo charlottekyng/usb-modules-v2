@@ -6,18 +6,12 @@ LOGDIR ?= log/varscanCNV.$(NOW)
 
 ##### MAKE INCLUDES #####
 include usb-modules-v2/Makefile.inc
-$(info TARGETS_FILE_INTERVALS_POOLS_CNA $(TARGETS_FILE_INTERVALS_POOLS_CNA))
+
 .DELETE_ON_ERROR:
 .SECONDARY: 
 .PHONY: all
 
-all : copynum copycalls segments geneCN 
-
-copynum : $(foreach pair,$(SAMPLE_PAIRS),$(foreach pool,$(TARGETS_FILE_INTERVALS_POOLS_CNA),varscan/copynum/$(pair).$(notdir $(pool)).copynumber))
-copycalls : $(foreach pair,$(SAMPLE_PAIRS),$(foreach pool,$(TARGETS_FILE_INTERVALS_POOLS_CNA),varscan/copycall/$(pair).$(notdir $(pool)).copycall))
-segments : $(foreach pair,$(SAMPLE_PAIRS),varscan/segment/$(pair).segment.Rdata)
-geneCN : varscan/segment/geneCN.txt
-
+all : varscan/segment/all$(PROJECT_PREFIX).geneCN.GL_LRR.pdf varscan/segment/all$(PROJECT_PREFIX).geneCN.log2Ratio.pdf
 
 ifeq ($(CAPTURE_METHOD),PCR)
 define varscan-copynum-tumor-normal
@@ -92,7 +86,7 @@ else
 varscan/segment/%.segment.Rdata : varscan/copycall/%.copycall
 	$(call RUN,1,$(RESOURCE_REQ_LOW_MEM),$(RESOURCE_REQ_VSHORT),$(R_MODULE),"\
 	$(CBS_SEGMENTCNV) --alpha $(CBS_SEG_ALPHA) --smoothRegion $(CBS_SEG_SMOOTH) \
-	-trim $(CBS_TRIM) --clen $(CBS_CLEN) --undoSD $(CBS_SEG_SD) \
+	--trim $(CBS_TRIM) --clen $(CBS_CLEN) --undoSD $(CBS_SEG_SD) \
 	$(if $(CENTROMERE_TABLE),--centromereFile=$(CENTROMERE_TABLE)) --prefix=$(@D)/$* $^")
 endif
 endif
@@ -100,14 +94,21 @@ endif
 varscan/segment/%.collapsed_seg.txt : varscan/segment/%.segment.Rdata
 	
 ifeq ($(CAPTURE_METHOD),RNA)
-varscan/segment/geneCN.txt : $(foreach sample,$(SAMPLES),varscan/segment/$(sample).collapsed_seg.txt)
+varscan/segment/all$(PROJECT_PREFIX).geneCN.GL_LRR.txt : $(foreach sample,$(SAMPLES),varscan/segment/$(sample).collapsed_seg.txt)
 	$(call RUN,1,$(RESOURCE_REQ_LOW_MEM),$(RESOURCE_REQ_VSHORT),$(R_MODULE),"\
-	$(VARSCAN_GENE_CN) $(VARSCAN_GENE_CN_OPTS) --outFile $@ $^")
+	$(VARSCAN_GENE_CN) $(VARSCAN_GENE_CN_OPTS) --genesFile $(TARGETS_FILE_GENES) --outFile $(@D)/all$(PROJECT_PREFIX).geneCN $^")
 else
-varscan/segment/geneCN.txt : $(foreach pair,$(SAMPLE_PAIRS),varscan/segment/$(pair).collapsed_seg.txt)
+varscan/segment/all$(PROJECT_PREFIX).geneCN.GL_LRR.txt : $(foreach pair,$(SAMPLE_PAIRS),varscan/segment/$(pair).collapsed_seg.txt)
 	$(call RUN,1,$(RESOURCE_REQ_LOW_MEM),$(RESOURCE_REQ_VSHORT),$(R_MODULE),"\
-	$(VARSCAN_GENE_CN) $(VARSCAN_GENE_CN_OPTS) --outFile $@ $^")	
+	$(VARSCAN_GENE_CN) $(VARSCAN_GENE_CN_OPTS) --genesFile $(TARGETS_FILE_GENES) --outFile $(@D)/all$(PROJECT_PREFIX).geneCN $^")	
 endif
+
+varscan/segment/all$(PROJECT_PREFIX).geneCN.log2Ratio.txt : varscan/segment/all$(PROJECT_PREFIX).geneCN.GL_LRR.txt
+	
+
+varscan/segment/all$(PROJECT_PREFIX).geneCN.%.pdf : varscan/segment/all$(PROJECT_PREFIX).geneCN.%.txt
+	$(call RUN,1,$(RESOURCE_REQ_LOW_MEM),$(RESOURCE_REQ_VSHORT),$(R_MODULE),"\
+	$(FACETS_GENE_CN_PLOT) $(FACETS_GENE_CN_PLOT_OPTS) $< $@")
 
 define varscan-segment-sd-alpha-smooth
 varscan/segment_sd$1_alpha$2_smooth$3/%.segment.Rdata : varscan/copycall/%.copycall
