@@ -13,7 +13,7 @@ DBSNP ?= $(ANN_DIR)/dbsnp_138.hg19.vcf
 
 ifeq ($(findstring NONE,$(PANEL)),NONE)
 else
-include usb-modules-v2/genome_inc/$(REF).$(PANEL).inc
+include usb-modules-v2/genome_inc/$(REF)/$(PANEL).inc
 endif
 
 RESOURCE_REQ ?= medium
