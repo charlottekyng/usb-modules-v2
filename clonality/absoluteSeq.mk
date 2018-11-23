@@ -28,7 +28,7 @@ $(foreach pair,$(SAMPLE_PAIRS),\
 absolute/segments/%.seg.txt : facets/cncf/%.cncf.txt
 	$(INIT) $(MKDIR) absolute/segments; \
 	sample=`basename $$@ .seg.txt`; ml $(R_MODULE); \
-	$(ABSOLUTE_MAKE_SEGS) --sample $$sample --outFile $@ $(ABSOLUTE_MAKE_SEGS_OPT) $<
+	$(ABSOLUTE_MAKE_SEGS) --sample $sample --outFile $@ $(ABSOLUTE_MAKE_SEGS_OPT) $<
 
 absolute/absolute_parameters_$(PROJECT_PREFIX).txt : $(foreach pair,$(SAMPLE_PAIRS),absolute/mutations/$(pair).mutations.txt absolute/segments/$(pair).seg.txt)
 	$(INIT) echo "include patient sample seg.dat.fn sigma.p max.sigma.h min.ploidy max.ploidy \
