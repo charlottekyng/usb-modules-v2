@@ -1,5 +1,9 @@
 include usb-modules-v2/Makefile.inc
 
+CALLER_PREFIX ?=
+FILTER_VARIANTS = false
+ANNOTATE_VARIANTS ?= true
+
 ifeq ($(findstring SOMATIC,$(ANALYSIS_TYPE)),SOMATIC)
 USE_SUFAM = false
 include usb-modules-v2/variant_callers/somatic/somaticVariantCaller.inc
@@ -12,10 +16,6 @@ endif
 # or if custom filtering is required then specify VCF_FILTER_SUFFIX
 # if annotation is required then set ANNOTATE_VARIANTS to true
 # or for custom annotation, specificy VCF_ANNS_SUFFIX
-
-CALLER_PREFIX ?=
-FILTER_VARIANTS = false
-ANNOTATE_VARIANTS ?= true
 
 LOGDIR ?= log/ann_ext_vcf.$(NOW)
 
