@@ -44,6 +44,7 @@ if (opt$format=="star") {
 	dat <- data.frame(TUMOR=tumor[match(normal[,1], tumor[,1]),2],
 		NORMAL= normal[,2])
 	dat$LOGRATIO = log2((dat$TUMOR+1)/(dat$NORMAL+1))
+	dat$LOGRATIO <- dat$LOGRATIO-median(dat$LOGRATIO, na.rm=T)
 	rownames(dat) <- normal[,1]
 } #else if (opt$format=="rsem") {
 #	dat <- data.frame(TUMOR=tumor$TPM,

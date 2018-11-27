@@ -186,6 +186,7 @@ SCRIPTS_DIR ?= $(USR_DIR)/local/scripts
 BIN_DIR ?= $(USR_DIR)/local/bin
 MODULE_SCRIPTS_DIR ?= usb-modules-v2/scripts
 LD_LIBRARY_PATH = $(USR_DIR)/local/MCR_R2014a/v83/runtime/glnxa64:$(USR_DIR)/local/MCR_R2014a/v83/bin/glnxa64:$(USR_DIR)/local/MCR_R2014a/v83/sys/os/glnxa64
+IMG_DIR ?= /scicore/home/terracci/GROUP/virtual_env
 
 export TMPDIR := /scicore/scratch
 export PATH := $(USR_DIR):$(PATH)
@@ -367,7 +368,7 @@ DECONSTRUCTSIGS_NUMCORES ?= 8
 
 
 PVACSEQ ?= pvacseq
-PVACTOOLS_IMG ?= /scicore/home/terracci/GROUP/virtual_env/pvactools.img
+PVACTOOLS_IMG ?= $(IMG_DIR)/pvactools.img
 PVACSEQ_OPTS ?= -e 8,9,10,11 \
 $(if $(findstring true,$(PVACSEQ_USE_LOCAL_IEDB)),--iedb-install-directory /MHC/,)
 PVACSEQ_PREPARE_VCF ?= $(PERL) usb-modules-v2/neoepitopes/pvacseq_prepare_vcf.pl
@@ -399,9 +400,16 @@ ABSOLUTE_NUM_CORE ?= 1
 CBS_SEGMENTCNV = $(RSCRIPT) usb-modules-v2/copy_number/varscanCNVSegment.R
 VARSCAN_GENE_CN = $(RSCRIPT) usb-modules-v2/copy_number/varscanCNVGeneCN.R
 VARSCAN_CONTROL_PROFILE_FROM_STAR ?= $(RSCRIPT) usb-modules-v2/copy_number/varscan_ekaryotyping_control_from_star.R
-RNA_LOGRATIO = $(RSCRIPT) usb-modules-v2/copy_number/varscan_input_from_RNAseq.R
+VARSCAN_RNA_LOGRATIO = $(RSCRIPT) usb-modules-v2/copy_number/varscan_input_from_RNAseq.R
+VARSCAN_GENE_CN_PLOT ?= $(FACETS_GENE_CN_PLOT)
+VARSCAN_GENE_CN_PLOT_OPTS ?= $(FACETS_GENE_CN_PLOT_OPTS)
 
 
+CNVKIT_IMG ?= $(IMG_DIR)/cnvkit_0.9.5.img
+CNVKIT ?= cnvkit.py
+CNVKIT_GENE_CN ?= $(RSCRIPT) usb-modules-v2/copy_number/cnvkitGeneCN.R
+CNVKIT_GENE_CN_PLOT ?= $(FACETS_GENE_CN_PLOT) 
+CNVKIT_PROCESS_RSEM ?= $(RSCRIPT) usb-modules-v2/copy_number/cnvkit_process_rsem_input.R
 
 MUTSIGCV ?= $(USR_DIR)/local/MutSigCV_1.4/run_MutSigCV.sh
 MCR ?= $(USR_DIR)/local/MCR_R2013a_glnxa64/v81/

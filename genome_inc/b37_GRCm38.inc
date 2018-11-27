@@ -71,6 +71,7 @@ MUTSIGCV_SEQ_REF_DIR ?= $(MUTSIGCV_REF_DIR)/chr_files_hg19/
 YOUN_AND_SIMON_SEQ_DATA ?= $(ANN_DIR)/youn_and_simon_sequence_data.RData
 
 MSISENSOR_REF ?= $(REF_DIR)/msi_reference/b37.txt
+CNVKIT_GENE_RESOURCE ?= $(ANN_DIR)/cnvkit_gene_resource_GRCh37.tsv
 
 endif
 B37_GRCM38_INC = true

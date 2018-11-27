@@ -122,6 +122,10 @@ TARGETS += facets_poolednorm
 facets_poolednorm :
 	$(call RUN_MAKE,usb-modules-v2/copy_number/facets_poolednorm.mk)
 
+TARGETS += cnvkit
+cnvkit :
+	$(call RUN_MAKE,usb-modules-v2/copy_number/cnvkit.mk)
+	
 TARGETS += tvc_somatic
 tvc_somatic :
 	$(call RUN_MAKE,usb-modules-v2/variant_callers/somatic/TVC.mk)

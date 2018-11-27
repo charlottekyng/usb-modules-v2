@@ -10,7 +10,8 @@ optList <- list(
 	make_option("--minCPM", default = 1, type = "double", action = "store", help = "minCPM to keep gene"),
 	make_option("--minNumSamples", default = NULL, type="integer", action = "store", help = "min num of samples with minCPM to keep gene"),
 	make_option("--whichStrand", default = "total", type="character", action = "store", help = " which strand to filter for minCPM. total, anti-sense or sense"),
-	make_option("--rmMostVarGenes", default = 0.1, type='double', action = "store", help = "remove the x% most variable genes"),
+	make_option("--rmMostVarGenes", default = 0.05, type='double', action = "store", help = "remove the x% most variable genes"),
+	make_option("--rmMostExpressedGenes", default = 0.05, type='double', action = "store", help = "remove the x% most highly expressed genes"),
 	make_option("--gtf", default = NULL, type="character", action = "store", help = "GTF file")
 )
 
@@ -63,6 +64,11 @@ mat <- mat[which(rowSums(cpm(mat)>opt$minCPM) >= opt$minNumSamples),]
 if (!is.null(opt$rmMostVarGenes)) {
 	v <- apply(mat,1,var)
 	threshold <- quantile(v, 1-opt$rmMostVarGenes)
+	mat <- mat[which(v<=threshold),]
+}
+if (!is.null(opt$rmMostExpressedGenes)) {
+	v <- apply(mat,1,mean)
+	threshold <- quantile(v, 1-opt$rmMostExpressedGenes)
 	mat <- mat[which(v<=threshold),]
 }
 

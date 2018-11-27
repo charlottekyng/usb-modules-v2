@@ -60,7 +60,7 @@ varscan/rna_logratio/control.rna_logratio.txt : $(foreach normal,$(PANEL_OF_NORM
 define rna-logratio
 varscan/rna_logratio/$1.rna_logratio.txt : star/$1.ReadsPerGene.out.tab varscan/rna_logratio/control.rna_logratio.txt
 	$$(call RUN,1,$$(RESOURCE_REQ_LOW_MEM),$$(RESOURCE_REQ_VSHORT),$$(R_MODULE),"\
-	$$(RNA_LOGRATIO) --tumor_file $$< --normal_file $$(<<) --gtf $$(GENCODE_GENE_GTF) --outfile $$@")
+	$$(VARSCAN_RNA_LOGRATIO) --tumor_file $$< --normal_file $$(<<) --gtf $$(GENCODE_GENE_GTF) --outfile $$@")
 endef
 $(foreach sample,$(SAMPLES),\
 	$(eval $(call rna-logratio,$(sample))))

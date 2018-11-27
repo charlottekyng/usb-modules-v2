@@ -77,7 +77,7 @@ DB_NSFP ?= $(REF_DIR)/dbNSFP/GRCh38/dbNSFP3.2a.txt.gz
 #YOUN_AND_SIMON_SEQ_DATA ?= $(ANN_DIR)/youn_and_simon_sequence_data.RData
 
 MSISENSOR_REF ?= $(REF_DIR)/msi_reference/hg38.txt
-
+CNVKIT_GENE_RESOURCE ?= $(ANN_DIR)/cnvkit_gene_resource.txt
 endif
 HG38_INC = true
 

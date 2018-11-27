@@ -55,7 +55,7 @@ if (!is.null(opt$centromereFile)) {
 
 cat ("Reading these files", cnFile, "\n")
 cn <- lapply(cnFile, read.table, header=T, as.is=T)
-cat ("Done reding files, "\n")
+cat ("Done reding files", "\n")
 
 cn <- do.call("rbind", cn)
 
