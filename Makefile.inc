@@ -410,6 +410,8 @@ CNVKIT ?= cnvkit.py
 CNVKIT_GENE_CN ?= $(RSCRIPT) usb-modules-v2/copy_number/cnvkitGeneCN.R
 CNVKIT_GENE_CN_PLOT ?= $(FACETS_GENE_CN_PLOT) 
 CNVKIT_PROCESS_RSEM ?= $(RSCRIPT) usb-modules-v2/copy_number/cnvkit_process_rsem_input.R
+CNVKIT_MEDIAN_CENTER ?= $(RSCRIPT) usb-modules-v2/copy_number/cnvkit_median_center.R
+CNVKIT_SCALE_SEGMENTS ?= $(RSCRIPT) usb-modules-v2/copy_number/cnvkitScaleSegments.R
 
 MUTSIGCV ?= $(USR_DIR)/local/MutSigCV_1.4/run_MutSigCV.sh
 MCR ?= $(USR_DIR)/local/MCR_R2013a_glnxa64/v81/
