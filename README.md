@@ -65,7 +65,7 @@ The preferred format is XXXnnn[TN]mm, where
 Obviously, this format does not apply to all types of projects, and some variation is of course permissible.
 Here are the rules
 * all alphanumeric characters are allowed `[A-Za-z0-9]` 
-* absolutely no space
+* _ABSOLUTE NO_ white space or underscore (`_`)
 * the only (tested) permissible symbol is `-`. Most other symbols are either known to break the pipeline or are untested.
 * sample names should start with an alphabet [A-Za-z], although it is not know if the pipeline would actually fall over otherwise.
 
@@ -184,27 +184,28 @@ make star
 ```
 
 #### QC
-The following will work for both Illumina and Ion Torrent sequencing, 
-and will collect the appropriate metrics based on capture method and target panel.
+Most of the following will work for both Illumina and Ion Torrent sequencing, unless otherwise specified.
 
 *Pre-requisites:* BAMs in `bam/` after alignment with an appropriate aligner.
 
 ```
-make bam_metrics
-make fastqc
-make genotype
+make bam_metrics       # This should be done for every dataset
+make fastqc            # This is occasionally useful for checking the quality of the sequencing (but isn't too useful most of the time)
+make genotype          # This is useful for confirming that sample pairs/sets came from the correct patient
+make facets_poolednorm # (Illumina only) This is useful for confirming that the germline samples are not contaminated with tumor cells
 ```
 
 #### Germline variant calling
 
 *Pre-requisites:* BAMs in `bam/` after alignment with an appropriate aligner.
 
-For Illumina, GATK v4 following the Best Practice guidelines is implemented and tested.
+For Illumina, GATK v4 following the Best Practice guidelines is implemented and tested. 
+*IMPORTANT*: If you are using targeted sequencing (e.g. WES or any other kind of targeted panel, set `NUM_JOBS=3` or a similarly small number as one of the steps in GATK writes a huge number of files. This does not apply to WGS.
 ```
-make gatk # IMPORTANT: limit NUM_JOBS to a small number, e.g. 3. It writes a huuuuuge number of temporary files!
+make gatk 
 ```
 
-For Ion Torrent, TVC is implemented but not well tested.
+For Ion Torrent, TVC is implemented.
 ```
 make tvc
 ```
@@ -213,7 +214,8 @@ make tvc
 
 *Pre-requisites:* BAMs in `bam/` after alignment with an appropriate aligner.
 
-For Illumina, mutect (SNVs) and strelka (indels) are implemented and tested.
+For Illumina, mutect (SNVs) and strelka (indels) are implemented and tested. 
+*Note*: It is generally advisable to run facets for CNAs before these. If you do not have facets results, you have to set `ANN_FACETS=false` in your `Makefile`.
 ```
 make mutect
 make strelka
@@ -235,7 +237,7 @@ For Illumina DNA sequencing, facets is implemented and tested.
 make facets
 ```
 
-For Ion Torrent DNA sequencing, varscan is implemented and tested.
+For Ion Torrent DNA sequencing, Varscan is implemented and tested.
 ```
 make varscan_cnv
 ```
@@ -246,7 +248,7 @@ make cnvkit
 ```
 
 #### RNA-seq transcript quantification
-RSEM is tested
+RSEM is tested to be run after STAR alignment.
 ```
 make rsem
 ```
@@ -271,7 +273,6 @@ make msisensor        # For the detection of microsatellite instability
 make pyclone          # For clonality analysis, requires mutations and facets output
 make absolute_seq     # For clonality analysis, requires mutations and facets output
 make pvacseq          # For the detection of neo-antigens
-
 ```
 
 
