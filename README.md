@@ -112,7 +112,7 @@ _before_ the `include usb-modules-v2/Makefile` line.
 
 Here are the most basic ones and these should almost always be specified.
 ```
-# example values:  b37, hg19_ionref, b37_hbv_hcv, hg38, b37_GRCm38 etc
+# example values:  b37, hg19_ionref, hg38 etc. Values permitted will have a `usb-modules-v2/genome_inc/$<REF>` directory
 REF = b37
 
 # possible values: [ILLUMINA|IONTORRENT]
@@ -121,7 +121,7 @@ SEQ_PLATFORM = ILLUMINA
 # possible values: NONE (e.g. WGS), BAITS (bait-capture enrichment), PCR (amplicon-based enrichment), RNA (cDNA enrichment), CHIP
 CAPTURE_METHOD = NONE
 
-# example values: HCC20160511, WXS etc
+# example values: HCC20160511, WXS etc. Values permitted will have a `usb-modules-v2/genome_inc/$<REF>/$<PANEL>.inc` file
 PANEL = NONE
 
 # Single-end or paired-end, set to false if single-end [true|false]
@@ -134,11 +134,9 @@ include usb-modules-v2/Makefile
 ```
 Most parameters are automatically set to the basic appropriate values if you set these above parameters correctly, but there is a lot of room for customization.
 
-Not all combinations of REF and PANEL are permissible. 
-(In the near future, valid combinations of 'REF' and 'PANEL' will be found as a `usb-modules-v2/genome_inc/<REF>/<PANEL>.inc` file.)
+Not all combinations of REF and PANEL are permissible. With the exception of `PANEL=NONE`, make sure your combination exists as a `usb-modules-v2/genome_inc/$<REF>/$<PANEL>.inc` file.
 
 Additional user-configurable parameters are defined (with default values) in the `usb-modules-v2/config.inc` file. 
-(In the near future, the parameters will be better documented in the config file.)
 
 Some `Makefile` templates are provided in `usb-modules-v2/Makefile_templates/`. Please *copy* them to your project directory and do not remove them from `usb-modules-v2/`.
 ```
@@ -147,15 +145,18 @@ Makefile_template_all_basic_options  Makefile_template_agilentallexonv6  Makefil
 >cp usb-modules-v2/Makefile_templates/Makefile_template_agilentallexonv6 Makefile
 ```
 
+There are many, many possibilities to customize the analysis. The ones listed above are merely the most basic ones.
+
 ---
 # Executing the modules
 This analysis pipeline is designed to be modular. 
-The names of the modules are found in module-level Makefile (not project-level Makefile). 
+The names of the modules are found in module-level Makefile (i.e. `usb-modules-v2/Makefile`, not project-level Makefile). 
+The ones listed below are only the most basic modules. There are many more advanced and/or less commonly used modules implemeted, particularly with re-processing bam/VCF files and downstream analyses.
 To execute a nodule, you type
 ```
 make <MODULE>
 ```
-This will set the parameters you set up in the project-level Makefile, 
+This will set the parameters you set up in the project-level `Makefile`, 
 then it will go through the code to set the remaining parameters with the appropriate default values, 
 then run your desired module. 
 It is highly advisable to run this with either `nohup`, or within `screen` or `tmux`.
@@ -171,7 +172,7 @@ This runs the chosen aligner on FASTQ files, including preprocessing (e.g. adapt
 
 *Pre-requisites:* FASTQs in `fastq/` or `unprocessed_fastq/` (see 'Setting up data directories' above).
 
-For genomic Illumina alignment, the following are implemented and tested.
+For genomic Illumina alignment, the following are implemented and tested. Use `bwaaln` for reads < 75bp, `bwamem` for reads >= 75bp.
 ```
 make bwaaln
 make bwamem
@@ -229,14 +230,25 @@ make mutation_summary
 
 *Pre-requisites:* BAMs in `bam/` after alignment with an appropriate aligner.
 
-For Illumina, facets is implemented and tested.
+For Illumina DNA sequencing, facets is implemented and tested.
 ```
 make facets
 ```
 
-For Ion Torrent, varscan is implemented and tested.
+For Ion Torrent DNA sequencing, varscan is implemented and tested.
 ```
 make varscan_cnv
+```
+
+For Illumina RNA sequencing, cnvkit is implemeted (but currently not well tested or documented).
+```
+make cnvkit
+```
+
+#### RNA-seq transcript quantification
+RSEM is tested
+```
+make rsem
 ```
 
 #### ChIP-seq peak detection
@@ -250,9 +262,16 @@ make mosaics
 #### Others/ downstream tools
 There are a lot more... 
 
-For exome analysis, there are a few things that are useful. These should work if you use them in the context of the suggested recipes below.
+For exome analysis, there are a few things that are useful. These should work if you use them in the context of the suggested recipes below. Some of them may only work on the b37 genome.
+You may run into errors if you run them outside of the context of in-house, standard data as they have complex (and cryptic) rules to obtain input files. 
 ```
-make deconstruct_sigs pyclone
+make deconstruct_sigs # For mutational signatures, requires mutations
+make lst              # For the detection of large-scale transitions, requires facets output
+make msisensor        # For the detection of microsatellite instability
+make pyclone          # For clonality analysis, requires mutations and facets output
+make absolute_seq     # For clonality analysis, requires mutations and facets output
+make pvacseq          # For the detection of neo-antigens
+
 ```
 
 
@@ -332,11 +351,11 @@ here are some suggested recipes that are valid sequences.
 
 #### Whole-exome sequencing on Illumina
 ```
-make bwamem genotype fastqc bam_metrics facets mutect strelka mutation_summary (deconstruct_sigs pyclone)
+make bwamem genotype bam_metrics facets mutect strelka mutation_summary (deconstruct_sigs pyclone)
 ```
 #### RNA-sequencing on Illumina
 ```
-make star bam_metrics rsem
+make star bam_metrics rsem (cnvkit)
 ```
 #### ChIP-seq on Illumina (75bp reads or longer)
 ```
@@ -346,7 +365,7 @@ make bwamem mosaics
 ```
 make bwaaln mosaics
 ```
-#### Targeted panel sequencing on Ion Torrent (from bam files)
+#### Targeted panel sequencing on Ion Torrent (from bam files from the Torrent server)
 ```
 make fix_rg genotype bam_metrics tvc_somatic varscan_cnv hotspot_screen mutation_summary
 ```
