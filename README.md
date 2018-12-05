@@ -269,11 +269,13 @@ You may run into errors if you run them outside of the context of in-house, stan
 ```
 make deconstruct_sigs # For mutational signatures, requires mutations
 make lst              # For the detection of large-scale transitions, requires facets output
-make msisensor        # For the detection of microsatellite instability
+make msisensor        # For the detection of microsatellite instability, requires bam files only
 make pyclone          # For clonality analysis, requires mutations and facets output
-make absolute_seq     # For clonality analysis, requires mutations and facets output
-make pvacseq          # For the detection of neo-antigens
+make absolute_seq     # For clonality analysis, requires mutations and facets output (see note below)
+make pvacseq          # For the detection of neo-antigens, requires mutations (not well tested...)
 ```
+
+_Note regarding absolute_seq_, it would attempt to run all 3 steps, choosing the default solutions. But, it does not always run to the end, as RunAbsolute error handing is not great.
 
 
 #### Note regarding sanity checks
@@ -352,8 +354,9 @@ here are some suggested recipes that are valid sequences.
 
 #### Whole-exome sequencing on Illumina
 ```
-make bwamem genotype bam_metrics facets mutect strelka mutation_summary (deconstruct_sigs pyclone)
+make bwamem genotype bam_metrics facets mutect strelka mutation_summary (deconstruct_sigs lst msisensor pyclone) [absolute_seq pvacseq]
 ```
+Those in parentheses `()` will work, those in brackets `[]` may fall over.
 #### RNA-sequencing on Illumina
 ```
 make star bam_metrics rsem (cnvkit)
