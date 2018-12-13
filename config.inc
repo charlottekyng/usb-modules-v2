@@ -164,6 +164,9 @@ SPLIT_CHR ?= true
 # deduplication: [none|markdup|rmdup]: markdup is Picard MarkDuplicates, rmdup is samtools rmdup
 # defaults to markdup and true except for RNA-seq, amplicon-based capture and CHIP
 ifeq ($(CAPTURE_METHOD),RNA)
+ifeq ($(POST_PROCESS_RNA_BAM),true)
+BAM_DUP_TYPE ?= markdup
+endif
 BAM_DUP_TYPE ?= none
 BAM_REALN ?= false
 BAM_RECAL ?= false
