@@ -1,9 +1,12 @@
 include usb-modules-v2/Makefile.inc
-#include usb-modules-v2/variant_callers/somatic/somaticVariantCaller.inc
 
 LOGDIR ?= log/pon.$(NOW)
 
+PHONY = pon
+
 ifeq ($(findstring tvc,$(MUT_CALLER)),tvc)
+
+pon : tvc/pon.tvc.vcf
 
 tvc/pon.tvc.vcf : $(foreach sample,$(PANEL_OF_NORMAL_SAMPLES),tvc/vcf_pon/$(sample)/TSVC_variants.vcf)
 	$(call RUN,1,$(RESOURCE_REQ_HIGH_MEM),$(RESOURCE_REQ_SHORT),$(JAVA8_MODULE),"\
@@ -19,6 +22,8 @@ tvc/vcf_pon/%/TSVC_variants.vcf : bam/%.bam bam/%.bam.bai
 	-m $(TVC_MOTIF) -p $(TVC_SOMATIC_JSON) \
 	-t $(TVC_ROOT_DIR) --primer-trim-bed $(PRIMER_TRIM_BED)")
 else
+
+pon : mutect2/pon.mutect2.vcf
 
 define mutect2-pon-chr
 mutect2/chr_vcf_pon/$1.$2.mutect2.vcf : bam/$1.bam
