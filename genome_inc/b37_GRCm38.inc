@@ -41,7 +41,8 @@ CANCER_GENE_CENSUS_BED = $(ANN_DIR)/cancer_gene_census.bed
 KANDOTH_BED = $(ANN_DIR)/kandoth127smg.bed
 LAWRENCE_BED = $(ANN_DIR)/lawrence_cancer5000s.bed
 DGD_BED = $(ANN_DIR)/dgd_Hsa_all_v71.bed
-CANCER_HOTSPOT_VCF = $(ANN_DIR)/publication_hotspots_inclnoncoding_incl3d.vcf
+#CANCER_HOTSPOT_VCF = $(ANN_DIR)/publication_hotspots_inclnoncoding_incl3d.vcf
+CANCER_HOTSPOT_VCF = $(ANN_DIR)/hotspots_changv2_gao_nc.vcf
 
 CENTROMERE_TABLE = $(ANN_DIR)/centromeres_b37.txt
 

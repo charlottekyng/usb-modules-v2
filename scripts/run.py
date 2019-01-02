@@ -153,6 +153,11 @@ if __name__ == '__main__':
         
     elif cluster_engine == 'slurm':
         qsub_args = "--workdir {pwd}".format(pwd=os.getcwd())
+
+        if job_name is not None:
+            qsub_args += " --comment {}".format(job_name)
+        else:
+            qsub_args += " --comment {}".format(os.getcwd())
         
         if job_name is not None:
             qsub_args += " --job-name {}".format(job_name)

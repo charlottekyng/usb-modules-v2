@@ -62,12 +62,17 @@ LOGDIR ?= log/vcf.$(NOW)
 	--filter-expression 'IHP > 14' --filter-name iHpol \
 	--filter-expression 'MQ0 > 1' --filter-name MQ0 && $(RM) $<"))
 
+#%.hotspot.vcf : %.vcf
+#	$(call CHECK_VCF,$<,$@,\
+#	$(call RUN,1,$(RESOURCE_REQ_MEDIUM_MEM),$(RESOURCE_REQ_SHORT),$(GATK40_MODULE),"\
+#		$(call GATK40,VariantFiltration,$(RESOURCE_REQ_MEDIUM_MEM_JAVA)) \
+#		-R $(REF_FASTA) -V $< -O $@ \
+#		--mask $(CANCER_HOTSPOT_VCF) --mask-name HOTSPOT && $(RM) $< $<.idx"))
+
 %.hotspot.vcf : %.vcf
 	$(call CHECK_VCF,$<,$@,\
-	$(call RUN,1,$(RESOURCE_REQ_MEDIUM_MEM),$(RESOURCE_REQ_SHORT),$(GATK40_MODULE),"\
-		$(call GATK40,VariantFiltration,$(RESOURCE_REQ_MEDIUM_MEM_JAVA)) \
-		-R $(REF_FASTA) -V $< -O $@ \
-		--mask $(CANCER_HOTSPOT_VCF) --mask-name HOTSPOT && $(RM) $< $<.idx"))
+	$(call RUN,1,$(RESOURCE_REQ_MEDIUM_MEM),$(RESOURCE_REQ_SHORT),$(SNP_EFF_MODULE),"\
+	$(SNP_SIFT) annotate $(SNP_SIFT_OPTS) $(CANCER_HOTSPOT_VCF) $< > $@ && $(RM) $^"))
 
 ## This is definitely broken
 # somatic filter for structural variants
@@ -385,36 +390,36 @@ endif
 
 %.nonsynonymous_hotspot.txt : %.txt
 	col_imp=$$(head -1 $< | tr '\t' '\n' | grep -n "IMPACT" | sed 's/:.*//'); \
-	col_filter=$$(head -1 $< | tr '\t' '\n' | grep -n "FILTER"); \
-	$(INIT) head -1 $< > $@ && awk -v col_imp=$$col_imp -v col_filter=$$col_filter \
-	'(match($$col_imp, /MODERATE/) || match($$col_imp, /HIGH/) || match($$col_filter, /HOTSPOT/))' $< >> $@
+	col_info=$$(head -1 $< | tr '\t' '\n' | grep -n "INFO"); \
+	$(INIT) head -1 $< > $@ && awk -v col_imp=$$col_imp -v col_filter=$$col_info \
+	'(match($$col_imp, /MODERATE/) || match($$col_imp, /HIGH/) || match($$col_info, /HOTSPOT/))' $< >> $@
 
 %.nonsynonymous_synonymous_hotspot.txt : %.txt
 	col_imp=$$(head -1 $< | tr '\t' '\n' | grep -n "IMPACT" | sed 's/:.*//'); \
 	col_eff=$$(head -1 $< | tr '\t' '\n' | grep -n "EFFECT" | sed 's/:.*//'); \
-	col_filter=$$(head -1 $< | tr '\t' '\n' | grep -n "FILTER"); \
-	$(INIT) head -1 $< > $@ && awk -v col_imp=$$col_imp -v col_eff=$$col_eff -v col_filter=$$col_filter \
+	col_info=$$(head -1 $< | tr '\t' '\n' | grep -n "INFO"); \
+	$(INIT) head -1 $< > $@ && awk -v col_imp=$$col_imp -v col_eff=$$col_eff -v col_info=$$col_info \
 	'(match($$col_imp, /MODERATE/) || match($$col_imp, /HIGH/) || \
 	 (match($$col_imp, /LOW/) && match($$col_eff, /synonymous_variant/)) || \
-	match($$col_filter, /HOTSPOT/))' $< >> $@
+	match($$col_info, /HOTSPOT/))' $< >> $@
 
 %.nonsynonymous_synonymous_hotspot_lincRNA.txt : %.txt
 	col_imp=$$(head -1 $< | tr '\t' '\n' | grep -n "IMPACT" | sed 's/:.*//'); \
 	col_eff=$$(head -1 $< | tr '\t' '\n' | grep -n "EFFECT" | sed 's/:.*//'); \
 	col_biotype=$$(head -1 $< | tr '\t' '\n' | grep -n "BIOTYPE" | sed 's/:.*//'); \
-	col_filter=$$(head -1 $< | tr '\t' '\n' | grep -n "FILTER"); \
-	$(INIT) head -1 $< > $@ && awk -v col_imp=$$col_imp -v col_eff=$$col_eff -v col_biotype=$$col_biotype -v col_filter=$$col_filter \
+	col_info=$$(head -1 $< | tr '\t' '\n' | grep -n "INFO"); \
+	$(INIT) head -1 $< > $@ && awk -v col_imp=$$col_imp -v col_eff=$$col_eff -v col_biotype=$$col_biotype -v col_info=$$col_info \
 	'(match($$col_imp, /MODERATE/) || match($$col_imp, /HIGH/) || (match($$col_imp, /LOW/) && match($$col_eff, /synonymous_variant/)) || \
-	(match($$col_biotype, /lincRNA/) && match($$col_eff, /non_coding_exon/)) || match($$col_filter, /HOTSPOT/))' $< >> $@
+	(match($$col_biotype, /lincRNA/) && match($$col_eff, /non_coding_exon/)) || match($$col_info, /HOTSPOT/))' $< >> $@
 
 %.nonsynonymous_synonymous_hotspot_lincRNA_upstream.txt : %.txt
 	col_imp=$$(head -1 $< | tr '\t' '\n' | grep -n "IMPACT" | sed 's/:.*//'); \
 	col_eff=$$(head -1 $< | tr '\t' '\n' | grep -n "EFFECT" | sed 's/:.*//'); \
 	col_biotype=$$(head -1 $< | tr '\t' '\n' | grep -n "BIOTYPE" | sed 's/:.*//'); \
-	col_filter=$$(head -1 $< | tr '\t' '\n' | grep -n "FILTER"); \
+	col_info=$$(head -1 $< | tr '\t' '\n' | grep -n "INFO"); \
 	$(INIT) head -1 $< > $@ && awk -v col_imp=$$col_imp -v col_eff=$$col_eff -v col_biotype=$$col_biotype -v col_filter=$$col_filter \
 	'(match($$col_imp, /MODERATE/) || match($$col_imp, /HIGH/) || (match($$col_imp, /LOW/) && match($$col_eff, /synonymous_variant/)) || \
-	(match($$col_biotype, /lincRNA/) && match($$col_eff, /non_coding_exon/)) || match($$col_filter, /HOTSPOT/) || \
+	(match($$col_biotype, /lincRNA/) && match($$col_eff, /non_coding_exon/)) || match($$col_info, /HOTSPOT/) || \
 	(match($$col_eff, /upstream_gene_variant/) && match($$col_imp, /MODIFIER/)))' $< >> $@
 
 
