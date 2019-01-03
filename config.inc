@@ -282,6 +282,7 @@ ANN_NFT ?= false
 PON_VCF ?= mutect2/pon.mutect2.vcf
 endif
 
+PON_MIN_SAMPLES ?= 2
 
 #################################################
 ###### Germline variant callers #################
