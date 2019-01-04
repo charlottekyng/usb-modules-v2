@@ -67,8 +67,17 @@ $(foreach chr,$(CHROMOSOMES), \
 	$(foreach normal,$(PANEL_OF_NORMAL_SAMPLES), \
 		$(eval $(call mutect2-pon-chr,$(normal),$(chr)))))
 
-mutect2/pon.mutect2.vcf : $(foreach chr,$(CHROMOSOMES),$(foreach normal,$(PANEL_OF_NORMAL_SAMPLES),mutect2/chr_vcf_pon/$(normal).$(chr).mutect2.vcf.gz))
+mutect2/pon.list : $(foreach normal,$(PANEL_OF_NORMAL_SAMPLES),$(foreach chr,$(CHROMOSOMES),mutect2/chr_vcf_pon/$(normal).$(chr).mutect2.vcf.gz))
+	$(INIT) \
+	$(RM) $@; \
+	for f in $^; do \
+		echo $${f} >> $@; \
+	done;
+
+
+
+mutect2/pon.mutect2.vcf : mutect2/pon.list
 	$(call RUN,1,$(RESOURCE_REQ_HIGH_MEM),$(RESOURCE_REQ_LONG),$(GATK40_MODULE),"\
 	$(call GATK40,CreateSomaticPanelOfNormals,$(RESOURCE_REQ_HIGH_MEM_JAVA)) \
-	$(foreach f,$^,-vcfs $(f)) -O $@ --duplicate-sample-strategy ALLOW_ALL --min-sample-count $(PON_MIN_SAMPLES)")
+	-vcfs $< -O $@ --duplicate-sample-strategy ALLOW_ALL --min-sample-count $(PON_MIN_SAMPLES) && $(RM) $<")
 endif
