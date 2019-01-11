@@ -6,21 +6,16 @@ ifndef VCFTOOLS_MK_NONTVC
 		-R $(REF_FASTA) -V $< -o $@ --filterExpression \
 		'! vc.hasAttribute(\"DP\") || DP < $(MIN_NORMAL_DEPTH) || DP == \".\"' --filterName DepthO")
 
-%.nft.vcf : %.vcf $(PON_VCF)
-	$(call RUN,1,$(RESOURCE_REQ_MEDIUM_MEM),$(RESOURCE_REQ_SHORT),$(JAVA8_MODULE),"\
-		$(call GATK,VariantFiltration,$(RESOURCE_REQ_MEDIUM_MEM_JAVA)) \
-		-R $(REF_FASTA) -V $< -o $@ --maskName 'PoN' --mask $(word 2,$^) && $(RM) $< $<.idx")
-
 %.lowFreq_ft.vcf : %.vcf
 	$(call RUN,1,$(RESOURCE_REQ_MEDIUM_MEM),$(RESOURCE_REQ_SHORT),$(JAVA8_MODULE),"\
 		$(call GATK,VariantFiltration,$(RESOURCE_REQ_MEDIUM_MEM_JAVA)) -R $$(REF_FASTA) -V $< -o $@ \
 		--filterExpression 'vc.getGenotype(\"$1\").getAD().1 * 1.0 > 0' --filterName interrogation \
 		--filterExpression 'vc.getGenotype(\"$1\").getAD().1 * 1.0 == 0' --filterName interrogation_Absent")
 
-%.pass.vcf : %.vcf
-	$(call CHECK_VCF,$<,$@,\
-	$(call RUN,1,$(RESOURCE_REQ_LOW_MEM),$(RESOURCE_REQ_VSHORT),,"\
-		$(VCF_PASS) $< $@ $(subst pass,fail,$@)"))
+#%.pass.vcf : %.vcf
+#	$(call CHECK_VCF,$<,$@,\
+#	$(call RUN,1,$(RESOURCE_REQ_LOW_MEM),$(RESOURCE_REQ_VSHORT),,"\
+#		$(VCF_PASS) $< $@ $(subst pass,fail,$@)"))
 
 ifdef SAMPLE_PAIRS
 define som-ad-ft-tumor-normal

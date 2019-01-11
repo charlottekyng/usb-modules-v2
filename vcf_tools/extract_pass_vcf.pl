@@ -1,9 +1,23 @@
 #!/usr/bin/perl
 
 use strict;
+use Getopt::Std;
+
+my %opt;
+getopts('n:', \%opt);
+
+my $usage = <<ENDL;
+Usage: extract_pass_vcf.pl [-n <max_allowed>] <input.vcf> <filtered.vcf> <filtered_out.vcf>
+
+-n : the maximum number of filters (excluding targetInterval) allowed to hotspots to be whitelisted
+ENDL
+
+my $max_filters;
+if ($opt{n} eq "") { $max_filters = 2;
+} else { $max_filters = $opt{n}; }
 
 if (@ARGV!=3) {
-	print "Usage: extract_pass_vcf.pl [input.vcf] [filtered.vcf] [filtered_out.vcf]"
+	print STDERR $usage; 
 }
 
 open IN, "$ARGV[0]";
@@ -36,7 +50,7 @@ while (my $line = <IN>) {
 			}
 
 			if ($info =~ /HOTSPOT/)	{
-				if (scalar keys %filters <=2 ) { 
+				if (scalar keys %filters <= $max_filters ) { 
 					print OUT $line."\n";
 				} else { print EXCLUDE $line."\n"; }
 			} else { }

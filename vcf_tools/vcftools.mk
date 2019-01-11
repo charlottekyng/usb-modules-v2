@@ -74,6 +74,17 @@ LOGDIR ?= log/vcf.$(NOW)
 	$(call RUN,1,$(RESOURCE_REQ_MEDIUM_MEM),$(RESOURCE_REQ_SHORT),$(SNP_EFF_MODULE),"\
 	$(SNP_SIFT) annotate $(SNP_SIFT_OPTS) $(CANCER_HOTSPOT_VCF) $< > $@ && $(RM) $^"))
 
+%.nft.vcf : %.vcf $(PON_VCF)
+	$(call RUN,1,$(RESOURCE_REQ_MEDIUM_MEM),$(RESOURCE_REQ_SHORT),$(JAVA8_MODULE),"\
+		$(call GATK,VariantFiltration,$(RESOURCE_REQ_MEDIUM_MEM_JAVA)) \
+		-R $(REF_FASTA) -V $< -o $@ --maskName 'PoN' --mask $(word 2,$^) && $(RM) $< $<.idx")
+
+%.pass.vcf : %.vcf
+	$(call CHECK_VCF,$<,$@,\
+	$(call RUN,1,$(RESOURCE_REQ_LOW_MEM),$(RESOURCE_REQ_VSHORT),,"\
+		$(VCF_PASS) -n $(VCF_PASS_MAX_FILTERS) $< $@ $(subst pass,fail,$@)"))
+
+
 ## This is definitely broken
 # somatic filter for structural variants
 #vcf/$1_$2.%.sv_som_ft.vcf : vcf/$1_$2.%.vcf
