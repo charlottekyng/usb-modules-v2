@@ -211,12 +211,12 @@ SAMTOOLS_DOWNSAMPLE_FACTOR ?= 1001.2
 # this is not good. This is also specified in some genome_inc panel
 # config files. Values in genome_inc configs overide the values here.
 ifeq ($(CAPTURE_METHOD),PCR)
-GENOTYPE_WITH_CHR2 = ?= false
+GENOTYPE_WITH_CHR2 ?= false
 endif
 ifeq ($(CAPTURE_METHOD),CHIP)
-GENOTYPE_WITH_CHR2 = ?= false
+GENOTYPE_WITH_CHR2 ?= false
 endif
-GENOTYPE_WITH_CHR2 = ?= true
+GENOTYPE_WITH_CHR2 ?= true
 
 
 

@@ -19,7 +19,7 @@ endif
 ifeq ($(findstring ILLUMINA,$(SEQ_PLATFORM)),ILLUMINA)
 define snps-chr
 genotype/all$(PROJECT_PREFIX).snps.$1.vcf : $$(foreach sample,$$(SAMPLES),gatk/dbsnp/$$(sample).gatk_snps.vcf)
-	$$(call RUN,1,$$(RESOURCE_REQ_VVHIGH_MEM),$$(RESOURCE_REQ_SHORT),$$(JAVA8_MODULE),"\
+	$$(call RUN,1,$$(RESOURCE_REQ_VVHIGH_MEM),$$(RESOURCE_REQ_LONG),$$(JAVA8_MODULE),"\
 	$$(call GATK,CombineVariants,$$(RESOURCE_REQ_VVHIGH_MEM_JAVA)) \
 	$$(foreach vcf,$$^,--variant $$(vcf) ) -o $$@ --genotypemergeoption UNSORTED \
 	-L $1 -R $$(REF_FASTA)")
