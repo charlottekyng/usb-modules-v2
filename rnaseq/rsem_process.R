@@ -27,7 +27,12 @@ if (is.null(opt$inputRSEMFile)) {
 if (!is.null(opt$gtf)){
 	gtf <- import(opt$gtf)
 	if (!is.null(opt$geneBiotype)){
-		gtf <- gtf[which(gtf$gene_biotype %in% opt$geneBiotype | gtf$gene_type %in% opt$geneBiotype),]
+		if ("gene_biotype" %in% colnames(mcols(gtf))) {
+			gtf <- gtf[which(gtf$gene_biotype %in% opt$geneBiotype),]
+		} else if ("gene_type" %in% colnames(mcols(gtf))) {
+			gtf <- gtf[which(gtf$gene_type %in% opt$geneBiotype),]
+		} else { cat ("Cannot find column for geneBiotype, using all genes in the GTF.\n") }
+
 	} else { cat("No geneBiotype provided, using all genes in the GTF.\n") }
 } else {
 	cat("GTF file not provided, not annotation will be done\n")

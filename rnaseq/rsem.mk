@@ -37,7 +37,7 @@ $(foreach type1,genes,\
 
 
 define rsem-gen-dat-matrix-coding
-rsem/all$$(PROJECT_PREFIX).$1.$2.results : $$(foreach sample,$$(SAMPLES),rsem/$$(sample).$1.results_coding)
+rsem/all$$(PROJECT_PREFIX).$1.$2.results_coding : $$(foreach sample,$$(SAMPLES),rsem/$$(sample).$1.results)
 	$$(call RUN,1,$$(RESOURCE_REQ_LOW_MEM),$$(RESOURCE_REQ_VSHORT),$$(PERL_MODULE) $$(R_MODULE),"\
 	$$(RSEM_GEN_DATA_MATRIX) $$(word 3,$$(subst .,$$( ),$$@)) $$^ | sed 's/rsem\///g;' | \
 	sed \"s/\.$$(word 2,$$(subst .,$$( ),$$@))\.results//g\" | tr -d \"\\\"\" > $$@.tmp && \
