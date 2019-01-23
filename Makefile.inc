@@ -180,13 +180,13 @@ $(if $(findstring $(QOS_30min),$3),--qos 30min,infinite))))),)
 ####### DEFINE PATHS/NAMES FOR SCRIPTS, BINARIES, MODULES #####
 ###############################################################
 
-USR_DIR ?= /scicore/home/terracci/GROUP/usr_nobackup
+USR_DIR ?= /scicore/home/pissal00/GROUP/usr_nobackup
 JAR_DIR ?= $(USR_DIR)/local/lib/java
 SCRIPTS_DIR ?= $(USR_DIR)/local/scripts
 BIN_DIR ?= $(USR_DIR)/local/bin
 MODULE_SCRIPTS_DIR ?= usb-modules-v2/scripts
 LD_LIBRARY_PATH = $(USR_DIR)/local/MCR_R2014a/v83/runtime/glnxa64:$(USR_DIR)/local/MCR_R2014a/v83/bin/glnxa64:$(USR_DIR)/local/MCR_R2014a/v83/sys/os/glnxa64
-IMG_DIR ?= /scicore/home/terracci/GROUP/virtual_env
+IMG_DIR ?= /scicore/home/pissal00/GROUP/virtual_env
 
 export TMPDIR := /scicore/scratch
 export PATH := $(USR_DIR):$(PATH)

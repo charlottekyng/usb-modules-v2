@@ -32,7 +32,7 @@ gistic/$(PROJECT_PREFIX)cnv.$(CNV_SIZE).txt : gistic/$(PROJECT_PREFIX)markersfil
 
 gistic/$(PROJECT_PREFIX)gistic_cnv%/timestamp : gistic/$(PROJECT_PREFIX)segmentationfile.txt gistic/$(PROJECT_PREFIX)markersfile.txt gistic/$(PROJECT_PREFIX)cnv.%.txt
 	$(call RUN,1,$(RESOURCE_REQ_HIGH_MEM),$(RESOURCE_REQ_VSHORT),,"\
-	export MCR_DIR=/scicore/home/terracci/GROUP/usr_nobackup/local/MCR_R2014a/; \
+	export MCR_DIR=/scicore/home/pissal00/GROUP/usr_nobackup/local/MCR_R2014a/; \
 	export LD_LIBRARY_PATH=$(LD_LIBRARY_PATH); \
 	umask 002; $(MKDIR) $(@D); $(GISTIC) -b $(@D) -seg $< -mk $(<<) -refgene $(GISTIC_REF) \
 	-cnv $(<<<) $(GISTIC_OPTS) 2>&1 && touch $@")

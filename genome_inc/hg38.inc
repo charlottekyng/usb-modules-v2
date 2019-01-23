@@ -5,7 +5,7 @@ include usb-modules-v2/genome_inc/common.inc
 REF_FASTA ?= $(GENOME_DIR)/Homo_sapiens_assembly38_gsa.fasta
 REF_DICT = $(REF_FASTA:.fasta=.dict)
 
-DBSNP ?= $(ANN_DIR)/dbsnp_138.b37.vcf.gz
+DBSNP ?= $(ANN_DIR)/dbsnp_138.hg38.vcf.gz
 
 ifeq ($(findstring NONE,$(PANEL)),NONE)
 else
@@ -20,7 +20,7 @@ TARGETS_FILE_GENES ?= $(ANN_DIR)/hg38_protein_coding_gene_symbols.txt
 ifeq ($(findstring bed,$(TARGETS_FILE_INTERVALS)),bed)
 CHROMOSOMES := $(shell grep -v '@' $(TARGETS_FILE_INTERVALS) | cut -f1 | sort -V | uniq)
 else
-CHROMOSOMES ?= $(shell seq 1 22) X $(if $(findstring true,$(INCLUDE_CHR_Y)),Y) MT
+CHROMOSOMES ?= $(foreach chr $(shell seq 1 22),chr$(chr)) chrX $(if $(findstring true,$(INCLUDE_CHR_Y)),chrY) chrM
 endif
 
 ### ANNOTATION SETS ####
@@ -29,12 +29,12 @@ CONTEST_POP_FILE ?= $(ANN_DIR)/hapmap_3.3_grch38_pop_stratified_af.vcf.gz
 
 KNOWN_INDELS ?= $(ANN_DIR)/Mills_and_1000G_gold_standard.indels.hg38.vcf.gz
 OMNI ?= $(ANN_DIR)/1000G_omni2.5.hg38.vcf.gz
-HAPMAP ?= $(ANN_DIR)/hapmap_3.3.hg38.vcf.gzz
+HAPMAP ?= $(ANN_DIR)/hapmap_3.3.hg38.vcf.gz
 R1000G ?= $(ANN_DIR)/1000G_phase1.snps.high_confidence.hg38.vcf.gz
 
-#CLINVAR = $(ANN_DIR)/clinvar.vcf
-#EXAC_NONTCGA = $(ANN_DIR)/ExAC_nonTCGA.r0.3.1.sites.vep.edited.vcf
-#EXAC_NONPSYCH ?= $(ANN_DIR)/ExAC.r0.3.nonpsych.sites.edited.vcf
+CLINVAR = $(ANN_DIR)/clinvar_20190114.vcf.gz
+EXAC_NONTCGA = $(ANN_DIR)/ExAC_nonTCGA.r0.3.1.sites.vep.edited.vcf
+EXAC_NONPSYCH ?= $(ANN_DIR)/ExAC.r0.3.nonpsych.sites.edited.vcf
 #CADD_SNV ?= $(ANN_DIR)/CADD_whole_genome_SNVs_header.vcf.gz
 #CADD_INDEL ?= $(ANN_DIR)/CADD_Indels_1000Gphase3_indels_header_sorted.vcf.gz
 #COSMIC ?= $(ANN_DIR)/CosmicCodingMuts.sorted.vcf
@@ -60,7 +60,7 @@ GENE_REF_FLAT = $(ANN_DIR)/refFlat.txt
 
 ### TOOL-SPECIFIC REF ###
 
-#GISTIC_REF ?= /scicore/home/terracci/GROUP/usr_nobackup/local/gistic_2.0.23/refgenefiles/hg19.UCSC.add_miR.140312.refgene.mat
+GISTIC_REF ?= $(REF_DIR)/gistic/hg19.UCSC.add_miR.140312.refgene.mat
 
 
 SNP_EFF_GENOME = GRCh38.81

@@ -58,7 +58,7 @@ GENE_REF_FLAT = $(ANN_DIR)/refFlat.txt
 
 ### TOOL-SPECIFIC REF ###
 
-GISTIC_REF ?= /scicore/home/terracci/GROUP/usr_nobackup/local/gistic_2.0.23/refgenefiles/hg19.UCSC.add_miR.140312.refgene.mat
+GISTIC_REF ?= $(REF_DIR)/gistic/hg19.UCSC.add_miR.140312.refgene.mat
 
 SNP_EFF_GENOME = GRCh37.75
 DB_NSFP ?= $(REF_DIR)/dbNSFP/GRCh37/dbNSFP2.9.txt.gz

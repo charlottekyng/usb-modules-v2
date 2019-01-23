@@ -3,7 +3,7 @@
 
 use strict;
 use warnings;
-use lib "/scicore/home/terracci/GROUP/usr_nobackup/local/perl5/lib/perl5/x86_64-linux-thread-multi/";
+use lib "/scicore/home/pissal00/GROUP/usr_nobackup/local/perl5/lib/perl5/x86_64-linux-thread-multi/";
 
 use Schedule::DRMAAc qw/ :all /;
 use File::Temp();
@@ -63,7 +63,7 @@ sub HELP_MESSAGE {
 
 HELP_MESSAGE if $opt{h};
 
-my $scriptFile = File::Temp->new(TEMPLATE => 'tempXXXXX', DIR => '/scicore/home/terracci/GROUP/tmp_nobackup', SUFFIX => '.sge');
+my $scriptFile = File::Temp->new(TEMPLATE => 'tempXXXXX', DIR => '/scicore/home/pissal00/GROUP/tmp_nobackup', SUFFIX => '.sge');
 
 my $args = join " ", @ARGV;
 while (<STDIN>) {
