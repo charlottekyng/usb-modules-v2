@@ -9,7 +9,8 @@ LOGDIR ?= log/mutect.$(NOW)
 PHONY += mutect mutect_vcfs mutect_tables ext_output #mut_report
 ..DUMMY := $(shell mkdir -p version; echo "$(MUTECT) &> version/mutect.txt")
 
-mutect : mutect_vcfs mutect_tables ext_output
+mutect : mutect_vcfs mutect_tables
+# ext_output
 mutect_vcfs : $(call MAKE_VCF_FILE_LIST,mutect) $(addsuffix .idx,$(call MAKE_VCF_FILE_LIST,mutect))
 mutect_tables : $(call MAKE_TABLE_FILE_LIST,mutect)
 ext_output : $(foreach pair,$(SAMPLE_PAIRS),mutect/tables/$(pair).mutect.txt)
