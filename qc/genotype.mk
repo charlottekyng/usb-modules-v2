@@ -27,7 +27,7 @@ endef
 $(foreach chr,$(CHROMOSOMES),$(eval $(call snps-chr,$(chr))))
 
 ifeq ($(findstring true,$(GENOTYPE_WITH_CHR2)),true)
-genotype/all$(PROJECT_PREFIX).snps.vcf : genotype/all$(PROJECT_PREFIX).snps.2.vcf
+genotype/all$(PROJECT_PREFIX).snps.vcf : genotype/all$(PROJECT_PREFIX).snps.$(word 2,$(CHROMOSOMES)).vcf
 	$(INIT) ln -f $< $@
 else
 genotype/all$(PROJECT_PREFIX).snps.vcf : $(foreach chr,$(CHROMOSOMES),genotype/all$(PROJECT_PREFIX).snps.$(chr).vcf)
