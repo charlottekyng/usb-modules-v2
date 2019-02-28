@@ -46,9 +46,9 @@ MAKE_VCF_FILE_LIST = $(foreach pair,$(SAMPLE_PAIRS),\
 	vcf/$(pair).$(suff).vcf))
 
 ifeq ($(findstring false,$(INCLUDE_LNCRNA_IN_SUMMARY)),false)
-TABLE_EFF_TYPES ?= nonsynonymous_synonymous_hotspot
+TABLE_EFF_TYPES ?= nonsynonymous_synonymous
 else
-TABLE_EFF_TYPES ?= nonsynonymous_synonymous_hotspot_lincRNA_upstream
+TABLE_EFF_TYPES ?= nonsynonymous_synonymous_lincRNA_upstream
 endif
 
 TABLE_EXTENSIONS = tab $(foreach eff,$(TABLE_EFF_TYPES),tab.$(eff))
