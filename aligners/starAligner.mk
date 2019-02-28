@@ -16,7 +16,9 @@ else
 STAR_BAMS = $(foreach sample,$(SAMPLES),star/$(sample).star.bam)
 endif
 
-star : $(STAR_BAMS) $(addsuffix .bai,$(STAR_BAMS)) star/all$(PROJECT_PREFIX).ReadsPerGene.out.tab star/all$(PROJECT_PREFIX).alignment_stats.txt 
+star : $(STAR_BAMS) $(addsuffix .bai,$(STAR_BAMS)) \
+star/all$(PROJECT_PREFIX).ReadsPerGene.out.tab star/all$(PROJECT_PREFIX).ReadsPerGene.out.tab.coding \
+star/all$(PROJECT_PREFIX).alignment_stats.txt 
 
 star/%.Aligned.sortedByCoord.out.bam : fastq/%.1.fastq.gz $(if $(findstring true,$(PAIRED_END)),fastq/%.2.fastq.gz)
 	$(call RUN,4,$(RESOURCE_REQ_MEDIUM_MEM),$(RESOURCE_REQ_SHORT),$(STAR_MODULE),"\
@@ -60,27 +62,34 @@ bam/%.bam : star/%.star.$(BAM_SUFFIX)
 	$(INIT) ln -f $< $@
 
 star/all$(PROJECT_PREFIX).ReadsPerGene.out.tab : $(foreach sample,$(SAMPLES),star/$(sample).ReadsPerGene.out.tab)
-	perl -p -e "s/N_unmapped/GENE\t\t\t\nN_unmapped/;" `ls $< |head -1` | cut -f1 > $@; \
-	if [ "$$STRAND_SPECIFICITY" == "FIRST_READ_TRANSCRIPTION_STRAND" ]; then \
-	        for x in $^; do \
-			sample=`echo $$x | sed 's/.*\///; s/\..*//'`; \
-			perl -p -e "s/N_unmapped/\t$${sample}_total\t$${sample}_sense\t$${sample}_antisense\nN_unmapped/;" \
-      			star/$$sample.ReadsPerGene.out.tab | cut -f 2-4 | paste $@ - > $@.tmp; mv $@.tmp $@; \
-		done; \
-	elif [ "$$STRAND_SPECIFICITY" == "SECOND_READ_TRANSCRIPTION_STRAND" ]; then \
-	        for x in $^; do \
-			sample=`echo $$x | sed 's/.*\///; s/\..*//'`; \
-			perl -p -e "s/N_unmapped/\t$${sample}_total\t$${sample}_antisense\t$${sample}_sense\nN_unmapped/;" \
-      			star/$$sample.ReadsPerGene.out.tab | cut -f 2-4 | paste $@ - > $@.tmp; mv $@.tmp $@; \
-		done; \
-	else \
-	        for x in $^; do \
-			sample=`echo $$x | sed 's/.*\///; s/\..*//'`; \
-			perl -p -e "s/N_unmapped/\t$$sample\t\t\nN_unmapped/;" \
-      			star/$$sample.ReadsPerGene.out.tab | cut -f 2 | paste $@ - > $@.tmp; mv $@.tmp $@; \
-		done; \
-	fi
+	$(call RUN,1,$(RESOURCE_REQ_LOW_MEM),$(RESOURCE_REQ_VSHORT),$(R_MODULE),"\
+	$(RSCRIPT) $(STAR_PROCESS) --gtf $(GENCODE_GENE_GTF) --outputFile $@ --stranded $(STRAND_SPECIFICITY) $^")
 
+star/all$(PROJECT_PREFIX).ReadsPerGene.out.tab.coding : $(foreach sample,$(SAMPLES),star/$(sample).ReadsPerGene.out.tab)
+	$(call RUN,1,$(RESOURCE_REQ_LOW_MEM),$(RESOURCE_REQ_VSHORT),$(R_MODULE),"\
+	$(RSCRIPT) $(STAR_PROCESS) --gtf $(GENCODE_GENE_GTF) --outputFile $@ \
+	--stranded $(STRAND_SPECIFICITY) --geneBiotype protein_coding $^")
+
+#	perl -p -e "s/N_unmapped/GENE\t\t\t\nN_unmapped/;" `ls $< |head -1` | cut -f1 > $@; \
+#	if [ "$$STRAND_SPECIFICITY" == "FIRST_READ_TRANSCRIPTION_STRAND" ]; then \
+#	        for x in $^; do \
+#			sample=`echo $$x | sed 's/.*\///; s/\..*//'`; \
+#			perl -p -e "s/N_unmapped/\t$${sample}_total\t$${sample}_sense\t$${sample}_antisense\nN_unmapped/;" \
+#     			star/$$sample.ReadsPerGene.out.tab | cut -f 2-4 | paste $@ - > $@.tmp; mv $@.tmp $@; \
+#		done; \
+#	elif [ "$$STRAND_SPECIFICITY" == "SECOND_READ_TRANSCRIPTION_STRAND" ]; then \
+#	        for x in $^; do \
+#			sample=`echo $$x | sed 's/.*\///; s/\..*//'`; \
+#			perl -p -e "s/N_unmapped/\t$${sample}_total\t$${sample}_antisense\t$${sample}_sense\nN_unmapped/;" \
+#      			star/$$sample.ReadsPerGene.out.tab | cut -f 2-4 | paste $@ - > $@.tmp; mv $@.tmp $@; \
+#		done; \
+#	else \
+#	        for x in $^; do \
+#			sample=`echo $$x | sed 's/.*\///; s/\..*//'`; \
+#			perl -p -e "s/N_unmapped/\t$$sample\t\t\nN_unmapped/;" \
+#      			star/$$sample.ReadsPerGene.out.tab | cut -f 2 | paste $@ - > $@.tmp; mv $@.tmp $@; \
+#		done; \
+#	fi
 
 star/all$(PROJECT_PREFIX).alignment_stats.txt : $(foreach sample,$(SAMPLES),star/$(sample).Log.final.out)
 	$(INIT) \
