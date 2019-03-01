@@ -27,7 +27,9 @@ if (length(arguments$args) < 1) {
 if (!is.null(opt$gtf)){
 	gtf <- import(opt$gtf)
 	if (!is.null(opt$geneBiotype)){
-		if ("gene_biotype" %in% colnames(mcols(gtf))) {
+		if ("gene_biotype" %in% colnames(mcols(gtf)) & "gene_type" %in% colnames(mcols(gtf))) {
+			gtf <- gtf[unique(c(which(gtf$gene_biotype %in% opt$geneBiotype), which(gtf$gene_type %in% opt$geneBiotype))),]
+		} else if ("gene_biotype" %in% colnames(mcols(gtf))) {
 			gtf <- gtf[which(gtf$gene_biotype %in% opt$geneBiotype),]
 		} else if ("gene_type" %in% colnames(mcols(gtf))) {
 			gtf <- gtf[which(gtf$gene_type %in% opt$geneBiotype),]
