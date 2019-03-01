@@ -1,29 +1,39 @@
 #### Usage:
 
-### Currently this figure can handle 3 types of data, to be represented by different shades of blue, boxes around each cell, and diagonal lines
+### Currently this figure can handle 3 types of data, to be represented by different shades of blue (mandatory), boxes around each cell (optional), and diagonal lines (optional)
 # e.g. color = CCF/VAF, boxes = clonal mutation, diagonals = LOH
 
 # step 1: turn a table with mutations into input for the next step
 # dat=make_CCF_matrix(mut)  
 # where mut is a mutation table to input for figure
 # use the various *col_name arguments to specify the appropriate columns.
+# chr_col_name, pos_col_name, ref_col_name, alt_col_name are column names for chromosome, positions, ref allele and alt allele respectively (default to the equivalent header names in VCF files)
+# gene_col_name, AA_col_name, CDNA_col_name are column names for gene name, amino acid change and cDNA change, respectively (default to GENE, HGVS_P and HGVS_C)
 # Z_col_name: a column with numeric data (eg. CCF, VAF)
 # diags_col_name and boxes_col_name: columns with TRUE/FALSE, 1/0
 # Z is mandatory, diags and boxes are optional
-# Use sample_order if the samples are to be shown in specific order. Otherwise samples will be in the order of the input file
-# gene_order not yet implemented
-# output: dat is a list with names "Z", "diags" and "boxes" and this goes into step 2
+# sample_order: if provided (vector of sample names), samples will be plotted in this order. If NULL, samples will be plotted in the order of the input file.
+# gene_order: not implemented
+# anno_cols: these annotation columns will eventually turn into the round dots next to the figure. Currently, the only two names that will work with plotting are 'membership' and 'pathogenicity'. Specify one or both as a vector.
 
 # step 2: make the skeleton chocolate bar figure
-# make_chocolate_bar(dat, filename)
-# (optional) anno: list of annotation for each of the mutations (in the order of dat$Z) with two elements "pathogenic" and "membership", these should be numeric
-# sort_genes will sort the genes in decreasing order of CCF/MAF or whatever the colours represent in decreasing order. Shared mutations go first.
-# the rest of the options are mostly colours etc
+# make_chocolate_bar(dat, filename, ...)
+# dat: the output of step 1
+# filename: if NULL, plot to screen. If specified, plots as PDF
+# height, width of the PDF
+# sort_genes: if T, sort the mutations first by the number of samples with non-zero Z-value of the mutation, then by decreasing order of the Z-value in the first sample
+# write_gene_names: 'all' or 'annotated'. if all, write the name of the mutation on the figure for all mutations. if annotated, only the mutations with non-1 values in all columns of the anno element of the dat object. This option is poorly implemented and may be upgraded in the future. 'all' works fine.
+# z_breaks, z_cols, zlim: breaks and colors for plotting dat$Z
+# box.col and diags_col: colors for boxes and diagonal lines
+# patho_col and mem_col: vectors for colors for 'pathogenicity' and 'membership' in dat$anno
+# return_dat: returns the object to be plotted
+# rotate_fig: if F, plots will have samples as rows and mutations as columns. If T, rotate the figure such that samples are columns and mutations are rows.
+# main and mar are standard par() 
 
 # step 3 (optional): make a color key for the chocolate bar figure
 # make_chocolate_bar_legend()
 # make the legend, duh!
-
+# the default values are the default values in make_chocolate_bar()
 
 
 make_chocolate_bar <- function (dat, filename, height=NULL, width=NULL, 
