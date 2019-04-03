@@ -91,7 +91,7 @@ vcf/$1_$2.%.sufam.vcf : vcf/$1_$2.%.vcf vcf/$3.%.sufam.tmp bam/$1.bam bam/$2.bam
 		--filterExpression 'vc.getGenotype(\"$1\").getAD().1 * 1.0 > 0' --filterName interrogation && \
 		--filterExpression 'vc.getGenotype(\"$1\").getAD().1 * 1.0 == 0' --filterName interrogation_Absent && \
 		$$(call PURGE_AND_LOAD, $$(SNP_EFF_43_MODULE)) && \
-		$$(SNP_SIFT) filter $$(SNP_SIFT_OPTS) -f $$@.tmp5 \
+		$$(call SNP_SIFT,$$(RESOURCE_REQ_LOW_MEM_JAVA)) filter $$(SNP_SIFT_OPTS) -f $$@.tmp5 \
 		\"(FILTER has 'interrogation') | (FILTER has 'interrogation_Absent')\" > $$@.tmp6 && \
 		$$(call PURGE_AND_LOAD, $$(JAVA8_MODULE)) && \
 		$$(call GATK,CombineVariants,$$(RESOURCE_REQ_HIGH_MEM_JAVA)) --variant $$< --variant $$@.tmp6 -o $$@ \
@@ -111,7 +111,7 @@ vcf/$1_$2.%.sufam.vcf : vcf/$1_$2.%.vcf vcf/$3.%.sufam.tmp bam/$1.bam bam/$2.bam
 		--filterExpression 'vc.getGenotype(\"$1\").getAD().1 * 1.0 > 0' --filterName interrogation \
 		--filterExpression 'vc.getGenotype(\"$1\").getAD().1 * 1.0 == 0' --filterName interrogation_Absent && \
 		$$(call PURGE_AND_LOAD, $$(SNP_EFF_43_MODULE)) && \
-		$$(SNP_SIFT) filter $$(SNP_SIFT_OPTS) -f $$@.tmp3 \
+		$$(call SNP_SIFT,$$(RESOURCE_REQ_LOW_MEM_JAVA)) filter $$(SNP_SIFT_OPTS) -f $$@.tmp3 \
 		\"(FILTER has 'interrogation') | (FILTER has 'interrogation_Absent')\" > $$@.tmp4 && \
 		$$(call PURGE_AND_LOAD, $$(JAVA8_MODULE)) && \
 		$$(call GATK,CombineVariants,$$(RESOURCE_REQ_HIGH_MEM_JAVA)) --variant $$< --variant $$@.tmp4 -o $$@ \

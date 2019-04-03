@@ -33,18 +33,19 @@ HAPMAP ?= $(ANN_DIR)/hapmap_3.3.hg38.vcf.gz
 R1000G ?= $(ANN_DIR)/1000G_phase1.snps.high_confidence.hg38.vcf.gz
 
 CLINVAR = $(ANN_DIR)/clinvar_20190114.vcf.gz
-EXAC_NONTCGA = $(ANN_DIR)/ExAC_nonTCGA.r0.3.1.sites.vep.edited.vcf.gz
+EXAC_NONTCGA = $(ANN_DIR)/ExAC.r0.3.nontcga.sites.edited.vcf.gz
 EXAC_NONPSYCH ?= $(ANN_DIR)/ExAC.r0.3.nonpsych.sites.edited.vcf.gz
 #CADD_SNV ?= $(ANN_DIR)/CADD_whole_genome_SNVs_header.vcf.gz
 #CADD_INDEL ?= $(ANN_DIR)/CADD_Indels_1000Gphase3_indels_header_sorted.vcf.gz
-#COSMIC ?= $(ANN_DIR)/CosmicCodingMuts.sorted.vcf
+COSMIC ?= $(ANN_DIR)/CosmicCodingMuts_v87.vcf.gz
 
 #HAPLOTYPE_INSUF_BED = $(ANN_DIR)/haploinsufficient.genes.bed
 #CANCER_GENE_CENSUS_BED = $(ANN_DIR)/cancer_gene_census.bed
 #KANDOTH_BED = $(ANN_DIR)/kandoth127smg.bed
 #LAWRENCE_BED = $(ANN_DIR)/lawrence_cancer5000s.bed
 #DGD_BED = $(ANN_DIR)/dgd_Hsa_all_v71.bed
-#CANCER_HOTSPOT_VCF = $(ANN_DIR)/hotspots_changv2_gao_nc.vcf.gz.gz
+CANCER_HOTSPOT_VCF = $(ANN_DIR)/hotspots_changv2_gao_nc.vcf.gz
+GENE_SETS_GMT = $(ANN_DIR)/gene_ann_20190401.gmt
 
 CENTROMERE_TABLE = $(ANN_DIR)/centromeres_hg38.txt
 

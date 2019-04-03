@@ -51,7 +51,7 @@ LOGDIR ?= log/vcf.$(NOW)
 %.sdp_ft.vcf : %.vcf
 	$(call CHECK_VCF,$<,$@,\
 	$(call RUN,1,$(RESOURCE_REQ_LOW_MEM),$(RESOURCE_REQ_VSHORT),$(SNP_EFF_43_MODULE),"\
-		$(SNP_SIFT) filter $(SNP_SIFT_OPTS) -f $< '(exists GEN[?].DP) & (GEN[?].DP > 20)' > $@"))
+		$(call SNP_SIFT,$(RESOURCE_REQ_LOW_MEM_JAVA)) filter $(SNP_SIFT_OPTS) -f $< '(exists GEN[?].DP) & (GEN[?].DP > 20)' > $@"))
 
 %.strelka_ft.vcf : %.vcf
 	$(call CHECK_VCF,$<,$@,\
@@ -65,7 +65,7 @@ LOGDIR ?= log/vcf.$(NOW)
 %.hotspot.vcf : %.vcf
 	$(call CHECK_VCF,$<,$@,\
 	$(call RUN,1,$(RESOURCE_REQ_MEDIUM_MEM),$(RESOURCE_REQ_SHORT),$(SNP_EFF_MODULE),"\
-	$(SNP_SIFT) annotate $(SNP_SIFT_OPTS) $(CANCER_HOTSPOT_VCF) $< > $@ && $(RM) $^"))
+	$(call SNP_SIFT,$(RESOURCE_REQ_MEDIUM_MEM_JAVA)) annotate $(SNP_SIFT_OPTS) $(CANCER_HOTSPOT_VCF) $< > $@ && $(RM) $^"))
 
 %.nft.vcf : %.vcf $(PON_VCF)
 	$(call RUN,1,$(RESOURCE_REQ_MEDIUM_MEM),$(RESOURCE_REQ_SHORT),$(JAVA8_MODULE),"\
@@ -131,19 +131,19 @@ LOGDIR ?= log/vcf.$(NOW)
 %.eff.vcf : %.vcf %.vcf.idx
 	$(call CHECK_VCF,$<,$@,\
 		$(call RUN,1,$(RESOURCE_REQ_MEDIUM_MEM),$(RESOURCE_REQ_SHORT),$(SNP_EFF_MODULE),"\
-		$(SNP_EFF) ann $(SNP_EFF_OPTS) -noStats $(SNP_EFF_GENOME) $< > $@"))
+		$(call SNP_EFF,$(RESOURCE_REQ_MEDIUM_MEM_JAVA)) ann $(SNP_EFF_OPTS) -noStats $(SNP_EFF_GENOME) $< > $@"))
 
 %.nsfp.vcf : %.vcf %.vcf.idx
 	$(call CHECK_VCF,$<,$@,\
 		$(call RUN,1,$(RESOURCE_REQ_MEDIUM_MEM),$(RESOURCE_REQ_SHORT),$(SNP_EFF_MODULE),"\
-		$(SNP_SIFT) dbnsfp $(SNP_SIFT_OPTS) -db $(DB_NSFP) $< | \
+		$(call SNP_SIFT,$(RESOURCE_REQ_MEDIUM_MEM_JAVA)) dbnsfp $(SNP_SIFT_OPTS) -db $(DB_NSFP) $< | \
 		sed '/^##INFO=<ID=dbNSFP/ s/Character/String/' \
 		> $@ && $(RM) $^"))
 
-%.gatk_eff.vcf : %.vcf %.vcf.idx
-	$(call CHECK_VCF,$<,$@,\
-		$(call RUN,1,$(RESOURCE_REQ_MEDIUM_MEM),$(RESOURCE_REQ_SHORT),$(SNP_EFF_MODULE),"\
-		$(SNP_EFF) eff -i vcf -o gatk $(SNP_EFF_GENOME) $< > $@"))
+#%.gatk_eff.vcf : %.vcf %.vcf.idx
+#	$(call CHECK_VCF,$<,$@,\
+#		$(call RUN,1,$(RESOURCE_REQ_MEDIUM_MEM),$(RESOURCE_REQ_SHORT),$(SNP_EFF_MODULE),"\
+#		$(call SNP_EFF,$(RESOURCE_REQ_MEDIUM_MEM_JAVA)) eff -i vcf -o gatk $(SNP_EFF_GENOME) $< > $@"))
 
 %.annotated.vcf : %.vcf %.gatk_eff.vcf %.gatk_eff.vcf.idx %.vcf.idx 
 	$(call RUN,4,$(RESOURCE_REQ_LOW_MEM),$(RESOURCE_REQ_VSHORT),$(JAVA8_MODULE),"\ 
@@ -181,41 +181,46 @@ $(foreach sample,$(SAMPLES),$(eval $(call hrun-sample,$(sample))))
 %.dbsnp.vcf : %.vcf %.vcf.idx 
 	$(call CHECK_VCF,$<,$@,\
 	$(call RUN,1,$(RESOURCE_REQ_MEDIUM_MEM),$(RESOURCE_REQ_SHORT),$(SNP_EFF_MODULE),"\
-	$(SNP_SIFT) annotate $(SNP_SIFT_OPTS) $(DBSNP) $< > $@ && $(RM) $^"))
+	$(call SNP_SIFT,$(RESOURCE_REQ_MEDIUM_MEM_JAVA)) annotate $(SNP_SIFT_OPTS) $(DBSNP) $< > $@ && $(RM) $^"))
 
 %.cosmic.vcf : %.vcf %.vcf.idx 
 	$(call CHECK_VCF,$<,$@,\
-	$(call RUN,1,$(RESOURCE_REQ_MEDIUM_MEM),$(RESOURCE_REQ_VSHORT),$(SNP_EFF_MODULE),"\
-	$(SNP_SIFT) annotate $(SNP_SIFT_OPTS) $(COSMIC) $< > $@ && $(RM) $^"))
+	$(call RUN,1,$(RESOURCE_REQ_MEDIUM_MEM),$(RESOURCE_REQ_SHORT),$(SNP_EFF_MODULE),"\
+	$(call SNP_SIFT,$(RESOURCE_REQ_MEDIUM_MEM_JAVA)) annotate $(SNP_SIFT_OPTS) $(COSMIC) $< > $@ && $(RM) $^"))
 
 %.clinvar.vcf : %.vcf %.vcf.idx 
 	$(call CHECK_VCF,$<,$@,\
 	$(call RUN,1,$(RESOURCE_REQ_MEDIUM_MEM),$(RESOURCE_REQ_VSHORT),$(SNP_EFF_MODULE),"\
-	$(SNP_SIFT) annotate $(SNP_SIFT_OPTS) $(CLINVAR) $< > $@ && $(RM) $^"))
+	$(call SNP_SIFT,$(RESOURCE_REQ_MEDIUM_MEM_JAVA)) annotate $(SNP_SIFT_OPTS) $(CLINVAR) $< > $@ && $(RM) $^"))
 
 %.exac_nontcga.vcf : %.vcf %.vcf.idx 
 	$(call CHECK_VCF,$<,$@,\
 		$(call RUN,1,$(RESOURCE_REQ_HIGH_MEM),$(RESOURCE_REQ_VSHORT),$(SNP_EFF_MODULE),"\
-	$(SNP_SIFT) annotate $(SNP_SIFT_OPTS) $(EXAC_NONTCGA) \
+	$(call SNP_SIFT,$(RESOURCE_REQ_HIGH_MEM_JAVA)) annotate $(SNP_SIFT_OPTS) $(EXAC_NONTCGA) \
 	$< > $@ && $(RM) $^"))
 
 %.exac_nonpsych.vcf : %.vcf %.vcf.idx
 	$(call CHECK_VCF,$<,$@,\
 	$(call RUN,1,$(RESOURCE_REQ_HIGH_MEM),$(RESOURCE_REQ_VSHORT),$(SNP_EFF_MODULE),"\
-	$(SNP_SIFT) annotate $(SNP_SIFT_OPTS) $(EXAC_NONPSYCH) $< > $@ && $(RM) $^"))
+	$(call SNP_SIFT,$(RESOURCE_REQ_HIGH_MEM_JAVA)) annotate $(SNP_SIFT_OPTS) $(EXAC_NONPSYCH) $< > $@ && $(RM) $^"))
 
 %.cadd.vcf : %.vcf %.vcf.idx 
 	$(call CHECK_VCF,$<,$@,\
 	$(call RUN,1,$(RESOURCE_REQ_HIGH_MEM),$(RESOURCE_REQ_SHORT),$(SNP_EFF_MODULE),"\
-	$(SNP_SIFT) annotate $(SNP_SIFT_OPTS) \
+	$(call SNP_SIFT,$(RESOURCE_REQ_HIGH_MEM_JAVA)) annotate $(SNP_SIFT_OPTS) \
 	$(if $(findstring indel,$<),$(CADD_INDEL),$(CADD_SNV)) $< > $@ && $(RM) $^"))
+
+#%.gene_ann.vcf : %.vcf
+#	$(call CHECK_VCF,$<,$@,\
+#	$(call RUN,1,$(RESOURCE_REQ_LOW_MEM),$(RESOURCE_REQ_VSHORT),$(R_MODULE),"\
+#	$(ADD_GENE_LIST_ANNOTATION) --genome $(REF) \
+#	--geneBed $(HAPLOTYPE_INSUF_BED)$(,)$(CANCER_GENE_CENSUS_BED)$(,)$(KANDOTH_BED)$(,)$(LAWRENCE_BED)$(,)$(DGD_BED) \
+#	--name hap_insuf$(,)cancer_gene_census$(,)kandoth$(,)lawrence$(,)duplicatedGenesDB --outFile $@ $< && $(RM) $< $<.idx"))
 
 %.gene_ann.vcf : %.vcf
 	$(call CHECK_VCF,$<,$@,\
-	$(call RUN,1,$(RESOURCE_REQ_LOW_MEM),$(RESOURCE_REQ_VSHORT),$(R_MODULE),"\
-	$(ADD_GENE_LIST_ANNOTATION) --genome $(REF) \
-	--geneBed $(HAPLOTYPE_INSUF_BED)$(,)$(CANCER_GENE_CENSUS_BED)$(,)$(KANDOTH_BED)$(,)$(LAWRENCE_BED)$(,)$(DGD_BED) \
-	--name hap_insuf$(,)cancer_gene_census$(,)kandoth$(,)lawrence$(,)duplicatedGenesDB --outFile $@ $< && $(RM) $< $<.idx"))
+	$(call RUN,1,$(RESOURCE_REQ_LOW_MEM),$(RESOURCE_REQ_VSHORT),$(SNP_EFF_MODULE),"\
+	$(call SNP_SIFT,$(RESOURCE_REQ_LOW_MEM_JAVA)) geneSets -v $(GENE_SETS_GMT) $< > $@ && $(RM) $<")) 
 
 ifdef SAMPLE_PAIRS
 define annotate-facets-pair
@@ -307,7 +312,7 @@ tables/%.opl_tab.txt : vcf/%.vcf
 	fields+=' '\$$(grep '^##INFO=<ID=' $< | grep -v '=REF,' | sed 's/dbNSFP_GERP++/dbNSFP_GERP/g' | \
 		sed 's/.*ID=//; s/,.*//; s/\bANN\b/$(ANN_FIELDS)/; ' | tr '\n' ' '); \
 	module load $(PERL_MODULE); $(VCF_EFF_ONE_PER_LINE) < $< | sed 's/dbNSFP_GERP++/dbNSFP_GERP/g' | \
-		$(SNP_SIFT) extractFields - \$$fields > $@; \
+		$(call SNP_SIFT,$(RESOURCE_REQ_LOW_MEM_JAVA)) extractFields - \$$fields > $@; \
 	for i in \`seq 0 \$$N\`; do \
 	S=\$$(grep '^#CHROM' $< | cut -f \$$((\$$i + 10))); \
 	sed -i \"1s/GEN\[\$$i\]/\$$S/g;\" $@; \
@@ -326,7 +331,7 @@ hotspots/%.opl_tab.txt : hotspots/%.vcf
 	fields+=' '\$$(grep '^##INFO=<ID=' $< | grep -v '=REF,' | sed 's/dbNSFP_GERP++/dbNSFP_GERP/g' | \
 		sed 's/.*ID=//; s/,.*//; s/\bANN\b/$(ANN_FIELDS)/; ' | tr '\n' ' '); \
 	module load $(PERL_MODULE); $(VCF_EFF_ONE_PER_LINE) < $< | sed 's/dbNSFP_GERP++/dbNSFP_GERP/g' | \
-		$(SNP_SIFT) extractFields - \$$fields > $@; \
+		$(call SNP_SIFT,$(RESOURCE_REQ_LOW_MEM_JAVA)) extractFields - \$$fields > $@; \
 	for i in \`seq 0 \$$N\`; do \
 	S=\$$(grep '^#CHROM' $< | cut -f \$$((\$$i + 10))); \
 	sed -i \"1s/GEN\[\$$i\]/\$$S/g;\" $@; \
@@ -345,7 +350,7 @@ sufamscreen/%.opl_tab.txt : sufamscreen/%.vcf
 	fields+=' '\$$(grep '^##INFO=<ID=' $< | grep -v '=REF,' | sed 's/dbNSFP_GERP++/dbNSFP_GERP/g' | \
 		sed 's/.*ID=//; s/,.*//; s/\bANN\b/$(ANN_FIELDS)/; ' | tr '\n' ' '); \
 	module load $(PERL_MODULE); $(VCF_EFF_ONE_PER_LINE) < $< | sed 's/dbNSFP_GERP++/dbNSFP_GERP/g' | \
-		$(SNP_SIFT) extractFields - \$$fields > $@; \
+		$(call SNP_SIFT,$(RESOURCE_REQ_LOW_MEM_JAVA)) extractFields - \$$fields > $@; \
 	for i in \`seq 0 \$$N\`; do \
 	S=\$$(grep '^#CHROM' $< | cut -f \$$((\$$i + 10))); \
 	sed -i \"1s/GEN\[\$$i\]/\$$S/g;\" $@; \

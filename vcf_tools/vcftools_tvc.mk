@@ -12,7 +12,7 @@ ifndef VCFTOOLS_MK_TVC
 #%.pass.vcf : %.vcf
 #	$(call CHECK_VCF,$<,$@,\
 #	$(call RUN,1,$(RESOURCE_REQ_LOW_MEM),$(RESOURCE_REQ_VSHORT),$(SNP_EFF_MODULE),"\
-#		$(SNP_SIFT) filter $(SNP_SIFT_OPTS) -f $< \
+#		$(call SNP_SIFT,$(RESOURCE_REQ_LOW_MEM_JAVA)) filter $(SNP_SIFT_OPTS) -f $< \
 #		\"( na FILTER ) | (FILTER = 'PASS') | (FILTER has 'HOTSPOT')\" > $@"))
 
 ifdef SAMPLE_PAIRS

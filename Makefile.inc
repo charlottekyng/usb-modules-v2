@@ -341,9 +341,9 @@ VARSCAN = $(JAVA) -Xmx$(RESOURCE_REQ_MEDIUM_MEM_JAVA) -jar $(VARSCAN_JAR)
 # VARSCAN ?= java -Xmx$(RESOURCE_REQ_LOW_MEM_JAVA) -jar \$$EBROOTVARSCAN/VarScan.v2.4.1.jar
 
 SNP_EFF_CONFIG ?= usb-modules-v2/vcf_tools/snpEff.config
-SNP_EFF = $(JAVA) -Xmx$(RESOURCE_REQ_LOW_MEM_JAVA) -jar \$$EBROOTSNPEFF/snpEff.jar
+SNP_EFF = $(JAVA) -Xmx$(1) -jar \$$EBROOTSNPEFF/snpEff.jar
 SNP_EFF_OPTS = -i vcf -o vcf -c $(SNP_EFF_CONFIG) $(SNP_EFF_FLAGS)
-SNP_SIFT = $(JAVA) -Xmx$(RESOURCE_REQ_LOW_MEM_JAVA) -jar \$$EBROOTSNPEFF/SnpSift.jar
+SNP_SIFT = $(JAVA) -Xmx$(1) -jar \$$EBROOTSNPEFF/SnpSift.jar
 SNP_SIFT_OPTS = -c $(SNP_EFF_CONFIG)
 VCF_EFF_ONE_PER_LINE = $(PERL) \$$EBROOTSNPEFF/scripts/vcfEffOnePerLine.pl
 VCF_JOIN_EFF = $(PERL) $(MODULE_SCRIPTS_DIR)/joinEff.pl

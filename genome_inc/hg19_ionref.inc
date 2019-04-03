@@ -34,12 +34,12 @@ CLINVAR ?= $(ANN_DIR)/clinvar.vcf
 EXAC_NONTCGA ?= $(ANN_DIR)/ExAC_nonTCGA.r0.3.1.sites.vep.edited.vcf
 COSMIC ?= $(ANN_DIR)/CosmicCodingMuts.sorted.vcf
 
-HAPLOTYPE_INSUF_BED = $(ANN_DIR)/haploinsufficient.genes.bed
-CANCER_GENE_CENSUS_BED = $(ANN_DIR)/cancer_gene_census.bed
-KANDOTH_BED = $(ANN_DIR)/kandoth127smg.bed
-LAWRENCE_BED = $(ANN_DIR)/lawrence_cancer5000s.bed
-DGD_BED = $(ANN_DIR)/dgd_Hsa_all_v71.bed
-#CANCER_HOTSPOT_VCF = $(ANN_DIR)/publication_hotspots_inclnoncoding_incl3d.vcf
+#HAPLOTYPE_INSUF_BED = $(ANN_DIR)/haploinsufficient.genes.bed
+#CANCER_GENE_CENSUS_BED = $(ANN_DIR)/cancer_gene_census.bed
+#KANDOTH_BED = $(ANN_DIR)/kandoth127smg.bed
+#LAWRENCE_BED = $(ANN_DIR)/lawrence_cancer5000s.bed
+#DGD_BED = $(ANN_DIR)/dgd_Hsa_all_v71.bed
+GENE_SETS_GMT = $(ANN_DIR)/gene_ann_20190401.gmt
 CANCER_HOTSPOT_VCF = $(ANN_DIR)/hotspots_changv2_gao_nc.vcf
 
 CENTROMERE_TABLE = $(ANN_DIR)/centromeres_hg19.txt
