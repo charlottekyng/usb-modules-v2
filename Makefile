@@ -130,6 +130,10 @@ TARGETS += tvc_somatic
 tvc_somatic :
 	$(call RUN_MAKE,usb-modules-v2/variant_callers/somatic/TVC.mk)
 
+TARGETS += pipeit
+pipeit :
+	$(call RUN_MAKE,usb-modules-v2/variant_callers/somatic/pipeit.mk)
+
 TARGETS += ballgown
 ballgown:
 	$(call RUN_MAKE,usb-modules-v2/rnaseq/ballgown.mk)
@@ -149,6 +153,10 @@ msisensor :
 TARGETS += mosaics
 mosaics :
 	$(call RUN_MAKE,usb-modules-v2/chipseq/mosaics.mk)
+
+TARGETS += macs2
+macs2 :
+	$(call RUN_MAKE,usb-modules-v2/chipseq/macs2.mk)
 
 TARGETS += absolute_seq
 absolute_seq :

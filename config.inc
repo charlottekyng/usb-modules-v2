@@ -448,6 +448,10 @@ MOSAICS_MAXGAP ?= 200
 MOSAICS_MINSIZE ?= 50
 MOSAICS_THRES ?= 10
 
+MACS2_PVALUE ?= 0.01
+MACS2_READLENGTH ?= 100
+MACS2_NUM_CORES ?= 4
+
 ##################################
 ########## Fusions ###############
 ##################################
