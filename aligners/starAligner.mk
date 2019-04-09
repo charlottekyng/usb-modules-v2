@@ -18,7 +18,10 @@ endif
 
 star : $(STAR_BAMS) $(addsuffix .bai,$(STAR_BAMS)) \
 star/all$(PROJECT_PREFIX).ReadsPerGene.out.tab star/all$(PROJECT_PREFIX).ReadsPerGene.out.tab.coding \
-star/all$(PROJECT_PREFIX).alignment_stats.txt 
+star/all$(PROJECT_PREFIX).alignment_stats.txt \
+$(foreach sample,$(SAMPLES),star/$(sample).Chimeric.out.junction.gz star/$(sample).Chimeric.out.sam.gz \
+star/$(sample).Unmapped.out.mate1.gz $(if $(findstring true,$(PAIRED_END)),star/$(sample).Unmapped.out.mate2.gz) \
+star/$(sample).Log.out.gz star/$(sample).Log.progress.out.gz)
 
 star/%.Aligned.sortedByCoord.out.bam : fastq/%.1.fastq.gz $(if $(findstring true,$(PAIRED_END)),fastq/%.2.fastq.gz)
 	$(call RUN,4,$(RESOURCE_REQ_MEDIUM_MEM),$(RESOURCE_REQ_SHORT),$(STAR_MODULE),"\
@@ -50,14 +53,17 @@ star/%.ReadsPerGene.out.tab : star/%.Aligned.sortedByCoord.out.bam
 	
 star/%.Log.final.out : star/%.Aligned.sortedByCoord.out.bam
 	
+star/%.Log.out : star/%.Aligned.sortedByCoord.out.bam
+	
+star/%.Log.progress.out : star/%.Aligned.sortedByCoord.out.bam
+	
 star/%.Unmapped.out.mate1 : star/%.Aligned.sortedByCoord.out.bam
 	
 star/%.Unmapped.out.mate2 : star/%.Aligned.sortedByCoord.out.bam
 	
 %.gz : %
-	$(GZIP) $<
+	$(INIT) $(GZIP) $<
 
-# star/%.Unmapped.out.mate1.gz $(if $(findstring true,$(PAIRED_END)),star/%.Unmapped.out.mate2.gz) star/%.Chimeric.out.bam
 bam/%.bam : star/%.star.$(BAM_SUFFIX) 
 	$(INIT) ln -f $< $@
 

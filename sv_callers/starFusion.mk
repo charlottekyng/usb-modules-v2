@@ -9,9 +9,10 @@ PHONY += star_fusion
 star_fusion : star_fusion/all.star-fusion.STAR-Fusion.final
 
 define star-fusion
-star_fusion/$1/star-fusion.STAR-Fusion.filter.ok : star/$1.Chimeric.out.junction
+star_fusion/$1/star-fusion.STAR-Fusion.filter.ok : star/$1.Chimeric.out.junction.gz
 	$$(call RUN,1,$$(RESOURCE_REQ_LOW_MEM),$$(RESOURCE_REQ_VSHORT),$$(STAR_FUSION_MODULE),"\
-	awk '\$$$$1!~\"GL0\" && \$$$$1!~\"GRCm\" && \$$$$1!~\"hs\" && \$$$$4!~\"GL0\" && \$$$$4!~\"GRCm\" && \$$$$4!~\"hs\"' $$< | \
+	gunzip -c $$< | \
+	awk '\$$$$1!~\"GL0\" && \$$$$1!~\"GRCm\" && \$$$$1!~\"hs\" && \$$$$4!~\"GL0\" && \$$$$4!~\"GRCm\" && \$$$$4!~\"hs\"' | \
 	awk 'BEGIN {OFS = \"\t\"} {print \"chr\"$$(,) \$$$$1$$(,) \$$$$2$$(,) \$$$$3$$(,) \"chr\"$$(,) \$$$$4$$(,) \$$$$5$$(,) \
 	\$$$$6$$(,) \$$$$7$$(,) \$$$$8$$(,) \$$$$9$$(,) \$$$$10$$(,) \$$$$11$$(,) \$$$$12$$(,) \$$$$13$$(,) \$$$$14}' | \
 	sed 's/chr\t/chr/g' | sed 's/chrMT/chrM/g' > $$<.tmp && \
