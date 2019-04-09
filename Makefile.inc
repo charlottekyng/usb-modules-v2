@@ -233,7 +233,7 @@ MUTECT_MODULE ?= MuTect/1.1.7-Java-1.7.0_80
 PICARD_MODULE ?= picard/2.9.2
 VARSCAN_MODULE ?= VarScan/2.4.1-Java-1.7.0_80
 ANACONDA_MODULE ?= Anaconda3/5.0.1
-SINGULARITY_MODULE ?= Singularity/2.5.2
+SINGULARITY_MODULE ?= Singularity/2.6.1
 VEP_MODULE ?= ensembl-vep/92.0-goolf-1.7.20-Perl-5.22.2
 MACS2_MODULE ?= MACS2/2.1.1.20160309-goolf-1.7.20-Python-2.7.11
 
@@ -335,7 +335,7 @@ TVC_SOMATIC_JSON = usb-modules-v2/variant_callers/somatic/TVC_somatic_parameters
 TVC_SENSITIVE_JSON = usb-modules-v2/variant_callers/somatic/TVC_somatic_parameters_sensitive.json
 TVC_MOTIF ?= $(TVC_ROOT_DIR)/share/TVC/sse/ampliseqexome_germline_p1_hiq_motifset.txt
 
-PIPEIT ?= $(IMG_DIR)/PipeIT_20190405.img
+PIPEIT_IMG ?= $(IMG_DIR)/PipeIT_20190405.img
 
 VARSCAN_JAR ?= $(JAR_DIR)/varscan/VarScan.v2.4.3.jar
 VARSCAN = $(JAVA) -Xmx$(RESOURCE_REQ_MEDIUM_MEM_JAVA) -jar $(VARSCAN_JAR)
