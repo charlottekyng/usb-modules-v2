@@ -1,6 +1,7 @@
 cat ("Running make_mutSigCV_input.R\n\n")
 
 library(optparse)
+library(openxlsx)
 if (!interactive()) {
     options(warn = -1, error = quote({ traceback(); q('no', status = 1) }))
 }
@@ -88,5 +89,6 @@ make_mutSigCV_input <- function(mut_tab,
 	}
 	write.table(res, file=outfile, sep="\t", row.names=F, na="", quote=F)
 }
-dat <- read.delim(inputfile, as.is=T)
+if(grepl("xlsx", inputfile)) { dat <- read.xlsx(inputfile) 
+} else { dat <- read.delim(inputfile, as.is=T)}
 make_mutSigCV_input(dat)

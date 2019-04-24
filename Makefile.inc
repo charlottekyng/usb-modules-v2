@@ -351,9 +351,9 @@ SNP_SIFT_OPTS = -c $(SNP_EFF_CONFIG)
 VCF_EFF_ONE_PER_LINE = $(PERL) \$$EBROOTSNPEFF/scripts/vcfEffOnePerLine.pl
 VCF_JOIN_EFF = $(PERL) $(MODULE_SCRIPTS_DIR)/joinEff.pl
 
-VEP_CACHE_DIR ?= /scicore/home/terracci/GROUP/ref_nobackup/vep/
+VEP_CACHE_DIR ?= /scicore/home/pissal00/GROUP/ref_nobackup/vep/
 VEP ?= vep --cache --offline --dir_cache $(VEP_CACHE_DIR) --no_stats --force_overwrite --pick --format vcf --vcf --symbol --terms SO
-VEP_PLUGIN_DIR ?= /scicore/home/terracci/GROUP/usr_nobackup/downloads/VEP_plugins
+VEP_PLUGIN_DIR ?= $(USR_DIR)/downloads/VEP_plugins
 
 
 ADD_GENE_LIST_ANNOTATION = $(RSCRIPT) usb-modules-v2/vcf_tools/addGeneListAnnotationToVcf.R

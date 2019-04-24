@@ -1,6 +1,7 @@
 cat ("Running youn_and_simon_make_input.R\n\n")
 
 library(optparse)
+library(openxlsx)
 if (!interactive()) {
     options(warn = -1, error = quote({ traceback(); q('no', status = 1) }))
 }
@@ -85,5 +86,6 @@ make_simon_input <- function(mut_tab,
         write.table(silent, file=paste(outPrefix, ".nonsilent.maf", sep=""), sep="\t", row.names=F, na="", quote=F)
 	write.table(nonsilent, file=paste(outPrefix, ".silent.maf", sep=""), sep="\t", row.names=F, na="", quote=F)
 }
-dat <- read.delim(inputfile, as.is=T)
+if(grepl("xlsx", inputfile)) { dat <- read.xlsx(inputfile) 
+} else { dat <- read.delim(inputfile, as.is=T)}
 make_simon_input(dat)

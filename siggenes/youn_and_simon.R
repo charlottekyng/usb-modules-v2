@@ -1,4 +1,4 @@
-cat ("Running make_simon_input.R\n\n")
+cat ("Running youn_and_simon.R\n\n")
 
 library(optparse)
 if (!interactive()) {
@@ -6,7 +6,7 @@ if (!interactive()) {
 }
 
 optList <- list(
-        make_option("--outFile", default = NULL, help = "out file name"),
+	make_option("--outFile", default = NULL, help = "out file name"),
 	make_option("--nonsilentFile", default = NULL, help = "nonsilent mutations file"),
 	make_option("--silentFile", default = NULL, help = "silent mutations file"),
 	make_option("--sequenceDataFile", default = NULL, help = "sequence data file"),
@@ -35,9 +35,9 @@ if (is.null(opt$nonsilentFile) | is.null(opt$silentFile)){
 }
 
 load(opt$sequenceDataFile)
-source("/scicore/home/terracci/GROUP/usr_nobackup/local/youn_and_simon/function_library.r")
-load("/scicore/home/terracci/GROUP/usr_nobackup/local/youn_and_simon/blosum_score.Rdata")
-load("/scicore/home/terracci/GROUP/usr_nobackup/local/youn_and_simon/fetched.data.Rdata")
+source("/scicore/home/pissal00/GROUP/usr_nobackup/local/youn_and_simon/function_library.r")
+load("/scicore/home/pissal00/GROUP/usr_nobackup/local/youn_and_simon/blosum_score.Rdata")
+load("/scicore/home/pissal00/GROUP/usr_nobackup/local/youn_and_simon/fetched.data.Rdata")
 
 read_data <- function(x) {
 	x <- read.delim(x, sep="\t", header=T, as.is=T)

@@ -14,7 +14,7 @@ siggenes/all$(PROJECT_PREFIX).youn_and_simon.sig_genes.txt : siggenes/all$(PROJE
  	$(YOUN_AND_SIMON) --outFile $@ --nonsilentFile $(<) --silentFile $(<<) \
 	--sequenceDataFile $(YOUN_AND_SIMON_SEQ_DATA) --numCases $(words $(SAMPLE_PAIRS))")
 
-siggenes/all$(PROJECT_PREFIX).youn_and_simon_input.silent.maf : summary/mutation_summary$(PROJECT_PREFIX).$(DOWNSTREAM_EFF_TYPES).txt
+siggenes/all$(PROJECT_PREFIX).youn_and_simon_input.silent.maf : $(if $(findstring EXCEL,$(MUTATION_SUMMARY_FORMAT)),summary/mutation_summary$(PROJECT_PREFIX).$(DOWNSTREAM_EFF_TYPES).xlsx,summary/mutation_summary$(PROJECT_PREFIX).$(DOWNSTREAM_EFF_TYPES).txt)
 	$(call RUN,1,$(RESOURCE_REQ_MEDIUM_MEM),$(RESOURCE_REQ_VSHORT),$(R_MODULE),"\
 	$(YOUN_AND_SIMON_MAKE_INPUT) --outPrefix $(@D)/all$(PROJECT_PREFIX).youn_and_simon_input $<")
 
