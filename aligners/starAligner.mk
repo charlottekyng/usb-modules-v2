@@ -44,7 +44,8 @@ star/%.star.bam : star/%.Aligned.sortedByCoord.out.bam
 	$(INIT) ln -f $< $@
 
 star/%.Aligned.toTranscriptome.out.bam : star/%.Aligned.sortedByCoord.out.bam
-	
+	$(INIT) touch $@
+
 star/%.Chimeric.out.junction : star/%.Aligned.sortedByCoord.out.bam
 	
 star/%.Chimeric.out.sam : star/%.Aligned.sortedByCoord.out.bam
