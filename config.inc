@@ -276,11 +276,14 @@ ifeq ($(findstring tvc,$(MUT_CALLER)),tvc)
 USE_NFT ?= false
 ANN_NFT ?= true
 PON_VCF ?= tvc/pon.tvc.vcf
-else
+endif
+ifeq ($(findstring pipeit,$(MUT_CALLER)),pipeit)
+USE_NFT ?= false
+ANN_NFT ?= false
+endif
 USE_NFT ?= true
 ANN_NFT ?= false
 PON_VCF ?= mutect2/pon.mutect2.vcf
-endif
 
 PON_MIN_SAMPLES ?= 2
 
