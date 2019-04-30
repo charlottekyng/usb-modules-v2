@@ -220,7 +220,8 @@ $(foreach sample,$(SAMPLES),$(eval $(call hrun-sample,$(sample))))
 %.gene_ann.vcf : %.vcf
 	$(call CHECK_VCF,$<,$@,\
 	$(call RUN,1,$(RESOURCE_REQ_LOW_MEM),$(RESOURCE_REQ_VSHORT),$(SNP_EFF_MODULE),"\
-	$(call SNP_SIFT,$(RESOURCE_REQ_LOW_MEM_JAVA)) geneSets -v $(GENE_SETS_GMT) $< > $@ && $(RM) $<")) 
+	$(call SNP_SIFT,$(RESOURCE_REQ_LOW_MEM_JAVA)) geneSets -v $(GENE_SETS_GMT) $< | \
+	sed 's/MSigDb/CancerGeneSets/' > $@ && $(RM) $<")) 
 
 ifdef SAMPLE_PAIRS
 define annotate-facets-pair
