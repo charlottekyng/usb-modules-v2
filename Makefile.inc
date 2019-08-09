@@ -198,7 +198,7 @@ GZIP ?= gzip -f
 GUNZIP ?= gunzip -c
 
 PERL_MODULE ?= Perl/5.22.2-goolf-1.7.20
-R_MODULE ?= R/3.5.0-goolf-1.7.20
+R_MODULE ?= R/3.5.2-foss-2018b
 JAVA6_MODULE ?= Java/1.6.0_24
 JAVA7_MODULE ?= Java/1.7.0_80
 JAVA8_MODULE ?= Java/1.8.0_92
@@ -320,10 +320,10 @@ FIX_VARSCAN_VCF = $(PERL) usb-modules-v2/variant_callers/fix_vcf_scripts/fix_var
 FIX_STRELKA_VCF = $(PERL) usb-modules-v2/variant_callers/fix_vcf_scripts/fix_strelka_vcf.pl
 FIX_TVC_VCF = $(PERL) usb-modules-v2/variant_callers/fix_vcf_scripts/fix_tvc_vcf.pl
 
-MUTECT ?= $(JAVA) -Xmx$(1) -jar $(JAR_DIR)/muTect-1.1.4.jar --analysis_type MuTect
+#MUTECT ?= $(JAVA) -Xmx$(1) -jar $(JAR_DIR)/muTect-1.1.4.jar --analysis_type MuTect
 
 ## For the future
-#MUTECT ?= java -Xmx$(1) -jar \$$EBROOTMUTECT/mutect-1.1.7.jar --analysis_type MuTect
+MUTECT ?= java -Xmx$(1) -jar \$$EBROOTMUTECT/mutect-1.1.7.jar --analysis_type MuTect
 #MUTECT2 ?= java -Xmx$(2) -jar \$$EBROOTGATK/GenomeAnalysisTK.jar --analysis_type MuTect2
 
 CONFIGURE_STRELKA = $(PERL) $(USR_DIR)/local/strelka_workflow-1.0.15/bin/configureStrelkaWorkflow.pl
