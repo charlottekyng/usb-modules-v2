@@ -121,9 +121,9 @@ save.image(paste(opt$outFile, ".RData", sep=""))
 
 seg_sample <- seg_chr <- seg_band <- seg_start <- seg_end <- seg_cnlr <- seg_genes <- seg_type <- seg_GLtype <- seg_cf.em <- NA
 
-for (i in grep("GL", colnames(mm))) {
+for (i in grep("_GL_", colnames(mm))) {
 	for(chr in intersect(c(1:22,"X"), unique(mm$chrom))) {
-		tt <- mm[which(mm$chrom==chr),c(1:5,i,grep("cf.em", colnames(mm))), drop=F]
+		tt <- mm[which(mm$chrom==chr),c(1:5,i,grep(sub("(.+)_GL_.+", "\\1_cf.em", colnames(mm)[i]), colnames(mm))), drop=F]
 		tt[which(is.na(tt[,6])),6] <- -1000
 		rr <- rle(tt[,6]); 
 		if (rr$values[1]== -1000 & length(rr$values)>1) {
@@ -140,7 +140,7 @@ for (i in grep("GL", colnames(mm))) {
 		}
 		mm[which(mm$chrom==chr),i] <- as.vector(unlist(apply(cbind(rr$value,rr$length), 1, function(x){rep(x[1],x[2])})))
 
-		tt <- mm[which(mm$chrom==chr),c(1:5,i,grep("cf.em", colnames(mm))), drop=F]
+		tt <- mm[which(mm$chrom==chr),c(1:5,i,grep(sub("(.+)_GL_.+", "\\1_cf.em", colnames(mm)[i]), colnames(mm))), drop=F]
 		rr <- rle(tt[,6]); 
 		if (length(rr$length)>1) {
 			cs <- cumsum(rr$lengths)
