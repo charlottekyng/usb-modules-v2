@@ -166,7 +166,7 @@ Here are some very common modules.
 (hopefully this will be improved in the future). 
 The sequences in "Example recipes" section below are valid sequences.
 
-#### Alignment
+### Alignment
 
 This runs the chosen aligner on FASTQ files, including preprocessing (e.g. adaptor trimming) and postprocessing (e.g. sorting, deduplication).
 
@@ -183,7 +183,7 @@ make hisat2
 make star
 ```
 
-#### QC
+### QC
 Most of the following will work for both Illumina and Ion Torrent sequencing, unless otherwise specified.
 
 *Pre-requisites:* BAMs in `bam/` after alignment with an appropriate aligner.
@@ -193,9 +193,10 @@ make bam_metrics       # This should be done for every dataset
 make fastqc            # This is occasionally useful for checking the quality of the sequencing (but isn't too useful most of the time)
 make genotype          # This is useful for confirming that sample pairs/sets came from the correct patient
 make facets_poolednorm # (Illumina only) This is useful for confirming that the germline samples are not contaminated with tumor cells
+make facets            # (Illumina only) This is useful for checking tumor content
 ```
 
-#### Germline variant calling
+### Germline variant calling
 
 *Pre-requisites:* BAMs in `bam/` after alignment with an appropriate aligner.
 
@@ -210,23 +211,132 @@ For Ion Torrent, TVC is implemented.
 make tvc
 ```
 
-#### Somatic variant calling
+### Somatic variant calling
 
 *Pre-requisites:* BAMs in `bam/` after alignment with an appropriate aligner.
 
-For Illumina, mutect (SNVs) and strelka (indels) are implemented and tested. 
+For Illumina, mutect/2 (SNVs) and strelka/2 (indels) are implemented and tested. 
+
 *Note*: It is generally advisable to run facets for CNAs before these. If you do not have facets results, you have to set `ANN_FACETS=false` in your `Makefile`.
 ```
-make mutect
-make strelka
+make mutect              ## for b37 and variants
+make strelka             ## for b37 and variants
+make mutect2             ## for hg38 and variants
+make strelka2            ## for hg38 and variants
 make mutation_summary
 ```
 
 For Ion Torrent, TVC (both SNVs and indels) is implemented and tested.
 ```
-make tvc_somatic
+make tvc_somatic         ## old implementarion of PipeIT
+make pipeit              ## use this
 make mutation_summary
 ```
+
+`mutation_summary` returns an Excel file for all mutations with simplified annotation. Here is a description of the fields included in the mutation summary:
+* IMPACT: Impact of effect (HIGH=frameshift indel, truncating, splice site and similar; MODERATE=missense, in-frame indel and similar; LOW=synonymous and similar) Details: snpeff.sourceforge.net/VCFannotationformat_v1.0.pdf
+* FA: variant allele fraction, meaning number of variant reads divided by total number of reads at the locus
+* DP: depth, meaning total number of reads at the locus
+* AD: ‘allelic depth’, meaning number of reference allele reads and number of variant allele reads, separated by a comma
+* Hotspot_*, Hotspot3D_*: mutation hotspots according to Chang et al (Cancer Discov 2017, cancerhotspots.org) and Gao et al (Genome Med 2017, 3dhotspots.org)
+* CancerGeneSets: list of cancer gene lists to which the gene belongs (see list below)
+* facetsCF: clonal fraction of the copy number segment at the locus (experimental, to be deprecated)
+* facetsTCN_EM: Total copy number at the locus
+* facetsLCN_EM: Lesser (minor) copy number at the locus
+* facetsLOHCall: loss of heterozygosity at the locus (i.e. LCN_EM=0)
+* CHROM, POS, REF, ALT: chromosome position, reference and alternate (variant) alleles
+* ID: dbSNP ID, COSMIC ID
+* ExACnontcga_AC/AF: Population level allele count (AC) and allele frequency (AF).
+
+*Important note re: multi-tumor cases and the FILTER field*: 
+For a given patient, somatic mutations found in one (or more) sample by the mutation calling pipeline were additionally 
+interrogated in all remaining tumor samples of this patient. (This "interrogation" is known to the pipeline as "sufam", FYI).
+“interrogation” and “interrogation_absent” in FILTER indicate mutations that were not called in the given sample but were 
+found to be supported by some sequencing reads (i.e. “interrogation”), or found not to be supported by any read 
+(i.e. “interrogation_absent”), respectively. These additional ‘interrogated’ mutations have been included 1) to ensure we don't
+falsely claim a mutation is not present in a particular tumor sample because of low sequencing depth and/or low VAF (false negative) 
+and 2) to aid clonal evolution analyses (e.g. PyClone wants counts for all mutations in all samples regardless whether the mutations
+are in a sample or now).  This "interrogation" step is performed per-row in the sample_sets.txt, regardless whether the tumors 
+are clonally related or not, and should be considered meaningless for tumors that were not clonally related. 
+Keep in mind that ‘interrogation’ mutations are usually at low variant allele frequencies, or were initially filtered out 
+for other quality/depth reasons, and should therefore be considered lower confidence. In general, mutations at low 
+variant allele fraction are also generally of lower confidence (e.g. sequencing error). Thus, two tumors that did not 
+share a single high confidence mutation, or a very small number of mutations but all of which were of low confidence or 
+low variant allele fractions, should be carefully studied to determine clonal relatedness.
+If you want to turn of this "interrogation" step, set `USE_SUFAM = false`.
+
+Cancer gene sets:
+* KANDOTH_127: 127 SMGs from Kandoth et al
+* LAWRENCE_CANCER5000S: Cancer5000-S set from Lawrence et al
+* TCGA_LIHC: SMGs from TCGA-LIHC
+* TCGA_LIHC_extended: Extended SMGs from TCGA-LIHC
+* SCHULZE_HCC: SMGs from Schulze et al
+* FUJIMOTO_HCC: SMGs from Fujimoto et al
+* CANCER_GENE_CENSUS_TIER1_V88: Cancer Gene Census Tier 1 v88
+* CANCER_GENE_CENSUS_TIERS1_AND_2_V88: Cancer Gene Census Tiers 1 and 2 v88
+* MARTINCORENA_ACC: ACC SMGs from Martincorena et al
+* MARTINCORENA_BLCA: BLCA SMGs from Martincorena et al
+* MARTINCORENA_BRCA: BRCA SMGs from Martincorena et al
+* MARTINCORENA_CESC: CESC SMGs from Martincorena et al
+* MARTINCORENA_COREAD: COREAD SMGs from Martincorena et al
+* MARTINCORENA_ESCA: ESCA SMGs from Martincorena et al
+* MARTINCORENA_GBM: GBM SMGs from Martincorena et al
+* MARTINCORENA_HNSC: HNSC SMGs from Martincorena et al
+* MARTINCORENA_KICH: KICH SMGs from Martincorena et al
+* MARTINCORENA_KIRC: KIRC SMGs from Martincorena et al
+* MARTINCORENA_KIRP: KIRP SMGs from Martincorena et al
+* MARTINCORENA_LAML: LAML SMGs from Martincorena et al
+* MARTINCORENA_LGG: LGG SMGs from Martincorena et al
+* MARTINCORENA_LIHC: LIHC SMGs from Martincorena et al
+* MARTINCORENA_LUAD: LUAD SMGs from Martincorena et al
+* MARTINCORENA_LUSC: LUSC SMGs from Martincorena et al
+* MARTINCORENA_MESO: MESO SMGs from Martincorena et al
+* MARTINCORENA_OV: OV SMGs from Martincorena et al
+* MARTINCORENA_PAAD: PAAD SMGs from Martincorena et al
+* MARTINCORENA_PCPG: PCPG SMGs from Martincorena et al
+* MARTINCORENA_PRAD: PRAD SMGs from Martincorena et al
+* MARTINCORENA_SARC: SARC SMGs from Martincorena et al
+* MARTINCORENA_SKCM: SKCM SMGs from Martincorena et al
+* MARTINCORENA_STAD: STAD SMGs from Martincorena et al
+* MARTINCORENA_TGCT: TGCT SMGs from Martincorena et al
+* MARTINCORENA_THYM: THYM SMGs from Martincorena et al
+* MARTINCORENA_UCEC: UCEC SMGs from Martincorena et al
+* MARTINCORENA_UCS: UCS SMGs from Martincorena et al
+* MARTINCORENA_PANCANCER: PANCAN SMGs from Martincorena et al
+* BAILEY_ACC: ACC SMGs from Bailey et al
+* BAILEY_BLCA: BLCA SMGs from Bailey et al
+* BAILEY_BRCA: BRCA SMGs from Bailey et al
+* BAILEY_CESC: CESC SMGs from Bailey et al
+* BAILEY_CHOL: CHOL SMGs from Bailey et al
+* BAILEY_COADREAD: COADREAD SMGs from Bailey et al
+* BAILEY_DLBC: DLBL SMGs from Bailey et al
+* BAILEY_ESCA: ESCA SMGs from Bailey et al
+* BAILEY_GBM: GBM SMGs from Bailey et al
+* BAILEY_HNSC: HNSC SMGs from Bailey et al
+* BAILEY_KICH: KICH SMGs from Bailey et al
+* BAILEY_KIRC: KIRC SMGs from Bailey et al
+* BAILEY_KIRP: KIRP SMGs from Bailey et al
+* BAILEY_LAML: LAML SMGs from Bailey et al
+* BAILEY_LGG: LGG SMGs from Bailey et al
+* BAILEY_LIHC: LIHC SMGs from Bailey et al
+* BAILEY_LUAD: LUAD SMGs from Bailey et al
+* BAILEY_LUSC: LUSC SMGs from Bailey et al
+* BAILEY_MESO: MESO SMGs from Bailey et al
+* BAILEY_OV: OV SMGs from Bailey et al
+* BAILEY_PAAD: PAAD SMGs from Bailey et al
+* BAILEY_PANCAN: PANCAN SMGs from Bailey et al
+* BAILEY_PCPG: PCPG SMGs from Bailey et al
+* BAILEY_PRAD: PRAD SMGs from Bailey et al
+* BAILEY_SARC: SARC SMGs from Bailey et al
+* BAILEY_SKCM: SKCM SMGs from Bailey et al
+* BAILEY_STAD: STAD SMGs from Bailey et al
+* BAILEY_THCA: THCA SMGs from Bailey et al
+* BAILEY_THYM: THYM SMGs from Bailey et al
+* BAILEY_UCEC: UCEC SMGs from Bailey et al
+* BAILEY_UCS: UCS SMGs from Bailey et al
+* BAILEY_UVM: UVM SMGs from Bailey et al
+Sources: Kandoth et al (PMID 24132290), Lawrence et al (PMID 23770567), Schultze et al (PMID 25822088), Fujimoto et al (PMID 27064257), Martincorena et al (PMID 29056346), Bailey et al (PMID 30096302)
+See https://gdc.cancer.gov/resources-tcga-users/tcga-code-tables/tcga-study-abbreviations for TCGA code abbreviations
 
 #### Somatic CNA detection
 
@@ -236,6 +346,41 @@ For Illumina DNA sequencing, facets is implemented and tested.
 ```
 make facets
 ```
+
+`facets` returns figures and tables. The segment files (`*.cncf.txt`) have these columns:
+* seg: segment number
+* num.mark: number of SNPs in the segment
+* nhet: number of heterozygous SNPs in the segment
+* cnlr.median: log ratio
+* mafR: log-odds-ratio summary of the segment
+* segclust: segment cluster
+* cnlr.median.clust: log ratio of segment cluster
+* mafR.clust: mafR of segment cluser
+* start/end: genomic position of segment start
+* cf.em: cellular fraction of the segment
+* tcn.em: total copy number
+* lcn.em: minor (lesser) copy number
+* clonal.cluster: clonal cluster
+
+3 versions of gene-level copy number alterations have been generated
+* GL_ASCNA: copy number status derived from total copy number. 
+    * 2: ≥ploidy+4 (amplification)
+    * 1: ≥ ploidy+1 (low-level copy number gain)
+    * 0: ploidy (copy number neutral)
+    * -1: < ploidy but not 0 (heterozygous loss)
+    * -2: total copy number = 0 (homozygous deletion)
+
+* GL_LRR: copy number status derived from log ratio
+    * 2: amplification
+    * 1: copy number gain
+    * 0: copy number neutral
+    * -1: copy number loss
+    * -2: deep deletion
+* tcn.em: total copy number (absolute copy number)
+
+Additional files are 1) a list of amplifications and homozygous deletions derived from ASCNA (`*.ampdel.txt`) and 2) per-sample copy number profile figure (`*cncf.pdf`).
+
+**Note**: FACETS profiling does not always work well. In particular samples in which >5% of the genome at copy number 0 (homozygous deletions) should be excluded from copy number analysis.
 
 For Ion Torrent DNA sequencing, Varscan is implemented and tested.
 ```
@@ -252,6 +397,13 @@ RSEM is tested to be run after STAR alignment.
 ```
 make rsem
 ```
+
+`rsem` runs RSEM and performs some additional normalization for convenience.
+* expected_count.results: expected counts from RSEM. 
+* expected_count.results_coding: subset of protein coding genes from genes.expected_count.results_coding. 
+* expected_count.results_coding_uq: expected_count.results_coding normalized by upper-quartile normalization according to the TCGA HCC paper (in this case to the fixed value of 1000). Values can be compared between samples, but NOT between genes. This is what TCGA used for clustering.
+* RSEM-TPM/FPKM: transcripts-per-million and fragments-per-kilobase-million: see http://www.rna-seqblog.com/rpkm-fpkm-and-tpm-clearly-explained/
+
 
 #### ChIP-seq peak detection
 MOSAICS is implemented but not very well tested. In particular, it almost always falls over with paired-end data.
