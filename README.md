@@ -172,10 +172,10 @@ This runs the chosen aligner on FASTQ files, including preprocessing (e.g. adapt
 
 *Pre-requisites:* FASTQs in `fastq/` or `unprocessed_fastq/` (see 'Setting up data directories' above).
 
-For genomic Illumina alignment, the following are implemented and tested. Use `bwaaln` for reads < 75bp, `bwamem` for reads >= 75bp.
+For genomic Illumina alignment, the following are implemented and tested.
 ```
-make bwaaln
-make bwamem
+make bwaaln     ### for reads < 75bp
+make bwamem     ### for reads >= 75bp
 ```
 For transcriptomic Illumina sequencing, the following are implemented and tested.
 ```
@@ -254,7 +254,7 @@ interrogated in all remaining tumor samples of this patient. (This "interrogatio
 “interrogation” and “interrogation_absent” in FILTER indicate mutations that were not called in the given sample but were 
 found to be supported by some sequencing reads (i.e. “interrogation”), or found not to be supported by any read 
 (i.e. “interrogation_absent”), respectively. These additional ‘interrogated’ mutations have been included 1) to ensure we don't
-falsely claim a mutation is not present in a particular tumor sample because of low sequencing depth and/or low VAF (false negative) 
+falsely claim a mutation is not present in a particular tumor sample because of low sequencing depth and/or low but non-zero VAF (false negative) 
 and 2) to aid clonal evolution analyses (e.g. PyClone wants counts for all mutations in all samples regardless whether the mutations
 are in a sample or now).  This "interrogation" step is performed per-row in the sample_sets.txt, regardless whether the tumors 
 are clonally related or not, and should be considered meaningless for tumors that were not clonally related. 
@@ -335,14 +335,30 @@ Cancer gene sets:
 * BAILEY_UCEC: UCEC SMGs from Bailey et al
 * BAILEY_UCS: UCS SMGs from Bailey et al
 * BAILEY_UVM: UVM SMGs from Bailey et al
+
 Sources: Kandoth et al (PMID 24132290), Lawrence et al (PMID 23770567), Schultze et al (PMID 25822088), Fujimoto et al (PMID 27064257), Martincorena et al (PMID 29056346), Bailey et al (PMID 30096302)
 See https://gdc.cancer.gov/resources-tcga-users/tcga-code-tables/tcga-study-abbreviations for TCGA code abbreviations
 
-#### Somatic CNA detection
+## If you have experiments other than matched tumor-normal pairs/sets from frozen samples...
+The defaults of the pipeline are tuned towards tumor-normal pairs/sets from frozen samples. If you have other sample types, you might have to consider adding the following steps:
+* for FFPE samples: formalin fixation artefacts are typically a strong enrichment of C>T/G>A variants at low VAF (<15%), 
+frequently accounting for 90%+ of all somatic variants identified. You may have to consider performing an additional filter by removing C>T/G>A variants <10% or <15%, 
+or supported by <5 reads. You may also consider remove all variants with <5 reads, in which case you can set `MIN_TUMOR_AD = 5` (sorry there is no parameter to do a blanket filtering for VAF for now).
+* for tumors without a matched normal (e.g. cell lines, archival materials without matched normal): do as many of the following as you can
+	* make a BAM file from a bunch of normals captured and sequenced the same way. To do this, you list these samples in `samples.poolednorm.txt`,
+	make sure their BAM files are in the `bam/` directory, set `SAMTOOLS_DOWNSAMPLE_FACTOR` such that you are sampling roughly 1/n (where n is the number of normals,
+	see `samtools view -s`), then run `make poolednorm_bam`, which generates a new sample called `poolednorm` - which you then use as your matched normal.
+	Proceed to regular somatic mutations/CNA calling. If you don't have normals captured and sequenced in the same project, find the closest thing from our collection of data. Any normal is better than no normal.
+	* make a panel of normal for filtering mutations. 
+
+
+### Somatic CNA detection
 
 *Pre-requisites:* BAMs in `bam/` after alignment with an appropriate aligner.
 
-For Illumina DNA sequencing, facets is implemented and tested.
+For Illumina DNA sequencing, facets is implemented and tested. It is recommended that you run facets *before* 
+somatic variant calling because the last step of variant annotation involves annotating copy number states to mutations. 
+If you do not run facets before variant calling, you have to set `ANN_FACETS=false` in your `Makefile`.
 ```
 make facets
 ```
@@ -392,7 +408,7 @@ For Illumina RNA sequencing, cnvkit is implemeted (but currently not well tested
 make cnvkit
 ```
 
-#### RNA-seq transcript quantification
+### RNA-seq transcript quantification
 RSEM is tested to be run after STAR alignment.
 ```
 make rsem
@@ -405,7 +421,7 @@ make rsem
 * RSEM-TPM/FPKM: transcripts-per-million and fragments-per-kilobase-million: see http://www.rna-seqblog.com/rpkm-fpkm-and-tpm-clearly-explained/
 
 
-#### ChIP-seq peak detection
+### ChIP-seq peak detection
 MOSAICS is implemented but not very well tested. In particular, it almost always falls over with paired-end data.
 
 *Pre-requisites:* BAMs in `bam/` after alignment with an appropriate aligner (bwaaln or bwamem).
@@ -413,7 +429,7 @@ MOSAICS is implemented but not very well tested. In particular, it almost always
 make mosaics
 ```
 
-#### Others/ downstream tools
+### Others/ downstream tools
 There are a lot more... 
 
 For exome analysis, there are a few things that are useful. These should work if you use them in the context of the suggested recipes below. Some of them may only work on the b37 genome.
@@ -430,7 +446,7 @@ make pvacseq          # For the detection of neo-antigens, requires mutations (n
 _Note regarding absolute_seq_, it would attempt to run all 3 steps, choosing the default solutions. But, it does not always run to the end, as RunAbsolute error handing is not great.
 
 
-#### Note regarding sanity checks
+### Note regarding sanity checks
 
 At the moment, there are no checks in place to see if what you are attempting to run is a sensible thing to do given your parameters.
 
@@ -506,7 +522,7 @@ here are some suggested recipes that are valid sequences.
 
 #### Whole-exome sequencing on Illumina
 ```
-make bwamem genotype bam_metrics facets mutect strelka mutation_summary (deconstruct_sigs lst msisensor pyclone) [absolute_seq pvacseq]
+make bwamem genotype bam_metrics facets mutect(2) strelka(2) mutation_summary (deconstruct_sigs lst msisensor pyclone) [absolute_seq pvacseq]
 ```
 Those in parentheses `()` will work, those in brackets `[]` may fall over.
 #### RNA-sequencing on Illumina
