@@ -98,9 +98,67 @@ TARGETS += pon
 pon :
 	$(call RUN_MAKE,usb-modules-v2/variant_callers/somatic/pon.mk)
 
+TARGETS += mutect2_calculate_contamination
+mutect2_calculate_contamination :
+	$(call RUN_MAKE,usb-modules-v2/variant_callers/somatic/mutect2_calculate_contamination.mk)
+
+TARGETS += mutect2
+mutect2 : mutect2_calculate_contamination pon
+	$(call RUN_MAKE,usb-modules-v2/variant_callers/somatic/mutect2.mk)
+
+TARGETS += bam_clipoverlap
+bam_clipoverlap :
+	$(call RUN_MAKE,usb-modules-v2/bam_tools/bam_clipoverlap.mk)
+
+# Note, the "PAIRED_END=true" from config.inc does not seem to be picked up here,
+# so using the more intuitive conditional ($(PAIRED_END),true) would work only if
+# "PAIRED_END=true" was also set in the main Makefile.
+# Because "PAIRED_END=false" must be explicitly set in case of SE, make the conditional around that.
+TARGETS += strelka_refs
+ifeq ($(PAIRED_END),false)
+strelka_refs :
+	$(call RUN_MAKE,usb-modules-v2/bam_tools/strelka_refs.mk)
+else
+strelka_refs : bam_clipoverlap
+	$(call RUN_MAKE,usb-modules-v2/bam_tools/strelka_refs.mk)
+endif
+
 TARGETS += strelka
+ifeq ($(strip $(PAIRED_END)$(REF)),falsehg38)
+strelka : strelka_refs
+	$(call RUN_MAKE,usb-modules-v2/variant_callers/somatic/strelka.mk)
+else
+ifeq ($(strip $(REF)),hg38)
+strelka : bam_clipoverlap strelka_refs
+	$(call RUN_MAKE,usb-modules-v2/variant_callers/somatic/strelka.mk)
+else
+ifeq ($(PAIRED_END),false)
 strelka :
 	$(call RUN_MAKE,usb-modules-v2/variant_callers/somatic/strelka.mk)
+else
+strelka : bam_clipoverlap
+	$(call RUN_MAKE,usb-modules-v2/variant_callers/somatic/strelka.mk)
+endif
+endif
+endif
+
+TARGETS += strelka2_somatic
+ifeq ($(PAIRED_END),false)
+strelka2_somatic :
+	$(call RUN_MAKE,usb-modules-v2/variant_callers/somatic/strelka2_somatic.mk)
+else
+strelka2_somatic : bam_clipoverlap
+	$(call RUN_MAKE,usb-modules-v2/variant_callers/somatic/strelka2_somatic.mk)
+endif
+
+#TARGETS += strelka2_germline
+#ifeq ($(PAIRED_END),false)
+#strelka2_germline :
+#	$(call RUN_MAKE,usb-modules-v2/variant_callers/strelka2_germline.mk)
+#else
+#strelka2_germline : bam_clipoverlap
+#	$(call RUN_MAKE,usb-modules-v2/variant_callers/strelka2_germline.mk)
+#endif
 
 TARGETS += varscan_cnv
 varscan_cnv :
@@ -221,10 +279,6 @@ cufflinks :
 #TARGETS += jsm
 #jsm :
 #	$(call RUN_MAKE,modules/variant_callers/somatic/jsm.mk)
-
-TARGETS += mutect2
-mutect2 :
-	$(call RUN_MAKE,usb-modules-v2/variant_callers/somatic/mutect2.mk)
 
 
 #TARGETS += varscan_fpfilter

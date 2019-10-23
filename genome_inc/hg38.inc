@@ -38,6 +38,7 @@ EXAC_NONPSYCH ?= $(ANN_DIR)/ExAC.r0.3.nonpsych.sites.edited.vcf.gz
 #CADD_SNV ?= $(ANN_DIR)/CADD_whole_genome_SNVs_header.vcf.gz
 #CADD_INDEL ?= $(ANN_DIR)/CADD_Indels_1000Gphase3_indels_header_sorted.vcf.gz
 COSMIC ?= $(ANN_DIR)/CosmicCodingMuts_v87.vcf.gz
+#COSMIC ?= $(ANN_DIR)/CosmicCodingMuts_v89_hg38.vcf
 
 #HAPLOTYPE_INSUF_BED = $(ANN_DIR)/haploinsufficient.genes.bed
 #CANCER_GENE_CENSUS_BED = $(ANN_DIR)/cancer_gene_census.bed

@@ -36,8 +36,8 @@ if __name__ == '__main__':
                         help='use these servers for checking non-zero output file size')
     parser.add_argument('-x', '--exclude_node', default=None, help='exclude node list') 
     parser.add_argument('--qos', default='6hours', help='Quality of Service')
-    parser.add_argument('--mail-type', default=None, help='Mail Type')
-    parser.add_argument('--mail-user', default=None, help='Mail User')
+    parser.add_argument('--mail_type', default='END,FAIL,TIME_LIMIT', help='Mail Type')
+    parser.add_argument('--mail_user', default=None, help='Mail User')
     parser.add_argument('--array', default=None, help='Number of Tasks and Parallel Tasks')
 
 
@@ -152,8 +152,8 @@ if __name__ == '__main__':
         
         
     elif cluster_engine == 'slurm':
-        qsub_args = "--workdir {pwd}".format(pwd=os.getcwd())
-
+        #  qsub_args = "--workdir {pwd}".format(pwd=os.getcwd())
+        qsub_args = "--chdir {pwd}".format(pwd=os.getcwd())
         if job_name is not None:
             qsub_args += " --comment {}".format(job_name)
         else:
@@ -172,10 +172,8 @@ if __name__ == '__main__':
             qsub_args += " --exclude {}".format(args.exclude_node)          
         if args.log_file is not None:
             qsub_args += " --error {error} --output {output}".format(error=args.log_file, output=args.log_file)  
-                    
-#        if args.mail-type is not None and args.mail-user is not None:
-#            qsub_args += " --mail-type {type} --mail-user {user}".format(type=args.mail-type, user=args.mail-user)       
-        
+        if args.mail_type is not None and args.mail_user is not None:
+            qsub_args += " --mail-type {type} --mail-user {user}".format(type=args.mail_type, user=args.mail_user)       
         if args.array is not None:
             qsub_args += " --array {}".format(args.array)
                        

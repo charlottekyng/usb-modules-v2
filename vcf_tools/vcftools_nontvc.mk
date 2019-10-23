@@ -68,12 +68,17 @@ ifeq ($3,$2)
 vcf/$1_$2.%.sufam.vcf : vcf/$1_$2.%.vcf
 	$$(INIT) ln -f $$< $$@
 else
+# Note, if sufam.tmp.tmp is empty, <grep -v '^#'> will finish with exit code 1, which will make run.py stop.
+# Using <$$(call CHECK_VCF_CMD,$$@.tmp,cp $$@.tmp $$@,> or hardcoding the same check in the code below works in some cases, but breaks when sample sets are larger.
+# The error complains about grep (from the conditional) not finding $$@.tmp. But $$@.tmp should be created (and the log says it is). I don't get it.
+# An alternative to hide grep's exit code 1 is to wrap it in a <{grep ... || true; }> construct (https://stackoverflow.com/questions/6550484/prevent-grep-returning-an-error-when-input-doesnt-match)
 vcf/$3.%.sufam.tmp : $$(foreach tumor,$$(wordlist 1,$$(shell expr $$(words $$(subst _,$$( ),$3)) - 1),$$(subst _,$$( ),$3)),vcf/$$(tumor)_$$(lastword $$(subst _,$$( ),$3)).%.vcf)
 	$$(call RUN,1,$$(RESOURCE_REQ_HIGH_MEM),$$(RESOURCE_REQ_SHORT),$$(JAVA8_MODULE),"\
 		$$(call GATK,CombineVariants,$$(RESOURCE_REQ_HIGH_MEM_JAVA)) \
 		$$(foreach vcf,$$^,--variant $$(vcf) ) -o $$@.tmp --genotypemergeoption UNSORTED \
-		-sites_only -R $$(REF_FASTA) && grep \"#\" $$@.tmp > $$@ && \
-		 grep -v \"#\" $$@.tmp | awk '{OFS=\"\t\"; \$$$$7=\"PASS\" ; print ;}' >> $$@")
+		-sites_only -R $$(REF_FASTA) && \
+		grep \"#\" $$@.tmp > $$@ && \
+		 { grep -v \"#\" $$@.tmp || true; } | awk '{OFS=\"\t\"; \$$$$7=\"PASS\" ; print ;}' >> $$@")
 
 ifeq ($$(findstring varscan,$$(MUT_CALLER)),varscan)
 vcf/$1_$2.%.sufam.vcf : vcf/$1_$2.%.vcf vcf/$3.%.sufam.tmp bam/$1.bam bam/$2.bam
@@ -116,6 +121,7 @@ vcf/$1_$2.%.sufam.vcf : vcf/$1_$2.%.vcf vcf/$3.%.sufam.tmp bam/$1.bam bam/$2.bam
 		$$(call PURGE_AND_LOAD, $$(JAVA8_MODULE)) && \
 		$$(call GATK,CombineVariants,$$(RESOURCE_REQ_HIGH_MEM_JAVA)) --variant $$< --variant $$@.tmp4 -o $$@ \
 		--genotypemergeoption UNSORTED -R $$(REF_FASTA)"))
+
 # && \
 #		$$(RM) $$@.tmp1 $$@.tmp2 $$@.tmp3 $$(word 2,$$^) $$@.tmp1.idx $$@.tmp2.idx $$@.tmp3.idx $$(word 2,$$^).idx \
 #		$$@.tmp2fixed $$@.tmp2fixed.idx"))

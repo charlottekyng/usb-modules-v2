@@ -89,18 +89,18 @@ $(if $(TARGETS_FILE_INTERVALS_POOLS),\
 metrics/%.wgs_metrics.txt : bam/%.bam bam/%.bam.bai
 	$(call RUN,1,$(RESOURCE_REQ_MEDIUM_MEM),$(RESOURCE_REQ_SHORT),$(JAVA8_MODULE),"\
 		$(call PICARD,CollectWgsMetrics,$(RESOURCE_REQ_MEDIUM_MEM_JAVA)) \
-		INPUT=$< OUTPUT=$@ COUNT_UNPAIRED=true MINIMUM_MAPPING_QUALITY=30")
+		INPUT=$< OUTPUT=$@ COUNT_UNPAIRED=true MINIMUM_MAPPING_QUALITY=30 REFERENCE_SEQUENCE=$(REF_FASTA)")
 
 metrics/%.rnaseq_metrics.txt : bam/%.bam bam/%.bam.bai
 	$(call RUN,1,$(RESOURCE_REQ_MEDIUM_MEM),$(RESOURCE_REQ_VSHORT),$(R_MODULE) $(JAVA8_MODULE),"\
 		$(call PICARD,CollectRnaSeqMetrics,$(RESOURCE_REQ_MEDIUM_MEM_JAVA)) \
 		REF_FLAT=$(GENE_REF_FLAT) RIBOSOMAL_INTERVALS=$(RIBOSOMAL_INTERVALS) \
 		STRAND_SPECIFICITY=$(STRAND_SPECIFICITY) \
-		INPUT=$< OUTPUT=$@ CHART_OUTPUT=$@.pdf VERBOSITY=ERROR")
+		INPUT=$< OUTPUT=$@ CHART_OUTPUT=$@.pdf VERBOSITY=ERROR REFERENCE_SEQUENCE=$(REF_FASTA)")
 
 metrics/%.alignment_summary_metrics.txt : bam/%.bam bam/%.bam.bai
 	$(call RUN,1,$(RESOURCE_REQ_MEDIUM_MEM),$(RESOURCE_REQ_SHORT),$(JAVA8_MODULE),"\
-	$(call PICARD,CollectAlignmentSummaryMetrics,$(RESOURCE_REQ_MEDIUM_MEM_JAVA)) INPUT=$< OUTPUT=$@")
+	$(call PICARD,CollectAlignmentSummaryMetrics,$(RESOURCE_REQ_MEDIUM_MEM_JAVA)) INPUT=$< OUTPUT=$@ REFERENCE_SEQUENCE=$(REF_FASTA)")
 
 # does not work, there's a conflict of java versions
 #metrics/%.gc_bias_metrics.txt metrics/%.gc_bias_metrics_summary.txt : bam/%.bam bam/%.bam.bai
@@ -115,12 +115,12 @@ metrics/%.artifact_metrics.bait_bias_summary_metrics : bam/%.bam bam/%.bam.bai
 	$(SAMTOOLS) view -H $< | grep '^@SQ' > \$$TMP &&  grep -P \"\t\" $(TARGETS_FILE_INTERVALS) | \
 	awk 'BEGIN {OFS = \"\t\"} { print \$$1$(,)\$$2+1$(,)\$$3$(,)\"+\"$(,)NR }' >> \$$TMP; \
 	$(call PICARD,CollectSequencingArtifactMetrics,$(RESOURCE_REQ_MEDIUM_MEM_JAVA)) INPUT=$< OUTPUT=$@ \
-	DB_SNP=$(DBSNP) INTERVALS=\$$TMP")
+	DB_SNP=$(DBSNP) INTERVALS=\$$TMP" REFERENCE_SEQUENCE=$(REF_FASTA))
 
 metrics/%.wgs.artifact_metrics.bait_bias_summary_metrics : bam/%.bam bam/%.bam.bai
 	$(call RUN,1,$(RESOURCE_REQ_MEDIUM_MEM),$(RESOURCE_REQ_SHORT),$(JAVA8_MODULE),"\
 	$(call PICARD,CollectSequencingArtifactMetrics,$(RESOURCE_REQ_MEDIUM_MEM_JAVA)) \	
-	INPUT=$< OUTPUT=$@ DB_SNP=$(DBSNP)")
+	INPUT=$< OUTPUT=$@ DB_SNP=$(DBSNP) REFERENCE_SEQUENCE=$(REF_FASTA)")
 
 metrics/%.oxog_metrics.txt : bam/%.bam bam/%.bam.bai
 	$(call RUN,1,$(RESOURCE_REQ_MEDIUM_MEM),$(RESOURCE_REQ_SHORT),$(SAMTOOLS_MODULE) $(JAVA8_MODULE),"\
@@ -128,11 +128,11 @@ metrics/%.oxog_metrics.txt : bam/%.bam bam/%.bam.bai
 	$(SAMTOOLS) view -H $< | grep '^@SQ' > \$$TMP &&  grep -P \"\t\" $(TARGETS_FILE_INTERVALS) | \
 	awk 'BEGIN {OFS = \"\t\"} { print \$$1$(,)\$$2+1$(,)\$$3$(,)\"+\"$(,)NR }' >> \$$TMP; \
 	$(call PICARD,CollectOxoGMetrics,$(RESOURCE_REQ_MEDIUM_MEM_JAVA)) INPUT=$< OUTPUT=$@ \
-	DB_SNP=$(DBSNP) INTERVALS=\$$TMP")
+	DB_SNP=$(DBSNP) INTERVALS=\$$TMP REFERENCE_SEQUENCE=$(REF_FASTA)")
 
 metrics/%.wgs.oxog_metrics.txt : bam/%.bam bam/%.bam.bai
 	$(call RUN,1,$(RESOURCE_REQ_MEDIUM_MEM),$(RESOURCE_REQ_SHORT),$(JAVA8_MODULE),"\
-	$(call PICARD,CollectOxoGMetrics,$(RESOURCE_REQ_MEDIUM_MEM_JAVA)) INPUT=$< OUTPUT=$@ DB_SNP=$(DBSNP)")
+	$(call PICARD,CollectOxoGMetrics,$(RESOURCE_REQ_MEDIUM_MEM_JAVA)) INPUT=$< OUTPUT=$@ DB_SNP=$(DBSNP) REFERENCE_SEQUENCE=$(REF_FASTA)")
 
 metrics/%.flagstats.txt : bam/%.bam bam/%.bam.bai
 	$(call RUN,1,$(RESOURCE_REQ_LOW_MEM),$(RESOURCE_REQ_VSHORT),$(SAMTOOLS_MODULE),"\

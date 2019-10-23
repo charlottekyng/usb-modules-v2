@@ -127,6 +127,7 @@ UMASK = 002
 
 INIT = module purge; umask $(UMASK); $(MKDIRS); set -o pipefail;
 PURGE_AND_LOAD = module purge && module load $1
+#PURGE_AND_LOAD = export LMOD_DISABLE_SAME_NAME_AUTOSWAP='no' && module purge && module load $1
 
 MD5 = md5sum $(@:.md5=) > $@
 CHECK_MD5 = for i in {0..20}; do if md5sum -c $(filter %.md5,$^); then break; fi; sleep 5; done;
@@ -201,7 +202,7 @@ PERL_MODULE ?= Perl/5.22.2-goolf-1.7.20
 R_MODULE ?= R/3.5.2-foss-2018b
 JAVA6_MODULE ?= Java/1.6.0_24
 JAVA7_MODULE ?= Java/1.7.0_80
-JAVA8_MODULE ?= Java/1.8.0_92
+JAVA8_MODULE ?= Java/8u212b03
 PYTHON_MODULE ?= Python/3.5.2-goolf-1.7.20
 SAMTOOLS_MODULE ?= SAMtools/1.3-goolf-1.7.20
 BCFTOOLS_MODULE ?= BCFtools/1.5-goolf-1.7.20
@@ -215,7 +216,7 @@ HTSLIB_MODULE ?= HTSlib/1.3.1-goolf-1.7.20
 TABIX_MODULE ?= $(HTSLIB_MODULE)
 FASTQC_MODULE ?= FastQC/0.11.4-Java-1.7.0_21
 BOWTIE2_MODULE ?= Bowtie2/2.3.2-goolf-1.7.20
-BWA_MODULE ?= BWA/0.7.13-goolf-1.7.20
+BWA_MODULE ?= BWA/0.7.17-goolf-1.7.20
 TOPHAT_MODULE ?= TopHat/2.0.6.Linux_x86_64
 STAR_MODULE ?= STAR/2.5.2a-goolf-1.7.20
 STAR_FUSION_MODULE ?= STAR-Fusion/0.6.0-goolf-1.7.20-Perl-5.22.2
@@ -265,7 +266,7 @@ CUTADAPT ?= cutadapt
 BGZIP ?= bgzip
 TABIX ?= tabix -p vcf
 BAM_READCOUNT ?= $(BIN_DIR)/bam-readcount
-
+BAMUTIL ?= $(USR_DIR)/local/bamUtil/bin/bam
 VCF_SORT ?= $(PERL) $(SCRIPTS_DIR)/vcfsorter.pl
 FASTQ_TRIMMER = $(PERL) usb-modules-v2/fastq_tools/trimFastq.pl
 VCF_PASS ?= usb-modules-v2/vcf_tools/extract_pass_vcf.pl
@@ -299,14 +300,11 @@ STAR_FUSION ?= STAR-Fusion
 HISAT2 ?= hisat2
 STRINGTIE ?= stringtie
 
-PICARD = $(JAVA) -Xmx$(2) -jar $(JAR_DIR)/picard-tools-2.4.1/picard.jar $(1)
-PICARD += VALIDATION_STRINGENCY=LENIENT MAX_RECORDS_IN_RAM=4000000 TMP_DIR=$(TMPDIR)
-PICARD += REFERENCE_SEQUENCE=$(REF_FASTA) CREATE_INDEX=true
-
-## For the future
-#PICARD = java -Xmx$(2) -jar \$$EBROOTPICARD/picard.jar
-#PICARD += VALIDATION_STRINGENCY=LENIENT MAX_RECORDS_IN_RAM=4000000 TMP_DIR=$(TMPDIR)
+#PICARD = java -Xmx$(RESOURCE_REQ_MEDIUM_MEM_JAVA) -jar \$$EBROOTPICARD/picard.jar
+PICARD = $(JAVA) -Xmx$(RESOURCE_REQ_MEDIUM_MEM_JAVA) -jar $(USR_DIR)/local/picard_2.20.0/picard.jar $(1)
+#PICARD += MAX_RECORDS_IN_RAM=4000000 TMP_DIR=$(TMPDIR)
 #PICARD += REFERENCE_SEQUENCE=$(REF_FASTA) CREATE_INDEX=true
+#PICARD += VALIDATION_STRINGENCY=LENIENT
 
 GATK = $(JAVA) -Xmx$(2) -jar $(JAR_DIR)/GenomeAnalysisTK-3.6/GenomeAnalysisTK-3.6.jar 
 GATK += -S LENIENT -T $(1) -filterNoBases
@@ -314,11 +312,15 @@ GATK37 = $(JAVA) -Xmx$(2) -jar $(JAR_DIR)/GenomeAnalysisTK-3.7/GenomeAnalysisTK-
 GATK37 += -S LENIENT -T $(1) -filterNoBases
 
 GATK40 = gatk --java-options \"-Xmx$(2) -Xms$(2)\" $(1)
+GATK41 = $(USR_DIR)/local/gatk-4.1.2.0/gatk --java-options \"-Xmx$(2) -Xms$(2)\" $(1)
 
 FIX_GATK_VCF = $(PERL) usb-modules-v2/variant_callers/fix_vcf_scripts/fix_gatk_vcf.pl
 FIX_VARSCAN_VCF = $(PERL) usb-modules-v2/variant_callers/fix_vcf_scripts/fix_varscan_vcf.pl
 FIX_STRELKA_VCF = $(PERL) usb-modules-v2/variant_callers/fix_vcf_scripts/fix_strelka_vcf.pl
 FIX_TVC_VCF = $(PERL) usb-modules-v2/variant_callers/fix_vcf_scripts/fix_tvc_vcf.pl
+# These need pyhton3:
+FIX_STRELKA2_VCF_INDELS = $(call PURGE_AND_LOAD,$(PYTHON_MODULE))&& $(PYTHON) usb-modules-v2/variant_callers/fix_vcf_scripts/fix_strelka2_vcf_indels.py
+FIX_STRELKA2_VCF_SNVS = $(call PURGE_AND_LOAD,$(PYTHON_MODULE))&& $(PYTHON) usb-modules-v2/variant_callers/fix_vcf_scripts/fix_strelka2_vcf_snvs.py
 
 #MUTECT ?= $(JAVA) -Xmx$(1) -jar $(JAR_DIR)/muTect-1.1.4.jar --analysis_type MuTect
 
@@ -328,6 +330,12 @@ MUTECT ?= java -Xmx$(1) -jar \$$EBROOTMUTECT/mutect-1.1.7.jar --analysis_type Mu
 
 CONFIGURE_STRELKA = $(PERL) $(USR_DIR)/local/strelka_workflow-1.0.15/bin/configureStrelkaWorkflow.pl
 STRELKA_CONFIG = usb-modules-v2/variant_callers/somatic/strelka_config_bwa_default.ini
+
+# Strelka2 runs with python2, which is the default on Scicore, and does not need to be loaded.
+CONFIGURE_STRELKA2_SOMATIC = $(PYTHON) $(USR_DIR)/local/strelka-2.9.10.centos6_x86_64/bin/configureStrelkaSomaticWorkflow.py
+STRELKA2_SOMATIC_CONFIG = usb-modules-v2/variant_callers/somatic/configureStrelkaSomaticWorkflow.py.ini
+CONFIGURE_STRELKA2_GERMLINE = $(PYTHON) $(USR_DIR)/local/strelka-2.9.10.centos6_x86_64/bin/configureStrelkaGermlineWorkflow.py
+STRELKA2_GERMLINE_CONFIG = usb-modules-v2/variant_callers/configureStrelkaGermlineWorkflow.py.ini
 
 TVC_ROOT_DIR ?= $(USR_DIR)/local/tvc-5.0.3-CentOS_7.3-x86_64-binary
 TVC = $(TVC_ROOT_DIR)/bin/variant_caller_pipeline.py
@@ -435,12 +443,8 @@ RSEM_CALC_EXPR ?= rsem-calculate-expression
 RSEM_GEN_DATA_MATRIX ?= usb-modules-v2/rnaseq/rsem-generate-data-matrix.pl
 RSEM_PROCCESS ?= usb-modules-v2/rnaseq/rsem_process.R
 
-STAR_PROCESS ?= usb-modules-v2/rnaseq/star_process.R
-
 MOSAICS_RUN ?= $(RSCRIPT) usb-modules-v2/chipseq/mosaics_run.R
 MOSAICS_CONSTRUCTBINS ?= $(RSCRIPT) usb-modules-v2/chipseq/mosaics_constructBins.R
-
-MACS2 ?= macs
 
 MSISENSOR ?= $(BIN_DIR)/msisensor_Linux_x86_64
 

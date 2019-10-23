@@ -240,6 +240,7 @@ MUTECT_MAX_ALT_IN_NORMAL ?= 500
 MUTECT_MAX_ALT_IN_NORMAL_FRACTION ?= 0.05
 MUTECT_GT_MAX_ALT_IN_NORMAL_FRACTION ?= 0.5
 MUTECT_OTHER_OPTS ?= 
+MUTECT2_OTHER_OPTS ?= 
 
 ################################################
 ###### Somatic variant filters #################
@@ -335,7 +336,8 @@ EXAC_INFO_FIELDS ?= ExACnontcga_AC,ExACnontcga_AF
 EXACNONPSYCH_INFO_FIELDS ?= ALL
 
 ifeq ($(findstring ILLUMINA,$(SEQ_PLATFORM)),ILLUMINA)
-CALLER_PREFIX ?= mutect strelka_indels
+# CALLER_PREFIX ?= mutect strelka_indels
+CALLER_PREFIX ?= mutect2 strelka2_indels strelka2_snvs
 endif
 ifeq ($(findstring IONTORRENT,$(SEQ_PLATFORM)),IONTORRENT)
 CALLER_PREFIX ?= tvc_snps tvc_indels
