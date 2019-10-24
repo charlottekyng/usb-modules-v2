@@ -28,7 +28,7 @@ pyclone/tables/%.clusters.txt : pyclone/tables/%.loci.txt
 		touch $@; \
 	fi
 
-pyclone/tables/%.clusters.signatures.RData : pyclone/tables/%.loci.txt
+pyclone/tables/%.clusters.signatures.RData : pyclone/tables/%.loci.txt pyclone/tables/%.clusters.txt
 	$(call RUN,1,$(RESOURCE_REQ_LOW_MEM),$(RESOURCE_REQ_VSHORT),$(R_MODULE),"\
 	$(PYCLONE_DECONSTRUCTSIGS) --outPrefix $(subst .RData,,$@) \
 	--num_iter $(DECONSTRUCTSIGS_NUMITER) --num_cores $(DECONSTRUCTSIGS_NUMCORES) $<")
