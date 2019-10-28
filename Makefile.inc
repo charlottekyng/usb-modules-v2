@@ -199,7 +199,8 @@ GZIP ?= gzip -f
 GUNZIP ?= gunzip -c
 
 PERL_MODULE ?= Perl/5.22.2-goolf-1.7.20
-R_MODULE ?= R/3.5.2-foss-2018b
+# R_MODULE ?= R/3.5.2-foss-2018b (breaks other modules that rely on local packages compiled for 3.5.0)
+R_MODULE ?= R/3.5.0-goolf-1.7.20
 JAVA6_MODULE ?= Java/1.6.0_24
 JAVA7_MODULE ?= Java/1.7.0_80
 JAVA8_MODULE ?= Java/8u212b03
