@@ -6,13 +6,14 @@ if (!interactive()) {
 }
 
 optList <- list(
-	make_option("--tri.count.method", default = "exome2genome", help = "tri.count.method for deconstructSigs"),
-	make_option("--num_iter", default = 100, type='integer', help = "number of re-sampling with replacement (at least 10, otherwise NA)"),
-	make_option("--num_cores", default = 1, type='integer', help = "number of cores to use"),
-	make_option("--min_muts_to_include", default = 15, type='integer', help = "minimum number of mutations required to derive signature"),
-	make_option("--seed", default = 1237, type='integer', help = "seed for randomization"),
-	make_option("--outPrefix", default = NULL, help = "output prefix"),
-	make_option("--deconstructSigs_script", default="usb-modules-v2/mut_sigs/deconstructSigs.R", type='character', help = "path to deconstructSigs.R"))
+	make_option("--tri.count.method", default = "exome2genome", help = "tri.count.method for deconstructSigs [default %default]"),
+	make_option("--num_iter", default = 100, type='integer', help = "number of re-sampling with replacement (at least 10, otherwise NA) [default %default]"),
+	make_option("--num_cores", default = 1, type='integer', help = "number of cores to use [default %default]"),
+	make_option("--min_muts_to_include", default = 15, type='integer', help = "minimum number of mutations required to derive signature [default %default]"),
+	make_option("--seed", default = 1237, type='integer', help = "seed for randomization [default %default]"),
+	make_option("--outPrefix", default = NULL, help = "output prefix [default %default]"),
+	make_option("--deconstructSigs_script", default="usb-modules-v2/mut_sigs/deconstructSigs.R", type='character', help = "path to deconstructSigs.R [default %default]"),
+	make_option("--hg38", action="store_true", default = FALSE, help = "this should be set if using hg38 [default %default]"))
 
 parser <- OptionParser(usage = "%prog [options] [mutation_summary_file]", option_list = optList);
 
@@ -50,11 +51,19 @@ if(!is.null(tab)) {
 
 		write.table(tab, file=gsub(".txt", ".deconstructSigs.input.txt", loci_file), sep="\t", row.names=F, na="", quote=F)
 
-		cmd <- paste("ml $R_MODULE; Rscript", opt$deconstructSigs_script, "--num_iter", opt$num_iter,
-			"--min_muts_to_include", opt$min_muts_to_include, #"--outPrefix", opt$outPrefix,
-			"--tri.count.method", opt$tri.count.method, "--num_cores", opt$num_cores, "--seed", opt$seed,
-			"--outPrefix", paste(opt$outPrefix, ".tmp", sep=""),
-			gsub(".txt", ".deconstructSigs.input.txt", loci_file), sep=" ")
+		if ( opt$hg38 ) { 
+			cmd <- paste("ml $R_MODULE; Rscript", opt$deconstructSigs_script, "--num_iter", opt$num_iter,
+				"--min_muts_to_include", opt$min_muts_to_include, #"--outPrefix", opt$outPrefix,
+				"--tri.count.method", opt$tri.count.method, "--num_cores", opt$num_cores, "--seed", opt$seed,
+				"--outPrefix", paste(opt$outPrefix, ".tmp", sep=""), "--hg38",
+				gsub(".txt", ".deconstructSigs.input.txt", loci_file), sep=" ")
+		} else {
+			cmd <- paste("ml $R_MODULE; Rscript", opt$deconstructSigs_script, "--num_iter", opt$num_iter,
+				"--min_muts_to_include", opt$min_muts_to_include, #"--outPrefix", opt$outPrefix,
+				"--tri.count.method", opt$tri.count.method, "--num_cores", opt$num_cores, "--seed", opt$seed,
+				"--outPrefix", paste(opt$outPrefix, ".tmp", sep=""),
+				gsub(".txt", ".deconstructSigs.input.txt", loci_file), sep=" ")
+		}
 
 		cat ("Executing: ", cmd, "\n")
 		system(cmd)

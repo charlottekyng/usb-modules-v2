@@ -3,24 +3,26 @@ cat ("Running deconstructSigs.R\n\n")
 suppressPackageStartupMessages(library(deconstructSigs))
 suppressPackageStartupMessages(library("optparse"));
 suppressPackageStartupMessages(library("parallel"));
+suppressPackageStartupMessages(library("BSgenome.Hsapiens.UCSC.hg38"));
 if (!interactive()) {
     options(warn = -1, error = quote({ traceback(); q('no', status = 1) }))
 }
 
 optList <- list(
-	make_option("--sample_col", default = "TUMOR_SAMPLE", type='character', help = "column name for tumor sample"),
-	make_option("--chr_col", default = "CHROM", type= 'character', help = "column name for chr"),
-	make_option("--pos_col", default = "POS", type='character', help = "column name for pos"),
-	make_option("--ref_col", default = "REF", type='character', help = "column name for ref"),
-	make_option("--alt_col", default = "ALT", type='character', help = "column name for alt"),
-	make_option("--tri.count.method", default = "exome2genome", help = "tri.count.method for deconstructSigs"),
-	make_option("--num_iter", default = NA, type='integer', help = "number of re-sampling with replacement (at least 10, otherwise NA)"),
-	make_option("--num_cores", default = 1, type='integer', help = "number of cores to use"),
-	make_option("--min_muts_to_include", default = 20, type='integer', help = "minimum number of mutations required to derive signature"),
-	make_option("--associated", default = NULL, type='character', help = "comma-separated list of signatures to evaluate"),
-	make_option("--seed", default = 1237, type='integer', help = "seed for randomization"),
-	make_option("--tumorSample", default = NULL, type='character', help = "tumor samples to run"),
-	make_option("--outPrefix", default = NULL, help = "output prefix"))
+	make_option("--sample_col", default = "TUMOR_SAMPLE", type='character', help = "column name for tumor sample [default %default]"),
+	make_option("--chr_col", default = "CHROM", type= 'character', help = "column name for chr [default %default]"),
+	make_option("--pos_col", default = "POS", type='character', help = "column name for pos [default %default]"),
+	make_option("--ref_col", default = "REF", type='character', help = "column name for ref [default %default]"),
+	make_option("--alt_col", default = "ALT", type='character', help = "column name for alt [default %default]"),
+	make_option("--tri.count.method", default = "exome2genome", help = "tri.count.method for deconstructSigs [default %default]"),
+	make_option("--num_iter", default = NA, type='integer', help = "number of re-sampling with replacement (at least 10, otherwise NA) [default %default]"),
+	make_option("--num_cores", default = 1, type='integer', help = "number of cores to use [default %default]"),
+	make_option("--min_muts_to_include", default = 20, type='integer', help = "minimum number of mutations required to derive signature [default %default]"),
+	make_option("--associated", default = NULL, type='character', help = "comma-separated list of signatures to evaluate [default %default]"),
+	make_option("--seed", default = 1237, type='integer', help = "seed for randomization [default %default]"),
+	make_option("--tumorSample", default = NULL, type='character', help = "tumor samples to run [default %default]"),
+	make_option("--outPrefix", default = NULL, help = "output prefix [default %default]"),
+	make_option("--hg38", action="store_true", default = FALSE, help = "this should be set if using hg38 [default %default]"))
 
 parser <- OptionParser(usage = "%prog [options] [mutation_summary_file]", option_list = optList);
 
@@ -99,7 +101,11 @@ if(nrow(pointmuts)>0) {
 		}
 	}
 
-	sigs <- mut.to.sigs.input(muts_for_input, opt$sample_col, "chr", opt$pos_col, opt$ref_col, opt$alt_col)
+	if ( opt$hg38 ) { 
+		sigs <- mut.to.sigs.input(muts_for_input, opt$sample_col, "chr", opt$pos_col, opt$ref_col, opt$alt_col, bsg = BSgenome.Hsapiens.UCSC.hg38)
+	} else {
+		sigs <- mut.to.sigs.input(muts_for_input, opt$sample_col, "chr", opt$pos_col, opt$ref_col, opt$alt_col)
+	}
 
 	rs <- rowSums(sigs)
 

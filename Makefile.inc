@@ -376,14 +376,8 @@ FACETS_CCF = $(RSCRIPT) usb-modules-v2/copy_number/facetsCCF.R
 
 MUTATION_SUMMARY_RSCRIPT = $(RSCRIPT) usb-modules-v2/summary/mutation_summary_excel.R
 
-ifeq ($(REF),hg38)
-    DECONSTRUCTSIGS = $(RSCRIPT) usb-modules-v2/mut_sigs/deconstructSigs.hg38.R
-else
-    DECONSTRUCTSIGS = $(RSCRIPT) usb-modules-v2/mut_sigs/deconstructSigs.R
-endif
-
+DECONSTRUCTSIGS = $(RSCRIPT) usb-modules-v2/mut_sigs/deconstructSigs.R
 DECONSTRUCTSIGS_NUMCORES ?= 8
-
 
 PVACSEQ ?= pvacseq
 PVACTOOLS_IMG ?= $(IMG_DIR)/pvactools.img
@@ -399,7 +393,7 @@ PYCLONE_BURNIN ?= 1000
 PYCLONE_SEED ?= 1234567
 PYCLONE_MAKE_MUT_TXT ?= $(RSCRIPT) usb-modules-v2/clonality/pyclone_make_input.R
 PYCLONE_MAKE_CLUSTER_TABLE ?= $(RSCRIPT) usb-modules-v2/clonality/pyclone_make_cluster_table.R
-PYCLONE_DECONSTRUCTSIGS ?= $(RSCRIPT) usb-modules-v2/clonality/pyclone_deconstuctSigs.R $(if $(findstring hg38,$(REF)), --deconstructSigs_script "usb-modules-v2/mut_sigs/deconstructSigs.hg38.R")
+PYCLONE_DECONSTRUCTSIGS ?= $(RSCRIPT) usb-modules-v2/clonality/pyclone_deconstructSigs.R $(if $(findstring hg38,$(REF)), --hg38)
 PYCLONE_POSTPY ?= $(RSCRIPT) usb-modules-v2/clonality/pyclone_postpy.R
 PYCLONE_POSTPY_MAXSD ?= 0.3
 
