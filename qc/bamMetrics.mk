@@ -47,7 +47,7 @@ dup : $(shell rm -f metrics/all$(PROJECT_PREFIX).dup_metrics.txt) metrics/all$(P
 
 # interval metrics per sample
 metrics/%.hs_metrics.txt metrics/%.interval_hs_metrics.txt : bam/%.bam bam/%.bam.bai
-	$(call RUN,1,$(RESOURCE_REQ_MEDIUM_MEM),$(RESOURCE_REQ_SHORT),$(R_MODULE) $(JAVA8_MODULE) $(SAMTOOLS_MODULE),"\
+	$(call RUN,1,$(RESOURCE_REQ_MEDIUM_MEM),$(RESOURCE_REQ_SHORT),$(R_MODULE) $(SAMTOOLS_MODULE),"\
 	TMP=`mktemp`.intervals; TMPCOVERED=`mktemp`.covered_intervals; \
 	$(SAMTOOLS) view -H $< | grep '^@SQ' > \$$TMP &&  grep -P \"\t\" $(TARGETS_FILE_INTERVALS) | \
 	awk 'BEGIN {OFS = \"\t\"} { print \$$1$(,)\$$2+1$(,)\$$3$(,)\"+\"$(,)NR }' >> \$$TMP; \
@@ -58,7 +58,7 @@ metrics/%.hs_metrics.txt metrics/%.interval_hs_metrics.txt : bam/%.bam bam/%.bam
 	BAIT_SET_NAME=hs BAIT_INTERVALS=\$$TMP")
 
 metrics/%.amplicon_metrics.txt metrics/%.interval_amplicon_metrics.txt : bam/%.bam bam/%.bam.bai
-	$(call RUN,1,$(RESOURCE_REQ_MEDIUM_MEM),$(RESOURCE_REQ_SHORT),$(R_MODULE) $(JAVA8_MODULE) $(SAMTOOLS_MODULE),"\
+	$(call RUN,1,$(RESOURCE_REQ_MEDIUM_MEM),$(RESOURCE_REQ_SHORT),$(R_MODULE) $(SAMTOOLS_MODULE),"\
 	TMP=`mktemp`.intervals; \
 	$(SAMTOOLS) view -H $< | grep '^@SQ' > \$$TMP && grep -P \"\t\" $(TARGETS_FILE_INTERVALS) | \
 	awk 'BEGIN {OFS = \"\t\"} { print \$$1$(,)\$$2+1$(,)\$$3$(,)\"+\"$(,)NR }' >> \$$TMP; \
@@ -73,7 +73,7 @@ metrics/%.per_base_depth.txt : bam/%.bam bam/%.bam.bai
 define amplicon-metrics-pools
 POOLNAME=$$(shell basename $2)
 metrics/$1.amplicon_metrics_$$(POOLNAME).txt : bam/$1.bam bam/$1.bam.bai $2
-	$$(call RUN,1,$(RESOURCE_REQ_MEDIUM_MEM),$(RESOURCE_REQ_SHORT),$$(R_MODULE) $$(JAVA8_MODULE) $$(SAMTOOLS_MODULE),"\
+	$$(call RUN,1,$(RESOURCE_REQ_MEDIUM_MEM),$(RESOURCE_REQ_SHORT),$$(R_MODULE) $$(SAMTOOLS_MODULE),"\
 	TMP=`mktemp`.intervals; \
 	$$(SAMTOOLS) view -H $$< | grep '^@SQ' > \$$$$TMP && grep -P \"\t\" $2 | \
 	awk 'BEGIN {OFS = \"\t\"} { print \$$$$1$$(,)\$$$$2+1$$(,)\$$$$3$$(,)\"+\"$$(,)NR }' >> \$$$$TMP; \
@@ -92,7 +92,7 @@ metrics/%.wgs_metrics.txt : bam/%.bam bam/%.bam.bai
 		INPUT=$< OUTPUT=$@ COUNT_UNPAIRED=true MINIMUM_MAPPING_QUALITY=30 REFERENCE_SEQUENCE=$(REF_FASTA)")
 
 metrics/%.rnaseq_metrics.txt : bam/%.bam bam/%.bam.bai
-	$(call RUN,1,$(RESOURCE_REQ_MEDIUM_MEM),$(RESOURCE_REQ_VSHORT),$(R_MODULE) $(JAVA8_MODULE),"\
+	$(call RUN,1,$(RESOURCE_REQ_MEDIUM_MEM),$(RESOURCE_REQ_VSHORT),$(R_MODULE),"\
 		$(call PICARD,CollectRnaSeqMetrics,$(RESOURCE_REQ_MEDIUM_MEM_JAVA)) \
 		REF_FLAT=$(GENE_REF_FLAT) RIBOSOMAL_INTERVALS=$(RIBOSOMAL_INTERVALS) \
 		STRAND_SPECIFICITY=$(STRAND_SPECIFICITY) \
