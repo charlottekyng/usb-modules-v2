@@ -121,9 +121,9 @@ save.image(paste(opt$outFile, ".RData", sep=""))
 
 seg_sample <- seg_chr <- seg_band <- seg_start <- seg_end <- seg_cnlr <- seg_genes <- seg_type <- seg_GLtype <- seg_cf.em <- NA
 
-for (i in grep("_GL_", colnames(mm))) {
+for (i in grep("_GL_ASCNA$|_GL_LRR$", colnames(mm))) {
 	for(chr in intersect(c(1:22,"X"), unique(mm$chrom))) {
-		tt <- mm[which(mm$chrom==chr),c(1:5,i,grep(sub("(.+)_GL_.+", "\\1_cf.em", colnames(mm)[i]), colnames(mm))), drop=F]
+		tt <- mm[which(mm$chrom==chr),c(1:5,i,grep(sub("(.+)_GL_ASCNA$|(.+)_GL_LRR$", "\\1\\2_cf.em", colnames(mm)[i]), colnames(mm))), drop=F]
 		tt[which(is.na(tt[,6])),6] <- -1000
 		rr <- rle(tt[,6]); 
 		if (rr$values[1]== -1000 & length(rr$values)>1) {
@@ -140,7 +140,7 @@ for (i in grep("_GL_", colnames(mm))) {
 		}
 		mm[which(mm$chrom==chr),i] <- as.vector(unlist(apply(cbind(rr$value,rr$length), 1, function(x){rep(x[1],x[2])})))
 
-		tt <- mm[which(mm$chrom==chr),c(1:5,i,grep(sub("(.+)_GL_.+", "\\1_cf.em", colnames(mm)[i]), colnames(mm))), drop=F]
+		tt <- mm[which(mm$chrom==chr),c(1:5,i,grep(sub("(.+)_GL_ASCNA$|(.+)_GL_LRR$", "\\1\\2_cf.em", colnames(mm)[i]), colnames(mm))), drop=F]
 		rr <- rle(tt[,6]); 
 		if (length(rr$length)>1) {
 			cs <- cumsum(rr$lengths)
@@ -150,7 +150,7 @@ for (i in grep("_GL_", colnames(mm))) {
 
 		for (idx in which(rr$values %in% c(-2,2))) {
 			if (rr$values[idx] %in% c(-2,2)) {
-				seg_sample <- c(seg_sample, colnames(mm)[i])
+				seg_sample <- c(seg_sample, sub("(.+)_GL_ASCNA$|(.+)_GL_LRR$", "\\1\\2", colnames(mm)[i]))
 				seg_chr <- c(seg_chr, chr)
 				seg_band <- c(seg_band, paste(tt[start[idx],"band"], tt[end[idx],"band"], sep="-"))
 				seg_start <- c(seg_start, tt[start[idx],"start"])
@@ -158,7 +158,7 @@ for (i in grep("_GL_", colnames(mm))) {
 #				seg_genes <- c(seg_genes, toString(mm[start[idx]:end[idx],"hgnc"]))
 				seg_genes <- c(seg_genes, toString(tt[start[idx]:end[idx],"hgnc"]))
 				seg_type <- c(seg_type, rr$values[idx])
-				seg_GLtype <- c(seg_GLtype, colnames(mm)[i])
+				seg_GLtype <- c(seg_GLtype, sub(".+_GL_(ASCNA)$|.+_GL_(LRR)$", "\\1\\2",colnames(mm)[i]))
 				seg_cf.em <- c(seg_cf.em, tt[start[idx],grep("cf.em", colnames(tt))])
 			}
 		}		
@@ -168,10 +168,12 @@ for (i in grep("_GL_", colnames(mm))) {
 
 
 
-seg_type[which(seg_type==2)] <- "amp"
-seg_type[which(seg_type== -2)] <- "del"
-write.table(cbind(seg_sample, seg_chr, seg_band, seg_start, seg_end, seg_genes, seg_type, seg_GLtype, seg_cf.em), 
-	file=paste(opt$outFile, ".ampdel.txt", sep=""), sep="\t", row.names=F, na="", quote=F)
+seg_type[which(seg_type ==  2)] <- "amp"
+seg_type[which(seg_type == -2)] <- "del"
+mm1 <- data.frame(cbind(seg_sample, seg_chr, seg_band, seg_start, seg_end, seg_genes, seg_type, seg_GLtype, seg_cf.em))
+# First raw is always empty. Check just in case and drop it if 'seg_sample' is NA
+mm1 <- mm1[-which(is.na(mm1$seg_sample)), ]
+write.table(mm1, file=paste(opt$outFile, ".ampdel.txt", sep=""), sep="\t", row.names=F, na="", quote=F)
 
 cat ("Done writing amp/del files\n")
 lapply(opt$summaryType, function(c){
