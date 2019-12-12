@@ -54,7 +54,7 @@ metrics/%.hs_metrics.txt metrics/%.interval_hs_metrics.txt : bam/%.bam bam/%.bam
 	$(SAMTOOLS) view -H $< | grep '^@SQ' > \$$TMPCOVERED &&  grep -P \"\t\" $(TARGETS_FILE_COVERED_INTERVALS) | \
 	awk 'BEGIN {OFS = \"\t\"} { print \$$1$(,)\$$2+1$(,)\$$3$(,)\"+\"$(,)NR }' >> \$$TMPCOVERED; \
 	$(call PICARD,CollectHsMetrics,$(RESOURCE_REQ_MEDIUM_MEM_JAVA)) INPUT=$< OUTPUT=metrics/$*.hs_metrics.txt \
-	PER_TARGET_COVERAGE=metrics/$*.interval_hs_metrics.txt TARGET_INTERVALS=\$$TMPCOVERED \
+	PER_TARGET_COVERAGE=metrics/$*.interval_hs_metrics.txt TARGET_INTERVALS=\$$TMPCOVERED REFERENCE_SEQUENCE=$(REF_FASTA) \
 	BAIT_SET_NAME=hs BAIT_INTERVALS=\$$TMP")
 
 metrics/%.amplicon_metrics.txt metrics/%.interval_amplicon_metrics.txt : bam/%.bam bam/%.bam.bai
