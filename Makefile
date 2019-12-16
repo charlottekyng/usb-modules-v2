@@ -142,7 +142,7 @@ endif
 endif
 endif
 
-TARGETS += strelka2_somatic
+TARGETS += strelka2
 ifeq ($(PAIRED_END),false)
 strelka2_somatic :
 	$(call RUN_MAKE,usb-modules-v2/variant_callers/somatic/strelka2_somatic.mk)
