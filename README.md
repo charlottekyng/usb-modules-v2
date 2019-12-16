@@ -253,12 +253,12 @@ For a given patient, somatic mutations found in one (or more) sample by the muta
 interrogated in all remaining tumor samples of this patient. (This "interrogation" is known to the pipeline as "sufam", FYI).
 “interrogation” and “interrogation_absent” in FILTER indicate mutations that were not called in the given sample but were 
 found to be supported by some sequencing reads (i.e. “interrogation”), or found not to be supported by any read 
-(i.e. “interrogation_absent”), respectively. These additional ‘interrogated’ mutations have been included 1) to ensure we don't
+(i.e. “interrogation_absent”), respectively. These additional "interrogated" mutations have been included 1) to ensure we don't
 falsely claim a mutation is not present in a particular tumor sample because of low sequencing depth and/or low but non-zero VAF (false negative) 
 and 2) to aid clonal evolution analyses (e.g. PyClone wants counts for all mutations in all samples regardless whether the mutations
-are in a sample or now).  This "interrogation" step is performed per-row in the sample_sets.txt, regardless whether the tumors 
+are in a sample or not).  This "interrogation" step is performed per-row in the sample_sets.txt, regardless whether the tumors 
 are clonally related or not, and should be considered meaningless for tumors that were not clonally related. 
-Keep in mind that ‘interrogation’ mutations are usually at low variant allele frequencies, or were initially filtered out 
+Keep in mind that "interrogation" mutations are usually at low variant allele frequencies, or were initially filtered out 
 for other quality/depth reasons, and should therefore be considered lower confidence. In general, mutations at low 
 variant allele fraction are also generally of lower confidence (e.g. sequencing error). Thus, two tumors that did not 
 share a single high confidence mutation, or a very small number of mutations but all of which were of low confidence or 
@@ -342,8 +342,7 @@ See https://gdc.cancer.gov/resources-tcga-users/tcga-code-tables/tcga-study-abbr
 ## If you have experiments other than matched tumor-normal pairs/sets from frozen samples...
 The defaults of the pipeline are tuned towards tumor-normal pairs/sets from frozen samples. If you have other sample types, you might have to consider adding the following steps:
 * for FFPE samples: formalin fixation artefacts are typically a strong enrichment of C>T/G>A variants at low VAF (<15%), 
-frequently accounting for 90%+ of all somatic variants identified. You may have to consider performing an additional filter by removing C>T/G>A variants <10% or <15%, 
-or supported by <5 reads. You may also consider remove all variants with <5 reads, in which case you can set `MIN_TUMOR_AD = 5` (sorry there is no parameter to do a blanket filtering for VAF for now).
+frequently accounting for 90%+ of all somatic variants identified. You may have to consider performing an additional filter by removing C>T/G>A variants <10% or <15%,or supported by <5 reads. You may also consider remove all variants with <5 reads, in which case you can set `MIN_TUMOR_AD = 5` (sorry there is no parameter to do a blanket filtering for VAF for now).
 * for tumors without a matched normal (e.g. cell lines, archival materials without matched normal): do as many of the following as you can
 	* make a BAM file from a bunch of normals captured and sequenced the same way. To do this, you list these samples in `samples.poolednorm.txt`,
 	make sure their BAM files are in the `bam/` directory, set `SAMTOOLS_DOWNSAMPLE_FACTOR` such that you are sampling roughly 1/n (where n is the number of normals,
