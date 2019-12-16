@@ -26,7 +26,7 @@ bam/%.bam : unprocessed_bam/%$(if $(findstring true,$(BAM_FIX_RG)),.rg).bam
 	$(INIT) ln -f $< $@
 endif
 endif
-
+$(info CHROMOSOMES $(CHROMOSOMES))
 ifeq ($(MERGE_SPLIT_BAMS),true)
 define bam-header
 unprocessed_bam/$1.header.sam : $$(foreach split,$2,unprocessed_bam/$$(split).bam)
@@ -128,28 +128,25 @@ endif
 	-I $< -R $(REF_FASTA) -targetIntervals $(<<) -o $@ $(BAM_REALN_OPTS) && $(RM) $^") ; \
 	else mv $< $@ ; fi
 
-BAM_BASE_RECAL_OPTS = -knownSites $(DBSNP) \
-	$(if $(findstring true,$(BAM_CHR2_BASE_RECAL)),-L $(word 2,$(CHROMOSOMES))) \
-	$(if $(TARGETS_FILE_INTERVALS),-L $(TARGETS_FILE_INTERVALS))
-
-ifeq ($(findstring true,$(BAM_CHR2_BASE_RECAL)),true)
-%.$(BAM_SUFFIX1).$(word 2,$(CHROMOSOMES)).$(BAM_SUFFIX2)_report.grp : %.$(BAM_SUFFIX1).$(word 2,$(CHROMOSOMES)).$(subst .recal,$(),$(BAM_SUFFIX2)).bam %.$(BAM_SUFFIX1).$(word 2,$(CHROMOSOMES)).$(subst .recal,$(),$(BAM_SUFFIX2)).bam.bai
+ifeq ($(findstring true,$(CHOOSE_CHR_FOR_RECAL)),true)
+%.$(BAM_SUFFIX1).$(RECAL_CHR).$(BAM_SUFFIX2)_report.grp : %.$(BAM_SUFFIX1).$(RECAL_CHR).$(subst .recal,$(),$(BAM_SUFFIX2)).bam %.$(BAM_SUFFIX1).$(RECAL_CHR).$(subst .recal,$(),$(BAM_SUFFIX2)).bam.bai
 	$(call RUN,1,$(RESOURCE_REQ_MEDIUM_MEM),$(RESOURCE_REQ_LONG),$(JAVA8_MODULE),"\
 	$(call GATK,BaseRecalibrator,$(RESOURCE_REQ_MEDIUM_MEM_JAVA)) \
-	-R $(REF_FASTA) $(BAM_BASE_RECAL_OPTS) -I $< -o $@ \
-	$(foreach chr,1 $(wordlist 3,100,$(CHROMOSOMES)), && ln -f $@ $*.$(BAM_SUFFIX1).$(chr).$(BAM_SUFFIX2)_report.grp)")
+	-R $(REF_FASTA) -knownSites $(DBSNP) $(if $(TARGETS_FILE_INTERVALS),-L $(TARGETS_FILE_INTERVALS)) \
+	-L $(RECAL_CHR) -I $< -o $@ \
+	$(foreach chr,$(filter-out $(RECAL_CHR),$(CHROMOSOMES)), && ln -f $@ $*.$(BAM_SUFFIX1).$(chr).$(BAM_SUFFIX2)_report.grp)")
 
 define chr-recal-report
-%.$(BAM_SUFFIX1).$1.$(BAM_SUFFIX2)_report.grp : %.$(BAM_SUFFIX1).$(word 2,$(CHROMOSOMES)).$(BAM_SUFFIX2)_report.grp
+%.$(BAM_SUFFIX1).$1.$(BAM_SUFFIX2)_report.grp : %.$(BAM_SUFFIX1).$(RECAL_CHR).$(BAM_SUFFIX2)_report.grp
 	$$(INIT) ln -f $$< $$@
 endef
-$(foreach chr,$(word 1,$(CHROMOSOMES)),$(eval $(call chr-recal-report,$(chr))))
-$(foreach chr,$(wordlist 3,100,$(CHROMOSOMES)),$(eval $(call chr-recal-report,$(chr))))
+$(foreach chr,$(filter-out $(RECAL_CHR),$(CHROMOSOMES)),$(eval $(call chr-recal-report,$(chr))))
 else
 %.recal_report.grp : %.bam %.bai
 	$(call RUN,1,$(RESOURCE_REQ_MEDIUM_MEM),$(RESOURCE_REQ_LONG),$(JAVA8_MODULE),"\
 	$(call GATK,BaseRecalibrator,$(RESOURCE_REQ_MEDIUM_MEM_JAVA)) \
-	-R $(REF_FASTA) $(BAM_BASE_RECAL_OPTS) -I $< -o $@")
+	-R $(REF_FASTA) -knownSites $(DBSNP) \
+	$(if $(TARGETS_FILE_INTERVALS),-L $(TARGETS_FILE_INTERVALS)) -I $< -o $@")
 endif
 
 %.recal.bam : %.bam %.recal_report.grp %.bai %.bam.bai

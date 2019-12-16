@@ -23,6 +23,8 @@ else
 CHROMOSOMES ?= $(shell seq 1 19) X $(if $(findstring true,$(INCLUDE_CHR_Y)),Y) MT
 endif
 
+RECAL_CHR = 2
+
 ### ANNOTATION SETS ####
 
 KNOWN_INDELS := $(ANN_DIR)/mgp.v5.merged.indels.dbSNP142.normed.noGT.vcf

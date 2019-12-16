@@ -23,6 +23,8 @@ else
 CHROMOSOMES ?= $(shell seq 1 22) X $(if $(findstring true,$(INCLUDE_CHR_Y)),Y) MT
 endif
 
+RECAL_CHR = 2
+
 ### ANNOTATION SETS ####
 
 CONTEST_POP_FILE ?= $(ANN_DIR)/hg19_population_stratified_af_hapmap_3.3.vcf

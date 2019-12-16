@@ -23,6 +23,8 @@ else
 CHROMOSOMES ?= $(foreach chr $(shell seq 1 22),chr$(chr)) chrX $(if $(findstring true,$(INCLUDE_CHR_Y)),chrY) chrM
 endif
 
+RECAL_CHR = chr2
+
 ### ANNOTATION SETS ####
 
 CONTEST_POP_FILE ?= $(ANN_DIR)/hapmap_3.3_grch38_pop_stratified_af.vcf.gz

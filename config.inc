@@ -184,7 +184,7 @@ endif
 BAM_DUP_TYPE ?= markdup 
 BAM_REALN ?= true 
 BAM_RECAL ?= true 
-BAM_CHR2_BASE_RECAL ?= true
+CHOOSE_CHR_FOR_RECAL ?= true
 
 #########################################################
 ############### Additional BAM processing ###############
