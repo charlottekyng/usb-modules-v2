@@ -144,10 +144,10 @@ endif
 
 TARGETS += strelka2
 ifeq ($(PAIRED_END),false)
-strelka2_somatic :
+strelka2 :
 	$(call RUN_MAKE,usb-modules-v2/variant_callers/somatic/strelka2_somatic.mk)
 else
-strelka2_somatic : bam_clipoverlap
+strelka2 : bam_clipoverlap
 	$(call RUN_MAKE,usb-modules-v2/variant_callers/somatic/strelka2_somatic.mk)
 endif
 
