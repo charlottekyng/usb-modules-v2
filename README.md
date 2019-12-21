@@ -201,12 +201,12 @@ make facets            # (Illumina only) This is useful for checking tumor conte
 
 It is strongly recommended to use a PoN for filtering the variant calls: `make pon`
 
-The main purpose of PoN is to account for technology-specific sequencing artefacts. Ideally, the PoN should match the methods used in your samples (tissue type, library prep, panel, sequencing platform, etc.) and should consist of over a hundred of normals. In practice, few dozens normals derived from the same sequencing platform is all that is available, and that is also fine.
+The main purpose of PoN is to account for technology-specific sequencing artefacts. Ideally, the PoN should match the methods used in your samples (tissue type, library prep, panel, sequencing platform, etc.) and should consist of over a hundred normals. In practice, few dozens normals derived from the same sequencing platform is all that is available, and that is also fine.
 
 For generating the PoN, the most straightforward approach is to use a SAMPLE_PON_FILE (default is `samples.pon.txt`), which contains a list of normal samples to be used.
 If you have matched tumor and normal samples, and you have not defined a SAMPLE_PON_FILE, the PoN will be created from the normals listed in `sample_sets.txt`. The default location of the PoN in case of IonTorrent is `tvc/pon.tvc.vcf` and in case of Illumina `mutect2/pon.mutect2.vcf`.
 
-It is common practice to use third-party PoNs. Just make sure to put the PoN VCF file in its expected location (see above) before running the variant calling modules.
+It is common practice to use a third-party PoN. Just make sure to put the PoN VCF file in its expected location (see above) before running the variant calling modules.
 
 ### Germline variant calling
 
