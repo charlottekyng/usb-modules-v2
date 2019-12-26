@@ -24,6 +24,7 @@ mutect2_tables : $(call MAKE_TABLE_FILE_LIST,mutect2)
 # Note, "in case of very small panels (<1Mb), CalculateContamination gives an unreliable estimate and we recommend running the Mutect2 pipeline without it"
 # This will be fixed in the next release.
 # https://gatkforums.broadinstitute.org/gatk/discussion/23685/issues-on-filtermutectcalls-log10-probability-must-be-0-or-less
+# We are using gatk 4.1.4.1 now, and this is not longer needed. Will keep the snipped below for logging purposes.
 # The target size will be estimated automatically:
 ifdef TARGETS_FILE_COVERED_INTERVALS
 $(info TARGETS_FILE_COVERED_INTERVALS $(TARGETS_FILE_COVERED_INTERVALS))
@@ -31,15 +32,15 @@ SIZE=$(shell cut -f2,3 $(TARGETS_FILE_COVERED_INTERVALS) | \
 sed -E -e '/^\$$/d' -e 's/^([0-9]+)\t([0-9]+)/ (-\1 + \2) /g' | tr '\n' '+' | sed 's/\+$$/\n/' | bc)
 $(info TARGETS SIZE $(SIZE))
 
-ifeq ($(shell test $(SIZE) -gt 1000000; echo $$?),0)
-TARGETS_LESS_1M=false
-endif
+# ifeq ($(shell test $(SIZE) -gt 1000000; echo $$?),0)
+# TARGETS_LESS_1M=false
+# endif
 
-ifeq ($(shell test $(SIZE) -gt 1000000; echo $$?),1)
-TARGETS_LESS_1M=true
-endif
+# ifeq ($(shell test $(SIZE) -gt 1000000; echo $$?),1)
+# TARGETS_LESS_1M=true
+# endif
 
-$(info TARGETS_LESS_1M $(TARGETS_LESS_1M))
+# $(info TARGETS_LESS_1M $(TARGETS_LESS_1M))
 endif
 
 
@@ -52,7 +53,7 @@ endif
 define mutect2-tumor-normal-chr
 mutect2/chr_vcf/$1_$2.$3.mutect2.unfiltered.vcf.gz : bam/$1.bam bam/$2.bam $(PON_VCF)
 	$$(call RUN,1,$$(RESOURCE_REQ_HIGH_MEM),$$(RESOURCE_REQ_LONG),$$(JAVA8_MODULE),"\
-	$$(call GATK41,Mutect2,$$(RESOURCE_REQ_HIGH_MEM_JAVA)) \
+	$$(call GATK4141,Mutect2,$$(RESOURCE_REQ_HIGH_MEM_JAVA)) \
 	-R $$(REF_FASTA) \
 	-I $$(word 1,$$^) -I $$(word 2,$$^) -tumor $1 -normal $2 \
 	-L $3 -O $$@ \
@@ -86,7 +87,7 @@ mutect2/merge_vcf/$1_$2.mutect2.unfiltered.vcf.gz : mutect2/merge_vcf/$1_$2.chr_
 # Run LearnReadOrientationModel, needed for Read Orientation Artifacts detection
 mutect2/merge_vcf/$1_$2.mutect2.f1r2.tar.gz : $(foreach chr,$(CHROMOSOMES),mutect2/chr_vcf/$1_$2.$(chr).mutect2.f1r2.tar.gz)
 	$$(call RUN,1,$$(RESOURCE_REQ_HIGH_MEM),$$(RESOURCE_REQ_LONG),$$(JAVA8_MODULE),"\
-	$$(call GATK41,LearnReadOrientationModel,$$(RESOURCE_REQ_HIGH_MEM_JAVA)) \
+	$$(call GATK4141,LearnReadOrientationModel,$$(RESOURCE_REQ_HIGH_MEM_JAVA)) \
 	$$(addprefix -I ,$$^) \
 	-O $$@")
 #$$(foreach chr,$$(CHROMOSOMES),-I mutect2/chr_vcf/$$1_$$2.$$(chr).mutect2.f1r2.tar.gz) \
@@ -95,14 +96,14 @@ mutect2/merge_vcf/$1_$2.mutect2.f1r2.tar.gz : $(foreach chr,$(CHROMOSOMES),mutec
 # Sum up all .stats from different chromosomes and create a "merged" one.
 mutect2/merge_vcf/$1_$2.mutect2.unfiltered.vcf.gz.stats : $(foreach chr,$(CHROMOSOMES),mutect2/chr_vcf/$1_$2.$(chr).mutect2.unfiltered.vcf.gz.stats)
 	$$(call RUN,1,$$(RESOURCE_REQ_MEDIUM_MEM),$$(RESOURCE_REQ_LONG),$$(JAVA8_MODULE),"\
-	$$(call GATK41,MergeMutectStats,$$(RESOURCE_REQ_MEDIUM_MEM_JAVA)) \
+	$$(call GATK4141,MergeMutectStats,$$(RESOURCE_REQ_MEDIUM_MEM_JAVA)) \
 	$$(addprefix --stats ,$$^) \
 	-O $$@")
 
 # Run FilterMutectCalls, which is required for the new Mutect2
 mutect2/$1_$2.mutect2.vcf.gz : mutect2/merge_vcf/$1_$2.mutect2.unfiltered.vcf.gz.stats
 	$$(call RUN,1,$$(RESOURCE_REQ_MEDIUM_MEM),$$(RESOURCE_REQ_LONG),$$(JAVA8_MODULE),"\
-	$$(call GATK41,FilterMutectCalls,$$(RESOURCE_REQ_MEDIUM_MEM_JAVA)) \
+	$$(call GATK4141,FilterMutectCalls,$$(RESOURCE_REQ_MEDIUM_MEM_JAVA)) \
 	-R $$(REF_FASTA) \
 	-V mutect2/merge_vcf/$1_$2.mutect2.unfiltered.vcf.gz \
 	$$(if $$(findstring true,$$(TARGETS_LESS_1M)),,--contamination-table mutect2/contamination/$1.contamination.table) \
