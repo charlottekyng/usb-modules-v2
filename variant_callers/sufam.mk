@@ -19,10 +19,10 @@ sufamscreen/all.sufamscreen.eff.tab.txt : $(foreach sample,$(SAMPLES),sufamscree
 ifeq ($(findstring ILLUMINA,$(SEQ_PLATFORM)),ILLUMINA)
 sufamscreen/%.sufamscreen.vcf : bam/%.bam sufamscreen/%.sites.to.screen.vcf
 	$(call RUN,8,$(RESOURCE_REQ_MEDIUM_MEM),$(RESOURCE_REQ_SHORT),$(JAVA8_MODULE),"\
-	$(call GATK41,HaplotypeCaller,$(RESOURCE_REQ_MEDIUM_MEM)) -nct 8 -VS LENIENT -R $(REF_FASTA) \
+	$(call GATK4130,HaplotypeCaller,$(RESOURCE_REQ_MEDIUM_MEM)) -nct 8 -VS LENIENT -R $(REF_FASTA) \
 	--dbsnp $(DBSNP) $(foreach bam,$(filter %.bam,$<),-I $(bam) ) \
-	-O $@.tmp --output-mode EMIT_ALL_SITES \
-	--genotyping-mode GENOTYPE_GIVEN_ALLELES --alleles $(word 2,$^) -L $(word 2,$^) && \
+	-O $@.tmp --genotyping-mode GENOTYPE_GIVEN_ALLELES --output-mode EMIT_ALL_SITES \
+	--alleles $(word 2,$^) -L $(word 2,$^) && \
 	$(FIX_GATK_VCF) < $@.tmp > $@")
 endif
 
