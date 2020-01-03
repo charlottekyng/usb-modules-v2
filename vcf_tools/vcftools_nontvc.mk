@@ -111,7 +111,7 @@ vcf/$1_$2.%.sufam.vcf : vcf/$1_$2.%.vcf vcf/$3.%.sufam.tmp bam/$1.bam bam/$2.bam
 		$$(call GATK4130,HaplotypeCaller,$$(RESOURCE_REQ_HIGH_MEM_JAVA)) -VS LENIENT -R $$(REF_FASTA) -I $$(word 3,$$^) -I $$(word 4,$$^) \
 		--dbsnp $$(DBSNP_TARGETS_INTERVALS) -L $$@.tmp1 \
 		--genotyping-mode GENOTYPE_GIVEN_ALLELES --output-mode EMIT_ALL_SITES --alleles $$@.tmp1 -O $$@.tmp2 && \
-		$$(FIX_GATK_VCF) $$@.tmp2 > $$@.tmp2fixed && \
+		$$(FIX_GATK_VCF) $$@.tmp2 | sed -e 's/\t\*$$(,)/\t/g' -e 's/$$(,)\*\t/\t/g' > $$@.tmp2fixed && \
 		$$(call GATK,VariantFiltration,$$(RESOURCE_REQ_MEDIUM_MEM_JAVA)) -R $$(REF_FASTA) -V $$@.tmp2fixed -o $$@.tmp3 \
 		--filterExpression 'vc.getGenotype(\"$1\").getAD().1 * 1.0 > 0' --filterName interrogation \
 		--filterExpression 'vc.getGenotype(\"$1\").getAD().1 * 1.0 == 0' --filterName interrogation_Absent && \
