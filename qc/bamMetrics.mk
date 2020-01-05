@@ -9,10 +9,10 @@ LOGDIR ?= log/metrics.$(NOW)
 .PHONY: bam_metrics #hs_metrics amplicon_metrics wgs_metrics rna_metrics #interval_report #non_ref_metrics
 
 ifeq ($(CAPTURE_METHOD),NONE)
-bam_metrics : wgs_metrics oxog_wgs flagstats alignment_summary_metrics dup
+bam_metrics : wgs_metrics oxog_wgs flagstats alignment_summary_metrics dup artifacts_wgs
 endif
 ifeq ($(CAPTURE_METHOD),BAITS)
-bam_metrics : hs_metrics oxog flagstats alignment_summary_metrics #dup
+bam_metrics : hs_metrics oxog flagstats alignment_summary_metrics artifacts
 endif
 ifeq ($(CAPTURE_METHOD),PCR)
 bam_metrics : amplicon_metrics flagstats alignment_summary_metrics per_base_depth
@@ -36,8 +36,8 @@ flagstats : $(shell rm -f metrics/all$(PROJECT_PREFIX).flagstats.txt) metrics/al
 flagstatsQ30 : $(shell rm -f metrics/all$(PROJECT_PREFIX).flagstatsQ30.txt) metrics/all$(PROJECT_PREFIX).flagstatsQ30.txt
 alignment_summary_metrics : $(shell rm -f metrics/all$(PROJECT_PREFIX).alignment_summary_metrics.txt) metrics/all$(PROJECT_PREFIX).alignment_summary_metrics.txt
 #gc : $(foreach sample,$(SAMPLES),metrics/$(sample).gc_bias_metrics.txt)
-artifacts : $(foreach sample,$(SAMPLES),metrics/$(sample).artifact_metrics.bait_bias_summary_metrics)
-artifacts_wgs : $(foreach sample,$(SAMPLES),metrics/$(sample).wgs.artifact_metrics.bait_bias_summary_metrics)
+artifacts : $(foreach sample,$(SAMPLES),metrics/$(sample).artifact_metrics.error_summary_metrics)
+artifacts_wgs : $(foreach sample,$(SAMPLES),metrics/$(sample).wgs.artifact_metrics.error_summary_metrics)
 oxog : metrics/all$(PROJECT_PREFIX).oxog_metrics.txt
 oxog_wgs : $(foreach sample,$(SAMPLES),metrics/$(sample).wgs.oxog_metrics.txt)
 dup : $(shell rm -f metrics/all$(PROJECT_PREFIX).dup_metrics.txt) metrics/all$(PROJECT_PREFIX).dup_metrics.txt
@@ -109,18 +109,18 @@ metrics/%.alignment_summary_metrics.txt : bam/%.bam bam/%.bam.bai
 #		INPUT=$< OUTPUT=$@ CHART_OUTPUT=$(addsuffix .pdf,$@) \
 #		SUMMARY_OUTPUT=metrics/$*.gc_bias_metrics_summary.txt")
 
-metrics/%.artifact_metrics.bait_bias_summary_metrics : bam/%.bam bam/%.bam.bai
+metrics/%.artifact_metrics.error_summary_metrics : bam/%.bam bam/%.bam.bai
 	$(call RUN,1,$(RESOURCE_REQ_MEDIUM_MEM),$(RESOURCE_REQ_SHORT),$(SAMTOOLS_MODULE) $(JAVA8_MODULE),"\
 	TMP=`mktemp`.intervals; \
 	$(SAMTOOLS) view -H $< | grep '^@SQ' > \$$TMP &&  grep -P \"\t\" $(TARGETS_FILE_INTERVALS) | \
 	awk 'BEGIN {OFS = \"\t\"} { print \$$1$(,)\$$2+1$(,)\$$3$(,)\"+\"$(,)NR }' >> \$$TMP; \
-	$(call PICARD,CollectSequencingArtifactMetrics,$(RESOURCE_REQ_MEDIUM_MEM_JAVA)) INPUT=$< OUTPUT=$@ \
+	$(call PICARD,CollectSequencingArtifactMetrics,$(RESOURCE_REQ_MEDIUM_MEM_JAVA)) INPUT=$< OUTPUT=$(basename $@) \
 	DB_SNP=$(DBSNP) INTERVALS=\$$TMP" REFERENCE_SEQUENCE=$(REF_FASTA))
 
-metrics/%.wgs.artifact_metrics.bait_bias_summary_metrics : bam/%.bam bam/%.bam.bai
+metrics/%.wgs.artifact_metrics.error_summary_metrics : bam/%.bam bam/%.bam.bai
 	$(call RUN,1,$(RESOURCE_REQ_MEDIUM_MEM),$(RESOURCE_REQ_SHORT),$(JAVA8_MODULE),"\
 	$(call PICARD,CollectSequencingArtifactMetrics,$(RESOURCE_REQ_MEDIUM_MEM_JAVA)) \	
-	INPUT=$< OUTPUT=$@ DB_SNP=$(DBSNP) REFERENCE_SEQUENCE=$(REF_FASTA)")
+	INPUT=$< OUTPUT=$(basename $@) DB_SNP=$(DBSNP) REFERENCE_SEQUENCE=$(REF_FASTA)")
 
 metrics/%.oxog_metrics.txt : bam/%.bam bam/%.bam.bai
 	$(call RUN,1,$(RESOURCE_REQ_MEDIUM_MEM),$(RESOURCE_REQ_SHORT),$(SAMTOOLS_MODULE) $(JAVA8_MODULE),"\
