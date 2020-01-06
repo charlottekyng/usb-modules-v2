@@ -27,7 +27,7 @@ if (length(arguments$args) < 1) {
 
 inTable <- read.delim(inFile, as.is=T, check.names=F, colClasses="character")
 
-if (any(names(outTable) == 'ExACnontcga_CSQ')) {
+if (any(names(inTable) == 'ExACnontcga_CSQ')) {
 	outTable <- subset(inTable, select = -c(ExACnontcga_CSQ))
 	outTable <- data.frame(lapply(outTable, function(x) { gsub(",", ";", x) }))
 
