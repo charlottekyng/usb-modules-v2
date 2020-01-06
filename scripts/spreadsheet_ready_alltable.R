@@ -1,8 +1,8 @@
 #!/usr/bin/env Rscript
 
 # Edits all.tables to be loadable into Excel
-# 1) Some numbers separated with commas get interpreted as a single number with a thausand separator. Convert ',' to ';'.
-# 2) The ExACnontcga_CSQ column can have thausands of characters, sometimes exceding the cell's maximum supported length and resulting in line breaks. Will remove it.
+# 1) Some numbers separated with commas get interpreted as a single number with a thousand separator. Convert ',' to ';'.
+# 2) The ExACnontcga_CSQ column can have thousands of characters, sometimes exceeding the cell's maximum supported length and resulting in line breaks. Will remove it.
 
 suppressPackageStartupMessages(library("optparse"))
 
@@ -15,8 +15,8 @@ opt <- arguments$options;
 
 if (length(arguments$args) < 1) {
     cat("\nEdits all.tables to be loadable into Excel.")
-    cat("\n    1) Some numbers separated with commas get interpreted\n       as a single number with a thausand separator.\n       Will replace all ',' to ';'")
-    cat("\n    2) The 'ExACnontcga_CSQ' column can have thausands of characters,\n       sometimes exceding the cell's maximum supported length,\n       and resulting in line breaks. Will remove 'ExACnontcga_CSQ' column.\n")
+    cat("\n    1) Some numbers separated with commas get interpreted\n       as a single number with a thousand separator.\n       Will replace all ',' to ';'")
+    cat("\n    2) The 'ExACnontcga_CSQ' column can have thousands of characters,\n       sometimes exceeding the cell's maximum supported length,\n       and resulting in line breaks. Will remove 'ExACnontcga_CSQ' column.\n")
     cat("\nOutput to a new table with suffix '.spreadsheetReady.txt'\n\n\n")
     print_help(parser);
     cat("\nNeed variants table file!\n\n")
