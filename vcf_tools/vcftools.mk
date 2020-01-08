@@ -64,7 +64,7 @@ LOGDIR ?= log/vcf.$(NOW)
 
 ifdef SAMPLE_PAIRS
 define oxog-pair
-vcf/$1_$2.%.oxog_ft.vcf : vcf/$1_$2.%.vcf metrics/$1.artifact_metrics.error_summary_metrics
+vcf/$1_$2.%.oxog_ft.vcf : vcf/$1_$2.%.vcf metrics/$1.artifact_metrics.pre_adapter_detail_metrics
 	$$(call CHECK_VCF,$$<,$$@,\
 	$$(call RUN,1,$$(RESOURCE_REQ_MEDIUM_MEM),$$(RESOURCE_REQ_SHORT),$$(GATK40_MODULE),"\
 	$$(call GATK40,FilterByOrientationBias,$$(RESOURCE_REQ_MEDIUM_MEM_JAVA)) \
@@ -75,7 +75,7 @@ $(foreach pair,$(SAMPLE_PAIRS),$(eval $(call oxog-pair,$(tumor.$(pair)),$(normal
 endif
 
 define oxog-sample
-vcf/$1.%.oxog_ft.vcf : vcf/$1.%.vcf metrics/$1.artifact_metrics.error_summary_metrics
+vcf/$1.%.oxog_ft.vcf : vcf/$1.%.vcf metrics/$1.artifact_metrics.pre_adapter_detail_metrics
 	$$(call CHECK_VCF,$$<,$$@,\
 	$$(call RUN,1,$$(RESOURCE_REQ_MEDIUM_MEM),$$(RESOURCE_REQ_SHORT),$$(GATK40_MODULE),"\
 	$$(call GATK40,FilterByOrientationBias,$$(RESOURCE_REQ_MEDIUM_MEM_JAVA)) \
@@ -86,7 +86,7 @@ $(foreach sample,$(SAMPLES),$(eval $(call oxog-sample,$(sample))))
 
 ifdef SAMPLE_PAIRS
 define ffpe-pair
-vcf/$1_$2.%.ffpe_ft.vcf : vcf/$1_$2.%.vcf metrics/$1.artifact_metrics.error_summary_metrics
+vcf/$1_$2.%.ffpe_ft.vcf : vcf/$1_$2.%.vcf metrics/$1.artifact_metrics.pre_adapter_detail_metrics
 	$$(call CHECK_VCF,$$<,$$@,\
 	$$(call RUN,1,$$(RESOURCE_REQ_MEDIUM_MEM),$$(RESOURCE_REQ_SHORT),$$(GATK40_MODULE),"\
 	$$(call GATK40,FilterByOrientationBias,$$(RESOURCE_REQ_MEDIUM_MEM_JAVA)) \
@@ -97,7 +97,7 @@ $(foreach pair,$(SAMPLE_PAIRS),$(eval $(call ffpe-pair,$(tumor.$(pair)),$(normal
 endif
 
 define ffpe-sample
-vcf/$1.%.ffpe_ft.vcf : vcf/$1.%.vcf metrics/$1.artifact_metrics.error_summary_metrics
+vcf/$1.%.ffpe_ft.vcf : vcf/$1.%.vcf metrics/$1.artifact_metrics.pre_adapter_detail_metrics
 	$$(call CHECK_VCF,$$<,$$@,\
 	$$(call RUN,1,$$(RESOURCE_REQ_MEDIUM_MEM),$$(RESOURCE_REQ_SHORT),$$(GATK40_MODULE),"\
 	$$(call GATK40,FilterByOrientationBias,$$(RESOURCE_REQ_MEDIUM_MEM_JAVA)) \

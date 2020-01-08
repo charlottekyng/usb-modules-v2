@@ -122,6 +122,9 @@ metrics/%.wgs.artifact_metrics.error_summary_metrics : bam/%.bam bam/%.bam.bai
 	$(call PICARD,CollectSequencingArtifactMetrics,$(RESOURCE_REQ_MEDIUM_MEM_JAVA)) \	
 	INPUT=$< OUTPUT=$(basename $@) DB_SNP=$(DBSNP) REFERENCE_SEQUENCE=$(REF_FASTA)")
 
+metrics/%.artifact_metrics.pre_adapter_detail_metrics :	metrics/%.artifact_metrics.error_summary_metrics
+	
+
 metrics/%.oxog_metrics.txt : bam/%.bam bam/%.bam.bai
 	$(call RUN,1,$(RESOURCE_REQ_MEDIUM_MEM),$(RESOURCE_REQ_SHORT),$(SAMTOOLS_MODULE) $(JAVA8_MODULE),"\
 	TMP=`mktemp`.intervals; \
