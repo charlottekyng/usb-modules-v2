@@ -10,7 +10,7 @@ STRELKA_NUM_CORES ?= 8
 
 
 LOGDIR ?= log/strelka.$(NOW)
-PHONY += strelka strelka_vcfs strelka_tables
+PHONY += strelka #strelka_vcfs strelka_tables
 
 strelka : strelka_vcfs strelka_tables
 
@@ -19,14 +19,17 @@ VARIANT_TYPES := strelka_indels
 strelka_vcfs : $(foreach type,$(VARIANT_TYPES),$(call MAKE_VCF_FILE_LIST,$(type)))
 strelka_tables : $(foreach type,$(VARIANT_TYPES),$(call MAKE_TABLE_FILE_LIST,$(type)))
 
+.DELETE_ON_ERROR:
+.SECONDARY:
+.PHONY : $(PHONY)
 
 define strelka-tumor-normal
 # If hg38 *and* PAIRED_END then look for BAMs and REF in strelka_refs folder,
 # elif hg38 then look for BAMs and REF also in strelka_refs folder,
 # elif PAIRED_END then look for BAMs in bam_clipoverlap folder,
 # elif any other case then look for BAMs in the bam folder.
-strelka/$1_$2/Makefile : $(if $(and $(findstring hg38,$(REF)),$(findstring true,$(PAIRED_END))),strelka_refs,if $(findstring hg38,$(REF)),strelka_refs,if $(findstring true,$(PAIRED_END)),bam_clipoverlap,bam)/$1.bam \
-                         $(if $(and $(findstring hg38,$(REF)),$(findstring true,$(PAIRED_END))),strelka_refs,if $(findstring hg38,$(REF)),strelka_refs,if $(findstring true,$(PAIRED_END)),bam_clipoverlap,bam)/$2.bam
+strelka/$1_$2/Makefile : $(if $(and $(findstring hg38,$(REF)),$(findstring true,$(PAIRED_END))),strelka_refs,$(if $(findstring hg38,$(REF)),strelka_refs,$(if $(findstring true,$(PAIRED_END)),bam_clipoverlap,bam)))/$1.bam \
+                         $(if $(and $(findstring hg38,$(REF)),$(findstring true,$(PAIRED_END))),strelka_refs,$(if $(findstring hg38,$(REF)),strelka_refs,$(if $(findstring true,$(PAIRED_END)),bam_clipoverlap,bam)))/$2.bam
 	$$(call RUN,1,$$(RESOURCE_REQ_LOW_MEM),$$(RESOURCE_REQ_VSHORT),$$(PERL_MODULE),"\
 	rm -rf $$(@D) &&\
 	$$(CONFIGURE_STRELKA) --tumor=$$< --normal=$$(<<) \
