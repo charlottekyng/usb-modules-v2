@@ -37,7 +37,7 @@ mutect2/pon/chr_vcf_pon/$1.$2.mutect2.vcf.gz : bam/$1.bam
 	$$(call GATK4141,Mutect2,$$(RESOURCE_REQ_HIGH_MEM_JAVA)) \
 	-R $$(REF_FASTA) -I $$< -tumor $1 -L $2 -O $$@ \
 	--max-mnp-distance 0 \
-	$$(if $(findstring hg38,$(REF)),--disable-read-filter MateOnSameContigOrNoMappedMateReadFilter,,)")
+	$$(if $(findstring hg38,$(REF)),--disable-read-filter MateOnSameContigOrNoMappedMateReadFilter,)")
 
 endef
 $(foreach chr,$(CHROMOSOMES), \
