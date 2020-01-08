@@ -6,6 +6,8 @@ ifndef SOMATIC_VARIANT_CALLER_INC
 
 ifeq ($(findstring true,$(FILTER_VARIANTS)),true)
 VCF_FILTERS = $(if $(findstring NONE,$(PANEL)),,target_ft) som_ad_ft
+VCF_FILTERS += $(if $(findstring true,$(FILTER_OXOG)),oxog_ft)
+VCF_FILTERS += $(if $(findstring true,$(FILTER_FFPE)),ffpe_ft)
 VCF_FILTERS += $(if $(findstring true,$(USE_NFT)),nft)
 VCF_FILTERS += $(if $(findstring GRCm38,$(REF)),,hotspot) pass
 else

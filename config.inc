@@ -286,6 +286,9 @@ USE_NFT ?= true
 ANN_NFT ?= false
 PON_VCF ?= mutect2/pon.mutect2.vcf
 
+FILTER_OXOG ?= false
+FILTER_FFPE ?= false
+
 PON_MIN_SAMPLES ?= 2
 
 VCF_PASS_MAX_FILTERS ?= 2
