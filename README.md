@@ -206,7 +206,7 @@ The main purpose of PoN is to account for technology-specific sequencing artefac
 For generating the PoN, the most straightforward approach is to use a SAMPLE_PON_FILE (default is `samples.pon.txt`), which contains a list of normal samples to be used.
 If you have matched tumor and normal samples, and you have not defined a SAMPLE_PON_FILE, the PoN will be created from the normals listed in `sample_sets.txt`. The default location of the PoN in case of IonTorrent is `tvc/pon.tvc.vcf` and in case of Illumina `mutect2/pon.mutect2.vcf`.
 
-It is common practice to use a third-party PoN. Just make sure to put the PoN VCF file in its expected location (see above) before running the variant calling modules.
+It is common practice to use a third-party PoN. Just make sure to put the PoN VCF file in its expected location (see above) before running the variant calling modules. Alternatively, you can use a different location of the PoN VCF by setting the `PON_VCF` variable in your `Makefile`.
 
 ### Germline variant calling
 
