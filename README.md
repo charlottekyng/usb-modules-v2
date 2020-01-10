@@ -227,6 +227,8 @@ make tvc
 
 *Pre-requisites:* BAMs in `bam/` after alignment with an appropriate aligner.
 
+*Pre-requisites:* PoN (by running `make pon`, or  setting the `PON_VCF` variable in your `Makefile`). Note, `mutect2` won't run if there is no PoN. Other variant callers might run, but their modules rely on a PoN in the downstream filtering! If you *really* don't want to use a PoN, set `PON_VCF` to an empty VCF.
+
 For Illumina, mutect/2 (SNVs) and strelka/2 (indels) are implemented and tested. 
 
 *Note*: It is generally advisable to run facets for CNAs before these. If you do not have facets results, you have to set `ANN_FACETS=false` in your `Makefile`.
