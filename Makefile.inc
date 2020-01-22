@@ -378,7 +378,7 @@ FACETS_CCF = $(RSCRIPT) usb-modules-v2/copy_number/facetsCCF.R
 
 MUTATION_SUMMARY_RSCRIPT = $(RSCRIPT) usb-modules-v2/summary/mutation_summary_excel.R
 
-DECONSTRUCTSIGS = $(RSCRIPT) usb-modules-v2/mut_sigs/deconstructSigs.R
+DECONSTRUCTSIGS = $(RSCRIPT) usb-modules-v2/mut_sigs/deconstructSigs.R $(if $(findstring hg38,$(REF)), --hg38)
 DECONSTRUCTSIGS_NUMCORES ?= 8
 
 PVACSEQ ?= pvacseq
