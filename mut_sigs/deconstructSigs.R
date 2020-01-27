@@ -1,4 +1,4 @@
-cat ("Running deconstructSigs.R\n\n")
+cat ("Running deconstructSigs.R\n deconstructSigs version", as.character(packageVersion('deconstructSigs')), "\n\n")
 
 suppressPackageStartupMessages(library(deconstructSigs))
 suppressPackageStartupMessages(library("optparse"));
@@ -22,6 +22,7 @@ optList <- list(
 	make_option("--seed", default = 1237, type='integer', help = "seed for randomization [default %default]"),
 	make_option("--tumorSample", default = NULL, type='character', help = "tumor samples to run [default %default]"),
 	make_option("--outPrefix", default = NULL, help = "output prefix [default %default]"),
+	make_option("--signatures.ref", default = "signatures.cosmic", help = "Signature matrix reference ('signatures.cosmic', 'signatures.nature2013', 'signatures.dbs.cosmic.v3.may2019', 'signatures.exome.cosmic.v3.may2019', 'signatures.genome.cosmic.v3.may2019') [default %default]"),
 	make_option("--hg38", action="store_true", default = FALSE, help = "this should be set if using hg38 [default %default]"))
 
 parser <- OptionParser(usage = "%prog [options] [mutation_summary_file]", option_list = optList);
@@ -46,8 +47,8 @@ if (!is.null(opt$associated)) {
 	opt$associated <- unlist(lapply(unlist(strsplit(opt$associated, split=',')[[1]]), function(x){
 		paste("Signature", x, sep=".")}))
 	
-	if (!all(opt$associated %in% rownames(signatures.cosmic))) {
-			stop ("associated sigs are not all in signature.cosmic. Fix that first.\n")
+	if (!all(opt$associated %in% rownames(get(opt$signatures.ref)))) {
+			stop (cat(paste("associated sigs are not all in ", opt$signature.ref, ". Fix that first.", sep=""),"\n"))
 	}
 } else { opt$associated <- c() }
 
@@ -116,21 +117,24 @@ if(nrow(pointmuts)>0) {
 	}
 
 	if(nrow(sigs) > 0) {
-	
-		cat ("Starting whichSignatures:", date(), "\n")
+		cat ("Starting whichSignatures:", date(), "\n", "Using", opt$signatures.ref, "as reference.",  "\n")
 		if (opt$num_cores>1) {
 			cl <- makeCluster(opt$num_cores, "SOCK")
 			ws <- parLapply(cl, rownames(sigs), function(sample,sigs, ...) {
 				library(deconstructSigs)
-				whichSignatures(tumor.ref = sigs, sample.id=sample,
-		      	          signatures.ref = signatures.cosmic, contexts.needed = T, ...)
+				whichSignatures(tumor.ref = sigs,
+								sample.id = sample,
+								signatures.ref = get(opt$signatures.ref),
+								contexts.needed = T, ...)
 			}, sigs, tri.counts.method = opt$tri.count.method, associated = opt$associated)
 			stopCluster(cl)
 		} else {
 			ws <- lapply(rownames(sigs), function(sample) {
-				whichSignatures(tumor.ref = sigs, sample.id=sample,
-				signatures.ref = signatures.cosmic, contexts.needed = T,
-				tri.counts.method = opt$tri.count.method, associated = opt$associated)
+				whichSignatures(tumor.ref = sigs,
+								sample.id = sample,
+								signatures.ref = get(opt$signatures.ref),
+								contexts.needed = T,
+								tri.counts.method = opt$tri.count.method, associated = opt$associated)
 			})
 		}
 		names(ws) <- rownames(sigs)
@@ -139,7 +143,7 @@ if(nrow(pointmuts)>0) {
 		if (!is.na(opt$num_iter)){
 			if(opt$num_iter>=10){
 				cat("Summarising bootstrapped signatures\n")
-				summarise_whichSignatures <- function(x, signatures=signatures.cosmic, sampleName) {
+				summarise_whichSignatures <- function(x, signatures=get(opt$signatures.ref), sampleName) {
 					weights_mat <- do.call("rbind", lapply(x, function(y){y$weights}))
 					tumor_mat <- do.call("rbind", lapply(x, function(y){y$tumor}))
 					prod_mat <- do.call("rbind", lapply(x, function(y){ y$product}))
@@ -172,22 +176,21 @@ if(nrow(pointmuts)>0) {
 				ws <- ws2
 			}
 		}
-	
+
 		plot_signature_bars_sanger_style <- function(x, main="", ylim=c(0,20), beside=T, border=NA, 
-			cex.axis=1.5, cex.lab=1, las=2, ylab="Proportion of mutations",
-			col=rep(c("cyan2", "black", "red", "grey", "chartreuse3", "lightpink1"), each=16),...) {
+			cex.axis=1, cex.lab=1, las=2, ylab="Proportion of mutations", cex.names=0.6,
+			col=rep(c("#999999ff", "#e69f00ff", "#56b4e9ff", "#009e73ff", "#f0e442ff", "#0072b2ff"), each=16),...) {
 			barplot(x*100, beside=T, border=border, main=main, ylim=ylim, cex.axis=cex.axis, cex.lab=cex.lab, ylab=ylab,
-			col=col, las=las, ...)
+			col=col, las=las, cex.names=cex.names, ...)
 		}
 
 		lapply(names(ws), function(sample) {
-			pdf(paste(opt$outPrefix, ".pdf", sep=""), height=3, width=6)
+			pdf(paste(opt$outPrefix, ".pdf", sep=""), height=3, width=10, pointsize=8)
 			plot_signature_bars_sanger_style(ws[[sample]]$tumor)
 			dev.off()
-			pdf(paste(opt$outPrefix, ".altversion.pdf", sep=""), height=9, width=6)
+			pdf(paste(opt$outPrefix, ".altversion.pdf", sep=""), height=9, width=10, pointsize=10)
 			plotSignatures(ws[[sample]])
 			dev.off()
-			
 		})
 
 		signatures <- do.call("rbind", lapply(ws, function(w) { w$weights }))
@@ -213,10 +216,7 @@ if(nrow(pointmuts)>0) {
 			}))
 			colnames(error) <- c("Error_expected_vs_observed")
 			signatures <- cbind(signatures, error)
-			
 		} 
-		
-			
 	}
 
 	cat ("Computing mutational burden\n")
@@ -258,6 +258,3 @@ if(exists("ws")) {
 } else {
 	save(signatures, file=paste(opt$outPrefix, ".RData", sep=""))
 }
-
-
-
