@@ -3,6 +3,14 @@ include usb-modules-v2/variant_callers/somatic/somaticVariantCaller.inc
 
 LOGDIR ?= log/pyclone.$(NOW)
 
+ifneq ($(words $(CALLER_PREFIX)),1)
+  $(info CALLER_PREFIX contains more than one variant caller)
+  $(info Choose only one by executing: make pyclone CALLER_PREFIX=<variant caller>)
+  $(info  )
+  exit:
+	val=1 && exit $${val}
+endif
+
 .SECONDARY:
 .DELETE_ON_ERROR:
 .PHONY : pyclone
