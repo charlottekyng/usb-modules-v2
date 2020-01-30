@@ -390,7 +390,7 @@ PVACSEQ_PREPARE_VCF ?= $(PERL) usb-modules-v2/neoepitopes/pvacseq_prepare_vcf.pl
 
 LST = $(RSCRIPT) usb-modules-v2/mut_sigs/lst.R
 
-PYCLONE ?= $(PYTHON_ENV_ACTIVATE) pyclonenv; PyClone
+PYCLONE ?= $(PYTHON_ENV_ACTIVATE) /scicore/home/pissal00/GROUP/usr_nobackup/local/conda/pyclonenv; PyClone
 PYCLONE_ITER ?= 10000
 PYCLONE_BURNIN ?= 1000
 PYCLONE_SEED ?= 1234567
