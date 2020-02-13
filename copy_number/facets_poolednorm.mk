@@ -7,7 +7,12 @@ LOGDIR ?= log/facets_poolednorm.$(NOW)
 .DELETE_ON_ERROR:
 .PHONY : facets_poolednorm
 
-facets_poolednorm : $(foreach cval1,$(FACETS_CVAL1),$(foreach sample,$(SAMPLES),facets/cncf_poolednorm_$(cval1)/$(sample)_poolednorm.out) facets/cncf_poolednorm_$(cval1)/all$(PROJECT_PREFIX).summary.txt facets/cncf_poolednorm_$(cval1)/all$(PROJECT_PREFIX).geneCN.filled.txt)
+# Omit poolednorm if present in SAMPLES, else the snp_pileup dependencies $(sample).bam and poolednorm.bam will refer to the same file and mess up the snp_pileup command.
+$(foreach sample,$(SAMPLES),$(if $(findstring poolednorm,$(sample)),$(info poolednorm in SAMPLES, will be omitted),))
+SAMPLES_FILT = $(foreach sample,$(SAMPLES),$(if $(findstring poolednorm,$(sample)),,$(sample)))
+$(info SAMPLES_FILT ${SAMPLES_FILT})
+
+facets_poolednorm : $(foreach cval1,$(FACETS_CVAL1),$(foreach sample,$(SAMPLES_FILT),facets/cncf_poolednorm_$(cval1)/$(sample)_poolednorm.out) facets/cncf_poolednorm_$(cval1)/all$(PROJECT_PREFIX).summary.txt facets/cncf_poolednorm_$(cval1)/all$(PROJECT_PREFIX).geneCN.GL_ASCNA.txt)
 
 ifeq ($(findstring ILLUMINA,$(SEQ_PLATFORM)),ILLUMINA)
 define snp-pileup-tumor-poolednorm
@@ -18,7 +23,7 @@ facets/snp_pileup/$1_poolednorm.bc.gz : bam/$1.bam bam/poolednorm.bam $$(if $$(f
 	-Q $$(FACETS_SNP_PILEUP_MINBASEQ) -r $$(FACETS_SNP_PILEUP_MIN_DEPTH)$$(,)0 \
 	$$(word 3,$$^) $$@ $$(word 2,$$^) $$(word 1,$$^)")
 endef
-$(foreach sample,$(SAMPLES),$(eval $(call snp-pileup-tumor-poolednorm,$(sample))))
+$(foreach sample,$(SAMPLES_FILT),$(eval $(call snp-pileup-tumor-poolednorm,$(sample))))
 endif
 
 ifeq ($(findstring IONTORRENT,$(SEQ_PLATFORM)),IONTORRENT)
@@ -33,7 +38,7 @@ facets/snp_pileup/$1_poolednorm.bc.gz : tvc/dbsnp/$1/TSVC_variants.vcf tvc/dbsnp
 	grep -v '\.' | \
 	sed 's/\t/$$(,)/g;' | gzip > $$@")
 endef
-$(foreach sample,$(SAMPLES),$(eval $(call snp-pileup-tumor-poolednorm,$(sample))))
+$(foreach sample,$(SAMPLES_FILT),$(eval $(call snp-pileup-tumor-poolednorm,$(sample))))
 endif
 
 define facets-cval1-sample
@@ -49,10 +54,10 @@ facets/cncf_poolednorm_$1/$2_poolednorm.Rdata : facets/cncf_poolednorm_$1/$2_poo
 facets/cncf_poolednorm_$1/$2_poolednorm.cncf.txt : facets/cncf_poolednorm_$1/$2_poolednorm.out
 
 endef
-$(foreach cval1,$(FACETS_CVAL1),$(foreach sample,$(SAMPLES),$(eval $(call facets-cval1-sample,$(cval1),$(sample)))))
+$(foreach cval1,$(FACETS_CVAL1),$(foreach sample,$(SAMPLES_FILT),$(eval $(call facets-cval1-sample,$(cval1),$(sample)))))
 
 define facets-merge-poolednorm
-facets/cncf_poolednorm_$1/all$(PROJECT_PREFIX).summary.txt : $$(foreach sample,$$(SAMPLES),facets/cncf_poolednorm_$1/$$(sample)_poolednorm.out)
+facets/cncf_poolednorm_$1/all$(PROJECT_PREFIX).summary.txt : $$(foreach sample,$$(SAMPLES_FILT),facets/cncf_poolednorm_$1/$$(sample)_poolednorm.out)
 	$$(INIT) \
 	{ \
 	cut -f2 -d' ' $$< | tr '\n' '\t'; echo ""; \
@@ -62,9 +67,9 @@ facets/cncf_poolednorm_$1/all$(PROJECT_PREFIX).summary.txt : $$(foreach sample,$
 } >$$@
 #	$$(INIT) paste $$^ > $$@;
 
-facets/cncf_poolednorm_$1/all$(PROJECT_PREFIX).geneCN.filled.txt : $$(foreach sample,$$(SAMPLES),facets/cncf_poolednorm_$1/$$(sample)_poolednorm.cncf.txt)
+facets/cncf_poolednorm_$1/all$(PROJECT_PREFIX).geneCN.GL_ASCNA.txt : $$(foreach sample,$$(SAMPLES_FILT),facets/cncf_poolednorm_$1/$$(sample)_poolednorm.cncf.txt)
 	$$(call RUN,1,$$(RESOURCE_REQ_MEDIUM_MEM),$$(RESOURCE_REQ_SHORT),$$(R_MODULE),"\
-	$$(FACETS_GENE_CN) $$(FACETS_GENE_CN_OPTS) --outFile $$@ $$^")
+	$$(FACETS_GENE_CN) $$(FACETS_GENE_CN_OPTS) --genesFile $(TARGETS_FILE_GENES) --outFile facets/cncf_poolednorm_$1/all$(PROJECT_PREFIX).geneCN $$^")
 endef
 $(foreach cval1,$(FACETS_CVAL1),$(eval $(call facets-merge-poolednorm,$(cval1))))
 
