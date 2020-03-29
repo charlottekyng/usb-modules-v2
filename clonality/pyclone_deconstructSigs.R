@@ -72,7 +72,8 @@ if(!is.null(tab)) {
 				"--seed", opt$seed,
 				"--outPrefix", paste(opt$outPrefix, ".tmp", sep=""),
 				"--signatures.ref", opt$signatures.ref,
-				gsub(".txt", ".deconstructSigs.input.txt", loci_file), sep=" ")		}
+				gsub(".txt", ".deconstructSigs.input.txt", loci_file), sep=" ")
+		}
 
 		cat ("Executing: ", cmd, "\n")
 		system(cmd)
@@ -103,16 +104,3 @@ if(!is.null(tab)) {
 	cat ("Empty file?\n")
 	save(file=paste(opt$outPrefix, ".RData", sep=""))
 }
-
-
-	
-	
-
-
-
-
-
-
-
-
-
