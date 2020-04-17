@@ -24,8 +24,8 @@ star/$(sample).Unmapped.out.mate1.gz $(if $(findstring true,$(PAIRED_END)),star/
 star/$(sample).Log.out.gz star/$(sample).Log.progress.out.gz)
 
 star/%.Aligned.sortedByCoord.out.bam : fastq/%.1.fastq.gz $(if $(findstring true,$(PAIRED_END)),fastq/%.2.fastq.gz)
-	$(call RUN,4,$(RESOURCE_REQ_MEDIUM_MEM),$(RESOURCE_REQ_SHORT),$(STAR_MODULE),"\
-	STAR --runMode alignReads --runThreadN 4 \
+	$(call RUN,12,5G,$(RESOURCE_REQ_MEDIUM),$(STAR_MODULE),"\
+	STAR --runMode alignReads --runThreadN 14 \
 	--genomeDir $(STAR_GENOME_DIR) \
 	--readFilesIn $< $(if $(findstring true,$(PAIRED_END)),$(word 2,$^)) \
 	--readFilesCommand gunzip -c \
@@ -37,6 +37,7 @@ star/%.Aligned.sortedByCoord.out.bam : fastq/%.1.fastq.gz $(if $(findstring true
 	--outSAMstrandField intronMotif --outSAMprimaryFlag AllBestScore --outSAMtype BAM SortedByCoordinate \
 	--outReadsUnmapped Fastx --outMultimapperOrder Random --outSAMattrIHstart 0 \
 	--chimSegmentMin 12 --chimJunctionOverhangMin 12 --chimSegmentReadGapMax 3 \
+	--chimOutType Junctions SeparateSAMold \
 	--quantMode GeneCounts TranscriptomeSAM --twopassMode Basic && \
 	$(RMR) $(@D)/$*._STARgenome $(@D)/$*._STARpass1")
 
@@ -46,24 +47,30 @@ star/%.star.bam : star/%.Aligned.sortedByCoord.out.bam
 star/%.Aligned.toTranscriptome.out.bam : star/%.Aligned.sortedByCoord.out.bam
 	$(INIT) touch $@
 
-star/%.Chimeric.out.junction : star/%.Aligned.sortedByCoord.out.bam
-	
-star/%.Chimeric.out.sam : star/%.Aligned.sortedByCoord.out.bam
-	
+star/%.Chimeric.out.junction.gz : star/%.Aligned.sortedByCoord.out.bam
+	@if [ -f '$(basename $@)' ]; then $(INIT) $(GZIP) $(basename $@); fi
+
+star/%.Chimeric.out.sam.gz : star/%.Aligned.sortedByCoord.out.bam
+	@if [ -f '$(basename $@)' ]; then $(INIT) $(GZIP) $(basename $@); fi
+
 star/%.ReadsPerGene.out.tab : star/%.Aligned.sortedByCoord.out.bam
-	
+
 star/%.Log.final.out : star/%.Aligned.sortedByCoord.out.bam
-	
-star/%.Log.out : star/%.Aligned.sortedByCoord.out.bam
-	
-star/%.Log.progress.out : star/%.Aligned.sortedByCoord.out.bam
-	
-star/%.Unmapped.out.mate1 : star/%.Aligned.sortedByCoord.out.bam
-	
-star/%.Unmapped.out.mate2 : star/%.Aligned.sortedByCoord.out.bam
-	
-%.gz : %
-	$(INIT) $(GZIP) $<
+
+star/%.Log.out.gz : star/%.Aligned.sortedByCoord.out.bam
+	@if [ -f '$(basename $@)' ]; then $(INIT) $(GZIP) $(basename $@); fi
+
+star/%.Log.progress.out.gz : star/%.Aligned.sortedByCoord.out.bam
+	@if [ -f '$(basename $@)' ]; then $(INIT) $(GZIP) $(basename $@); fi
+
+star/%.Unmapped.out.mate1.gz : star/%.Aligned.sortedByCoord.out.bam
+	@if [ -f '$(basename $@)' ]; then $(INIT) $(GZIP) $(basename $@); fi
+
+star/%.Unmapped.out.mate2.gz : star/%.Aligned.sortedByCoord.out.bam
+	@if [ -f '$(basename $@)' ]; then $(INIT) $(GZIP) $(basename $@); fi
+
+# %.gz : %
+# 	$(INIT) $(GZIP) $<
 
 bam/%.bam : star/%.star.$(BAM_SUFFIX) 
 	$(INIT) ln -f $< $@
