@@ -72,20 +72,27 @@ mm <- lapply(facetsFiles, function(f) {
 	mcols(tabGR) <- tab %>% select(num.mark,cnlr.median:mafR.clust,cf.em:lcn.em)
 
 	fo <- findOverlaps(tabGR, genesGR)
+	df <- as.data.frame(cbind(as.data.frame(genesGR)[subjectHits(fo),], mcols(tabGR)[queryHits(fo),]))
 
-	df <- as.data.frame(cbind(mcols(genesGR)[subjectHits(fo),], mcols(tabGR)[queryHits(fo),]))
 	df %<>% group_by(hgnc) %>% top_n(1, abs(cnlr.median))
-
 	if ("GL_ASCNA" %in% opt$summaryType) {
-
-		ploidy <- median(unlist(apply(cbind(df$tcn.em, df$num.mark),1,function(x){rep(x[1], x[2])})))
-
+		load(gsub("cncf.txt", "Rdata", f, fixed=T))
+		ploidy <- median(df$tcn.em)	
 		df$GL_ASCNA <- 0
 		df$GL_ASCNA[df$tcn.em < ploidy] <- -1
 		df$GL_ASCNA[df$tcn.em == 0] <- -2
 		df$GL_ASCNA[df$tcn.em > ploidy] <- 1
 		df$GL_ASCNA[df$tcn.em >= ploidy + 4] <- 2
+		if (table(out2$jointseg$chrom, out2$jointseg$het)[out2$nX, "1"]<10) {
+			df$GL_ASCNA[df$seqnames=="X"] <- 0
+			df$GL_ASCNA[df$seqnames=="X" & df$tcn.em < floor(ploidy/2)] <- -1
+			df$GL_ASCNA[df$seqnames=="X" & df$tcn.em ==0 ] <- -2
+			df$GL_ASCNA[df$seqnames=="X" & df$tcn.em > ceiling(ploidy/2)] <- 1
+			df$GL_ASCNA[df$seqnames=="X" & df$tcn.em >= ceiling(ploidy/2) + 4] <- 2
+		}
 	}
+
+
 	if ("GL_LRR" %in% opt$summaryType) {
 		load(gsub("cncf.txt", "Rdata", f, fixed=T))
 		noise <- median(abs(out2$jointseg$cnlr-  unlist(apply(out2$out[,c("cnlr.median", "num.mark")], 1, 
