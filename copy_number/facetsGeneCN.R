@@ -72,6 +72,7 @@ mm <- lapply(facetsFiles, function(f) {
 	mcols(tabGR) <- tab %>% select(num.mark,cnlr.median:mafR.clust,cf.em:lcn.em)
 
 	fo <- findOverlaps(tabGR, genesGR)
+<<<<<<< HEAD
 	
 	####ChrX BUG FIX OLD
 	#df <- as.data.frame(cbind(mcols(genesGR)[subjectHits(fo),], mcols(tabGR)[queryHits(fo),]))
@@ -94,6 +95,11 @@ mm <- lapply(facetsFiles, function(f) {
 	#}
 	###OLD END
 	###NEW
+=======
+	df <- as.data.frame(cbind(as.data.frame(genesGR)[subjectHits(fo),], mcols(tabGR)[queryHits(fo),]))
+
+	df %<>% group_by(hgnc) %>% top_n(1, abs(cnlr.median))
+>>>>>>> 19e3127e453ab9a79af81786bf8e8964178deabb
 	if ("GL_ASCNA" %in% opt$summaryType) {
 		load(gsub("cncf.txt", "Rdata", f, fixed=T))
 		ploidy <- median(df$tcn.em)	
@@ -110,7 +116,10 @@ mm <- lapply(facetsFiles, function(f) {
 			df$GL_ASCNA[df$seqnames=="X" & df$tcn.em >= ceiling(ploidy/2) + 4] <- 2
 		}
 	}
+<<<<<<< HEAD
 ###NEW END
+=======
+>>>>>>> 19e3127e453ab9a79af81786bf8e8964178deabb
 
 
 	if ("GL_LRR" %in% opt$summaryType) {

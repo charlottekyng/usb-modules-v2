@@ -5,7 +5,7 @@ include usb-modules-v2/genome_inc/common.inc
 REF_FASTA ?= $(GENOME_DIR)/Homo_sapiens_assembly38_gsa.fasta
 REF_DICT = $(REF_FASTA:.fasta=.dict)
 
-DBSNP ?= $(ANN_DIR)/dbsnp_138.hg38.vcf.gz
+DBSNP ?= $(ANN_DIR)/dbsnp_146.hg38.vcf.gz
 
 ifeq ($(findstring NONE,$(PANEL)),NONE)
 else
@@ -15,7 +15,6 @@ endif
 RESOURCE_REQ ?= high
 TARGETS_FILE_INTERVALS ?= $(REF_FASTA:.fasta=.bed)
 DBSNP_TARGETS_INTERVALS ?= $(DBSNP)
-TARGETS_FILE_GENES ?= $(ANN_DIR)/hg38_protein_coding_gene_symbols.txt
 
 ifeq ($(findstring bed,$(TARGETS_FILE_INTERVALS)),bed)
 CHROMOSOMES := $(shell grep -v '@' $(TARGETS_FILE_INTERVALS) | cut -f1 | sort -V | uniq)
@@ -24,6 +23,9 @@ CHROMOSOMES ?= $(foreach chr $(shell seq 1 22),chr$(chr)) chrX $(if $(findstring
 endif
 
 RECAL_CHR = chr2
+
+GENCODE_VER ?= v33
+TARGETS_FILE_GENES ?= $(ANN_DIR)/gencode.$(GENCODE_VER).primary_assembly.annotation_gene.protein_coding.gene.band.txt
 
 ### ANNOTATION SETS ####
 
@@ -54,17 +56,17 @@ CENTROMERE_TABLE = $(ANN_DIR)/centromeres_hg38.txt
 
 #DGV_FILE = $(ANN_DIR)/DGV_GRCh37_hg19_variants_2016-05-15.txt
 
-GENCODE_GTF = $(ANN_DIR)/gencode.v27.primary_assembly.annotation.gtf
-GENCODE_GENE_GTF = $(ANN_DIR)/gencode.v27.primary_assembly.annotation_gene.gtf
-GENCODE_CODING_GENE_GTF = $(ANN_DIR)/gencode.v27.primary_assembly.annotation_protein_coding_gene.gtf
-GENCODE_NONCODING_GENE_GTF = $(ANN_DIR)/gencode.v27.primary_assembly.annotation_gene.non_coding.gtf
+GENCODE_GTF = $(ANN_DIR)/gencode.$(GENCODE_VER).primary_assembly.annotation.gtf
+GENCODE_GENE_GTF = $(ANN_DIR)/gencode.$(GENCODE_VER).primary_assembly.annotation_gene.gtf
+GENCODE_CODING_GENE_GTF = $(ANN_DIR)/gencode.$(GENCODE_VER).primary_assembly.annotation_gene.protein_coding.gtf
+GENCODE_NONCODING_GENE_GTF = $(ANN_DIR)/gencode.$(GENCODE_VER).primary_assembly.annotation_gene.non_coding.gtf
 
-RIBOSOMAL_INTERVALS ?= $(ANN_DIR)/ribosomal.interval_list
+RIBOSOMAL_INTERVALS ?= $(ANN_DIR)/gencode.$(GENCODE_VER).primary_assembly.annotation_ribosomal.interval_list
 GENE_REF_FLAT = $(ANN_DIR)/refFlat.txt
 
 ### TOOL-SPECIFIC REF ###
 
-GISTIC_REF ?= $(REF_DIR)/gistic/hg19.UCSC.add_miR.140312.refgene.mat
+GISTIC_REF ?= $(REF_DIR)/gistic/hg38.UCSC.add_miR.160920.refgene.mat
 
 
 SNP_EFF_GENOME = GRCh38.81

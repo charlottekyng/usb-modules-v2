@@ -219,7 +219,7 @@ FASTQC_MODULE ?= FastQC/0.11.4-Java-1.7.0_21
 BOWTIE2_MODULE ?= Bowtie2/2.3.2-goolf-1.7.20
 BWA_MODULE ?= BWA/0.7.17-goolf-1.7.20
 TOPHAT_MODULE ?= TopHat/2.0.6.Linux_x86_64
-STAR_MODULE ?= STAR/2.5.2a-goolf-1.7.20
+STAR_MODULE ?= STAR/2.7.3a-foss-2018b
 STAR_FUSION_MODULE ?= STAR-Fusion/0.6.0-goolf-1.7.20-Perl-5.22.2
 HISAT2_MODULE ?= HISAT2/2.0.4-goolf-1.7.20
 STRINGTIE_MODULE ?= StringTie/1.3.3-goolf-1.7.20
@@ -227,7 +227,7 @@ SNP_EFF_MODULE ?= snpEff/4.1l-Java-1.7.0_75
 SNP_EFF_43_MODULE ?= snpEff/4.3t-Java-1.8.0_92
 CUFFLINKS_MODULE ?= Cufflinks/2.2.1-Linux_x86_64
 STRINGTIE_MODULE ?= StringTie/1.3.3-goolf-1.7.20
-RSEM_MODULE ?= RSEM/1.2.31-goolf-1.7.20
+RSEM_MODULE ?= RSEM/1.3.2-foss-2018b
 OPENBLAS_MODULE ?= OpenBLAS/0.2.13-GCC-4.8.4-LAPACK-3.5.0
 GATK36_MODULE ?= GATK/3.6-Java-1.8.0_92
 GATK40_MODULE ?= GATK/4.0.7.0-Java-1.8.0_92
@@ -447,8 +447,12 @@ RSEM_CALC_EXPR ?= rsem-calculate-expression
 RSEM_GEN_DATA_MATRIX ?= usb-modules-v2/rnaseq/rsem-generate-data-matrix.pl
 RSEM_PROCCESS ?= usb-modules-v2/rnaseq/rsem_process.R
 
+STAR_PROCESS ?= usb-modules-v2/rnaseq/star_process.R
+
 MOSAICS_RUN ?= $(RSCRIPT) usb-modules-v2/chipseq/mosaics_run.R
 MOSAICS_CONSTRUCTBINS ?= $(RSCRIPT) usb-modules-v2/chipseq/mosaics_constructBins.R
+
+MACS2 ?= macs
 
 MSISENSOR ?= $(BIN_DIR)/msisensor_Linux_x86_64
 

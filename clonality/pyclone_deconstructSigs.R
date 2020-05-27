@@ -13,6 +13,7 @@ optList <- list(
 	make_option("--seed", default = 1237, type='integer', help = "seed for randomization [default %default]"),
 	make_option("--outPrefix", default = NULL, help = "output prefix [default %default]"),
 	make_option("--deconstructSigs_script", default="usb-modules-v2/mut_sigs/deconstructSigs.R", type='character', help = "path to deconstructSigs.R [default %default]"),
+	make_option("--signatures.ref", default = "signatures.cosmic", help = "Signature matrix reference ('signatures.cosmic', 'signatures.nature2013', 'signatures.dbs.cosmic.v3.may2019', 'signatures.exome.cosmic.v3.may2019', 'signatures.genome.cosmic.v3.may2019') [default %default]"),	
 	make_option("--hg38", action="store_true", default = FALSE, help = "this should be set if using hg38 [default %default]"))
 
 parser <- OptionParser(usage = "%prog [options] [mutation_summary_file]", option_list = optList);
@@ -52,16 +53,25 @@ if(!is.null(tab)) {
 		write.table(tab, file=gsub(".txt", ".deconstructSigs.input.txt", loci_file), sep="\t", row.names=F, na="", quote=F)
 
 		if ( opt$hg38 ) { 
-			cmd <- paste("ml $R_MODULE; Rscript", opt$deconstructSigs_script, "--num_iter", opt$num_iter,
-				"--min_muts_to_include", opt$min_muts_to_include, #"--outPrefix", opt$outPrefix,
-				"--tri.count.method", opt$tri.count.method, "--num_cores", opt$num_cores, "--seed", opt$seed,
-				"--outPrefix", paste(opt$outPrefix, ".tmp", sep=""), "--hg38",
+			cmd <- paste("Rscript", opt$deconstructSigs_script,
+				"--hg38",
+				"--num_iter", opt$num_iter,
+				"--min_muts_to_include", opt$min_muts_to_include,
+				"--tri.count.method", opt$tri.count.method,
+				"--num_cores", opt$num_cores,
+				"--seed", opt$seed,
+				"--outPrefix", paste(opt$outPrefix, ".tmp", sep=""),
+				"--signatures.ref", opt$signatures.ref,
 				gsub(".txt", ".deconstructSigs.input.txt", loci_file), sep=" ")
 		} else {
-			cmd <- paste("ml $R_MODULE; Rscript", opt$deconstructSigs_script, "--num_iter", opt$num_iter,
-				"--min_muts_to_include", opt$min_muts_to_include, #"--outPrefix", opt$outPrefix,
-				"--tri.count.method", opt$tri.count.method, "--num_cores", opt$num_cores, "--seed", opt$seed,
+			cmd <- paste("Rscript", opt$deconstructSigs_script,
+				"--num_iter", opt$num_iter,
+				"--min_muts_to_include", opt$min_muts_to_include,
+				"--tri.count.method", opt$tri.count.method,
+				"--num_cores", opt$num_cores,
+				"--seed", opt$seed,
 				"--outPrefix", paste(opt$outPrefix, ".tmp", sep=""),
+				"--signatures.ref", opt$signatures.ref,
 				gsub(".txt", ".deconstructSigs.input.txt", loci_file), sep=" ")
 		}
 
@@ -94,16 +104,3 @@ if(!is.null(tab)) {
 	cat ("Empty file?\n")
 	save(file=paste(opt$outPrefix, ".RData", sep=""))
 }
-
-
-	
-	
-
-
-
-
-
-
-
-
-
