@@ -203,7 +203,7 @@ MERGE_SPLIT_BAMS ?= false  # internal parameter
 # if you need to downsample BAM files, for example to
 # make a pooled normal BAM file, then you set this.
 # see the samtools view -s option
-SAMTOOLS_DOWNSAMPLE_FACTOR ?= 1001.2
+SAMTOOLS_DOWNSAMPLE_FACTOR ?= 1001.026
 
 # For QC, genotyping is usually done. For performance reasons,
 # we usually use chromosome 2 for genotyping (a large chromosome
