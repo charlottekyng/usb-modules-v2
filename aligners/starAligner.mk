@@ -54,8 +54,10 @@ star/%.Chimeric.out.sam.gz : star/%.Aligned.sortedByCoord.out.bam
 	@if [ -f '$(basename $@)' ]; then $(INIT) $(GZIP) $(basename $@); fi
 
 star/%.ReadsPerGene.out.tab : star/%.Aligned.sortedByCoord.out.bam
+	
 
 star/%.Log.final.out : star/%.Aligned.sortedByCoord.out.bam
+	
 
 star/%.Log.out.gz : star/%.Aligned.sortedByCoord.out.bam
 	@if [ -f '$(basename $@)' ]; then $(INIT) $(GZIP) $(basename $@); fi
