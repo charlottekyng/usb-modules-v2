@@ -9,7 +9,7 @@ suppressPackageStartupMessages(library("tidyr"));
 suppressPackageStartupMessages(library("stringr"));
 suppressPackageStartupMessages(library("magrittr"));
 suppressPackageStartupMessages(library("foreach"));
-suppressPackageStartupMessages(library("Cairo"));
+# suppressPackageStartupMessages(library("Cairo")); # Cairo cannot be loaded on our system
 suppressPackageStartupMessages(library("RMySQL"))
 suppressPackageStartupMessages(library("rtracklayer"))
 suppressPackageStartupMessages(library("Biobase"))
