@@ -24,25 +24,21 @@ strelka_tables : $(foreach type,$(VARIANT_TYPES),$(call MAKE_TABLE_FILE_LIST,$(t
 .PHONY : $(PHONY)
 
 define strelka-tumor-normal
-# If hg38 *and* PAIRED_END then look for BAMs and REF in strelka_refs folder,
-# elif hg38 then look for BAMs and REF also in strelka_refs folder,
-# elif PAIRED_END then look for BAMs in bam_clipoverlap folder,
-# elif any other case then look for BAMs in the bam folder.
-strelka/$1_$2/Makefile : $(if $(and $(findstring hg38,$(REF)),$(findstring true,$(PAIRED_END))),strelka_refs,$(if $(findstring hg38,$(REF)),strelka_refs,$(if $(findstring true,$(PAIRED_END)),bam_clipoverlap,bam)))/$1.bam \
-                         $(if $(and $(findstring hg38,$(REF)),$(findstring true,$(PAIRED_END))),strelka_refs,$(if $(findstring hg38,$(REF)),strelka_refs,$(if $(findstring true,$(PAIRED_END)),bam_clipoverlap,bam)))/$2.bam
+# If b37 AND PAIRED_END then look for BAMs in bam_clipoverlap folder,
+# else look for BAMs in the bam folder (for some reason strelka breaks on bam_clipoverlap if hg38)
+# sed will remove any HLA contigs from the makefile and config (if not hg38, sed won't change anything).
+strelka/$1_$2/Makefile : $(if $(and $(findstring b37,$(REF)),$(findstring true,$(PAIRED_END))),bam_clipoverlap,bam)/$1.bam \
+                         $(if $(and $(findstring b37,$(REF)),$(findstring true,$(PAIRED_END))),bam_clipoverlap,bam)/$2.bam
 	$$(call RUN,1,$$(RESOURCE_REQ_LOW_MEM),$$(RESOURCE_REQ_VSHORT),$$(PERL_MODULE),"\
 	rm -rf $$(@D) &&\
 	$$(CONFIGURE_STRELKA) --tumor=$$< --normal=$$(<<) \
-	--ref=$$(if $$(findstring hg38,$(REF)),strelka_refs/$$(REF).fasta,$$(REF_FASTA)) --config=$$(STRELKA_CONFIG) --output-dir=$$(@D)")
+	--ref=$$(REF_FASTA) --config=$$(STRELKA_CONFIG) --output-dir=$$(@D) &&\
+	sed -i '/HLA\-/d' strelka/$1_$2/Makefile ;\
+	sed -r -i -e 's/(\tHLA\-[^\t]+)+//g' -e '/^chrom_HLA\-/d' strelka/$1_$2/config/run.config.ini")
 
-# sed will revert any temporary contig name (strelka_refs module) back to the original in the final VCF results.
 strelka/$1_$2/results/all.somatic.indels.vcf : strelka/$1_$2/Makefile
 	$$(call RUN,$$(STRELKA_NUM_CORES),$$(RESOURCE_REQ_LOW_MEM),$$(RESOURCE_REQ_SHORT),,"\
-	make -j $$(STRELKA_NUM_CORES) -C $$(<D) &&\
-	sed -i -e 's/__asterisk__/\*/g' -e 's/__colon__/\:/g' strelka/$1_$2/results/all.somatic.indels.vcf ;\
-	sed -i -e 's/__asterisk__/\*/g' -e 's/__colon__/\:/g' strelka/$1_$2/results/all.somatic.snvs.vcf ;\
-	sed -i -e 's/__asterisk__/\*/g' -e 's/__colon__/\:/g' strelka/$1_$2/results/passed.somatic.indels.vcf ;\
-	sed -i -e 's/__asterisk__/\*/g' -e 's/__colon__/\:/g' strelka/$1_$2/results/passed.somatic.snvs.vcf")
+	make -j $$(STRELKA_NUM_CORES) -C $$(<D)")
 
 strelka/$1_$2/results/all.somatic.snvs.vcf : strelka/$1_$2/results/all.somatic.indels.vcf
 	$$(INIT) rm -rf strelka/$1_$2/chromosomes

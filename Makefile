@@ -114,32 +114,22 @@ bam_clipoverlap :
 # so using the more intuitive conditional ($(PAIRED_END),true) would work only if
 # "PAIRED_END=true" was also set in the main Makefile.
 # Because "PAIRED_END=false" must be explicitly set in case of SE, make the conditional around that.
-TARGETS += strelka_refs
-ifeq ($(PAIRED_END),false)
-strelka_refs :
-	$(call RUN_MAKE,usb-modules-v2/bam_tools/strelka_refs.mk)
-else
-strelka_refs : bam_clipoverlap
-	$(call RUN_MAKE,usb-modules-v2/bam_tools/strelka_refs.mk)
-endif
+# TARGETS += strelka_refs
+# ifeq ($(PAIRED_END),false)
+# strelka_refs :
+# 	$(call RUN_MAKE,usb-modules-v2/bam_tools/strelka_refs.mk)
+# else
+# strelka_refs : bam_clipoverlap
+# 	$(call RUN_MAKE,usb-modules-v2/bam_tools/strelka_refs.mk)
+# endif
 
 TARGETS += strelka
-ifeq ($(strip $(PAIRED_END)$(REF)),falsehg38)
-strelka : strelka_refs
-	$(call RUN_MAKE,usb-modules-v2/variant_callers/somatic/strelka.mk)
-else
-ifeq ($(strip $(REF)),hg38)
-strelka : bam_clipoverlap strelka_refs
-	$(call RUN_MAKE,usb-modules-v2/variant_callers/somatic/strelka.mk)
-else
-ifeq ($(PAIRED_END),false)
-strelka :
-	$(call RUN_MAKE,usb-modules-v2/variant_callers/somatic/strelka.mk)
-else
+ifeq ($(strip $(PAIRED_END)$(REF)),falseb37)
 strelka : bam_clipoverlap
 	$(call RUN_MAKE,usb-modules-v2/variant_callers/somatic/strelka.mk)
-endif
-endif
+else
+strelka :
+	$(call RUN_MAKE,usb-modules-v2/variant_callers/somatic/strelka.mk)
 endif
 
 TARGETS += strelka2
