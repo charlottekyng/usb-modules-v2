@@ -35,4 +35,4 @@ gistic/$(PROJECT_PREFIX)gistic_cnv%/timestamp : gistic/$(PROJECT_PREFIX)segmenta
 	export MCR_DIR=/scicore/home/pissal00/GROUP/usr_nobackup/local/MCR_R2014a/; \
 	export LD_LIBRARY_PATH=$(LD_LIBRARY_PATH); \
 	umask 002; $(MKDIR) $(@D); $(GISTIC) -b $(@D) -seg $< -mk $(<<) -refgene $(GISTIC_REF) \
-	-cnv $(<<<) $(GISTIC_OPTS) 2>&1 && touch $@")
+	-cnv $(<<<) $(GISTIC_OPTS) 2>&1 && date > $@")
