@@ -58,6 +58,8 @@ SAMPLE_POOLEDNORM_FILE ?= samples.poolednorm.txt
 
 MERGE_SAMPLE_FILE ?= merge_samples.txt
 
+GENCODE_VER ?= v33
+
 ############################################################
 ########### END MOST FREQUENTLY CUSTOMIZED PARAMS ##########
 ############################################################
