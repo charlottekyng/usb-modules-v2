@@ -24,7 +24,6 @@ endif
 
 RECAL_CHR = chr2
 
-GENCODE_VER ?= v33
 TARGETS_FILE_GENES ?= $(ANN_DIR)/gencode.$(GENCODE_VER).primary_assembly.annotation_gene.protein_coding.gene.band.txt
 
 ### ANNOTATION SETS ####
