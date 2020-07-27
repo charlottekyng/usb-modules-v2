@@ -14,7 +14,7 @@ optList <- list(
 	make_option("--pos_col", default = "POS", type='character', help = "column name for pos [default %default]"),
 	make_option("--ref_col", default = "REF", type='character', help = "column name for ref [default %default]"),
 	make_option("--alt_col", default = "ALT", type='character', help = "column name for alt [default %default]"),
-	make_option("--tri.count.method", default = "exome2genome", help = "tri.count.method for deconstructSigs [default %default]"),
+	make_option("--tri.counts.method", default = "exome2genome", help = "tri.counts.method for deconstructSigs [default %default]"),
 	make_option("--num_iter", default = NA, type='integer', help = "number of re-sampling with replacement (at least 10, otherwise NA) [default %default]"),
 	make_option("--num_cores", default = 1, type='integer', help = "number of cores to use [default %default]"),
 	make_option("--min_muts_to_include", default = 20, type='integer', help = "minimum number of mutations required to derive signature [default %default]"),
@@ -53,7 +53,7 @@ if (!is.null(opt$associated)) {
 } else { opt$associated <- c() }
 
 
-cat ("Reading mutation summary file\n")
+cat ("Reading mutation summary file: ", muts_file, "\n")
 allmuts <- read.delim(muts_file, as.is=T)
 
 if (!is.null(opt$tumorSample)) {
@@ -126,7 +126,7 @@ if(nrow(pointmuts)>0) {
 								sample.id = sample,
 								signatures.ref = get(opt$signatures.ref),
 								contexts.needed = T, ...)
-			}, sigs, tri.counts.method = opt$tri.count.method, associated = opt$associated)
+			}, sigs, tri.counts.method = opt$tri.counts.method, associated = opt$associated)
 			stopCluster(cl)
 		} else {
 			ws <- lapply(rownames(sigs), function(sample) {
@@ -134,7 +134,7 @@ if(nrow(pointmuts)>0) {
 								sample.id = sample,
 								signatures.ref = get(opt$signatures.ref),
 								contexts.needed = T,
-								tri.counts.method = opt$tri.count.method, associated = opt$associated)
+								tri.counts.method = opt$tri.counts.method, associated = opt$associated)
 			})
 		}
 		names(ws) <- rownames(sigs)
