@@ -12,15 +12,15 @@ fastq: $(foreach sample,$(SAMPLES),fastq/$(sample).1.fastq.gz fastq/$(sample).2.
 
 define merged-fastq
 fastq/$1.%.fastq.gz : $$(foreach split,$2,fastq/$$(split).%.fastq.gz)
-	$$(call RUN,1,$(RESOURCE_REQ_MEDIUM_MEM),$(RESOURCE_REQ_SHORT),,"zcat $$(^) | gzip -c > $$(@)")
+	$$(call RUN,1,$(RESOURCE_REQ_MEDIUM_MEM),$(RESOURCE_REQ_SHORT),,"cat $$(^) > $$(@)")
 endef
 $(foreach sample,$(SAMPLES),$(eval $(call merged-fastq,$(sample),$(split.$(sample)))))
 
 define merged-fastq2
 fastq/$1.1.fastq.gz : $$(foreach split,$2,$$(word 1, $$(fq.$$(split))))
-	$$(call RUN,1,$(RESOURCE_REQ_MEDIUM_MEM),$(RESOURCE_REQ_SHORT),,"zcat $$(^) | gzip -c > $$(@)")
+	$$(call RUN,1,$(RESOURCE_REQ_MEDIUM_MEM),$(RESOURCE_REQ_SHORT),,"cat $$(^) > $$(@)")
 fastq/$1.2.fastq.gz : $$(foreach split,$2,$$(word 2, $$(fq.$$(split))))
-	$$(call RUN,1,$(RESOURCE_REQ_MEDIUM_MEM),$(RESOURCE_REQ_SHORT),,"zcat $$(^) | gzip -c > $$(@)")
+	$$(call RUN,1,$(RESOURCE_REQ_MEDIUM_MEM),$(RESOURCE_REQ_SHORT),,"cat $$(^) > $$(@)")
 endef
 $(foreach sample,$(SAMPLES),$(eval $(call merged-fastq2,$(sample),$(split.$(sample)))))
 
