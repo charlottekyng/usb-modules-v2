@@ -190,6 +190,10 @@ TARGETS	+= deconstruct_sigs
 deconstruct_sigs :
 	$(call RUN_MAKE,usb-modules-v2/mut_sigs/deconstructSigs.mk)
 
+TARGETS	+= mutational_patterns
+mutational_patterns :
+	$(call RUN_MAKE,usb-modules-v2/mut_sigs/MutationalPatterns.mk)
+
 TARGETS += lst
 lst :
 	$(call RUN_MAKE,usb-modules-v2/mut_sigs/lst.mk)
