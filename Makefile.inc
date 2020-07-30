@@ -383,6 +383,11 @@ DECONSTRUCTSIGS_TRI_COUNT_METHOD = $(if $(findstring cosmic.v3.may2019,$(SIGNATU
 DECONSTRUCTSIGS = $(RSCRIPT) usb-modules-v2/mut_sigs/deconstructSigs.R $(if $(findstring hg38,$(REF)), --hg38) $(if $(findstring NONE,$(CAPTURE_METHOD)), --signatures.ref $(SIGNATURES), $(if $(findstring BAITS,$(CAPTURE_METHOD)), --signatures.ref $(SIGNATURES))) --tri.counts.method $(DECONSTRUCTSIGS_TRI_COUNT_METHOD)
 DECONSTRUCTSIGS_NUMCORES = 1
 
+MSIGDB_DIR = $(REF_DIR)/msigdb
+MSIGDB = signatures.exome.cosmic.v3.may2019
+MUTATIONALPATTERNS = $(RSCRIPT) usb-modules-v2/mut_sigs/MutationalPatterns.R --signatures $(MSIGDB_DIR)/$(MSIGDB).rda $(if $(findstring hg38,$(REF)),--ref hg38, $(if $(findstring b37,$(REF)),--ref hg19))
+
+
 PVACSEQ ?= pvacseq
 PVACTOOLS_IMG ?= $(IMG_DIR)/pvactools.img
 PVACSEQ_OPTS ?= -e 8,9,10,11 \
