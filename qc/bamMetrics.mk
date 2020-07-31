@@ -62,7 +62,7 @@ metrics/%.amplicon_metrics.txt metrics/%.interval_amplicon_metrics.txt : bam/%.b
 	TMP=`mktemp`.intervals; \
 	$(SAMTOOLS) view -H $< | grep '^@SQ' > \$$TMP && grep -P \"\t\" $(TARGETS_FILE_INTERVALS) | \
 	awk 'BEGIN {OFS = \"\t\"} { print \$$1$(,)\$$2+1$(,)\$$3$(,)\"+\"$(,)NR }' >> \$$TMP; \
-	$(call PICARD,CollectTargetedPcrMetrics,$(RESOURCE_REQ_MEDIUM_MEM_JAVA)) INPUT=$< OUTPUT=$@ \
+	$(call PICARD,CollectTargetedPcrMetrics,$(RESOURCE_REQ_MEDIUM_MEM_JAVA)) INPUT=$< OUTPUT=$@ REFERENCE_SEQUENCE=$(REF_FASTA) \
 	AMPLICON_INTERVALS=\$$TMP TARGET_INTERVALS=\$$TMP \
 	PER_TARGET_COVERAGE=metrics/$*.interval_amplicon_metrics.txt COVERAGE_CAP=500000")
 
@@ -77,7 +77,7 @@ metrics/$1.amplicon_metrics_$$(POOLNAME).txt : bam/$1.bam bam/$1.bam.bai $2
 	TMP=`mktemp`.intervals; \
 	$$(SAMTOOLS) view -H $$< | grep '^@SQ' > \$$$$TMP && grep -P \"\t\" $2 | \
 	awk 'BEGIN {OFS = \"\t\"} { print \$$$$1$$(,)\$$$$2+1$$(,)\$$$$3$$(,)\"+\"$$(,)NR }' >> \$$$$TMP; \
-	$$(call PICARD,CollectTargetedPcrMetrics,$$(RESOURCE_REQ_MEDIUM_MEM_JAVA)) INPUT=$$< OUTPUT=$$@ \
+	$$(call PICARD,CollectTargetedPcrMetrics,$$(RESOURCE_REQ_MEDIUM_MEM_JAVA)) INPUT=$$< OUTPUT=$$@ REFERENCE_SEQUENCE=$(REF_FASTA) \
 	AMPLICON_INTERVALS=\$$$$TMP TARGET_INTERVALS=\$$$$TMP \
 	COVERAGE_CAP=500000")
 endef
