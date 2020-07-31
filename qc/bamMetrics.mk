@@ -26,11 +26,11 @@ ifeq ($(CAPTURE_METHOD),CHIP)
 bam_metrics : flagstats
 endif
 
-hs_metrics : $(shell rm -f metrics/all$(PROJECT_PREFIX).hs_metrics.txt metrics/all$(PROJECT_PREFIX).interval_hs_metrics.txt) metrics/all$(PROJECT_PREFIX).hs_metrics.txt metrics/all$(PROJECT_PREFIX).interval_hs_metrics.txt
-amplicon_metrics : $(shell rm -f metrics/all$(PROJECT_PREFIX).hs_metrics.txt metrics/all$(PROJECT_PREFIX).interval_hs_metrics.txt) metrics/all$(PROJECT_PREFIX).amplicon_metrics.txt metrics/all$(PROJECT_PREFIX).interval_amplicon_metrics.txt
-per_base_depth : $(foreach sample,$(SAMPLES),metrics/$(sample).per_base_depth.txt)
+hs_metrics : $(shell rm -f metrics/all$(PROJECT_PREFIX).hs_metrics.txt metrics/all$(PROJECT_PREFIX).interval_hs_metrics.txt.gz) metrics/all$(PROJECT_PREFIX).hs_metrics.txt metrics/all$(PROJECT_PREFIX).interval_hs_metrics.txt.gz
+amplicon_metrics : $(shell rm -f metrics/all$(PROJECT_PREFIX).hs_metrics.txt metrics/all$(PROJECT_PREFIX).interval_hs_metrics.txt.gz) metrics/all$(PROJECT_PREFIX).amplicon_metrics.txt metrics/all$(PROJECT_PREFIX).interval_amplicon_metrics.txt.gz
+per_base_depth : $(foreach sample,$(SAMPLES),metrics/$(sample).per_base_depth.txt.gz)
 wgs_metrics : $(shell rm -f metrics/all$(PROJECT_PREFIX).wgs_metrics.txt) metrics/all$(PROJECT_PREFIX).wgs_metrics.txt
-rna_metrics : $(shell rm -f metrics/all$(PROJECT_PREFIX).hs_metrics.txt metrics/all$(PROJECT_PREFIX).interval_hs_metrics.txt) metrics/all$(PROJECT_PREFIX).rnaseq_metrics.txt metrics/all$(PROJECT_PREFIX).normalized_coverage.rnaseq_metrics.txt
+rna_metrics : $(shell rm -f metrics/all$(PROJECT_PREFIX).hs_metrics.txt metrics/all$(PROJECT_PREFIX).interval_hs_metrics.txt.gz) metrics/all$(PROJECT_PREFIX).rnaseq_metrics.txt metrics/all$(PROJECT_PREFIX).normalized_coverage.rnaseq_metrics.txt
 #metrics/all.rnaseq_report/index.html
 flagstats : $(shell rm -f metrics/all$(PROJECT_PREFIX).flagstats.txt) metrics/all$(PROJECT_PREFIX).flagstats.txt
 flagstatsQ30 : $(shell rm -f metrics/all$(PROJECT_PREFIX).flagstatsQ30.txt) metrics/all$(PROJECT_PREFIX).flagstatsQ30.txt
@@ -46,7 +46,7 @@ dup : $(shell rm -f metrics/all$(PROJECT_PREFIX).dup_metrics.txt) metrics/all$(P
 #non_ref_metrics : $(foreach sample,$(SAMPLES),metrics/$(sample).interval_nonref_freq.txt)
 
 # interval metrics per sample
-metrics/%.hs_metrics.txt metrics/%.interval_hs_metrics.txt : bam/%.bam bam/%.bam.bai
+metrics/%.hs_metrics.txt metrics/%.interval_hs_metrics.txt.gz : bam/%.bam bam/%.bam.bai
 	$(call RUN,1,$(RESOURCE_REQ_MEDIUM_MEM),$(RESOURCE_REQ_SHORT),$(R_MODULE) $(SAMTOOLS_MODULE),"\
 	TMP=`mktemp`.intervals; TMPCOVERED=`mktemp`.covered_intervals; \
 	$(SAMTOOLS) view -H $< | grep '^@SQ' > \$$TMP &&  grep -P \"\t\" $(TARGETS_FILE_INTERVALS) | \
@@ -54,21 +54,28 @@ metrics/%.hs_metrics.txt metrics/%.interval_hs_metrics.txt : bam/%.bam bam/%.bam
 	$(SAMTOOLS) view -H $< | grep '^@SQ' > \$$TMPCOVERED &&  grep -P \"\t\" $(TARGETS_FILE_COVERED_INTERVALS) | \
 	awk 'BEGIN {OFS = \"\t\"} { print \$$1$(,)\$$2+1$(,)\$$3$(,)\"+\"$(,)NR }' >> \$$TMPCOVERED; \
 	$(call PICARD,CollectHsMetrics,$(RESOURCE_REQ_MEDIUM_MEM_JAVA)) INPUT=$< OUTPUT=metrics/$*.hs_metrics.txt \
-	PER_TARGET_COVERAGE=metrics/$*.interval_hs_metrics.txt TARGET_INTERVALS=\$$TMPCOVERED REFERENCE_SEQUENCE=$(REF_FASTA) \
-	BAIT_SET_NAME=hs BAIT_INTERVALS=\$$TMP")
+	PER_TARGET_COVERAGE=metrics/$*.interval_hs_metrics.txt.gz TARGET_INTERVALS=\$$TMPCOVERED REFERENCE_SEQUENCE=$(REF_FASTA) \
+	BAIT_SET_NAME=hs BAIT_INTERVALS=\$$TMP; \
+	gzip metrics/$*.hs_metrics.txt")
 
-metrics/%.amplicon_metrics.txt metrics/%.interval_amplicon_metrics.txt : bam/%.bam bam/%.bam.bai
+metrics/%.amplicon_metrics.txt metrics/%.interval_amplicon_metrics.txt.gz : bam/%.bam bam/%.bam.bai
 	$(call RUN,1,$(RESOURCE_REQ_MEDIUM_MEM),$(RESOURCE_REQ_SHORT),$(R_MODULE) $(SAMTOOLS_MODULE),"\
 	TMP=`mktemp`.intervals; \
 	$(SAMTOOLS) view -H $< | grep '^@SQ' > \$$TMP && grep -P \"\t\" $(TARGETS_FILE_INTERVALS) | \
 	awk 'BEGIN {OFS = \"\t\"} { print \$$1$(,)\$$2+1$(,)\$$3$(,)\"+\"$(,)NR }' >> \$$TMP; \
-	$(call PICARD,CollectTargetedPcrMetrics,$(RESOURCE_REQ_MEDIUM_MEM_JAVA)) INPUT=$< OUTPUT=$@ REFERENCE_SEQUENCE=$(REF_FASTA) \
+	$(call PICARD,CollectTargetedPcrMetrics,$(RESOURCE_REQ_MEDIUM_MEM_JAVA)) INPUT=$< OUTPUT=$@ REFERENCE_SEQUENCE=$(REF_FASTA)\
 	AMPLICON_INTERVALS=\$$TMP TARGET_INTERVALS=\$$TMP \
-	PER_TARGET_COVERAGE=metrics/$*.interval_amplicon_metrics.txt COVERAGE_CAP=500000")
+	PER_TARGET_COVERAGE=metrics/$*.interval_amplicon_metrics.txt COVERAGE_CAP=500000; \
+	gzip metrics/$*.interval_amplicon_metrics.txt")
 
-metrics/%.per_base_depth.txt : bam/%.bam bam/%.bam.bai
-	$(call RUN,1,$(RESOURCE_REQ_VHIGH_MEM),$(RESOURCE_REQ_VSHORT),$(BEDTOOLS_MODULE), "\
-	$(BEDTOOLS) coverage -d -b $< -a $(TARGETS_FILE_INTERVALS_MERGED) > $@")
+# To avoid crazy RAM usage, sort the target bed to match the chr order in the BAM, and use the '-sorted' option
+metrics/%.per_base_depth.txt.gz : bam/%.bam bam/%.bam.bai
+	$(call RUN,1,$(RESOURCE_REQ_LOW_MEM),$(RESOURCE_REQ_SHORT),$(R_MODULE) $(SAMTOOLS_MODULE),"\
+	TMP=`mktemp`.chromosomes; \
+	$(SAMTOOLS) idxstats $< | cut -f 1-2 > \$$TMP; \
+	$(PURGE_AND_LOAD) $(BEDTOOLS_MODULE); \
+	$(BEDTOOLS) sort -faidx \$$TMP -i $(TARGETS_FILE_INTERVALS_MERGED) > \$$TMP.intervals; \
+	$(BEDTOOLS) coverage -g \$$TMP -sorted -d -b $< -a \$$TMP.intervals | gzip > $@")
  
 define amplicon-metrics-pools
 POOLNAME=$$(shell basename $2)
@@ -77,7 +84,7 @@ metrics/$1.amplicon_metrics_$$(POOLNAME).txt : bam/$1.bam bam/$1.bam.bai $2
 	TMP=`mktemp`.intervals; \
 	$$(SAMTOOLS) view -H $$< | grep '^@SQ' > \$$$$TMP && grep -P \"\t\" $2 | \
 	awk 'BEGIN {OFS = \"\t\"} { print \$$$$1$$(,)\$$$$2+1$$(,)\$$$$3$$(,)\"+\"$$(,)NR }' >> \$$$$TMP; \
-	$$(call PICARD,CollectTargetedPcrMetrics,$$(RESOURCE_REQ_MEDIUM_MEM_JAVA)) INPUT=$$< OUTPUT=$$@ REFERENCE_SEQUENCE=$(REF_FASTA) \
+	$$(call PICARD,CollectTargetedPcrMetrics,$$(RESOURCE_REQ_MEDIUM_MEM_JAVA)) INPUT=$$< OUTPUT=$$@ REFERENCE_SEQUENCE=$(REF_FASTA)\
 	AMPLICON_INTERVALS=\$$$$TMP TARGET_INTERVALS=\$$$$TMP \
 	COVERAGE_CAP=500000")
 endef
@@ -161,14 +168,14 @@ metrics/all$(PROJECT_PREFIX).hs_metrics.txt : $(foreach sample,$(SAMPLES),metric
 	} > $@
 
 # summarize interval metrics into one file
-metrics/all$(PROJECT_PREFIX).interval_hs_metrics.txt : $(foreach sample,$(SAMPLES),metrics/$(sample).interval_hs_metrics.txt)
+metrics/all$(PROJECT_PREFIX).interval_hs_metrics.txt.gz : $(foreach sample,$(SAMPLES),metrics/$(sample).interval_hs_metrics.txt.gz)
 	$(INIT) \
-	sed '/^#/d; /^$$/d' $< | cut -f 1-6 > $@.tmp; \
+	zcat $< | sed '/^#/d; /^$$/d' | cut -f 1-6 > $@.tmp; \
 	for metrics in $^; do \
-		samplename=$$(basename $${metrics%%.interval_hs_metrics.txt}); \
-		sed '/^#/d; /^$$/d' $$metrics | cut -f 7,8 | \
+		samplename=$$(basename $${metrics%%.interval_hs_metrics.txt.gz}); \
+		zcat $$metrics | sed '/^#/d; /^$$/d' | cut -f 7,8 | \
 		sed "s/mean_coverage/$${samplename}_mean_coverage/; s/normalized_coverage/$${samplename}_normalized_coverage/" | \
-		paste $@.tmp - > $@; \
+		paste $@.tmp - | gzip > $@; \
 		cp $@ $@.tmp; \
 	done; \
 	rm -f $@.tmp
@@ -196,14 +203,14 @@ metrics/all$(PROJECT_PREFIX).wgs_metrics.txt : $(foreach sample,$(SAMPLES),metri
 
 
 # summarize interval metrics into one file
-metrics/all$(PROJECT_PREFIX).interval_amplicon_metrics.txt : $(foreach sample,$(SAMPLES),metrics/$(sample).interval_amplicon_metrics.txt)
+metrics/all$(PROJECT_PREFIX).interval_amplicon_metrics.txt.gz : $(foreach sample,$(SAMPLES),metrics/$(sample).interval_amplicon_metrics.txt.gz)
 	$(INIT) \
-	sed '/^#/d; /^$$/d' $< | cut -f 1-6 > $@.tmp; \
+	zcat $< | sed '/^#/d; /^$$/d' | cut -f 1-6 > $@.tmp; \
 	for metrics in $^; do \
-	samplename=$$(basename $${metrics%%.interval_amplicon_metrics.txt}); \
-	sed '/^#/d; /^$$/d' $$metrics | cut -f 7,8 | \
+	samplename=$$(basename $${metrics%%.interval_amplicon_metrics.txt.gz}); \
+	zcat $$metrics | sed '/^#/d; /^$$/d' | cut -f 7,8 | \
 	sed "s/mean_coverage/$${samplename}_mean_coverage/; s/normalized_coverage/$${samplename}_normalized_coverage/" | \
-		paste $@.tmp - > $@; \
+		paste $@.tmp - | gzip > $@; \
 		cp $@ $@.tmp; \
 	done; \
 	rm -f $@.tmp
