@@ -19,7 +19,7 @@ DBSNP_TARGETS_INTERVALS ?= $(DBSNP)
 ifeq ($(findstring bed,$(TARGETS_FILE_INTERVALS)),bed)
 CHROMOSOMES := $(shell grep -v '@' $(TARGETS_FILE_INTERVALS) | cut -f1 | sort -V | uniq)
 else
-CHROMOSOMES ?= $(foreach chr $(shell seq 1 22),chr$(chr)) $(foreach gg $(shell seq 1 33),gg$(gg)) chrX ggZ $(if $(findstring true,$(INCLUDE_CHR_Y)),chrY ggW) chrM ggM
+CHROMOSOMES ?= $(foreach chr $(shell seq 1 22),chr$(chr)) chrX $(if $(findstring true,$(INCLUDE_CHR_Y)),chrY) chrM
 endif
 
 RECAL_CHR = chr2
