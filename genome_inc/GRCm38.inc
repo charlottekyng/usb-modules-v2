@@ -30,8 +30,8 @@ RECAL_CHR = 2
 KNOWN_INDELS := $(ANN_DIR)/mgp.v5.merged.indels.dbSNP142.normed.noGT.vcf
 
 GENCODE_GTF = $(ANN_DIR)/gencode.vM11.annotation_nochr.gtf
-GENCODE_GENE_GTF = $(ANN_DIR)/gencode.vM11.annotation.genes.gtf
-GENCODE_CODING_GENE_GTF = $(ANN_DIR)/gencode.vM11.annotation.protein_coding_genes.gtf
+GENCODE_GENE_GTF = $(ANN_DIR)/gencode.vM11.annotation_nochr.genes.gtf
+GENCODE_CODING_GENE_GTF = $(ANN_DIR)/gencode.vM11.annotation_nochr.protein_coding_genes.gtf
 RIBOSOMAL_INTERVALS = $(ANN_DIR)/ribosomalRNA.interval_list
 GENE_REF_FLAT = $(ANN_DIR)/refFlat.txt
 
