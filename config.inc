@@ -55,7 +55,6 @@ SAMPLE_SPLIT_FILE ?= samples.split.txt
 SAMPLE_PON_FILE ?= samples.pon.txt
 SAMPLE_POOLEDNORM_FILE ?= samples.poolednorm.txt
 
-
 MERGE_SAMPLE_FILE ?= merge_samples.txt
 
 GENCODE_VER ?= v33
@@ -80,7 +79,7 @@ include usb-modules-v2/genome_inc/$(REF).inc
 # For transcriptome, true. For genomic, false.
 # There are performance advantages to setting this to false.
 ifeq ($(CAPTURE_METHOD),RNA)
-MERGE_SPLIT_FASTQ ?= true # merge multiple sets of fastqs from a given sample before alignment
+MERGE_SPLIT_FASTQ ?= true 
 endif
 ifeq ($(wildcard $(SAMPLE_SPLIT_FILE)),)
 MERGE_SPLIT_FASTQ ?= true
@@ -89,11 +88,12 @@ MERGE_SPLIT_FASTQ ?= false
 
 # Pre-processing the FASTQs, trimming bad cycles or adaptors
 # [<NULL>|trim|trimgalore|cutadapt]
+# RNA-seq needs the adaptors trimmed off so need either trimgalore or cutadapt
 # trim: uniforming trim reads down to TRIM_LENGTH (see below)
 # trimgalore: trims adaptors, and optionally clip reads to CLIP_FASTQ_R1/2 base pairs
 # cutadapt: trims adaptors, but more flexible options than trimgalore
 ifeq ($(CAPTURE_METHOD),RNA)
-FASTQ_FILTER ?= cutadapt # for fastq trimming. RNA-seq needs the adaptors trimmed off
+FASTQ_FILTER ?= cutadapt
 endif
 FASTQ_FILTER ?=
 
@@ -105,9 +105,11 @@ CLIP_FASTQ_R1 ?=
 CLIP_FASTQ_R2 ?=
 
 # options for FASTQ_FILTER=cutadapt
-ADAPTOR_POS ?= 3prime # [3prime|5prime]
+# ADAPTOR_POS =  [3prime|5prime]
+# NEXTSEQ_TRIM = true may help for sequencing done with NextSeq
+ADAPTOR_POS ?= 3prime 
 ADAPTOR_SEQ ?= AGATCGGAAGAGC
-NEXTSEQ_TRIM ?= false # if sequencing was done with NextSeq, this may help.
+NEXTSEQ_TRIM ?= false 
 
 
 #############################################
@@ -119,7 +121,7 @@ NEXTSEQ_TRIM ?= false # if sequencing was done with NextSeq, this may help.
 # For RNA-seq, if mutation calls will eventually be needed, 
 # then post-process, otherwise just dont, it takes a long time and creates hard-clipped
 # reads that may be problematic. Use true with caution
-POST_PROCESS_RNA_BAM ?= false [true|false]
+POST_PROCESS_RNA_BAM ?= false 
 
 # this runs Picard ReorderSam
 BAM_REORDER ?= true 
@@ -131,6 +133,7 @@ BAM_SORT ?= true
 BAM_FIX_RG ?= false 
 
 # this filters out reads with BAM_FILTER_FLAGS
+# default 768 means "not primary alignment" and "read fails platform/vendor quality checks"
 BAM_FILTER ?= true 
 BAM_FILTER_FLAGS ?= 768
 
@@ -148,8 +151,7 @@ BAM_SPLIT_N_TRIM ?= false
 # this splits bams into individual chroms betfore BAM_DUP_TYPE, 
 # BAM_REALN and BAM_RECAL before remerging the BAMs.
 # defaults to true except for RNA-seq, amplicon-based capture and CHIP
-# setting this to false means BAM_DUP_TYPE, BAM_REALN and BAM_RECAL are done
-# on a genome-wide level
+# setting this to false means BAM_DUP_TYPE, BAM_REALN and BAM_RECAL are done on a genome-wide level
 ifeq ($(CAPTURE_METHOD),RNA)
 SPLIT_CHR ?= false
 endif
@@ -220,13 +222,6 @@ GENOTYPE_WITH_CHR2 ?= false
 endif
 GENOTYPE_WITH_CHR2 ?= true
 
-
-
-##################################
-#### General MPS tools ###########
-##################################
-
-EXTRACT_TOOL ?= PICARD # obsolete
 
 ##################################
 ########## Aligners ##############
