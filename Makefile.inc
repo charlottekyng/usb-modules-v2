@@ -345,6 +345,7 @@ TVC = $(TVC_ROOT_DIR)/bin/variant_caller_pipeline.py
 TVC_SOMATIC_JSON = usb-modules-v2/variant_callers/somatic/TVC_somatic_parameters.json
 TVC_SENSITIVE_JSON = usb-modules-v2/variant_callers/somatic/TVC_somatic_parameters_sensitive.json
 TVC_MOTIF ?= $(TVC_ROOT_DIR)/share/TVC/sse/ampliseqexome_germline_p1_hiq_motifset.txt
+TVC_NUM_CORES ?= 4
 
 PIPEIT_IMG ?= $(IMG_DIR)/PipeIT_20190426.img
 
