@@ -168,7 +168,7 @@ ifeq ($(findstring IONTORRENT,$(SEQ_PLATFORM)),IONTORRENT)
 %.rg.bam : %.bam
 	$(INIT) module load $(SAMTOOLS_MODULE); \
 		samplename=`basename $< .bam` && \
-		$(SAMTOOLS) view -H $< | sed "s/SM:[a-zA-Z0-9 _-\.]*/SM:$${samplename}/" > $<.header
+		$(SAMTOOLS) view -H $< | sed "s/SM:[a-zA-Z0-9 _\.-]*/SM:$${samplename}/" > $<.header
 	$(call RUN,1,$(RESOURCE_REQ_LOW_MEM),$(RESOURCE_REQ_VSHORT),$(SAMTOOLS_MODULE),"\
 	$(SAMTOOLS) reheader $<.header $< > $@")
 endif
