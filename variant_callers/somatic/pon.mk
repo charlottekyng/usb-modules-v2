@@ -25,7 +25,7 @@ tvc/vcf_pon/%/TSVC_variants.vcf : bam/%.bam bam/%.bam.bai
 	-t $(TVC_ROOT_DIR) --primer-trim-bed $(PRIMER_TRIM_BED)")
 else
 
-pon : mutect2/pon.mutect2.vcf
+pon : mutect2/pon.mutect2.vcf.gz
 .PHONY : $(PHONY)
 # Note_1: Use --max-mnp-distance 0 in Mutect2, else GenomicsDBImport breaks. To be consistent, use the same option in all Mutect2 runs.
 #         https://gatkforums.broadinstitute.org/gatk/discussion/23914/pon-mutect2-include-mnps-and-crash-genomicsdbimport
@@ -78,7 +78,7 @@ mutect2/pon/pon_db : mutect2/pon/pon.list
 	$(call GATK4141,GenomicsDBImport,$(RESOURCE_REQ_HIGH_MEM_JAVA)) \
 	-V $< -L $(shell echo '$(CHROMOSOMES)' | sed 's/ / -L /g') --genomicsdb-workspace-path $@")
 
-mutect2/pon.mutect2.vcf : mutect2/pon/pon_db
+mutect2/pon.mutect2.vcf.gz : mutect2/pon/pon_db
 	$(call RUN,1,$(RESOURCE_REQ_HIGH_MEM),$(RESOURCE_REQ_LONG),$(JAVA8_MODULE),"\
 	$(call GATK4141,CreateSomaticPanelOfNormals,$(RESOURCE_REQ_HIGH_MEM_JAVA)) \
 	$(if $$(findstring hg38,$(REF)),--germline-resource $(ANN_DIR)/af-only-gnomad.hg38.vcf.gz,$$(if $(findstring b37,$(REF)),--germline-resource $(ANN_DIR)/af-only-gnomad.raw.sites.b37.vcf.gz,,))\
