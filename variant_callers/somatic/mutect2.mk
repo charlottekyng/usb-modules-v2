@@ -59,7 +59,6 @@ mutect2/chr_vcf/$1_$2.$3.mutect2.unfiltered.vcf.gz : bam/$1.bam bam/$2.bam $(PON
 	-L $3 -O $$@ \
 	-pon $$(word 3,$$^) \
 	--f1r2-tar-gz mutect2/chr_vcf/$1_$2.$3.mutect2.f1r2.tar.gz \
-	--germline-resource $$(ANN_DIR)/af-only-gnomad.hg38.vcf.gz \
 	--max-mnp-distance 0 \
 	$$(MUTECT2_OTHER_OPTIONS) \
 	$$(if $$(findstring hg38,$$(REF)),--disable-read-filter MateOnSameContigOrNoMappedMateReadFilter,,)")
