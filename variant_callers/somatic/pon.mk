@@ -8,6 +8,7 @@ PHONY += pon
 ifeq ($(findstring tvc,$(MUT_CALLER)),tvc)
 
 pon : tvc/pon.tvc.vcf
+.DELETE_ON_ERROR:
 .PHONY : $(PHONY)
 
 tvc/pon.tvc.vcf : $(foreach sample,$(PANEL_OF_NORMAL_SAMPLES),tvc/vcf_pon/$(sample)/TSVC_variants.vcf)
@@ -26,6 +27,7 @@ tvc/vcf_pon/%/TSVC_variants.vcf : bam/%.bam bam/%.bam.bai
 else
 
 pon : mutect2/pon.mutect2.vcf.gz
+.DELETE_ON_ERROR:
 .PHONY : $(PHONY)
 # Note_1: Use --max-mnp-distance 0 in Mutect2, else GenomicsDBImport breaks. To be consistent, use the same option in all Mutect2 runs.
 #         https://gatkforums.broadinstitute.org/gatk/discussion/23914/pon-mutect2-include-mnps-and-crash-genomicsdbimport
