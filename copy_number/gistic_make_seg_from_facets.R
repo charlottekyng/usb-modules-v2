@@ -1,5 +1,5 @@
 #!/usr/bin/env Rscript
-# parse facets output (ccf) and prepares a gegmentation table that can be used as input for GISTIC.
+# parse facets output (Rdata) and prepares a segmentation table that can be used as input for GISTIC.
 # It is a six column, tab-delimited file with an optional first line identifying the columns:
 # (1)  Sample           (sample name)
 # (2)  Chromosome  (chromosome number)
