@@ -53,7 +53,7 @@ GENE_SETS_GMT = $(ANN_DIR)/gene_ann_20190401.gmt
 
 CENTROMERE_TABLE = $(ANN_DIR)/centromeres_hg38.txt
 
-#DGV_FILE = $(ANN_DIR)/DGV_GRCh37_hg19_variants_2016-05-15.txt
+DGV_FILE = $(ANN_DIR)/DGV_GRCh38_hg38_variants_2016-08-31.txt
 
 GENCODE_GTF = $(ANN_DIR)/gencode.$(GENCODE_VER).primary_assembly.annotation.gtf
 GENCODE_GENE_GTF = $(ANN_DIR)/gencode.$(GENCODE_VER).primary_assembly.annotation_gene.gtf
