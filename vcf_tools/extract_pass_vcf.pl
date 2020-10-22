@@ -49,11 +49,11 @@ while (my $line = <IN>) {
 				$filters{$filter} = 1;
 			}
 
-			if ($info =~ /HOTSPOT/)	{
+			if ($info =~ /HOTSPOT;/ || $info =~ /HOTSPOT3D;/) {
 				if (scalar keys %filters <= $max_filters ) { 
-					print OUT $line."\n";
+					print OUT join("\t", @line[0..6]).",hotspotPASS\t".join("\t", @line[7..$#line])."\n"; # Add hotspotPASS when rescued by hotspot.
 				} else { print EXCLUDE $line."\n"; }
-			} else { }
+			} else { print EXCLUDE $line."\n"; }
 		}
 	}
 }
