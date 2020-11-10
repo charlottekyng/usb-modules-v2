@@ -348,7 +348,7 @@ TVC_SENSITIVE_JSON = usb-modules-v2/variant_callers/somatic/TVC_somatic_paramete
 TVC_MOTIF ?= $(TVC_ROOT_DIR)/share/TVC/sse/ampliseqexome_germline_p1_hiq_motifset.txt
 TVC_NUM_CORES ?= 4
 
-PIPEIT_IMG ?= $(IMG_DIR)/PipeIT_1.2.13.img
+PIPEIT_IMG ?= $(IMG_DIR)/PipeIT_1.2.15.img
 
 VARSCAN_JAR ?= $(JAR_DIR)/varscan/VarScan.v2.4.3.jar
 VARSCAN = $(JAVA) -Xmx$(RESOURCE_REQ_MEDIUM_MEM_JAVA) -jar $(VARSCAN_JAR)
