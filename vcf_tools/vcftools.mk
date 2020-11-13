@@ -114,7 +114,7 @@ $(foreach sample,$(SAMPLES),$(eval $(call ffpe-sample,$(sample))))
 %.nft.vcf : %.vcf $(PON_VCF)
 	$(call RUN,1,$(RESOURCE_REQ_MEDIUM_MEM),$(RESOURCE_REQ_SHORT),$(JAVA8_MODULE),"\
 		$(call GATK4141,VariantFiltration,$(RESOURCE_REQ_MEDIUM_MEM_JAVA)) \
-		-R $(REF_FASTA) -V $< -o $@ --mask-name 'PoN' --mask $(word 2,$^) && $(RM) $< $<.idx")
+		-R $(REF_FASTA) -V $< -O $@ --mask-name 'PoN' --mask $(word 2,$^) && $(RM) $< $<.idx")
 
 %.pass.vcf : %.vcf
 	$(call CHECK_VCF,$<,$@,\
