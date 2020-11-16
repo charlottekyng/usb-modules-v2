@@ -26,11 +26,11 @@ open EXCLUDE, ">$ARGV[2]";
 
 while (my $line = <IN>) {
 	chomp $line;
-	#print header lines, and add a new hotspotPASS FILTER key before the #CHROM line.
-	if ($line =~ /^\#\#/) { 
+	#print header lines, and add the new hotspotPASS FILTER key.
+	if ($line =~ /^\#\#fileformat\=VCF/) { 
+		print OUT $line."\n##FILTER=<ID=hotspotPASS,Description=\"rescued hotspot\">\n"; print EXCLUDE $line."\n##FILTER=<ID=hotspotPASS,Description=\"rescued hotspot\">\n";
+	} elsif ($line =~ /^\#/) { 
 		print OUT $line."\n"; print EXCLUDE $line."\n";
-	} elsif ($line =~ /^\#CHROM/) { 
-		print OUT "##FILTER=<ID=hotspotPASS,Description=\"rescued hotspot\">\n".$line."\n"; print EXCLUDE "##FILTER=<ID=hotspotPASS,Description=\"rescued hotspot\">\n".$line."\n";
 	}
 	else {
 		my @line = split /\t/, $line;
@@ -54,7 +54,7 @@ while (my $line = <IN>) {
 
 			if ($info =~ /HOTSPOT;/ || $info =~ /HOTSPOT3D;/) {
 				if (scalar keys %filters <= $max_filters ) { 
-					print OUT join("\t", @line[0..6]).",hotspotPASS\t".join("\t", @line[7..$#line])."\n"; # Add hotspotPASS when rescued by hotspot.
+					print OUT join("\t", @line[0..6]).";hotspotPASS\t".join("\t", @line[7..$#line])."\n"; # Add hotspotPASS when rescued by hotspot.
 				} else { print EXCLUDE $line."\n"; }
 			} else { print EXCLUDE $line."\n"; }
 		}
