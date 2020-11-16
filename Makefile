@@ -243,6 +243,11 @@ TARGETS += sufam_screen
 sufam_screen :
 	$(call RUN_MAKE,usb-modules-v2/variant_callers/sufam.mk)
 
+TARGETS += fusion_ts
+fusion_ts :
+	$(call RUN_MAKE,usb-modules-v2/sv_callers/fusionTS.mk)
+
+
 #########################################################
 ## The set of targets below have NOT been tested,
 ## or are known to be broken/obsolete.

@@ -246,8 +246,8 @@ PYTHON ?= python
 PYTHON_ENV_ACTIVATE ?= ml load $(ANACONDA_MODULE) && source activate 
 PYTHON_ENV_DEACTIVATE = source deactivate
 
-SINGULARITY_EXEC ?= singularity exec -B $(shell pwd)
-SINGULARITY_RUN ?= singularity run -B $(shell pwd)
+SINGULARITY_EXEC ?= singularity exec --cleanenv -B $(shell pwd)
+SINGULARITY_RUN ?= singularity run --cleanenv -B $(shell pwd)
 
 R_LIBS ?= $(USR_DIR)/$(R_MODULE)/lib64/R/library
 R ?= export R_LIBS=$(R_LIBS); R
@@ -349,6 +349,16 @@ TVC_MOTIF ?= $(TVC_ROOT_DIR)/share/TVC/sse/ampliseqexome_germline_p1_hiq_motifse
 TVC_NUM_CORES ?= 4
 
 PIPEIT_IMG ?= $(IMG_DIR)/PipeIT_1.2.15.img
+
+TS_IMG ?= $(IMG_DIR)/TS_v5.12.1.sp1_v1.0.1.img
+FUSION_TS_FILTER = $(RSCRIPT) usb-modules-v2/sv_callers/fusionTSfilter.R
+FUSION_TS_FILTER_MIN_TOTAL_READS ?= 500000
+FUSION_TS_FILTER_MIN_OVERALL_E2E_PERCENT ?= 0.7
+FUSION_TS_FILTER_MIN_BREAKPOINT_READS ?= 100
+FUSION_TS_FILTER_MIN_BREAKPOINT_E2E_PERCENT ?= 0.8
+FUSION_TS_FILTER_MAX_BREAKPOINT_E2E_STRANDBIAS ?= 0.2
+FUSION_TS_FILTER_MIN_PARTNER_GENES_EXPRS ?= 500
+
 
 VARSCAN_JAR ?= $(JAR_DIR)/varscan/VarScan.v2.4.3.jar
 VARSCAN = $(JAVA) -Xmx$(RESOURCE_REQ_MEDIUM_MEM_JAVA) -jar $(VARSCAN_JAR)
