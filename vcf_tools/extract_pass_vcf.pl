@@ -26,10 +26,13 @@ open EXCLUDE, ">$ARGV[2]";
 
 while (my $line = <IN>) {
 	chomp $line;
-	#print header lines
-	if ($line =~ /^\#/) { 
+	#print header lines, and add a new hotspotPASS FILTER key before the #CHROM line.
+	if ($line =~ /^\#\#/) { 
 		print OUT $line."\n"; print EXCLUDE $line."\n";
-	} else {
+	} elsif ($line =~ /^\#CHROM/) { 
+		print OUT "##FILTER=<ID=hotspotPASS,Description=\"rescued hotspot\">\n".$line."\n"; print EXCLUDE "##FILTER=<ID=hotspotPASS,Description=\"rescued hotspot\">\n".$line."\n";
+	}
+	else {
 		my @line = split /\t/, $line;
 
 		# print anything that has not been filtered out
