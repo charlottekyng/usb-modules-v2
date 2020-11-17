@@ -13,7 +13,8 @@ optList <- list(
 	make_option("--min_breakpoint_reads", default = 100),
 	make_option("--min_breakpoint_e2e_percent", default= 0.8),
 	make_option("--max_breakpoint_e2e_strandbias", default = 0.2),
-	make_option("--min_partner_genes_exprs", default = 500))
+	make_option("--min_partner_genes_exprs", default = 500),
+	make_option("--out", default = NULL))
 
 parser <- OptionParser(usage = "%prog [options] [coverageAnalysis amplicon.cov.xls]", option_list = optList);
 
@@ -22,6 +23,10 @@ opt <- arguments$options;
 
 if (length(arguments$args) < 1) {
     cat("Need input file\n")
+    print_help(parser);
+    stop();
+} else if (is.null(opt$out)) {
+    cat("Need output name\n")
     print_help(parser);
     stop();
 } else {
@@ -41,7 +46,7 @@ MAX_BREAKPOINT_E2E_STRANDBIAS=opt$max_breakpoint_e2e_strandbias
 # requiring some level of expression of the partner genes
 MIN_PARTNER_GENES_EXPRS=opt$min_partner_genes_exprs
 
-extract_fusions <- function(in_file, out_file=paste0(in_file, ".out"), 
+extract_fusions <- function(in_file, out_file, 
 	min_total_reads=MIN_TOTAL_READS, 
 	min_overall_e2e_percent=MIN_OVERALL_E2E_PERCENT, 
 	min_breakpoint_reads=MIN_BREAKPOINT_READS, 
@@ -95,6 +100,6 @@ extract_fusions <- function(in_file, out_file=paste0(in_file, ".out"),
 	write.table(fusion, file=out_file, sep="\t", row.names=F, na="", quote=F)
 }
 
-extract_fusions(infile)
+extract_fusions(infile, opt$out)
 
 warnings()
