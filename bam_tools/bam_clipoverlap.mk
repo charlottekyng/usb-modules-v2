@@ -13,7 +13,7 @@ ifeq ($(PAIRED_END),true)
 bam_clipoverlap : $(foreach sample,$(SAMPLES),bam_clipoverlap/$(sample).bam)
 
 bam_clipoverlap/%.bam : bam/%.bam
-	$(call RUN,1,$(RESOURCE_REQ_LOW_MEM),$(RESOURCE_REQ_SHORT),$(SAMTOOLS_MODULE),"\
+	$(call RUN,1,$(RESOURCE_REQ_HIGH_MEM),$(RESOURCE_REQ_SHORT),$(SAMTOOLS_MODULE),"\
 	$(BAMUTIL) clipOverlap --poolSize 100000000 --in $< --out $@ &&samtools index $@")
 else
 bam_clipoverlap:
