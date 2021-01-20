@@ -214,14 +214,44 @@ SAMTOOLS_DOWNSAMPLE_FACTOR ?= 1001.026
 # that is not usually gained/lost in cancer. For very small panel,
 # this is not good. This is also specified in some genome_inc panel
 # config files. Values in genome_inc configs overide the values here.
+# GENOTYPE_CHR can be "allchr" or the chromosome of your choice.
 ifeq ($(CAPTURE_METHOD),PCR)
-GENOTYPE_WITH_CHR2 ?= false
-endif
+GENOTYPE_CHR ?= allchr
+else
 ifeq ($(CAPTURE_METHOD),CHIP)
-GENOTYPE_WITH_CHR2 ?= false
+GENOTYPE_CHR ?= allchr
+else
+ifeq ($(REF),b37)
+GENOTYPE_CHR ?= 2
+else
+ifeq ($(REF),b37_GRCm38)
+GENOTYPE_CHR ?= 2
+else
+ifeq ($(REF),b37_hbv_hcv)
+GENOTYPE_CHR ?= 2
+else
+ifeq ($(REF),b37_hbv_hcv_GRCm38)
+GENOTYPE_CHR ?= 2
+else
+ifeq ($(REF),hg38)
+GENOTYPE_CHR ?= chr2
+else
+ifeq ($(REF),hg38_gallchrus6a)
+GENOTYPE_CHR ?= chr2
+else
+ifeq ($(REF),hg38_GRCm38)
+GENOTYPE_CHR ?= chr2
+else
+GENOTYPE_CHR ?= allchr
 endif
-GENOTYPE_WITH_CHR2 ?= true
-
+endif
+endif
+endif
+endif
+endif
+endif
+endif
+endif
 
 ##################################
 ########## Aligners ##############
