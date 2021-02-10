@@ -100,7 +100,7 @@ cancer_signatures <- cancer_signatures[as.vector(new_order),]
 cos_sim_samples_signatures <- cos_sim_matrix(mut_mat, cancer_signatures)
 
 par(mar=c(2,2,2,2))
-pdf(file=paste0(out.dir, opt$outPrefix, ".", sig_prefix, ".SimilarityHeatmap.pdf"), height = length(sample_names), width = 16)
+pdf(file=paste0(out.dir, opt$outPrefix, ".", sig_prefix, ".SimilarityHeatmap.pdf"), height = max(3,length(sample_names)/2.8), width = 16)
 plot_cosine_heatmap(cos_sim_samples_signatures,cluster_rows = TRUE)
 dev.off()
 
@@ -113,12 +113,12 @@ select <- which(rowSums(fit_res$contribution) > 10)
 
 # Plots with relative contribution of signatures in each sample
 par(mar=c(2,2,2,2))
-pdf(file=paste0(out.dir, opt$outPrefix, ".", sig_prefix, ".BarplotRelativeContribution.pdf"), height = length(sample_names))
+pdf(file=paste0(out.dir, opt$outPrefix, ".", sig_prefix, ".BarplotRelativeContribution.pdf"), height = max(3,length(sample_names)/2.5))
 plot_contribution(fit_res$contribution[select,],cancer_signatures[,select],coord_flip = TRUE,mode = "relative")
 dev.off()
 
 par(mar=c(2,2,2,2))
-pdf(file=paste0(out.dir, opt$outPrefix, ".", sig_prefix, ".HeatmapRelativeContribution.pdf"), height = length(sample_names), width = 12)
+pdf(file=paste0(out.dir, opt$outPrefix, ".", sig_prefix, ".HeatmapRelativeContribution.pdf"), height = max(5,length(sample_names)/2.8), width = 12)
 plot_contribution_heatmap(fit_res$contribution,cluster_samples = FALSE,method = "complete")
 dev.off()
 
