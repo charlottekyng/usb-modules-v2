@@ -301,6 +301,7 @@ STAR ?= STAR
 STAR_FUSION ?= STAR-Fusion
 HISAT2 ?= hisat2
 STRINGTIE ?= stringtie
+KALLISTO ?= $(USR_DIR)/local/kallisto_v0.46.1/kallisto
 
 #PICARD = java -Xmx$(RESOURCE_REQ_MEDIUM_MEM_JAVA) -jar \$$EBROOTPICARD/picard.jar
 PICARD = $(JAVA) -Xmx$(RESOURCE_REQ_MEDIUM_MEM_JAVA) -jar $(USR_DIR)/local/picard_2.20.0/picard.jar $(1)
@@ -467,6 +468,12 @@ RSEM_GEN_DATA_MATRIX ?= usb-modules-v2/rnaseq/rsem-generate-data-matrix.pl
 RSEM_PROCCESS ?= usb-modules-v2/rnaseq/rsem_process.R
 
 STAR_PROCESS ?= usb-modules-v2/rnaseq/star_process.R
+
+KALLISTO_NUM_CORES ?= 4
+KALLISTO_OPTIONS ?= --plaintext --fusion
+KALLISTO_BIAS ?= true
+KALLISTO_GENOMEBAM ?= true
+KALLISTO_FRAGMENT_LEN ?= 200
 
 MOSAICS_RUN ?= $(RSCRIPT) usb-modules-v2/chipseq/mosaics_run.R
 MOSAICS_CONSTRUCTBINS ?= $(RSCRIPT) usb-modules-v2/chipseq/mosaics_constructBins.R
