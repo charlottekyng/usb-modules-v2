@@ -20,7 +20,7 @@ if (length(arguments$args) < 1) {
 kallistoFiles <- arguments$args
 }
 
-samples <- gsub("kallisto.(.+).abundance.tsv", "\\1", kallistoFiles)
+samples <- gsub("kallisto.(.+).abundance.tsv.gz", "\\1", kallistoFiles)
 kallisto <- lapply(kallistoFiles, read.delim, as.is=T, header=T)
 names(kallisto) <- samples
 

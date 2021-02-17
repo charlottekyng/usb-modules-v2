@@ -301,7 +301,6 @@ STAR ?= STAR
 STAR_FUSION ?= STAR-Fusion
 HISAT2 ?= hisat2
 STRINGTIE ?= stringtie
-KALLISTO ?= $(USR_DIR)/local/kallisto_v0.46.1/kallisto
 
 #PICARD = java -Xmx$(RESOURCE_REQ_MEDIUM_MEM_JAVA) -jar \$$EBROOTPICARD/picard.jar
 PICARD = $(JAVA) -Xmx$(RESOURCE_REQ_MEDIUM_MEM_JAVA) -jar $(USR_DIR)/local/picard_2.20.0/picard.jar $(1)
@@ -469,11 +468,22 @@ RSEM_PROCCESS ?= usb-modules-v2/rnaseq/rsem_process.R
 
 STAR_PROCESS ?= usb-modules-v2/rnaseq/star_process.R
 
+KALLISTO ?= $(USR_DIR)/local/kallisto_v0.46.1/kallisto
 KALLISTO_NUM_CORES ?= 4
-KALLISTO_OPTIONS ?= --plaintext --fusion
+KALLISTO_OPTIONS ?= --fusion
+# --bias: learns parameters for a model of sequences specific bias and corrects the abundances accordingly.
 KALLISTO_BIAS ?= true
+# --genomebam: Project pseudoalignments to genome sorted BAM file
 KALLISTO_GENOMEBAM ?= true
+# only used for single-end:
+# kallisto manual: Typical Illumina libraries produce fragment lengths ranging from 180–200 bp but it’s best to determine this from a library quantification.
 KALLISTO_FRAGMENT_LEN ?= 200
+
+PIZZLY ?= $(USR_DIR)/local/pizzly_v0.37.3/pizzly
+# k-mer size used in kallisto (kallisto default: 31)
+PIZZLY_K ?= 31
+PIZZLY_OPTIONS ?= 
+PIZZLY_FLATTEN_JSON ?= $(USR_DIR)/local/pizzly_v0.37.3/scripts/flatten_json.py
 
 MOSAICS_RUN ?= $(RSCRIPT) usb-modules-v2/chipseq/mosaics_run.R
 MOSAICS_CONSTRUCTBINS ?= $(RSCRIPT) usb-modules-v2/chipseq/mosaics_constructBins.R
