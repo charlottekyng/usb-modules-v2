@@ -50,7 +50,7 @@ COSMIC ?= $(ANN_DIR)/CosmicCodingMuts_v87.vcf.gz
 #LAWRENCE_BED = $(ANN_DIR)/lawrence_cancer5000s.bed
 #DGD_BED = $(ANN_DIR)/dgd_Hsa_all_v71.bed
 CANCER_HOTSPOT_VCF = $(ANN_DIR)/hotspots_changv2_gao_nc.vcf.gz
-GENE_SETS_GMT = $(ANN_DIR)/gene_ann_20190401.gmt
+GENE_SETS_GMT = $(ANN_DIR)/gene_ann_20200201.gmt
 
 CENTROMERE_TABLE = $(ANN_DIR)/centromeres_hg38.txt
 
