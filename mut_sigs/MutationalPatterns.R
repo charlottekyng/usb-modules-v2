@@ -11,7 +11,6 @@ if (!interactive()) {
 optList <- list(
 	make_option("--ref", default = NULL, type='character', help = "Reference genome (hg19 or hg38)"),
 	make_option("--signatures", default = NULL, type= 'character', help = "Path to the mutation signature file (.rda, RData etc.)\n\t\tThe name of the object within the file must correspond to its file name."),
-	make_option("--outdir", default = "MutationalPatterns/", type= 'character', help = "Must end with a slash [default %default]"),
 	make_option("--outPrefix", default = NULL, help = "output prefix"))
 parser <- OptionParser(usage = "%prog [options] [VCF files]", option_list = optList);
 
@@ -59,9 +58,6 @@ for (i in 1:length(sample_names)) {print(sample_names[i])}
 
 sig_prefix <- tools::file_path_sans_ext(basename(opt$signatures))
 
-# set out dirs (won't do anything if already exists)
-out.dir <- opt$outdir
-dir.create(out.dir, showWarnings = FALSE)
 
 ##############################################################
 # Mutational profiles
@@ -80,12 +76,12 @@ mut_mat <- mut_matrix(vcf_list = vcfs, ref_genome = ref_genome)
 cat("\nPlotting...\n")
 
 par(mar=c(2,2,2,2))
-pdf(file=paste0(out.dir, opt$outPrefix, ".", sig_prefix, ".Spectrum.pdf"), height = 1.5*length(sample_names), width = 1.5*length(sample_names))
+pdf(file=paste0(opt$outPrefix, ".", sig_prefix, ".Spectrum.pdf"), height = 1.5*length(sample_names), width = 1.5*length(sample_names))
 plot_spectrum(type_occurrences, by = sample_names, CT = TRUE, legend = TRUE)
 dev.off()
 
 par(mar=c(2,2,2,2))
-pdf(file=paste0(out.dir, opt$outPrefix, ".", sig_prefix, ".Profile_96.pdf"), height = 1.5*length(sample_names))
+pdf(file=paste0(opt$outPrefix, ".", sig_prefix, ".Profile_96.pdf"), height = 1.5*length(sample_names))
 plot_96_profile(mut_mat, condensed = TRUE)
 dev.off()
 
@@ -100,7 +96,7 @@ cancer_signatures <- cancer_signatures[as.vector(new_order),]
 cos_sim_samples_signatures <- cos_sim_matrix(mut_mat, cancer_signatures)
 
 par(mar=c(2,2,2,2))
-pdf(file=paste0(out.dir, opt$outPrefix, ".", sig_prefix, ".SimilarityHeatmap.pdf"), height = max(3,length(sample_names)/2.8), width = 16)
+pdf(file=paste0(opt$outPrefix, ".", sig_prefix, ".SimilarityHeatmap.pdf"), height = length(sample_names), width = 16)
 plot_cosine_heatmap(cos_sim_samples_signatures,cluster_rows = TRUE)
 dev.off()
 
@@ -113,12 +109,12 @@ select <- which(rowSums(fit_res$contribution) > 10)
 
 # Plots with relative contribution of signatures in each sample
 par(mar=c(2,2,2,2))
-pdf(file=paste0(out.dir, opt$outPrefix, ".", sig_prefix, ".BarplotRelativeContribution.pdf"), height = max(3,length(sample_names)/2.5))
+pdf(file=paste0(opt$outPrefix, ".", sig_prefix, ".BarplotRelativeContribution.pdf"), height = length(sample_names))
 plot_contribution(fit_res$contribution[select,],cancer_signatures[,select],coord_flip = TRUE,mode = "relative")
 dev.off()
 
 par(mar=c(2,2,2,2))
-pdf(file=paste0(out.dir, opt$outPrefix, ".", sig_prefix, ".HeatmapRelativeContribution.pdf"), height = max(5,length(sample_names)/2.8), width = 12)
+pdf(file=paste0(opt$outPrefix, ".", sig_prefix, ".HeatmapRelativeContribution.pdf"), height = length(sample_names), width = 12)
 plot_contribution_heatmap(fit_res$contribution,cluster_samples = FALSE,method = "complete")
 dev.off()
 
@@ -128,9 +124,9 @@ mutationalpatterns <- apply(sigs, 1, function(x) x/sum(x))
 mutationalpatterns <- t(mutationalpatterns)
 mutationalpatterns <- as.data.frame(mutationalpatterns)
 mutationalpatterns <- setNames(cbind(rownames(mutationalpatterns), mutationalpatterns),c("SampleName",colnames(mutationalpatterns)))
-write.table(mutationalpatterns,paste0(out.dir, opt$outPrefix, ".", sig_prefix, ".RelativeContribution.txt"), sep = "\t", quote=FALSE, row.names=FALSE,col.names = TRUE)
+write.table(mutationalpatterns,paste0(opt$outPrefix, ".", sig_prefix, ".RelativeContribution.txt"), sep = "\t", quote=FALSE, row.names=FALSE,col.names = TRUE)
 cat("\nSaving contribution matrix\n")
 
 # Save R session
-save.image(paste0(out.dir, opt$outPrefix, ".", sig_prefix, ".RData"))
+save.image(paste0(opt$outPrefix, ".", sig_prefix, ".RData"))
 cat("Saving session\nDone.\n")
