@@ -235,8 +235,7 @@ MUTECT_MODULE ?= MuTect/1.1.7-Java-1.7.0_80
 PICARD_MODULE ?= picard/2.9.2
 VARSCAN_MODULE ?= VarScan/2.4.1-Java-1.7.0_80
 ANACONDA_MODULE ?= Anaconda3/5.0.1
-#SINGULARITY_MODULE ?= Singularity/2.6.1 #deprecated on scicore. A newer singularity is available system-wide. Load wget instead because we have to load something.
-SINGULARITY_MODULE ?= wget
+#SINGULARITY_MODULE ?= Singularity/2.6.1 #deprecated on scicore. A newer singularity is available system-wide.
 VEP_MODULE ?= ensembl-vep/92.0-goolf-1.7.20-Perl-5.22.2
 MACS2_MODULE ?= MACS2/2.1.1.20160309-goolf-1.7.20-Python-2.7.11
 
@@ -348,7 +347,7 @@ TVC_SENSITIVE_JSON = usb-modules-v2/variant_callers/somatic/TVC_somatic_paramete
 TVC_MOTIF ?= $(TVC_ROOT_DIR)/share/TVC/sse/ampliseqexome_germline_p1_hiq_motifset.txt
 TVC_NUM_CORES ?= 4
 
-PIPEIT_IMG ?= $(IMG_DIR)/PipeIT_1.2.15.img
+PIPEIT_IMG ?= $(IMG_DIR)/PipeIT_1.2.19.img
 
 TS_IMG ?= $(IMG_DIR)/TS_v5.12.1.sp1_v1.0.1.img
 FUSION_TS_FILTER = $(RSCRIPT) usb-modules-v2/sv_callers/fusionTSfilter.R

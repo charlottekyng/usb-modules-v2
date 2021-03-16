@@ -30,6 +30,7 @@ endif
 
 ### ANNOTATION SETS ####
 
+ANNOVAR_HUMANDB ?= $(REF_DIR)/annovar_humandb.hg19.2018-04-16
 CLINVAR ?= $(ANN_DIR)/clinvar.vcf
 EXAC_NONTCGA ?= $(ANN_DIR)/ExAC_nonTCGA.r0.3.1.sites.vep.edited.vcf
 COSMIC ?= $(ANN_DIR)/CosmicCodingMuts.sorted.vcf

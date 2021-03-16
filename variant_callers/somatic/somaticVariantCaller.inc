@@ -43,9 +43,17 @@ VCF_SUFFIX = $(subst $( ),.,$(strip $1 $(VCF_FILTER_SUFFIX) $(VCF_ANNS_SUFFIX)))
 
 VCF_SUFFIXES = $(foreach type,$1,$(call VCF_SUFFIX,$(type)))
 
+ifdef SAMPLE_PAIRS
 MAKE_VCF_FILE_LIST = $(foreach pair,$(SAMPLE_PAIRS),\
 	$(foreach suff,$(call VCF_SUFFIXES,$1),\
 	vcf/$(pair).$(suff).vcf))
+endif
+
+ifndef SAMPLE_PAIRS
+MAKE_VCF_FILE_LIST = $(foreach sample,$(SAMPLES),\
+	$(foreach suff,$(call VCF_SUFFIXES,$1), \
+	vcf/$(sample).$(suff).vcf))
+endif
 
 ifeq ($(findstring false,$(INCLUDE_LNCRNA_IN_SUMMARY)),false)
 TABLE_EFF_TYPES ?= nonsynonymous_synonymous
@@ -57,10 +65,19 @@ TABLE_EXTENSIONS = tab $(foreach eff,$(TABLE_EFF_TYPES),tab.$(eff))
 TABLE_SUFFIXES = $(foreach suff,$(call VCF_SUFFIXES,$1),\
 	 $(foreach ext,$(TABLE_EXTENSIONS),$(suff).$(ext)))
 
+ifdef SAMPLE_PAIRS
 MAKE_TABLE_FILE_LIST = $(foreach pair,$(SAMPLE_PAIRS),\
 	$(foreach suff,$(call TABLE_SUFFIXES,$1),\
 	tables/$(pair).$(suff).txt))
 MAKE_TABLE_FILE_LIST += $(foreach suff,$(call TABLE_SUFFIXES,$1),alltables/allTN$(PROJECT_PREFIX).$(suff).txt)
+endif
+
+ifndef SAMPLE_PAIRS
+MAKE_TABLE_FILE_LIST = $(foreach sample,$(SAMPLES),\
+	$(foreach suff,$(call TABLE_SUFFIXES,$1),\
+	tables/$(sample).$(suff).txt))
+MAKE_TABLE_FILE_LIST += $(foreach suff,$(call TABLE_SUFFIXES,$1),alltables/all$(PROJECT_PREFIX).$(suff).txt)
+endif
 
 DOWNSTREAM_EFF_TYPES ?= $(word 1,$(TABLE_EFF_TYPES))
 DOWMSTREAM_VCF_TABLE_SUFFIX_ALLEFFTYPES ?= $(call VCF_SUFFIXES,$1).tab
