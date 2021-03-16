@@ -36,7 +36,7 @@ vcf/$1.pipeit.vcf : bam/$1.bam bam/$1.bam.bai
 	$$(PIPEIT_IMG) -t ./$$< -e $$(TARGETS_FILE_INTERVALS) \
 	-c $$(ANNOVAR_HUMANDB) \
 	-d $$(PON_VCF) \
-	-o $1 -s $$(MIN_TUMOR_AD) -m $$(MIN_TUMOR_DEPTH) -f $$(MIN_AF_SNP) \
+	-o $1 -s $$(MIN_TUMOR_AD) -m $$(MIN_TUMOR_DEPTH) -f $$(MIN_AF) \
 	$$(ifdef $$(PIPEIT_JSON),-j ./$$(PIPEIT_JSON),,) -a true && ln PipeIT/results/$1/$1.PipeIT.vcf $$@")
 endef
 $(foreach sample,$(SAMPLES), \
