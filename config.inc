@@ -312,13 +312,24 @@ USE_NFT ?= false
 ANN_NFT ?= true
 PON_VCF ?= tvc/pon.tvc.vcf
 endif
+
 ifeq ($(findstring pipeit,$(MUT_CALLER)),pipeit)
+ifdef PON_VCF
+USE_NFT ?= true
+ANN_NFT ?= true
+endif
+ifndef PON_VCF
 USE_NFT ?= false
 ANN_NFT ?= false
 endif
+endif
+
 USE_NFT ?= true
 ANN_NFT ?= false
+
+ifeq ($(findstring ILLUMINA,$(SEQ_PLATFORM)),ILLUMINA)
 PON_VCF ?= mutect2/pon.mutect2.vcf
+endif
 
 FILTER_OXOG ?= false
 FILTER_FFPE ?= false

@@ -1,4 +1,4 @@
-MUT_CALLER := tvc
+MUT_CALLER := pipeit
 FILTER_VARIANTS := false
 
 include usb-modules-v2/Makefile.inc
@@ -21,10 +21,10 @@ pipeit_tables : $(foreach type,$(VARIANT_TYPES),$(call MAKE_TABLE_FILE_LIST,$(ty
 define pipeit-vcf
 vcf/$1_$2.pipeit.vcf : bam/$1.bam bam/$1.bam.bai bam/$2.bam bam/$2.bam.bai
 	$$(call RUN,4,$$(RESOURCE_REQ_HIGH_MEM),$$(RESOURCE_REQ_LONG),$$(SINGULARITY_MODULE),"\
-	$$(SINGULARITY_RUN) -B $$(dir $$(TARGETS_FILE_INTERVALS))  \
+	$$(SINGULARITY_RUN) -B $$(dir $$(TARGETS_FILE_INTERVALS)) $$(if $$(PIPEIT_JSON),-B $$(dir $$(PIPEIT_JSON)),) \
 	$$(PIPEIT_IMG) -t ./$$< -n ./$$(word 3,$$^) -e $$(TARGETS_FILE_INTERVALS) \
 	-o $1_$2 -s $$(MIN_TUMOR_AD) -r $$(MIN_NORMAL_DEPTH) -m $$(MIN_TUMOR_DEPTH) -f $$(MIN_TN_AD_RATIO) \
-	$$(ifdef $$(PIPEIT_JSON),-j ./$$(PIPEIT_JSON),,) -a true && ln PipeIT/results/$1_$2/$1_$2.PipeIT.vcf $$@")
+	$$(if $$(PIPEIT_JSON),-j $$(PIPEIT_JSON),,) -a true && ln PipeIT/results/$1_$2/$1_$2.PipeIT.vcf $$@")
 endef
 $(foreach pair,$(SAMPLE_PAIRS), \
 	$(eval $(call pipeit-vcf,$(tumor.$(pair)),$(normal.$(pair)))))
@@ -32,12 +32,11 @@ $(foreach pair,$(SAMPLE_PAIRS), \
 define pipeit-vcf-tumor-only   
 vcf/$1.pipeit.vcf : bam/$1.bam bam/$1.bam.bai
 	$$(call RUN,4,$$(RESOURCE_REQ_HIGH_MEM),$$(RESOURCE_REQ_LONG),$$(SINGULARITY_MODULE),"\
-	$$(SINGULARITY_RUN) -B $$(dir $$(TARGETS_FILE_INTERVALS)) -B $$(dir $$(PON_VCF)) -B $$(dir $$(ANNOVAR_HUMANDB))\
+	$$(SINGULARITY_RUN) -B $$(dir $$(TARGETS_FILE_INTERVALS)) -B $$(dir $$(ANNOVAR_HUMANDB)) $$(if $$(PIPEIT_JSON),-B $$(dir $$(PIPEIT_JSON)),) \
 	$$(PIPEIT_IMG) -t ./$$< -e $$(TARGETS_FILE_INTERVALS) \
 	-c $$(ANNOVAR_HUMANDB) \
-	-d $$(PON_VCF) \
 	-o $1 -s $$(MIN_TUMOR_AD) -m $$(MIN_TUMOR_DEPTH) -f $$(MIN_AF) \
-	$$(ifdef $$(PIPEIT_JSON),-j ./$$(PIPEIT_JSON),,) -a true && ln PipeIT/results/$1/$1.PipeIT.vcf $$@")
+	$$(if $$(PIPEIT_JSON),-j $$(PIPEIT_JSON),) -a true && ln PipeIT/results/$1/$1.PipeIT.vcf $$@")
 endef
 $(foreach sample,$(SAMPLES), \
 	$(eval $(call pipeit-vcf-tumor-only,$(sample))))
