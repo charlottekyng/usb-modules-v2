@@ -70,7 +70,7 @@ segs <- do.call("rbind", lapply(segfiles, function(fn) {
 	dat
 }))
 
-segs <- segs[order(segs$sample, segs$chrom, as.numeric(segs$start)),]
+# segs <- segs[order(segs$sample, segs$chrom, as.numeric(segs$start)),] # ordering might change the order of samples, resulting in out-of-sync ploidy values in the lst table below. Facets cncf.txt are already sorted so we don't need this.
 segs <- subset(segs, !is.na(segs$lcn))
 
 merge_segs <- function(seg_tab) {	
