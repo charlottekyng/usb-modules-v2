@@ -347,7 +347,7 @@ TVC_SENSITIVE_JSON = usb-modules-v2/variant_callers/somatic/TVC_somatic_paramete
 TVC_MOTIF ?= $(TVC_ROOT_DIR)/share/TVC/sse/ampliseqexome_germline_p1_hiq_motifset.txt
 TVC_NUM_CORES ?= 4
 
-PIPEIT_IMG ?= $(IMG_DIR)/PipeIT_1.2.19.img
+PIPEIT_IMG ?= $(IMG_DIR)/PipeIT_1.2.20.img
 
 TS_IMG ?= $(IMG_DIR)/TS_v5.12.1.sp1_v1.0.1.img
 FUSION_TS_FILTER = $(RSCRIPT) usb-modules-v2/sv_callers/fusionTSfilter.R
