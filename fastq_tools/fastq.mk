@@ -41,8 +41,8 @@ unprocessed_fastq/%.1.trimgalore.fastq.gz : unprocessed_fastq/%.1.fastq.gz unpro
 	$(TRIM_GALORE) -q 20 --output unprocessed_fastq --paired \
 	$(if $(CLIP_FASTQ_R1),--clip_R1 $(CLIP_FASTQ_R1)) \
 	$(if $(CLIP_FASTQ_R2),--clip_R2 $(CLIP_FASTQ_R2)) \
-	$^ && rename _val_1.fq.gz .cutadapt.fastq.gz unprocessed_fastq/$*.1_val_1.fq.gz \
-	&& rename _val_2.fq.gz .cutadapt.fastq.gz unprocessed_fastq/$*.2_val_2.fq.gz")
+	$^ && rename _val_1.fq.gz .trimgalore.fastq.gz unprocessed_fastq/$*.1_val_1.fq.gz \
+	&& rename _val_2.fq.gz .trimgalore.fastq.gz unprocessed_fastq/$*.2_val_2.fq.gz")
 
 unprocessed_fastq/%.2.trimgalore.fastq.gz : unprocessed_fastq/%.1.trimgalore.fastq.gz
 	$(INIT)

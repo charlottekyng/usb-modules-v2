@@ -245,7 +245,7 @@ $(REF_FASTA).fai : $(REF_FASTA)
 	$(SAMTOOLS) faidx $<")
 
 $(REF_FASTA:.fasta=.dict) : $(REF_FASTA)
-	$(call RUN,1,$(RESOURCE_REQ_LOW_MEM),$(RESOURCE_REQ_VSHORT)),$(GATK40_MODULE),"\
+	$(call RUN,1,$(RESOURCE_REQ_LOW_MEM),$(RESOURCE_REQ_VSHORT),$(GATK40_MODULE),"\
 	$(call PICARD,CreateSequenceDictionary,$(RESOURCE_REQ_LOW_MEM_JAVA)) REFERENCE=$< OUTPUT=$@")
 
 
