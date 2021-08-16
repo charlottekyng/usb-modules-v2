@@ -103,6 +103,7 @@ TRIM_LENGTH ?= 150
 # setting the --clip_R1 and --clip_R2 parameters if FASTQ_FILTER=trimgalore
 CLIP_FASTQ_R1 ?=
 CLIP_FASTQ_R2 ?=
+TRIM_GALORE_OPTS ?=
 
 # options for FASTQ_FILTER=cutadapt
 # ADAPTOR_POS =  [3prime|5prime]

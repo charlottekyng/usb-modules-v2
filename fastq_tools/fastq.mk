@@ -38,7 +38,7 @@ unprocessed_fastq/%.trim.fastq.gz : unprocessed_fastq/%.fastq.gz
 ifeq ($(PAIRED_END),true)
 unprocessed_fastq/%.1.trimgalore.fastq.gz : unprocessed_fastq/%.1.fastq.gz unprocessed_fastq/%.2.fastq.gz
 	$(call RUN,1,$(RESOURCE_REQ_LOW_MEM),$(RESOURCE_REQ_LONG),$(TRIM_GALORE_MODULE) $(FASTQC_MODULE),"\
-	$(TRIM_GALORE) -q 20 --output unprocessed_fastq --paired \
+	$(TRIM_GALORE) --output unprocessed_fastq --paired $(TRIM_GALORE_OPTS) \
 	$(if $(CLIP_FASTQ_R1),--clip_R1 $(CLIP_FASTQ_R1)) \
 	$(if $(CLIP_FASTQ_R2),--clip_R2 $(CLIP_FASTQ_R2)) \
 	$^ && rename _val_1.fq.gz .trimgalore.fastq.gz unprocessed_fastq/$*.1_val_1.fq.gz \
@@ -49,7 +49,7 @@ unprocessed_fastq/%.2.trimgalore.fastq.gz : unprocessed_fastq/%.1.trimgalore.fas
 else
 unprocessed_fastq/%.trimgalore.fastq.gz : unprocessed_fastq/%.fastq.gz
 	$(call RUN,1,$(RESOURCE_REQ_LOW_MEM),$(RESOURCE_REQ_LONG),$(TRIM_GALORE_MODULE) $(FASTQC_MODULE),"\
-	$(TRIM_GALORE) -q 20 --output unprocessed_fastq \
+	$(TRIM_GALORE) -q 20 --output unprocessed_fastq $(TRIM_GALORE_OPTS) \
 	$(if $(CLIP_FASTQ_R1),--clip_R1 $(CLIP_FASTQ_R1)) \
 	$^ && mv unprocessed_fastq/$*_trimmed.fq.gz $@")
 endif
