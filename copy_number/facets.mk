@@ -8,7 +8,7 @@ LOGDIR ?= log/facets.$(NOW)
 .PHONY : facets
 
 SNPPILEUP_SUFFIX = q$(FACETS_SNP_PILEUP_MINMAPQ)_Q$(FACETS_SNP_PILEUP_MINBASEQ)_d$(FACETS_SNP_PILEUP_MAX_DEPTH)_r$(FACETS_SNP_PILEUP_MIN_DEPTH)
-FACETS_SUFFIX = $(SNPPILEUP_SUFFIX)_bin$(FACETS_WINDOW_SIZE)_mingc$(FACETS_MINGC)_maxgc$(FACETS_MAXGC)_nhet$(FACETS_MIN_NHET)_cval$(FACETS_CVAL1)
+FACETS_SUFFIX = $(SNPPILEUP_SUFFIX)_bin$(FACETS_WINDOW_SIZE)_mingc$(FACETS_MINGC)_maxgc$(FACETS_MAXGC)_nhet$(FACETS_MIN_NHET)_cval$(FACETS_CVAL)
 
 facets : facets/cncf/all$(PROJECT_PREFIX).summary.txt facets/cncf/all$(PROJECT_PREFIX).geneCN.GL_ASCNA.pdf \
 facets/cncf/all$(PROJECT_PREFIX).geneCN.GL_LRR.pdf facets/cncf/all$(PROJECT_PREFIX).geneCN.cnlr.median.pdf \
@@ -25,7 +25,7 @@ define snp-pileup-tumor-normal
 facets/snp_pileup/$1_$2_$$(SNPPILEUP_SUFFIX).bc.gz : bam/$1.bam bam/$2.bam $$(if $$(findstring true,$$(FACETS_GATK_VARIANTS)),facets/base_pos/$2.gatk.dbsnp.vcf,$$(FACETS_TARGETS_INTERVALS))
 	$$(call RUN,1,$$(RESOURCE_REQ_LOW_MEM),$$(RESOURCE_REQ_SHORT),,"\
 	$$(FACETS_SNP_PILEUP) \
-	-A -d $$(FACETS_SNP_PILEUP_MAX_DEPTH) -g -q $$(FACETS_SNP_PILEUP_MINMAPQ) \
+	-A -P $$(FACETS_SNP_PILEUP_PSEUDO_SNPS) -d $$(FACETS_SNP_PILEUP_MAX_DEPTH) -g -q $$(FACETS_SNP_PILEUP_MINMAPQ) \
 	-Q $$(FACETS_SNP_PILEUP_MINBASEQ) -r $$(FACETS_SNP_PILEUP_MIN_DEPTH)$$(,)0 \
 	$$(word 3,$$^) $$@ $$(word 2,$$^) $$(word 1,$$^)")
 endef
@@ -48,16 +48,20 @@ endef
 endif
 
 define facets-cval1-tumor-normal
-facets/cncfTN/$1_$2_$$(FACETS_SUFFIX).out : facets/snp_pileup/$1_$2_$$(SNPPILEUP_SUFFIX).bc.gz
-	$$(call RUN,1,$$(RESOURCE_REQ_LOW_MEM),$$(RESOURCE_REQ_VSHORT),$$(R_MODULE),"\
-	$$(FACETS) --minNDepth $$(FACETS_SNP_PILEUP_MIN_DEPTH) \
-	--maxNDepth $$(FACETS_SNP_PILEUP_MAX_DEPTH) --snp_nbhd $$(FACETS_WINDOW_SIZE) \
+facets/cncfTN/$1_$2_$$(FACETS_SUFFIX).done : facets/snp_pileup/$1_$2_$$(SNPPILEUP_SUFFIX).bc.gz
+	$$(call RUN,1,$$(RESOURCE_REQ_LOW_MEM),$$(RESOURCE_REQ_VSHORT),$$(R4_MODULE),"\
+	$$(FACETS) --pre_cval $$(FACETS_PRE_CVAL) \
+	--minNDepth $$(FACETS_SNP_PILEUP_MIN_DEPTH) \
+	--maxNDepth $$(FACETS_SNP_PILEUP_MAX_DEPTH) \
+	--snp_nbhd $$(FACETS_WINDOW_SIZE) \
 	--minGC $$(FACETS_MINGC) --maxGC $$(FACETS_MAXGC) \
-	--cval1 $$(FACETS_CVAL1) --genome $$(REF) --min_nhet $$(FACETS_MIN_NHET) \
+	--cval $$(FACETS_CVAL) --genome $$(REF) --min_nhet $$(FACETS_MIN_NHET) \
+	--max_segs $$(FACETS_MAX_SEGS) \
+	--tumorName $1 --normalName $2 \
 	--outPrefix $$* $$< ")
 
 
-facets/cncfTN/$1_$2_$$(FACETS_SUFFIX).Rdata facets/cncfTN/$1_$2_$$(FACETS_SUFFIX).cncf.txt facets/cncfTN/$1_$2_$$(FACETS_SUFFIX).cncf.pdf facets/cncfTN/$1_$2_$$(FACETS_SUFFIX).logR.pdf: facets/cncfTN/$1_$2_$$(FACETS_SUFFIX).out
+facets/cncfTN/$1_$2_$$(FACETS_SUFFIX).Rdata facets/cncfTN/$1_$2_$$(FACETS_SUFFIX).cncf.txt facets/cncfTN/$1_$2_$$(FACETS_SUFFIX).cncf.pdf facets/cncfTN/$1_$2_$$(FACETS_SUFFIX).logR.pdf facets/cncfTN/$1_$2_$$(FACETS_SUFFIX).out: facets/cncfTN/$1_$2_$$(FACETS_SUFFIX).done
 	
 
 endef
@@ -70,21 +74,50 @@ FACETS_SUFFIX_FINAL = $$(shell grep $1_$2 $$(FACETS_SPECIAL_CASES) | cut -f2)
 endif
 FACETS_SUFFIX_FINAL ?= $$(FACETS_SUFFIX)
 
-
-facets/cncf/$1_$2.out : facets/cncfTN/$1_$2_$$(FACETS_SUFFIX_FINAL).out
-	$$(INIT) ln -f $$(<) $$(@)
-
+# Final Rdata is in facets/cncfTN, but other files can be in facets/cncfTN/rerun.
 facets/cncf/$1_$2.Rdata : facets/cncfTN/$1_$2_$$(FACETS_SUFFIX_FINAL).Rdata
 	$$(INIT) ln -f $$(<) $$(@)
 
+facets/cncf/$1_$2.out : facets/cncfTN/$1_$2_$$(FACETS_SUFFIX_FINAL).out
+	$$(INIT) \
+	{ \
+	if test -f facets/cncfTN/rerun/$1_$2_$$(FACETS_SUFFIX).rerun*.out; then \
+		mkdir -p facets/cncf/rerun && \
+		ln -f facets/cncfTN/rerun/$1_$2_$$(FACETS_SUFFIX).rerun*.out facets/cncf/rerun/$1_$2_$$$$(echo facets/cncfTN/rerun/$1_$2_$$(FACETS_SUFFIX).rerun*.out | sed 's/.*rerun_cval/rerun_cval/')  && \
+		ln -f -s rerun/$$$$(basename facets/cncf/rerun/$1_$2_rerun*.out) $$(@); \
+	else ln -f $$(<) $$(@); fi; \
+}
+
 facets/cncf/$1_$2.cncf.txt : facets/cncfTN/$1_$2_$$(FACETS_SUFFIX_FINAL).cncf.txt
-	$$(INIT) ln -f $$(<) $$(@)
+	$$(INIT) \
+	{ \
+	if test -f facets/cncfTN/rerun/$1_$2_$$(FACETS_SUFFIX).rerun*.cncf.txt; then \
+		mkdir -p facets/cncf/rerun && \
+		ln -f facets/cncfTN/rerun/$1_$2_$$(FACETS_SUFFIX).rerun*.cncf.txt facets/cncf/rerun/$1_$2_$$$$(echo facets/cncfTN/rerun/$1_$2_$$(FACETS_SUFFIX).rerun*.cncf.txt | sed 's/.*rerun_cval/rerun_cval/')  && \
+		ln -f -s rerun/$$$$(basename facets/cncf/rerun/$1_$2_rerun*.cncf.txt) $$(@); \
+	else ln -f $$(<) $$(@); fi; \
+}
 
 facets/cncf/$1_$2.cncf.pdf : facets/cncfTN/$1_$2_$$(FACETS_SUFFIX_FINAL).cncf.pdf
-	$$(INIT) ln -f $$(<) $$(@)
+	$$(INIT) \
+	{ \
+	if test -f facets/cncfTN/rerun/$1_$2_$$(FACETS_SUFFIX).rerun*.cncf.pdf; then \
+		mkdir -p facets/cncf/rerun && \
+		ln -f facets/cncfTN/rerun/$1_$2_$$(FACETS_SUFFIX).rerun*.cncf.pdf facets/cncf/rerun/$1_$2_$$$$(echo facets/cncfTN/rerun/$1_$2_$$(FACETS_SUFFIX).rerun*.cncf.pdf | sed 's/.*rerun_cval/rerun_cval/')  && \
+		ln -f -s rerun/$$$$(basename facets/cncf/rerun/$1_$2_rerun*.cncf.pdf) $$(@); \
+	else ln -f $$(<) $$(@); fi; \
+}
 
 facets/cncf/$1_$2.logR.pdf : facets/cncfTN/$1_$2_$$(FACETS_SUFFIX_FINAL).logR.pdf
-	$$(INIT) ln -f $$(<) $$(@)
+	$$(INIT) \
+	{ \
+	if test -f facets/cncfTN/rerun/$1_$2_$$(FACETS_SUFFIX).rerun*.logR.pdf; then \
+		mkdir -p facets/cncf/rerun && \
+		ln -f facets/cncfTN/rerun/$1_$2_$$(FACETS_SUFFIX).rerun*.logR.pdf facets/cncf/rerun/$1_$2_$$$$(echo facets/cncfTN/rerun/$1_$2_$$(FACETS_SUFFIX).rerun*.logR.pdf | sed 's/.*rerun_cval/rerun_cval/')  && \
+		ln -f -s rerun/$$$$(basename facets/cncf/rerun/$1_$2_rerun*.logR.pdf) $$(@); \
+	else ln -f $$(<) $$(@); fi; \
+}
+
 endef
 $(foreach pair,$(SAMPLE_PAIRS),$(eval $(call facets-ln-files,$(tumor.$(pair)),$(normal.$(pair)))))
  
@@ -103,7 +136,7 @@ facets/cncf/all$(PROJECT_PREFIX).geneCN.%.pdf : facets/cncf/all$(PROJECT_PREFIX)
 
 facets/cncf/all$(PROJECT_PREFIX).geneCN.GL_ASCNA.txt : $(foreach pair,$(SAMPLE_PAIRS),facets/cncf/$(pair).cncf.txt) $(foreach pair,$(SAMPLE_PAIRS),facets/cncf/$(pair).Rdata)
 	$(call RUN,1,$(RESOURCE_REQ_HIGH_MEM),$(RESOURCE_REQ_SHORT),$(R_MODULE),"\
-	$(FACETS_GENE_CN) $(FACETS_GENE_CN_OPTS) --genesFile $(TARGETS_FILE_GENES) --outFile $(@D)/all$(PROJECT_PREFIX).geneCN $(filter %.cncf.txt,$^)")
+	$(FACETS_GENE_CN) $(FACETS_GENE_CN_OPTS) --genesFile $(TARGETS_FILE_GENES) --outFile $(@D)/all$(PROJECT_PREFIX).geneCN $(filter %.Rdata,$^)")
 	
 facets/cncf/all$(PROJECT_PREFIX).geneCN.GL_LRR.txt : facets/cncf/all$(PROJECT_PREFIX).geneCN.GL_ASCNA.txt
 	

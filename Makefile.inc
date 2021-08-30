@@ -201,6 +201,7 @@ GUNZIP ?= gunzip -c
 PERL_MODULE ?= Perl/5.22.2-goolf-1.7.20
 # R_MODULE ?= R/3.5.2-foss-2018b (breaks other modules that rely on local packages compiled for 3.5.0)
 R_MODULE ?= R/3.5.0-goolf-1.7.20
+R4_MODULE ?= R/4.0.3-foss-2018b
 JAVA6_MODULE ?= Java/1.6.0_24
 JAVA7_MODULE ?= Java/1.7.0_80
 JAVA8_MODULE ?= Java/8u212b03
@@ -249,8 +250,11 @@ SINGULARITY_EXEC ?= singularity exec --cleanenv -B $(shell pwd)
 SINGULARITY_RUN ?= singularity run --cleanenv -B $(shell pwd)
 
 R_LIBS ?= $(USR_DIR)/$(R_MODULE)/lib64/R/library
+R4_LIBS ?= $(USR_DIR)/$(R4_MODULE)/lib64/R/library
 R ?= export R_LIBS=$(R_LIBS); R
+R4 ?= export R_LIBS=$(R4_LIBS); R
 RSCRIPT ?= export R_LIBS=$(R_LIBS); Rscript
+R4SCRIPT ?= export R_LIBS=$(R4_LIBS); Rscript
 KNIT ?= $(RSCRIPT) $(MODULE_SCRIPTS_DIR)/knit.R
 SWEAVE ?= $(RSCRIPT) $(MODULE_SCRIPTS_DIR)/Sweave.R
 RBIND ?= $(RSCRIPT) $(MODULE_SCRIPTS_DIR)/rbind.R
@@ -383,7 +387,7 @@ ADD_GENE_LIST_ANNOTATION = $(RSCRIPT) usb-modules-v2/vcf_tools/addGeneListAnnota
 ANNOTATE_FACETS_VCF = $(RSCRIPT) usb-modules-v2/copy_number/annotateFacets2Vcf.R
 
 FACETS_SNP_PILEUP = $(BIN_DIR)/snp-pileup
-FACETS = $(RSCRIPT) usb-modules-v2/copy_number/facetsRun.R
+FACETS = $(R4SCRIPT) usb-modules-v2/copy_number/facetsRun.R
 FACETS_GENE_CN = $(RSCRIPT) usb-modules-v2/copy_number/facetsGeneCN.R
 FACETS_GENE_CN_PLOT = $(RSCRIPT) usb-modules-v2/copy_number/facetsGeneCNPlot.R
 FACETS_CCF = $(RSCRIPT) usb-modules-v2/copy_number/facetsCCF.R

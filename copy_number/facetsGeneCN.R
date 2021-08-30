@@ -9,10 +9,28 @@
 #---------------
 
 # load base libraries
-suppressMessages(pacman::p_load(optparse,RColorBrewer,GenomicRanges,plyr,dplyr,tibble))
-suppressMessages(pacman::p_load(readr,stringr,tidyr,purrr,magrittr,rlist,crayon,foreach))
-suppressMessages(pacman::p_load(RMySQL,rtracklayer,colorspace,ggplot2,grid,gridExtra,RColorBrewer))
-suppressPackageStartupMessages(library("facets"));
+suppressPackageStartupMessages(library("optparse"))
+suppressPackageStartupMessages(library("RColorBrewer"))
+suppressPackageStartupMessages(library("GenomicRanges"))
+suppressPackageStartupMessages(library("plyr"))
+suppressPackageStartupMessages(library("dplyr"))
+suppressPackageStartupMessages(library("tibble"))
+suppressPackageStartupMessages(library("readr"))
+suppressPackageStartupMessages(library("stringr"))
+suppressPackageStartupMessages(library("tidyr"))
+suppressPackageStartupMessages(library("purrr"))
+suppressPackageStartupMessages(library("magrittr"))
+suppressPackageStartupMessages(library("rlist"))
+suppressPackageStartupMessages(library("crayon"))
+suppressPackageStartupMessages(library("foreach"))
+suppressPackageStartupMessages(library("Cairo"))
+suppressPackageStartupMessages(library("RMySQL"))
+suppressPackageStartupMessages(library("rtracklayer"))
+suppressPackageStartupMessages(library("colorspace"))
+suppressPackageStartupMessages(library("ggplot2"))
+suppressPackageStartupMessages(library("grid"))
+suppressPackageStartupMessages(library("gridExtra"))
+suppressPackageStartupMessages(library("facets"))
 
 #--------------
 # parse options
@@ -21,11 +39,6 @@ suppressPackageStartupMessages(library("facets"));
 optList <- list(
 	make_option("--outFile", default = NULL, help = "output file"),
 	make_option("--summaryType", default = c("GL_ASCNA", "GL_LRR", "cnlr.median", "tcn.em", "lcn.em", "cf.em")),
-#	make_option("--mysqlHost", default = '10.0.200.48', help = "MySQL server hostname"),
-#	make_option("--mysqlPort", default = 38493, help = "MySQL server port"),
-#	make_option("--mysqlUser", default = 'embl', help = "MySQL server username"),
-#	make_option("--mysqlPassword", default = 'embl', help = "MySQL server password"),
-#	make_option("--mysqlDb", default = 'homo_sapiens_core_75_37', help = "MySQL server database"),
 	make_option("--genesFile", default = NULL, help = "list of genes to include (hgnc symbols)"))
 parser <- OptionParser(usage = "%prog [options] [facets files]", option_list = optList);
 
@@ -63,53 +76,42 @@ genes$chrom <- factor(genes$chrom, levels=chrom_levels)
 
 genesGR <- genes %$% GRanges(seqnames = chrom, ranges = IRanges(start, end), band = band, hgnc = hgnc)
 
-cat ("Start reading CNCF files\n")			
+cat ("Start reading Rdata files\n")
 mm <- lapply(facetsFiles, function(f) {
-	tab <- read.delim(f, as.is=T)
+	attach(f) # for some reason we get errors downstream if using 'load'.
+	tab <- fit$cncf
+	detach()
 	tab$chrom[which(tab$chrom==23)] <- "X"
-
 	tabGR <- tab %$% GRanges(seqnames = chrom, ranges = IRanges(start, end))
 	mcols(tabGR) <- tab %>% select(num.mark,cnlr.median:mafR.clust,cf.em:lcn.em)
 
 	fo <- findOverlaps(tabGR, genesGR)
 
-	df <- as.data.frame(cbind(as.data.frame(genesGR)[subjectHits(fo),], mcols(tabGR)[queryHits(fo),]))
-	
-	df %<>% group_by(hgnc) %>% top_n(1, abs(cnlr.median))
-	
-	df <- as.data.frame(cbind(as.data.frame(genesGR)[subjectHits(fo),], mcols(tabGR)[queryHits(fo),]))
-
+	df <- as.data.frame(cbind(mcols(genesGR)[subjectHits(fo),], mcols(tabGR)[queryHits(fo),]))
 	df %<>% group_by(hgnc) %>% top_n(1, abs(cnlr.median))
 	if ("GL_ASCNA" %in% opt$summaryType) {
-		load(gsub("cncf.txt", "Rdata", f, fixed=T))
-		ploidy <- median(df$tcn.em)	
+
+		ploidy <- median(unlist(apply(cbind(df$tcn.em, df$num.mark),1,function(x){rep(x[1], x[2])})))
+
 		df$GL_ASCNA <- 0
 		df$GL_ASCNA[df$tcn.em < ploidy] <- -1
 		df$GL_ASCNA[df$tcn.em == 0] <- -2
 		df$GL_ASCNA[df$tcn.em > ploidy] <- 1
 		df$GL_ASCNA[df$tcn.em >= ploidy + 4] <- 2
-		if (table(out2$jointseg$chrom, out2$jointseg$het)[out2$nX, "1"]<10) {
-			df$GL_ASCNA[df$seqnames=="X"] <- 0
-			df$GL_ASCNA[df$seqnames=="X" & df$tcn.em < floor(ploidy/2)] <- -1
-			df$GL_ASCNA[df$seqnames=="X" & df$tcn.em ==0 ] <- -2
-			df$GL_ASCNA[df$seqnames=="X" & df$tcn.em > ceiling(ploidy/2)] <- 1
-			df$GL_ASCNA[df$seqnames=="X" & df$tcn.em >= ceiling(ploidy/2) + 4] <- 2
-		}
 	}
-
-
 	if ("GL_LRR" %in% opt$summaryType) {
-		load(gsub("cncf.txt", "Rdata", f, fixed=T))
-		noise <- median(abs(out2$jointseg$cnlr-  unlist(apply(out2$out[,c("cnlr.median", "num.mark")], 1, 
+		attach(f)
+		noise <- median(abs(out$jointseg$cnlr-  unlist(apply(out$out[,c("cnlr.median", "num.mark")], 1, 
 			function(x) {rep(x[1], each=x[2])}))))
 
-		lrr <- sort(out2$jointseg$cnlr)
+		lrr <- sort(out$jointseg$cnlr)
 		lrr <- lrr[round(0.25*length(lrr)):round(0.75*length(lrr))] 
 		df$GL_LRR <- 0
 		df$GL_LRR[df$cnlr.median < median(lrr)-(2.5*sd(lrr))] <- -1
 		df$GL_LRR[df$cnlr.median < median(lrr)-(7*sd(lrr))] <- -2
 		df$GL_LRR[df$cnlr.median > median(lrr)+(2*sd(lrr))] <- 1
 		df$GL_LRR[df$cnlr.median > median(lrr)+(6*sd(lrr))] <- 2
+		detach()
 	}
 	df %>% select(hgnc, GL_ASCNA, GL_LRR, tcn.em, lcn.em, cnlr.median, cf.em) %>% ungroup
 })
@@ -118,7 +120,7 @@ for (f in facetsFiles) {
 	n <- sub('\\..*', '', sub('.*/', '', f))
 	colnames(mm[[f]])[2:ncol(mm[[f]])] <- paste(n,  colnames(mm[[f]])[2:ncol(mm[[f]])], sep="_")
 }
-cat ("Finished reading CNCF files\n")
+cat ("Finished reading RData files\n")
 
 save.image(paste(opt$outFile, ".RData", sep=""))
 
