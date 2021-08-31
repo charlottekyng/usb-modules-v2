@@ -411,6 +411,12 @@ Additional files are 1) a list of amplifications and homozygous deletions derive
 
 **Note**: FACETS profiling does not always work well. In particular samples in which >5% of the genome at copy number 0 (homozygous deletions) should be excluded from copy number analysis.
 
+**Note 2**: The `facets` module has an autosmoothing function (implemented on [Aug 30 2021](https://github.com/charlottekyng/usb-modules-v2/commit/3d168c014e6739af98dd5b88fef6f8dd6b4ba71c)), which will increase the `cval` parameter (default 150, a sensible value for WES) if the original segmentation results in too many fragments (i.e. hyperfragmentation, expected to occur only in edge cases). The maximum number of segments a sample can have is controlled by `FACETS_MAX_SEGS` parameter (default 300). If the number of segments exceeds `FACETS_MAX_SEGS`, `facets` will run again with an increased `cval` and results will appear in `facets/cncf/rerun`, with the final `cval` hard-coded in the file names (and also reported  in the corresponding `.out` file). In that case, final files in `facets/cncf/` will be symbolic links to the files in `rerun`. This is to help spotting cases that went through the autosmoothing step. Results with the original `cval` are still available in `facets/cncfTN/` folder.
+
+<br>
+
+**Ion Torrent and RNA:**
+
 For Ion Torrent DNA sequencing, Varscan is implemented and tested.
 ```
 make varscan_cnv
