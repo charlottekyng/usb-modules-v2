@@ -103,6 +103,7 @@ switch(opt$genome,
 	mm10={gbuild="mm10"},
 	GRCm38={gbuild="mm10"},
 	hg38={gbuild="hg38"},
+	hg38_GRCm38={gbuild="hg38"},
        { stop(paste("Invalid Genome",opt$genome)) })
 
 buildData=installed.packages()["facets",]
