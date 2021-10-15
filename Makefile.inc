@@ -189,7 +189,8 @@ MODULE_SCRIPTS_DIR ?= usb-modules-v2/scripts
 LD_LIBRARY_PATH = $(USR_DIR)/local/MCR_R2014a/v83/runtime/glnxa64:$(USR_DIR)/local/MCR_R2014a/v83/bin/glnxa64:$(USR_DIR)/local/MCR_R2014a/v83/sys/os/glnxa64
 IMG_DIR ?= /scicore/home/pissal00/GROUP/virtual_env/img
 
-export TMPDIR := /scicore/scratch
+# use system $TEMPDIR on scicore (/scratch)
+export TMPDIR := $(TEMPDIR)
 export PATH := $(USR_DIR):$(PATH)
 export LD_LIBRARY_PATH := $(LD_LIBRARY_PATH)
 

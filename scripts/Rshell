@@ -5,7 +5,7 @@ set -o pipefail
 RMODULE="ml purge && module load R/3.5.0-goolf-1.7.20"
 RCMD="Rscript"
 NAME="Rshell"
-TMPDIR="/scicore/scratch"
+TMPDIR=${TEMPDIR} #use system $TEMPDIR on scicore (/scratch)
 LOGDIR=.
 MEM="1G"
 TIME="00:29:59"
