@@ -14,7 +14,7 @@ optList <- list(
 	make_option("--pos_col", default = "POS", type='character', help = "column name for pos [default %default]"),
 	make_option("--ref_col", default = "REF", type='character', help = "column name for ref [default %default]"),
 	make_option("--alt_col", default = "ALT", type='character', help = "column name for alt [default %default]"),
-	make_option("--tri.counts.method", default = "exome2genome", help = "tri.counts.method for deconstructSigs [default %default]"),
+	make_option("--tri.counts.method", default = "default", help = "tri.counts.method for deconstructSigs [default %default]"),
 	make_option("--num_iter", default = NA, type='integer', help = "number of re-sampling with replacement (at least 10, otherwise NA) [default %default]"),
 	make_option("--num_cores", default = 1, type='integer', help = "number of cores to use [default %default]"),
 	make_option("--min_muts_to_include", default = 20, type='integer', help = "minimum number of mutations required to derive signature [default %default]"),
@@ -22,8 +22,8 @@ optList <- list(
 	make_option("--seed", default = 1237, type='integer', help = "seed for randomization [default %default]"),
 	make_option("--tumorSample", default = NULL, type='character', help = "tumor samples to run [default %default]"),
 	make_option("--outPrefix", default = NULL, help = "output prefix [default %default]"),
-	make_option("--signatures.ref", default = "signatures.cosmic", help = "Signature matrix reference ('signatures.cosmic', 'signatures.nature2013', 'signatures.dbs.cosmic.v3.may2019', 'signatures.exome.cosmic.v3.may2019', 'signatures.genome.cosmic.v3.may2019') [default %default]"),
-	make_option("--hg38", action="store_true", default = FALSE, help = "this should be set if using hg38 [default %default]"))
+	make_option("--signatures.ref", default = "signatures.cosmic", help = "Signature matrix reference (internal: 'signatures.cosmic', 'signatures.nature2013', 'signatures.dbs.cosmic.v3.may2019', 'signatures.exome.cosmic.v3.may2019', 'signatures.genome.cosmic.v3.may2019') [default %default]\n\t\tNote: you can also provide an external signature file, which should be a tsv file formatted in the same way as the official COSMIC signature files that can be downloaded from  https://cancer.sanger.ac.uk/signatures/downloads/."),
+	make_option("--hg38", action="store_true", default = TRUE, help = "this should be set if using hg38 [default %default]"))
 
 parser <- OptionParser(usage = "%prog [options] [mutation_summary_file]", option_list = optList);
 
@@ -31,16 +31,28 @@ arguments <- parse_args(parser, positional_arguments = T);
 opt <- arguments$options;
 
 if (length(arguments$args) < 1) {
-    cat("Need mutations file\n")
-    print_help(parser);
-    stop();
+	cat("Need mutations file\n")
+	print_help(parser);
+	stop();
 } else if (is.null(opt$outPrefix)) {
-    cat("Need output prefix\n")
-    print_help(parser);
-    stop();
+	cat("Need output prefix\n")
+	print_help(parser);
+	stop();
 } else {
-    muts_file <- arguments$args[1];
+	muts_file <- arguments$args[1];
 }
+
+# Handle opt$signatures.ref. If not present in the internal data assume it's an external file in COSMIC format (in which case it just needs to be transposed)
+if (opt$signatures.ref %in% c('signatures.cosmic', 'signatures.nature2013', 'signatures.dbs.cosmic.v3.may2019', 'signatures.exome.cosmic.v3.may2019', 'signatures.genome.cosmic.v3.may2019')) {
+	signatures.ref <- get(opt$signatures.ref)
+} else if (!(file.exists(opt$signatures.ref))) {
+	cat("ERROR: file", opt$signatures.ref, "does not exist\n\n")
+	print_help(parser);
+	stop();
+} else {
+	signatures.ref <- as.data.frame(t(read.table(opt$signatures.ref, header = T, row.names = 1)))
+}
+
 
 if (!is.null(opt$associated)) {
 	cat ("Checking associated signatures\n")
@@ -124,7 +136,7 @@ if(nrow(pointmuts)>0) {
 				library(deconstructSigs)
 				whichSignatures(tumor.ref = sigs,
 								sample.id = sample,
-								signatures.ref = get(opt$signatures.ref),
+								signatures.ref = signatures.ref,
 								contexts.needed = T, ...)
 			}, sigs, tri.counts.method = opt$tri.counts.method, associated = opt$associated)
 			stopCluster(cl)
@@ -132,7 +144,7 @@ if(nrow(pointmuts)>0) {
 			ws <- lapply(rownames(sigs), function(sample) {
 				whichSignatures(tumor.ref = sigs,
 								sample.id = sample,
-								signatures.ref = get(opt$signatures.ref),
+								signatures.ref = signatures.ref,
 								contexts.needed = T,
 								tri.counts.method = opt$tri.counts.method, associated = opt$associated)
 			})
@@ -143,7 +155,7 @@ if(nrow(pointmuts)>0) {
 		if (!is.na(opt$num_iter)){
 			if(opt$num_iter>=10){
 				cat("Summarising bootstrapped signatures\n")
-				summarise_whichSignatures <- function(x, signatures=get(opt$signatures.ref), sampleName) {
+				summarise_whichSignatures <- function(x, signatures=signatures.ref, sampleName) {
 					weights_mat <- do.call("rbind", lapply(x, function(y){y$weights}))
 					tumor_mat <- do.call("rbind", lapply(x, function(y){y$tumor}))
 					prod_mat <- do.call("rbind", lapply(x, function(y){ y$product}))

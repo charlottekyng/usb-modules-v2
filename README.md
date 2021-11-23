@@ -427,6 +427,46 @@ For Illumina RNA sequencing, cnvkit is implemeted (but currently not well tested
 make cnvkit
 ```
 
+### Mutational signatures
+*Pre-requisites:* variant calls.
+When running mutational signatures modules, you need to specify only one `CALLER_PREFIX`. For example:
+```
+make deconstruct_sigs CALLER_PREFIX=mutect2
+```
+
+Currently implemented: `deconstruct_sigs` & `mutational_patterns`.
+
+#### deconstructSigs
+Usage:
+```
+make deconstruct_sigs CALLER_PREFIX=<caller>
+```
+In most cases `caller` will be `mutect2`.
+Two parameters are important:
+1. `SIGNATURES` (default: `signatures.genome.cosmic.v3.may2019` for WGS and `signatures.exome.cosmic.v3.may2019` for WES)
+2. `DECONSTRUCTSIGS_TRI_COUNT_METHOD` (default: `default`)
+
+The first option can be either one of the internal signatures, or a path to an external file.
+
+Internal signatures:
+`signatures.cosmic`
+`signatures.nature2013`
+`signatures.dbs.cosmic.v3.may2019`
+`signatures.exome.cosmic.v3.may2019`
+`signatures.genome.cosmic.v3.may2019`
+
+If `SIGNATURES` does not match any of the internal signatures listed above, the module will assume you provided an external file. The external file should be a tsv file formatted in the same way as the official COSMIC signature files that can be downloaded from [https://cancer.sanger.ac.uk/signatures/downloads/](https://cancer.sanger.ac.uk/signatures/downloads/).
+
+#### MutationalPatterns
+Usage:
+```
+make mutational_patterns CALLER_PREFIX=<caller>
+```
+In most cases `caller` will be `mutect2`.
+
+Important parameter:
+1. MUT_SIG_COSMIC (currently only `signatures.exome.cosmic.v3.may2019`. Eventually we will add the possibility to load external signature files).
+
 ### RNA-seq transcript quantification
 RSEM is tested to be run after STAR alignment.
 ```
