@@ -427,6 +427,17 @@ For Illumina RNA sequencing, cnvkit is implemeted (but currently not well tested
 make cnvkit
 ```
 
+### deTiN
+DeTiN estimates tumor in normal (TiN) based on tumor and matched normal sequencing data. The estimate is based on both candidate SSNVs and aSCNAs.
+
+Read more at [https://github.com/getzlab/deTiN](https://github.com/getzlab/deTiN)
+
+*Pre-requisites:* tumor/normal datasets, `mutect2` somatic calls, `facets` results (`cncf.txt`) and `gatk` results (`dbsnp` VCFs).
+
+Note: currently only `hg38` is supported. 
+
+Usage: `make detin`
+
 ### Mutational signatures
 *Pre-requisites:* variant calls.
 When running mutational signatures modules, you need to specify only one `CALLER_PREFIX`. For example:

@@ -250,6 +250,10 @@ fusion_ts :
 TARGETS += kallisto
 kallisto :
 	$(call RUN_MAKE,usb-modules-v2/rnaseq/kallisto.mk)
+
+TARGETS += detin
+detin :
+	$(call RUN_MAKE,usb-modules-v2/qc/detin.mk)
 #########################################################
 ## The set of targets below have NOT been tested,
 ## or are known to be broken/obsolete.
