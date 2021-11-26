@@ -84,7 +84,7 @@ MUTSIGCV_SEQ_REF_DIR ?= $(MUTSIGCV_REF_DIR)/chr_files_hg38/
 MSISENSOR_REF ?= $(REF_DIR)/msi_reference/hg38.txt
 CNVKIT_GENE_RESOURCE ?= $(ANN_DIR)/cnvkit_gene_resource.txt
 
-DETIN_PICKLE ?= $(ANN_DIR)/ExAC.0.3.GRCh38.pickle
+DETIN_PICKLE ?= $(ANN_DIR)/ExAC.r0.3.nontcga.sites.edited4detin.pickle
 
 endif
 HG38_INC = true
