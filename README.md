@@ -468,6 +468,9 @@ Internal signatures:
 
 If `SIGNATURES` does not match any of the internal signatures listed above, the module will assume you provided an external file. The external file should be a tsv file formatted in the same way as the official COSMIC signature files that can be downloaded from [https://cancer.sanger.ac.uk/signatures/downloads/](https://cancer.sanger.ac.uk/signatures/downloads/).
 
+**Note** that the signature matrix should match your genome build and type of data. The internal signatures `*.cosmic.v3.may2019` are based on `hg19`.
+It is recommended to keep the default `DECONSTRUCTSIGS_TRI_COUNT_METHOD`, and to provide the signature reference that matches your data. If you have `hg38` and you need the exome-normalised signatures you can use `/scicore/home/pissal00/GROUP/ref_nobackup/mut_sig_cosmic/COSMIC_v3.2_SBS_GRCh38_exome-sigfit.txt`, which was normalised using the `convert_signatures()` function from [sigfit](https://github.com/kgori/sigfit).
+
 #### MutationalPatterns
 Usage:
 ```
