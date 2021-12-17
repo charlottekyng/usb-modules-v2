@@ -123,13 +123,19 @@ bam_clipoverlap :
 # 	$(call RUN_MAKE,usb-modules-v2/bam_tools/strelka_refs.mk)
 # endif
 
+# bam_clipoveralp only if b37 PE (for some reason strelka breaks on bam_clipoverlap if hg38)
 TARGETS += strelka
-ifeq ($(strip $(PAIRED_END)$(REF)),falseb37)
-strelka : bam_clipoverlap
-	$(call RUN_MAKE,usb-modules-v2/variant_callers/somatic/strelka.mk)
-else
+ifeq ($(PAIRED_END),false)
 strelka :
 	$(call RUN_MAKE,usb-modules-v2/variant_callers/somatic/strelka.mk)
+else
+ifeq ($(REF),hg38)
+strelka :
+	$(call RUN_MAKE,usb-modules-v2/variant_callers/somatic/strelka.mk)
+else
+strelka : bam_clipoverlap
+	$(call RUN_MAKE,usb-modules-v2/variant_callers/somatic/strelka.mk)
+endif
 endif
 
 TARGETS += strelka2

@@ -15,7 +15,7 @@ define mutect2_calculate_contamination
 mutect2/contamination/$1.getpileupsummaries.table : bam/$1.bam
 	$$(call RUN,1,$$(RESOURCE_REQ_HIGH_MEM),$$(RESOURCE_REQ_LONG),$$(JAVA8_MODULE),"\
 	$$(call GATK4141,GetPileupSummaries,$$(RESOURCE_REQ_HIGH_MEM_JAVA)) \
-	-I $$< -V $$(ANN_DIR)/small_exac_common_3.hg38.vcf.gz -L $$(ANN_DIR)/small_exac_common_3.hg38.vcf.gz -O $$@")
+	-I $$< -V $$(ANN_DIR)/small_exac_common_3.$$(REF).vcf.gz -L $$(ANN_DIR)/small_exac_common_3.$$(REF).vcf.gz -O $$@")
 
 mutect2/contamination/$1.contamination.table : mutect2/contamination/$1.getpileupsummaries.table
 	$$(call RUN,1,$$(RESOURCE_REQ_HIGH_MEM),$$(RESOURCE_REQ_LONG),$$(JAVA8_MODULE),"\
@@ -23,4 +23,3 @@ mutect2/contamination/$1.contamination.table : mutect2/contamination/$1.getpileu
 	-I $$< -O $$@")
 endef
 $(foreach pair,$(SAMPLE_PAIRS),$(eval $(call mutect2_calculate_contamination,$(tumor.$(pair)),$(normal.$(pair)))))
-
