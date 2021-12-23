@@ -58,7 +58,7 @@ facets/cncfTN/$1_$2_$$(FACETS_SUFFIX).done : facets/snp_pileup/$1_$2_$$(SNPPILEU
 	--cval $$(FACETS_CVAL) --genome $$(REF) --min_nhet $$(FACETS_MIN_NHET) \
 	--max_segs $$(FACETS_MAX_SEGS) \
 	--tumorName $1 --normalName $2 \
-	--outPrefix $$* $$< ")
+	--outPrefix facets/cncfTN/$1_$2_$$(FACETS_SUFFIX) $$<")
 
 
 facets/cncfTN/$1_$2_$$(FACETS_SUFFIX).Rdata facets/cncfTN/$1_$2_$$(FACETS_SUFFIX).cncf.txt facets/cncfTN/$1_$2_$$(FACETS_SUFFIX).cncf.pdf facets/cncfTN/$1_$2_$$(FACETS_SUFFIX).logR.pdf facets/cncfTN/$1_$2_$$(FACETS_SUFFIX).out: facets/cncfTN/$1_$2_$$(FACETS_SUFFIX).done
