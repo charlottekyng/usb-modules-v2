@@ -25,16 +25,16 @@ LOGDIR ?= log/vcf.$(NOW)
 
 %.target_ft.vcf : %.vcf
 	$(call CHECK_VCF,$<,$@,\
-	$(call RUN,1,$(RESOURCE_REQ_MEDIUM_MEM),$(RESOURCE_REQ_SHORT),$(GATK42_MODULE),"\
-	$(call GATK42,VariantFiltration,$(RESOURCE_REQ_MEDIUM_MEM_JAVA)) \
+	$(call RUN,1,$(RESOURCE_REQ_MEDIUM_MEM),$(RESOURCE_REQ_SHORT),$(JAVA_MODULE),"\
+	$(call GATK4241,VariantFiltration,$(RESOURCE_REQ_MEDIUM_MEM_JAVA)) \
 	-R $(REF_FASTA) -V $< -O $@ \
 	--mask $(TARGETS_FILE_INTERVALS) --mask-name targetInterval \
 	--filter-not-in-mask && $(RM) $< $<.idx"))
 
 %.het_ft.vcf : %.vcf
 	$(call CHECK_VCF,$<,$@,\
-	$(call RUN,1,$(RESOURCE_REQ_MEDIUM_MEM),$(RESOURCE_REQ_SHORT),$(GATK42_MODULE),"\
-	$(call GATK42,VariantFiltration,$(RESOURCE_REQ_MEDIUM_MEM_JAVA)) \
+	$(call RUN,1,$(RESOURCE_REQ_MEDIUM_MEM),$(RESOURCE_REQ_SHORT),$(JAVA_MODULE),"\
+	$(call GATK4241,VariantFiltration,$(RESOURCE_REQ_MEDIUM_MEM_JAVA)) \
 	-R $(REF_FASTA) -V $< -O $@ \
 	--genotype-filter-expression 'isHet == 1' --genotype-filter-name 'Heterozygous positions'"))
 
@@ -55,8 +55,8 @@ LOGDIR ?= log/vcf.$(NOW)
 
 %.strelka_ft.vcf : %.vcf
 	$(call CHECK_VCF,$<,$@,\
-	$(call RUN,1,$(RESOURCE_REQ_MEDIUM_MEM),$(RESOURCE_REQ_SHORT),$(GATK42_MODULE),"\
-	$(call GATK42,VariantFiltration,$(RESOURCE_REQ_MEDIUM_MEM_JAVA)) \
+	$(call RUN,1,$(RESOURCE_REQ_MEDIUM_MEM),$(RESOURCE_REQ_SHORT),$(JAVA_MODULE),"\
+	$(call GATK4241,VariantFiltration,$(RESOURCE_REQ_MEDIUM_MEM_JAVA)) \
 	-R $(REF_FASTA) -V $< -O $@ \
 	--filter-expression 'QSI_NT < 30' --filter-name QSI_ref \
 	--filter-expression 'IHP > 14' --filter-name iHpol \
@@ -113,7 +113,7 @@ $(foreach sample,$(SAMPLES),$(eval $(call ffpe-sample,$(sample))))
 
 %.nft.vcf : %.vcf $(PON_VCF)
 	$(call RUN,1,$(RESOURCE_REQ_MEDIUM_MEM),$(RESOURCE_REQ_SHORT),$(JAVA8_MODULE),"\
-		$(call GATK4141,VariantFiltration,$(RESOURCE_REQ_MEDIUM_MEM_JAVA)) \
+		$(call GATK4241,VariantFiltration,$(RESOURCE_REQ_MEDIUM_MEM_JAVA)) \
 		-R $(REF_FASTA) -V $< -O $@ --mask-name 'PoN' --mask $(word 2,$^) && $(RM) $< $<.idx")
 
 %.pass.vcf : %.vcf
@@ -148,7 +148,7 @@ $(foreach sample,$(SAMPLES),$(eval $(call ffpe-sample,$(sample))))
 
 
 
-##### PROESSING #######
+##### PROCESSING #######
 
 %.norm.vcf : %.vcf.gz %.vcf.gz.tbi
 	$(call CHECK_VCF,$<,$@,\
@@ -158,7 +158,7 @@ $(foreach sample,$(SAMPLES),$(eval $(call ffpe-sample,$(sample))))
 %.left_align.vcf : %.vcf
 	$(call CHECK_VCF,$<,$@,\
 	$(call RUN,1,$(RESOURCE_REQ_LOW_MEM),$(RESOURCE_REQ_VSHORT),$(JAVA8_MODULE),"\
-	$(call GATK,LeftAlignAndTrimVariants,$(RESOURCE_REQ_LOW_MEM_JAVA)) -R $(REF_FASTA) -V $< -o $@"))
+	$(call GATK4241,LeftAlignAndTrimVariants,$(RESOURCE_REQ_LOW_MEM_JAVA)) -R $(REF_FASTA) -V $< -o $@"))
 
 %.post_bcftools.vcf : %.vcf
 	$(call CHECK_VCF,$<,$@,\
@@ -191,7 +191,7 @@ $(foreach sample,$(SAMPLES),$(eval $(call ffpe-sample,$(sample))))
 
 %.annotated.vcf : %.vcf %.gatk_eff.vcf %.gatk_eff.vcf.idx %.vcf.idx 
 	$(call RUN,4,$(RESOURCE_REQ_LOW_MEM),$(RESOURCE_REQ_VSHORT),$(JAVA8_MODULE),"\ 
-		$(call GATK,VariantFiltration,$(RESOURCE_REQ_LOWMEM)) \
+		$(call GATK4241,VariantFiltration,$(RESOURCE_REQ_LOWMEM)) \
 		-R $(REF_FASTA) -nt 4 -A SnpEff --variant $< --snpEffFile $(word 2,$^) -o $@ &> $(LOGDIR)/$@.log")
 
 %.amplicons.vcf : %.vcf
@@ -207,7 +207,7 @@ $(foreach sample,$(SAMPLES),$(eval $(call ffpe-sample,$(sample))))
 define annotate-sample
 vcf/$1.%.ann.vcf : vcf/$1.%.vcf bam/$1.bam bam/$1.bai
 	$$(call RUN,4,$$(RESOURCE_REQ_LOW_MEM),$$(RESOURCE_REQ_VSHORT),$$(JAVA8_MODULE),"\
-	$$(call GATK,VariantAnnotator,$$(RESOURCE_REQ_LOW_MEM_JAVA)) -nt 4 -R $$(REF_FASTA) \
+	$$(call GATK4241,VariantAnnotator,$$(RESOURCE_REQ_LOW_MEM_JAVA)) -nt 4 -R $$(REF_FASTA) \
 	$$(foreach ann,$$(VCF_ANNOTATIONS),-A $$(ann) ) --dbsnp $$(DBSNP) \
 	$$(foreach bam,$$(filter %.bam,$$^),-I $$(bam) ) -L $$< -V $$< -o $$@ && $$(RM) $$< $$<.idx")
 endef
@@ -216,7 +216,7 @@ $(foreach sample,$(SAMPLES),$(eval $(call annotate-sample,$(sample))))
 define hrun-sample
 vcf/$1.%.hrun.vcf : vcf/$1.%.vcf bam/$1.bam bam/$1.bai
 	$$(call RUN,2,$$(RESOURCE_REQ_LOW_MEM),$$(RESOURCE_REQ_VSHORT),$$(JAVA8_MODULE),"\
-	$$(call GATK,VariantAnnotator,$$(RESOURCE_REQ_LOW_MEM_JAVA)) -nt 2 -R $$(REF_FASTA) \
+	$$(call GATK4241,VariantAnnotator,$$(RESOURCE_REQ_LOW_MEM_JAVA)) -nt 2 -R $$(REF_FASTA) \
 	-L $$< -A HomopolymerRun --dbsnp $$(DBSNP) $$(foreach bam,$$(filter %.bam,$$^),-I $$(bam) ) \
 	-V $$< -o $$@ && $$(RM) $$< $$<.idx")
 endef
