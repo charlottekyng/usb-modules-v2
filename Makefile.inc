@@ -325,6 +325,7 @@ GATK4130 = $(USR_DIR)/local/gatk-4.1.3.0/gatk --java-options \"-Xmx$(2) -Xms$(2)
 GATK4141 = $(USR_DIR)/local/gatk-4.1.4.1/gatk --java-options \"-Xmx$(2) -Xms$(2)\" $(1)
 # gatk-4.1.5.0 is the latest that still has FilterByOrientationBias (see  https://gatk.broadinstitute.org/hc/en-us/community/posts/360060284132-FilterByOrientationBias-vanished-in-4-1-6-0)
 GATK4150 = $(USR_DIR)/local/gatk-4.1.5.0/gatk --java-options \"-Xmx$(2) -Xms$(2)\" $(1)
+GATK4241 = $(USR_DIR)/local/gatk-4.2.4.1/gatk --java-options \"-Xmx$(2) -Xms$(2)\" $(1)
 
 FIX_GATK_VCF = $(PERL) usb-modules-v2/variant_callers/fix_vcf_scripts/fix_gatk_vcf.pl
 FIX_VARSCAN_VCF = $(PERL) usb-modules-v2/variant_callers/fix_vcf_scripts/fix_varscan_vcf.pl

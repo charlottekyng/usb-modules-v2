@@ -53,7 +53,7 @@ endif
 define mutect2-tumor-normal-chr
 mutect2/chr_vcf/$1_$2.$3.mutect2.unfiltered.vcf.gz : bam/$1.bam bam/$2.bam $(PON_VCF)
 	$$(call RUN,1,$$(RESOURCE_REQ_HIGH_MEM),$$(RESOURCE_REQ_LONG),$$(JAVA8_MODULE),"\
-	$$(call GATK4141,Mutect2,$$(RESOURCE_REQ_HIGH_MEM_JAVA)) \
+	$$(call GATK4241,Mutect2,$$(RESOURCE_REQ_HIGH_MEM_JAVA)) \
 	-R $$(REF_FASTA) \
 	-I $$(word 1,$$^) -I $$(word 2,$$^) -tumor $1 -normal $2 \
 	-L $3 -O $$@ \
@@ -86,7 +86,7 @@ mutect2/merge_vcf/$1_$2.mutect2.unfiltered.vcf.gz : mutect2/merge_vcf/$1_$2.chr_
 # Run LearnReadOrientationModel, needed for Read Orientation Artifacts detection
 mutect2/merge_vcf/$1_$2.mutect2.f1r2.tar.gz : $(foreach chr,$(CHROMOSOMES),mutect2/chr_vcf/$1_$2.$(chr).mutect2.f1r2.tar.gz)
 	$$(call RUN,1,$$(RESOURCE_REQ_HIGH_MEM),$$(RESOURCE_REQ_LONG),$$(JAVA8_MODULE),"\
-	$$(call GATK4141,LearnReadOrientationModel,$$(RESOURCE_REQ_HIGH_MEM_JAVA)) \
+	$$(call GATK4241,LearnReadOrientationModel,$$(RESOURCE_REQ_HIGH_MEM_JAVA)) \
 	$$(addprefix -I ,$$^) \
 	-O $$@")
 #$$(foreach chr,$$(CHROMOSOMES),-I mutect2/chr_vcf/$$1_$$2.$$(chr).mutect2.f1r2.tar.gz) \
@@ -95,14 +95,14 @@ mutect2/merge_vcf/$1_$2.mutect2.f1r2.tar.gz : $(foreach chr,$(CHROMOSOMES),mutec
 # Sum up all .stats from different chromosomes and create a "merged" one.
 mutect2/merge_vcf/$1_$2.mutect2.unfiltered.vcf.gz.stats : $(foreach chr,$(CHROMOSOMES),mutect2/chr_vcf/$1_$2.$(chr).mutect2.unfiltered.vcf.gz.stats)
 	$$(call RUN,1,$$(RESOURCE_REQ_MEDIUM_MEM),$$(RESOURCE_REQ_LONG),$$(JAVA8_MODULE),"\
-	$$(call GATK4141,MergeMutectStats,$$(RESOURCE_REQ_MEDIUM_MEM_JAVA)) \
+	$$(call GATK4241,MergeMutectStats,$$(RESOURCE_REQ_MEDIUM_MEM_JAVA)) \
 	$$(addprefix --stats ,$$^) \
 	-O $$@")
 
 # Run FilterMutectCalls, which is required for the new Mutect2
 mutect2/$1_$2.mutect2.vcf.gz : mutect2/merge_vcf/$1_$2.mutect2.unfiltered.vcf.gz.stats
 	$$(call RUN,1,$$(RESOURCE_REQ_MEDIUM_MEM),$$(RESOURCE_REQ_LONG),$$(JAVA8_MODULE),"\
-	$$(call GATK4141,FilterMutectCalls,$$(RESOURCE_REQ_MEDIUM_MEM_JAVA)) \
+	$$(call GATK4241,FilterMutectCalls,$$(RESOURCE_REQ_MEDIUM_MEM_JAVA)) \
 	-R $$(REF_FASTA) \
 	-V mutect2/merge_vcf/$1_$2.mutect2.unfiltered.vcf.gz \
 	$$(if $$(findstring true,$$(TARGETS_LESS_1M)),,--contamination-table mutect2/contamination/$1.contamination.table) \
