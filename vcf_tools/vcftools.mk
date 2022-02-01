@@ -66,8 +66,8 @@ ifdef SAMPLE_PAIRS
 define oxog-pair
 vcf/$1_$2.%.oxog_ft.vcf : vcf/$1_$2.%.vcf metrics/$1.artifact_metrics.pre_adapter_detail_metrics
 	$$(call CHECK_VCF,$$<,$$@,\
-	$$(call RUN,1,$$(RESOURCE_REQ_MEDIUM_MEM),$$(RESOURCE_REQ_SHORT),$$(GATK42_MODULE),"\
-	$$(call GATK42,FilterByOrientationBias,$$(RESOURCE_REQ_MEDIUM_MEM_JAVA)) \
+	$$(call RUN,1,$$(RESOURCE_REQ_MEDIUM_MEM),$$(RESOURCE_REQ_SHORT),$$(JAVA8_MODULE),"\
+	$$(call GATK4150,FilterByOrientationBias,$$(RESOURCE_REQ_MEDIUM_MEM_JAVA)) \
 	-R $$(REF_FASTA) -V $$< -O $$@ \
 	--artifact-modes 'G/T' -P $$(<<)"))
 endef
@@ -77,8 +77,8 @@ endif
 define oxog-sample
 vcf/$1.%.oxog_ft.vcf : vcf/$1.%.vcf metrics/$1.artifact_metrics.pre_adapter_detail_metrics
 	$$(call CHECK_VCF,$$<,$$@,\
-	$$(call RUN,1,$$(RESOURCE_REQ_MEDIUM_MEM),$$(RESOURCE_REQ_SHORT),$$(GATK42_MODULE),"\
-	$$(call GATK42,FilterByOrientationBias,$$(RESOURCE_REQ_MEDIUM_MEM_JAVA)) \
+	$$(call RUN,1,$$(RESOURCE_REQ_MEDIUM_MEM),$$(RESOURCE_REQ_SHORT),$$(JAVA8_MODULE),"\
+	$$(call GATK4150,FilterByOrientationBias,$$(RESOURCE_REQ_MEDIUM_MEM_JAVA)) \
 	-R $$(REF_FASTA) -V $$< -O $$@ \
 	--artifact-modes 'G/T' -P $$(<<)"))
 endef
@@ -88,8 +88,8 @@ ifdef SAMPLE_PAIRS
 define ffpe-pair
 vcf/$1_$2.%.ffpe_ft.vcf : vcf/$1_$2.%.vcf metrics/$1.artifact_metrics.pre_adapter_detail_metrics
 	$$(call CHECK_VCF,$$<,$$@,\
-	$$(call RUN,1,$$(RESOURCE_REQ_MEDIUM_MEM),$$(RESOURCE_REQ_SHORT),$$(GATK42_MODULE),"\
-	$$(call GATK42,FilterByOrientationBias,$$(RESOURCE_REQ_MEDIUM_MEM_JAVA)) \
+	$$(call RUN,1,$$(RESOURCE_REQ_MEDIUM_MEM),$$(RESOURCE_REQ_SHORT),$$(JAVA8_MODULE),"\
+	$$(call GATK4150,FilterByOrientationBias,$$(RESOURCE_REQ_MEDIUM_MEM_JAVA)) \
 	-R $$(REF_FASTA) -V $$< -O $$@ \
 	--artifact-modes 'C/T' -P $$(<<)"))
 endef
@@ -99,8 +99,8 @@ endif
 define ffpe-sample
 vcf/$1.%.ffpe_ft.vcf : vcf/$1.%.vcf metrics/$1.artifact_metrics.pre_adapter_detail_metrics
 	$$(call CHECK_VCF,$$<,$$@,\
-	$$(call RUN,1,$$(RESOURCE_REQ_MEDIUM_MEM),$$(RESOURCE_REQ_SHORT),$$(GATK42_MODULE),"\
-	$$(call GATK42,FilterByOrientationBias,$$(RESOURCE_REQ_MEDIUM_MEM_JAVA)) \
+	$$(call RUN,1,$$(RESOURCE_REQ_MEDIUM_MEM),$$(RESOURCE_REQ_SHORT),$$(JAVA8_MODULE),"\
+	$$(call GATK4150,FilterByOrientationBias,$$(RESOURCE_REQ_MEDIUM_MEM_JAVA)) \
 	-R $$(REF_FASTA) -V $$< -O $$@ \
 	--artifact-modes 'C/T' -P $$(<<)"))
 endef
