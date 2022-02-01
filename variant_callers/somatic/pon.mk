@@ -36,7 +36,7 @@ pon : mutect2/pon.mutect2.vcf.gz
 define mutect2-pon-chr
 mutect2/pon/chr_vcf_pon/$1.$2.mutect2.vcf.gz : bam/$1.bam
 	$$(call RUN,1,$$(RESOURCE_REQ_HIGH_MEM),$$(RESOURCE_REQ_LONG),$$(JAVA8_MODULE),"\
-	$$(call GATK4141,Mutect2,$$(RESOURCE_REQ_HIGH_MEM_JAVA)) \
+	$$(call GATK4241,Mutect2,$$(RESOURCE_REQ_HIGH_MEM_JAVA)) \
 	-R $$(REF_FASTA) -I $$< -tumor $1 -L $2 -O $$@ \
 	--max-mnp-distance 0 \
 	$$(if $(findstring hg38,$(REF)),--disable-read-filter MateOnSameContigOrNoMappedMateReadFilter,)")
@@ -77,12 +77,12 @@ mutect2/pon/pon.list : $(foreach normal,$(PANEL_OF_NORMAL_SAMPLES),mutect2/pon/m
 # Supply format -L chr1 -L chr2 ...
 mutect2/pon/pon_db : mutect2/pon/pon.list
 	$(call RUN,1,$(RESOURCE_REQ_HIGH_MEM),$(RESOURCE_REQ_LONG),$(JAVA8_MODULE),"\
-	$(call GATK4141,GenomicsDBImport,$(RESOURCE_REQ_HIGH_MEM_JAVA)) \
+	$(call GATK4241,GenomicsDBImport,$(RESOURCE_REQ_HIGH_MEM_JAVA)) \
 	-V $< -L $(shell echo '$(CHROMOSOMES)' | sed 's/ / -L /g') --genomicsdb-workspace-path $@")
 
 mutect2/pon.mutect2.vcf.gz : mutect2/pon/pon_db
 	$(call RUN,1,$(RESOURCE_REQ_HIGH_MEM),$(RESOURCE_REQ_LONG),$(JAVA8_MODULE),"\
-	$(call GATK4141,CreateSomaticPanelOfNormals,$(RESOURCE_REQ_HIGH_MEM_JAVA)) \
+	$(call GATK4241,CreateSomaticPanelOfNormals,$(RESOURCE_REQ_HIGH_MEM_JAVA)) \
 	$(if $$(findstring hg38,$(REF)),--germline-resource $(ANN_DIR)/af-only-gnomad.hg38.vcf.gz,$$(if $(findstring b37,$(REF)),--germline-resource $(ANN_DIR)/af-only-gnomad.raw.sites.b37.vcf.gz,,))\
 	-V gendb://$< -O $@ --min-sample-count $(PON_MIN_SAMPLES) -R $(REF_FASTA)")
 endif
