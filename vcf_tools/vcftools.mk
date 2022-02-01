@@ -26,7 +26,7 @@ LOGDIR ?= log/vcf.$(NOW)
 %.target_ft.vcf : %.vcf
 	$(call CHECK_VCF,$<,$@,\
 	$(call RUN,1,$(RESOURCE_REQ_MEDIUM_MEM),$(RESOURCE_REQ_SHORT),$(GATK42_MODULE),"\
-	$(call GATK40,VariantFiltration,$(RESOURCE_REQ_MEDIUM_MEM_JAVA)) \
+	$(call GATK42,VariantFiltration,$(RESOURCE_REQ_MEDIUM_MEM_JAVA)) \
 	-R $(REF_FASTA) -V $< -O $@ \
 	--mask $(TARGETS_FILE_INTERVALS) --mask-name targetInterval \
 	--filter-not-in-mask && $(RM) $< $<.idx"))
@@ -34,7 +34,7 @@ LOGDIR ?= log/vcf.$(NOW)
 %.het_ft.vcf : %.vcf
 	$(call CHECK_VCF,$<,$@,\
 	$(call RUN,1,$(RESOURCE_REQ_MEDIUM_MEM),$(RESOURCE_REQ_SHORT),$(GATK42_MODULE),"\
-	$(call GATK40,VariantFiltration,$(RESOURCE_REQ_MEDIUM_MEM_JAVA)) \
+	$(call GATK42,VariantFiltration,$(RESOURCE_REQ_MEDIUM_MEM_JAVA)) \
 	-R $(REF_FASTA) -V $< -O $@ \
 	--genotype-filter-expression 'isHet == 1' --genotype-filter-name 'Heterozygous positions'"))
 
@@ -56,7 +56,7 @@ LOGDIR ?= log/vcf.$(NOW)
 %.strelka_ft.vcf : %.vcf
 	$(call CHECK_VCF,$<,$@,\
 	$(call RUN,1,$(RESOURCE_REQ_MEDIUM_MEM),$(RESOURCE_REQ_SHORT),$(GATK42_MODULE),"\
-	$(call GATK40,VariantFiltration,$(RESOURCE_REQ_MEDIUM_MEM_JAVA)) \
+	$(call GATK42,VariantFiltration,$(RESOURCE_REQ_MEDIUM_MEM_JAVA)) \
 	-R $(REF_FASTA) -V $< -O $@ \
 	--filter-expression 'QSI_NT < 30' --filter-name QSI_ref \
 	--filter-expression 'IHP > 14' --filter-name iHpol \
@@ -67,7 +67,7 @@ define oxog-pair
 vcf/$1_$2.%.oxog_ft.vcf : vcf/$1_$2.%.vcf metrics/$1.artifact_metrics.pre_adapter_detail_metrics
 	$$(call CHECK_VCF,$$<,$$@,\
 	$$(call RUN,1,$$(RESOURCE_REQ_MEDIUM_MEM),$$(RESOURCE_REQ_SHORT),$$(GATK42_MODULE),"\
-	$$(call GATK40,FilterByOrientationBias,$$(RESOURCE_REQ_MEDIUM_MEM_JAVA)) \
+	$$(call GATK42,FilterByOrientationBias,$$(RESOURCE_REQ_MEDIUM_MEM_JAVA)) \
 	-R $$(REF_FASTA) -V $$< -O $$@ \
 	--artifact-modes 'G/T' -P $$(<<)"))
 endef
@@ -78,7 +78,7 @@ define oxog-sample
 vcf/$1.%.oxog_ft.vcf : vcf/$1.%.vcf metrics/$1.artifact_metrics.pre_adapter_detail_metrics
 	$$(call CHECK_VCF,$$<,$$@,\
 	$$(call RUN,1,$$(RESOURCE_REQ_MEDIUM_MEM),$$(RESOURCE_REQ_SHORT),$$(GATK42_MODULE),"\
-	$$(call GATK40,FilterByOrientationBias,$$(RESOURCE_REQ_MEDIUM_MEM_JAVA)) \
+	$$(call GATK42,FilterByOrientationBias,$$(RESOURCE_REQ_MEDIUM_MEM_JAVA)) \
 	-R $$(REF_FASTA) -V $$< -O $$@ \
 	--artifact-modes 'G/T' -P $$(<<)"))
 endef
@@ -89,7 +89,7 @@ define ffpe-pair
 vcf/$1_$2.%.ffpe_ft.vcf : vcf/$1_$2.%.vcf metrics/$1.artifact_metrics.pre_adapter_detail_metrics
 	$$(call CHECK_VCF,$$<,$$@,\
 	$$(call RUN,1,$$(RESOURCE_REQ_MEDIUM_MEM),$$(RESOURCE_REQ_SHORT),$$(GATK42_MODULE),"\
-	$$(call GATK40,FilterByOrientationBias,$$(RESOURCE_REQ_MEDIUM_MEM_JAVA)) \
+	$$(call GATK42,FilterByOrientationBias,$$(RESOURCE_REQ_MEDIUM_MEM_JAVA)) \
 	-R $$(REF_FASTA) -V $$< -O $$@ \
 	--artifact-modes 'C/T' -P $$(<<)"))
 endef
@@ -100,7 +100,7 @@ define ffpe-sample
 vcf/$1.%.ffpe_ft.vcf : vcf/$1.%.vcf metrics/$1.artifact_metrics.pre_adapter_detail_metrics
 	$$(call CHECK_VCF,$$<,$$@,\
 	$$(call RUN,1,$$(RESOURCE_REQ_MEDIUM_MEM),$$(RESOURCE_REQ_SHORT),$$(GATK42_MODULE),"\
-	$$(call GATK40,FilterByOrientationBias,$$(RESOURCE_REQ_MEDIUM_MEM_JAVA)) \
+	$$(call GATK42,FilterByOrientationBias,$$(RESOURCE_REQ_MEDIUM_MEM_JAVA)) \
 	-R $$(REF_FASTA) -V $$< -O $$@ \
 	--artifact-modes 'C/T' -P $$(<<)"))
 endef

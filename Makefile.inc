@@ -319,7 +319,7 @@ GATK += -S LENIENT -T $(1) -filterNoBases
 GATK37 = $(JAVA) -Xmx$(2) -jar $(JAR_DIR)/GenomeAnalysisTK-3.7/GenomeAnalysisTK-3.7.jar 
 GATK37 += -S LENIENT -T $(1) -filterNoBases
 
-GATK40 = gatk --java-options \"-Xmx$(2) -Xms$(2)\" $(1)
+GATK42 = gatk --java-options \"-Xmx$(2) -Xms$(2)\" $(1)
 GATK4120 = $(USR_DIR)/local/gatk-4.1.2.0/gatk --java-options \"-Xmx$(2) -Xms$(2)\" $(1)
 GATK4130 = $(USR_DIR)/local/gatk-4.1.3.0/gatk --java-options \"-Xmx$(2) -Xms$(2)\" $(1)
 GATK4141 = $(USR_DIR)/local/gatk-4.1.4.1/gatk --java-options \"-Xmx$(2) -Xms$(2)\" $(1)
