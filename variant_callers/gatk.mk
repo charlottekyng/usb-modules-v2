@@ -28,7 +28,7 @@ HAPLOTYPE_CALLER_OPTS = --dbsnp $(DBSNP) -ERC GVCF -R $(REF_FASTA)
 	$(INIT) sed '/^#/d' $< | awk '{print $$1":"$$2 }' > $@
 
 #gatk/dbsnp/%.gatk_snps.vcf.gz : bam/%.bam bam/%.bai
-#	$(call RUN,1,$(RESOURCE_REQ_MEDIUM_MEM),$(RESOURCE_REQ_SHORT),$(GATK40_MODULE),"\
+#	$(call RUN,1,$(RESOURCE_REQ_MEDIUM_MEM),$(RESOURCE_REQ_SHORT),$(GATK42_MODULE),"\
 #	$(call GATK40,HaplotypeCaller,$(RESOURCE_REQ_MEDIUM_MEM_JAVA)) \
 #	-R $(REF_FASTA) -I $< -O $@ \
 #	--dbsnp $(DBSNP_TARGETS_INTERVALS) --alleles $(DBSNP_TARGETS_INTERVALS) \
@@ -51,7 +51,7 @@ gatk/vcf_ug/%.variants.vcf : bam/%.bam bam/%.bai
 MAX_INTERVAL_IDX = $(shell expr $(GATK_INTERVALS_COUNT) - 1)
 
 gatk/intervals/$(shell printf "%04d" $(MAX_INTERVAL_IDX))-scattered.intervals : $(TARGETS_FILE_INTERVALS)
-	$(call RUN,1,$(RESOURCE_REQ_LOW_MEM),$(RESOURCE_REQ_VSHORT),$(GATK40_MODULE),"\
+	$(call RUN,1,$(RESOURCE_REQ_LOW_MEM),$(RESOURCE_REQ_VSHORT),$(GATK42_MODULE),"\
 	$(call GATK40,SplitIntervals,$(RESOURCE_REQ_LOW_MEM_JAVA)) \
 	-L $< -R $(REF_FASTA) -O $(dir $@) --scatter-count $(GATK_INTERVALS_COUNT)") 
 
@@ -64,7 +64,7 @@ $(foreach interval,$(shell seq 0 $(shell expr $(MAX_INTERVAL_IDX) - 1)),$(eval $
 
 define hapcall-interval
 gatk/intervals_gvcf/$1/%.variants.vcf.gz : bam/%.bam bam/%.bai gatk/intervals/$1-scattered.intervals 
-	$$(call RUN,1,$$(RESOURCE_REQ_MEDIUM_MEM),$$(RESOURCE_REQ_SHORT),$$(GATK40_MODULE),"\
+	$$(call RUN,1,$$(RESOURCE_REQ_MEDIUM_MEM),$$(RESOURCE_REQ_SHORT),$$(GATK42_MODULE),"\
 	$$(MKDIR) gatk/intervals_gvcf/; \
 	$$(call GATK40,HaplotypeCaller,$$(RESOURCE_REQ_MEDIUM_MEM_JAVA)) $$(HAPLOTYPE_CALLER_OPTS) \
 	-I $$< -O $$@ -L $$(<<<) -ip 150")
@@ -73,7 +73,7 @@ $(foreach interval,$(shell seq 0 $(MAX_INTERVAL_IDX)),$(eval $(call hapcall-inte
 
 define genomicsdb-interval
 gatk/intervals_db/$1.db.vcf.gz : $$(foreach sample,$$(SAMPLES),gatk/intervals_gvcf/$1/$$(sample).variants.vcf.gz) gatk/intervals/$1-scattered.intervals
-	$$(call RUN,1,$$(RESOURCE_REQ_HIGH_MEM),$$(RESOURCE_REQ_SHORT),$$(GATK40_MODULE),"\
+	$$(call RUN,1,$$(RESOURCE_REQ_HIGH_MEM),$$(RESOURCE_REQ_SHORT),$$(GATK42_MODULE),"\
 	$$(MKDIR) gatk/intervals_db/; $$(RMR) $$(@D)/$1; \
 	$$(call GATK40,GenomicsDBImport,$$(RESOURCE_REQ_HIGH_MEM_JAVA)) \
 	$$(foreach vcf,$$(filter %.vcf.gz,$$^),-V $$(vcf) ) --genomicsdb-workspace-path $$(@D)/$1 \
@@ -84,7 +84,7 @@ endef
 $(foreach interval,$(shell seq 0 $(MAX_INTERVAL_IDX)),$(eval $(call genomicsdb-interval,$(shell printf "%04d" $(interval)))))
 
 gatk/gvcf/genomics.variants.vcf.gz : $(foreach interval,$(shell seq 0 $(MAX_INTERVAL_IDX)),gatk/intervals_db/$(shell printf "%04d" $(interval)).db.vcf.gz)
-	$(call RUN,1,$(RESOURCE_REQ_MEDIUM_MEM),$(RESOURCE_REQ_SHORT),$(GATK40_MODULE),"\
+	$(call RUN,1,$(RESOURCE_REQ_MEDIUM_MEM),$(RESOURCE_REQ_SHORT),$(GATK42_MODULE),"\
 	$(call GATK40,SortVcf,$(RESOURCE_REQ_MEDIUM_MEM_JAVA)) \
 	$(foreach vcf,$^,-I $(vcf) ) -O $@")
 	
@@ -94,12 +94,12 @@ gatk/gvcf/genomics.variants.vcf.gz : $(foreach interval,$(shell seq 0 $(MAX_INTE
 
 
 gatk/gatk_snps.vcf.gz : gatk/gvcf/genomics.variants.vcf.gz gatk/gvcf/genomics.variants.vcf.gz.tbi
-	$(call RUN,1,$(RESOURCE_REQ_MEDIUM_MEM),$(RESOURCE_REQ_SHORT),$(GATK40_MODULE),"\
+	$(call RUN,1,$(RESOURCE_REQ_MEDIUM_MEM),$(RESOURCE_REQ_SHORT),$(GATK42_MODULE),"\
 	$(call GATK40,SelectVariants,$(RESOURCE_REQ_MEDIUM_MEM_JAVA)) \
 	-R $(REF_FASTA) -V $< -O $@ -select-type SNP")
 
 gatk/gatk_indels.vcf.gz : gatk/gvcf/genomics.variants.vcf.gz gatk/gvcf/genomics.variants.vcf.gz.tbi
-	$(call RUN,1,$(RESOURCE_REQ_MEDIUM_MEM),$(RESOURCE_REQ_VSHORT),$(GATK40_MODULE),"\
+	$(call RUN,1,$(RESOURCE_REQ_MEDIUM_MEM),$(RESOURCE_REQ_VSHORT),$(GATK42_MODULE),"\
 	$(call GATK40,SelectVariants,$(RESOURCE_REQ_MEDIUM_MEM_JAVA)) \
 	-R $(REF_FASTA) -V $< -O $@ -select-type INDEL")
 
@@ -128,13 +128,13 @@ VARIANT_RECAL_ANNOTATIONS_SNPS = QD MQ MQRankSum ReadPosRankSum FS SOR DP
 VARIANT_RECAL_ANNOTATIONS_INDELS = QD DP FS SOR ReadPosRankSum MQRankSum 
 
 define SELECT_SAMPLE
-	$(call RUN,1,$(RESOURCE_REQ_MEDIUM_MEM),$(RESOURCE_REQ_VSHORT),$(GATK40_MODULE),"\
+	$(call RUN,1,$(RESOURCE_REQ_MEDIUM_MEM),$(RESOURCE_REQ_VSHORT),$(GATK42_MODULE),"\
 	$(call GATK40,SelectVariants,$(RESOURCE_REQ_MEDIUM_MEM_JAVA)) \
 	-R $(REF_FASTA) -V $1 -O $2 -sn $3")
 endef
 	
 define VARIANT_RECAL_SNPS
-	$(call RUN,1,$(RESOURCE_REQ_LOW_MEM),$(RESOURCE_REQ_SHORT),$(GATK40_MODULE) $(R_MODULE),"\
+	$(call RUN,1,$(RESOURCE_REQ_LOW_MEM),$(RESOURCE_REQ_SHORT),$(GATK42_MODULE) $(R_MODULE),"\
 	$(call GATK40,VariantRecalibrator,$(RESOURCE_REQ_LOW_MEM_JAVA)) \
 	-R $(REF_FASTA) -V $1 -O $2 -mode SNP \
 	--resource hapmap$(,)known=false$(,)training=true$(,)truth=true$(,)prior=15.0:$(HAPMAP) \
@@ -147,7 +147,7 @@ define VARIANT_RECAL_SNPS
 endef
 
 define VARIANT_RECAL_INDELS
-	$(call RUN,1,$(RESOURCE_REQ_LOW_MEM),$(RESOURCE_REQ_VSHORT),$(GATK40_MODULE) $(R_MODULE),"\
+	$(call RUN,1,$(RESOURCE_REQ_LOW_MEM),$(RESOURCE_REQ_VSHORT),$(GATK42_MODULE) $(R_MODULE),"\
 	$(call GATK40,VariantRecalibrator,$(RESOURCE_REQ_LOW_MEM_JAVA)) \
 	-R $(REF_FASTA) -V $1 -O $2 -mode INDEL --max-gaussians 4 \
 	--resource mills$(,)known=false$(,)training=true$(,)truth=true$(,)prior=12.0:$(KNOWN_INDELS) \
@@ -158,7 +158,7 @@ define VARIANT_RECAL_INDELS
 endef
 
 define APPLY_VARIANT_RECAL_SNPS
-	$(call RUN,1,$(RESOURCE_REQ_MEDIUM_MEM),$(RESOURCE_REQ_SHORT),$(GATK40_MODULE) $(R_MODULE),"\
+	$(call RUN,1,$(RESOURCE_REQ_MEDIUM_MEM),$(RESOURCE_REQ_SHORT),$(GATK42_MODULE) $(R_MODULE),"\
 	$(call GATK40,ApplyVQSR,$(RESOURCE_REQ_MEDIUM_MEM_JAVA)) \
 	-R $(REF_FASTA) -V $1 --recal-file $2 -O $3 -mode SNP \
 	--truth-sensitivity-filter-level $(VARIANT_RECAL_TRUTH_SENSITIVITY_LEVEL_SNPS) \
@@ -166,7 +166,7 @@ define APPLY_VARIANT_RECAL_SNPS
 endef
 
 define APPLY_VARIANT_RECAL_INDELS
-	$(call RUN,1,$(RESOURCE_REQ_MEDIUM_MEM),$(RESOURCE_REQ_VSHORT),$(GATK40_MODULE) $(R_MODULE),"\
+	$(call RUN,1,$(RESOURCE_REQ_MEDIUM_MEM),$(RESOURCE_REQ_VSHORT),$(GATK42_MODULE) $(R_MODULE),"\
 	$(call GATK40,ApplyVQSR,$(RESOURCE_REQ_MEDIUM_MEM_JAVA)) \
 	-R $(REF_FASTA) -V $1 --recal-file $2 -O $3 -mode INDEL\
 	--truth-sensitivity-filter-level $(VARIANT_RECAL_TRUTH_SENSITIVITY_LEVEL_INDELS) \
@@ -182,7 +182,7 @@ endef
 $(foreach sample,$(SAMPLES),$(eval $(call SELECT_SAMPLE_SNPS,$(sample))))
 
 gatk/vcf/%.gatk_snps.filtered.vcf.gz : gatk/vcf/%.gatk_snps.vcf.gz
-	$(call RUN,4,$(RESOURCE_REQ_MEDIUM_MEM),$(RESOURCE_REQ_VSHORT),$(GATK40_MODULE),"\
+	$(call RUN,4,$(RESOURCE_REQ_MEDIUM_MEM),$(RESOURCE_REQ_VSHORT),$(GATK42_MODULE),"\
 	$(call GATK40,VariantFiltration,$(RESOURCE_REQ_MEDIUM_MEM_JAVA)) -R $(REF_FASTA) \
 	$(HAPCALL_SNP_FILTERS) -V $< -O $@")
 
@@ -204,7 +204,7 @@ endef
 $(foreach sample,$(SAMPLES),$(eval $(call SELECT_SAMPLE_INDELS,$(sample))))
 
 gatk/vcf/%.gatk_indels.filtered.vcf.gz : gatk/vcf/%.gatk_indels.vcf.gz
-	$(call RUN,1,$(RESOURCE_REQ_MEDIUM_MEM),$(RESOURCE_REQ_VSHORT),$(GATK40_MODULE),"\
+	$(call RUN,1,$(RESOURCE_REQ_MEDIUM_MEM),$(RESOURCE_REQ_VSHORT),$(GATK42_MODULE),"\
 	$(call GATK40,VariantFiltration,$(RESOURCE_REQ_MEDIUM_MEM_JAVA)) -R $(REF_FASTA) \
 	$(HAPCALL_INDEL_FILTERS) -V $< -O $@")
 	
@@ -245,7 +245,7 @@ $(REF_FASTA).fai : $(REF_FASTA)
 	$(SAMTOOLS) faidx $<")
 
 $(REF_FASTA:.fasta=.dict) : $(REF_FASTA)
-	$(call RUN,1,$(RESOURCE_REQ_LOW_MEM),$(RESOURCE_REQ_VSHORT),$(GATK40_MODULE),"\
+	$(call RUN,1,$(RESOURCE_REQ_LOW_MEM),$(RESOURCE_REQ_VSHORT),$(GATK42_MODULE),"\
 	$(call PICARD,CreateSequenceDictionary,$(RESOURCE_REQ_LOW_MEM_JAVA)) REFERENCE=$< OUTPUT=$@")
 
 
