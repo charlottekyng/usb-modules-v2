@@ -10,7 +10,7 @@ LOGDIR ?= log/vcf.$(NOW)
 
 ######### GZ & INDEX #####
 %.vcf.idx : %.vcf
-	$(call RUN,1,$(RESOURCE_REQ_LOW_MEM),$(RESOURCE_REQ_VSHORT),$(IGVTOOLS_MODULE),"\
+	$(call RUN,1,$(RESOURCE_REQ_LOW_MEM),$(RESOURCE_REQ_VSHORT),,"\
 	sleep 5 && $(RM) $@ && $(IGVTOOLS) index $< && sleep 5")
 
 %.vcf.gz : %.vcf

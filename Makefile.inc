@@ -210,7 +210,6 @@ PYTHON_MODULE ?= Python/3.5.2-goolf-1.7.20
 SAMTOOLS_MODULE ?= SAMtools/1.3-goolf-1.7.20
 BCFTOOLS_MODULE ?= BCFtools/1.5-goolf-1.7.20
 BEDTOOLS_MODULE ?= BEDTools/2.26.0-goolf-1.7.20
-IGVTOOLS_MODULE ?= IGVTools/2.3.60-Java-1.7.0_21
 VCFTOOLS_MODULE ?= VCFtools/0.1.14-goolf-1.7.20-Perl-5.22.2
 BCL2FASTQ_MODULE ?= bcl2fastq/2.17.1.14-goolf-1.7.20
 TRIM_GALORE_MODULE ?= Trim_Galore/0.4.4-goolf-1.7.20-Perl-5.22.2
@@ -265,7 +264,7 @@ RBIND ?= $(RSCRIPT) $(MODULE_SCRIPTS_DIR)/rbind.R
 SAMTOOLS ?= samtools
 BCFTOOLS ?= bcftools
 BEDTOOLS ?= bedtools
-IGVTOOLS ?= igvtools
+IGVTOOLS ?= $(USR_DIR)/local/IGV_2.12.0/igvtools
 VCFTOOLS ?= vcftools
 VCFTOOLS_MERGE ?= vcf-merge
 BCL2FASTQ ?= bcl2fastq
@@ -323,8 +322,9 @@ GATK42 = gatk --java-options \"-Xmx$(2) -Xms$(2)\" $(1)
 GATK4120 = $(USR_DIR)/local/gatk-4.1.2.0/gatk --java-options \"-Xmx$(2) -Xms$(2)\" $(1)
 # gatk-4.1.3.0 is used in sufam (https://github.com/charlottekyng/usb-modules-v2/commit/f7f8ee6db4a33e48247812efc0430337af1d073c#commitcomment-36581870)
 GATK4130 = $(USR_DIR)/local/gatk-4.1.3.0/gatk --java-options \"-Xmx$(2) -Xms$(2)\" $(1)
-# gatk-4.1.4.1 is the latest that still has FilterByOrientationBias
 GATK4141 = $(USR_DIR)/local/gatk-4.1.4.1/gatk --java-options \"-Xmx$(2) -Xms$(2)\" $(1)
+# gatk-4.1.5.0 is the latest that still has FilterByOrientationBias (see  https://gatk.broadinstitute.org/hc/en-us/community/posts/360060284132-FilterByOrientationBias-vanished-in-4-1-6-0)
+GATK4150 = $(USR_DIR)/local/gatk-4.1.5.0/gatk --java-options \"-Xmx$(2) -Xms$(2)\" $(1)
 GATK4241 = $(USR_DIR)/local/gatk-4.2.4.1/gatk --java-options \"-Xmx$(2) -Xms$(2)\" $(1)
 
 FIX_GATK_VCF = $(PERL) usb-modules-v2/variant_callers/fix_vcf_scripts/fix_gatk_vcf.pl
