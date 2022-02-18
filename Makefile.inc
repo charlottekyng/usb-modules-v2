@@ -188,6 +188,7 @@ BIN_DIR ?= $(USR_DIR)/local/bin
 MODULE_SCRIPTS_DIR ?= usb-modules-v2/scripts
 LD_LIBRARY_PATH = $(USR_DIR)/local/MCR_R2014a/v83/runtime/glnxa64:$(USR_DIR)/local/MCR_R2014a/v83/bin/glnxa64:$(USR_DIR)/local/MCR_R2014a/v83/sys/os/glnxa64
 IMG_DIR ?= /scicore/home/pissal00/GROUP/virtual_env/img
+HOTSPOTS_DIR ?= $(USR_DIR)/local/cancer_hotspots
 
 # use system $TEMPDIR on scicore (/scratch)
 export TMPDIR := $(TEMPDIR)
@@ -224,8 +225,7 @@ STAR_MODULE ?= STAR/2.7.3a-foss-2018b
 STAR_FUSION_MODULE ?= STAR-Fusion/0.6.0-goolf-1.7.20-Perl-5.22.2
 HISAT2_MODULE ?= HISAT2/2.0.4-goolf-1.7.20
 STRINGTIE_MODULE ?= StringTie/1.3.3-goolf-1.7.20
-SNP_EFF_MODULE ?= snpEff/4.1l-Java-1.7.0_75
-SNP_EFF_43_MODULE ?= snpEff/4.3t-Java-1.8.0_92
+SNP_EFF_MODULE ?= snpEff/4.3t-Java-1.8.0_92
 CUFFLINKS_MODULE ?= Cufflinks/2.2.1-Linux_x86_64
 STRINGTIE_MODULE ?= StringTie/1.3.3-goolf-1.7.20
 RSEM_MODULE ?= RSEM/1.3.2-foss-2018b
@@ -376,12 +376,13 @@ VARSCAN = $(JAVA) -Xmx$(RESOURCE_REQ_MEDIUM_MEM_JAVA) -jar $(VARSCAN_JAR)
 ### For the future
 # VARSCAN ?= java -Xmx$(RESOURCE_REQ_LOW_MEM_JAVA) -jar \$$EBROOTVARSCAN/VarScan.v2.4.1.jar
 
-SNP_EFF_CONFIG ?= usb-modules-v2/vcf_tools/snpEff.config
+#SNP_EFF_CONFIG ?= usb-modules-v2/vcf_tools/snpEff.config
+SNP_EFF_DATA_DIR ?= /scicore/home/pissal00/GROUP/ref_nobackup/snpeff/4.3
 SNP_EFF = $(JAVA) -Xmx$(1) -jar \$$EBROOTSNPEFF/snpEff.jar
-SNP_EFF_OPTS = -i vcf -o vcf -c $(SNP_EFF_CONFIG) $(SNP_EFF_FLAGS)
+SNP_EFF_OPTS = -i vcf -o vcf -configOption data.dir=$(SNP_EFF_DATA_DIR) -noStats $(SNP_EFF_FLAGS)
 SNP_SIFT = $(JAVA) -Xmx$(1) -jar \$$EBROOTSNPEFF/SnpSift.jar
-SNP_SIFT_OPTS = -c $(SNP_EFF_CONFIG)
-VCF_EFF_ONE_PER_LINE = $(PERL) \$$EBROOTSNPEFF/scripts/vcfEffOnePerLine.pl
+#SNP_SIFT_OPTS = -c $(SNP_EFF_CONFIG)
+VCF_EFF_ONE_PER_LINE = $(PERL) \$$EBROOTSNPEFF/snpEff/scripts/vcfEffOnePerLine.pl
 VCF_JOIN_EFF = $(PERL) $(MODULE_SCRIPTS_DIR)/joinEff.pl
 
 VEP_CACHE_DIR ?= /scicore/home/pissal00/GROUP/ref_nobackup/vep/

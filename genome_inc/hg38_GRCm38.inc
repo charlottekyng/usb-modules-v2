@@ -70,7 +70,7 @@ GENE_REF_FLAT = $(ANN_DIR)/Homo_sapiens_assembly38__GRCm38_68.refFlat
 GISTIC_REF ?= $(REF_DIR)/gistic/hg38.UCSC.add_miR.160920.refgene.mat
 
 
-SNP_EFF_GENOME = GRCh38.81
+SNP_EFF_GENOME = GRCh38.86
 DB_NSFP ?= $(REF_DIR)/dbNSFP/GRCh38/dbNSFP3.2a.txt.gz
 
 #MOSAICS_CHRFILE = $(GENOME_DIR)/human_g1k_v37_decoy.mosaics.chrfile

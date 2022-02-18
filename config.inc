@@ -385,7 +385,7 @@ ifeq ($(findstring IONTORRENT,$(SEQ_PLATFORM)),IONTORRENT)
 CALLER_PREFIX ?= tvc_snps tvc_indels
 endif
 
-
+SKIP_3D_HOTSPOTS ?= yes
 ##################################
 ########## Copy number ###########
 ##################################

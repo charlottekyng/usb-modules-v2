@@ -52,7 +52,7 @@ while (my $line = <IN>) {
 				$filters{$filter} = 1;
 			}
 
-			if ($info =~ /HOTSPOT;/ || $info =~ /HOTSPOT3D;/) {
+			if ($info =~ /HOTSPOTaa/ || $info =~ /HOTSPOT3Daa/ || $info =~ /HOTSPOTindel/ || $info =~ /HOTSPOTsp/ || $info =~ /HOTSPOTNC/) {
 				if (scalar keys %filters <= $max_filters ) { 
 					print OUT join("\t", @line[0..6]).";hotspotPASS\t".join("\t", @line[7..$#line])."\n"; # Add hotspotPASS when rescued by hotspot.
 				} else { print EXCLUDE $line."\n"; }

@@ -50,7 +50,7 @@ LOGDIR ?= log/vcf.$(NOW)
 
 %.sdp_ft.vcf : %.vcf
 	$(call CHECK_VCF,$<,$@,\
-	$(call RUN,1,$(RESOURCE_REQ_LOW_MEM),$(RESOURCE_REQ_VSHORT),$(SNP_EFF_43_MODULE),"\
+	$(call RUN,1,$(RESOURCE_REQ_LOW_MEM),$(RESOURCE_REQ_VSHORT),$(SNP_EFF_MODULE),"\
 		$(call SNP_SIFT,$(RESOURCE_REQ_LOW_MEM_JAVA)) filter $(SNP_SIFT_OPTS) -f $< '(exists GEN[?].DP) & (GEN[?].DP > 20)' > $@"))
 
 %.strelka_ft.vcf : %.vcf
@@ -106,10 +106,15 @@ vcf/$1.%.ffpe_ft.vcf : vcf/$1.%.vcf metrics/$1.artifact_metrics.pre_adapter_deta
 endef
 $(foreach sample,$(SAMPLES),$(eval $(call ffpe-sample,$(sample))))
 	
+comma := ,
 %.hotspot.vcf : %.vcf
 	$(call CHECK_VCF,$<,$@,\
-	$(call RUN,1,$(RESOURCE_REQ_MEDIUM_MEM),$(RESOURCE_REQ_SHORT),$(SNP_EFF_MODULE),"\
-	$(call SNP_SIFT,$(RESOURCE_REQ_MEDIUM_MEM_JAVA)) annotate $(SNP_SIFT_OPTS) $(CANCER_HOTSPOT_VCF) $< > $@ && $(RM) $^"))
+	$(call RUN,1,$(RESOURCE_REQ_MEDIUM_MEM),$(RESOURCE_REQ_SHORT),$(SNP_EFF_MODULE) $(R4_MODULE),"\
+	$(call SNP_EFF,$(RESOURCE_REQ_MEDIUM_MEM_JAVA)) ann $(SNP_EFF_OPTS) $(SNP_EFF_GENOME) $< | $(VCF_EFF_ONE_PER_LINE) > $<.tmp-hotspot.eff.OnePerLine.vcf &&\
+	$(call SNP_SIFT,$(RESOURCE_REQ_MEDIUM_MEM_JAVA)) extractFields -s '|' -e '.' $<.tmp-hotspot.eff.OnePerLine.vcf CHROM POS ID REF ALT QUAL FILTER 'ANN[*].EFFECT' 'ANN[*].GENE' 'ANN[*].HGVS_C' 'ANN[*].AA' > $<.tmp-hotspot.eff.OnePerLine.tab &&\
+	$(R4SCRIPT) $(HOTSPOTS_DIR)/prepareHotspotVCFs.R --mutations $<.tmp-hotspot.eff.OnePerLine.tab --tumor_ID $<.tmp-hotspot.eff.OnePerLine --hotspots $(HOTSPOTS_DIR)/hotspots_single_aa_change.$(REF).txt --noncoding_hotspots $(HOTSPOTS_DIR)/hotspots_non_coding.$(REF).txt --splicesite_hotspots $(HOTSPOTS_DIR)/hotspots_splice.$(REF).txt --indel_hotspots $(HOTSPOTS_DIR)/hotspots_indel.txt --skip_3D $(SKIP_3D_HOTSPOTS) --save_table no &&\
+	cat $<.tmp-hotspot.eff.OnePerLine_hotspot.vcf $<.tmp-hotspot.eff.OnePerLine_hotspot_indel.vcf $<.tmp-hotspot.eff.OnePerLine_hotspot_noncoding.vcf $<.tmp-hotspot.eff.OnePerLine_hotspot_sp.vcf | sed '2$(comma)\$${/^#/d;}' > $<.tmp-hotspot.eff.OnePerLine_hotspot_merged.vcf &&\
+	$(call SNP_SIFT,$(RESOURCE_REQ_MEDIUM_MEM_JAVA)) annotate $<.tmp-hotspot.eff.OnePerLine_hotspot_merged.vcf $< > $@ && $(RM) $< $<.tmp-hotspot*"))
 
 %.nft.vcf : %.vcf $(PON_VCF)
 	$(call RUN,1,$(RESOURCE_REQ_MEDIUM_MEM),$(RESOURCE_REQ_SHORT),$(JAVA8_MODULE),"\
