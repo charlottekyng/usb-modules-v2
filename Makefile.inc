@@ -208,7 +208,7 @@ JAVA6_MODULE ?= Java/1.6.0_24
 JAVA7_MODULE ?= Java/1.7.0_80
 JAVA8_MODULE ?= Java/8u212b03
 PYTHON_MODULE ?= Python/3.5.2-goolf-1.7.20
-SAMTOOLS_MODULE ?= SAMtools/1.3-goolf-1.7.20
+SAMTOOLS_MODULE ?= SAMtools/1.9-foss-2018b
 BCFTOOLS_MODULE ?= BCFtools/1.5-goolf-1.7.20
 BEDTOOLS_MODULE ?= BEDTools/2.26.0-goolf-1.7.20
 VCFTOOLS_MODULE ?= VCFtools/0.1.14-goolf-1.7.20-Perl-5.22.2
@@ -504,6 +504,8 @@ MSISENSOR ?= $(BIN_DIR)/msisensor_Linux_x86_64
 
 DETIN_DIR = /scicore/home/pissal00/GROUP/usr_nobackup/local/deTiN_2021-11-25/deTiN
 DETIN ?= python $(DETIN_DIR)/deTiN.py
+
+TCELLEXTRECT ?= $(RSCRIPT) usb-modules-v2/Tcell_quant/runTcellExTRECT.R
 
 endif
 MAKEFILE_INC = true

@@ -236,6 +236,11 @@ TARGETS += contest
 contest :
 	$(call RUN_MAKE,usb-modules-v2/qc/contest.mk)
 
+TARGETS += tcell_extrect
+tcell_extrect :
+	$(call RUN_MAKE,usb-modules-v2/Tcell_quant/tcell_extrect.mk)
+
+
 # annotate external vcfs
 TARGETS += ann_ext_vcf
 ann_ext_vcf: 

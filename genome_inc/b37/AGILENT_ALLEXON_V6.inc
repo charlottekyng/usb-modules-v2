@@ -5,6 +5,7 @@ TARGETS_FILE_MUTATIONS ?= $(BED_DIR)/S07604514_Agilent_AllExon_V6_Padded_noHeade
 TARGETS_FILE_GENES ?=$ $(BED_DIR)/S06588914_Agilent_Clinical_Exome_TargetGeneSymbols.txt
 DBSNP_TARGETS_INTERVALS ?= $(BED_DIR)/S07604514_Agilent_AllExon_V6.dbsnp_138.vcf
 DBSNP_TARGETS_INTERVALS_COMMON ?= $(BED_DIR)/S07604514_Agilent_AllExon_V6.dbsnp_138.common.vcf
+TCRA_EXONS ?= $(BED_DIR)/S07604514_Agilent_AllExon_V6_Padded_noHeader_noAnn.TCRA_exons.txt
 
 # Resources
 RESOURCE_REQ ?= medium

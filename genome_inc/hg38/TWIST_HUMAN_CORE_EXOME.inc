@@ -5,6 +5,8 @@ TARGETS_FILE_MUTATIONS ?= $(BED_DIR)/Twist_Exome_Target_hg38.bed
 # TARGETS_FILE_GENES ?= $(BED_DIR)/wxs.GeneSymbols.txt
 DBSNP_TARGETS_INTERVALS ?= $(BED_DIR)/Twist_Exome_Target_hg38.dbsnp_146.vcf
 DBSNP_TARGETS_INTERVALS_COMMON ?= $(BED_DIR)/Twist_Exome_Target_hg38.dbsnp_146.common.monoallelic.vcf
+TCRA_EXONS ?= $(BED_DIR)/Twist_Exome_Target_hg38.TCRA_exons.txt
+
 # Resources
 RESOURCE_REQ ?= medium
 
