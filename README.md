@@ -427,6 +427,24 @@ For Illumina RNA sequencing, cnvkit is implemeted (but currently not well tested
 make cnvkit
 ```
 
+### TcellExTRECT
+TcellExTRECT is an R package to calculate T cell fractions from WES data from hg19 or hg38 aligned genomes.
+Read more at [https://github.com/McGranahanLab/TcellExTRECT)
+
+*Pre-requisites:* tumor/normal WES datasets and `facets` results (`*.cncf.txt` and `*.out`)
+
+Usage: `make tcell_extrect`
+
+The analysis will be performed only on the TCRA exons present in the corresponding padded bed file. Note that if you are using a capture kit not officially supported by T cell ExTRECT (Agilent all exome kits) there may be unknown biases or not sufficient number of exons with coverage to calculate the TCRA T cell fraction. 
+
+Results:
+```
+tcell_extrect/
+├── <sample>.plotTcellExTRECT.pdf ... TCRA loci coverage plots.
+├── <sample>.resTcellExTRECT.txt .... final result summary (tab delimited, 1 header, 1 row).
+└── <sample>.txt.gz ............ Row coverage of the TCRA loci.
+```
+
 ### deTiN
 DeTiN estimates tumor in normal (TiN) based on tumor and matched normal sequencing data. The estimate is based on both candidate SSNVs and aSCNAs.
 
