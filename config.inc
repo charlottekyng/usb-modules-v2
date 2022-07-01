@@ -2,7 +2,7 @@ ifndef CONFIG_INC
 
 
 ############################################################
-########## OPTIONS MOST LIKELY NEED TO CUSTOMIZED ##########
+########## OPTIONS MOST LIKELY NEED TO BE CUSTOMIZED ##########
 ############################################################
 
 
@@ -58,6 +58,9 @@ SAMPLE_POOLEDNORM_FILE ?= samples.poolednorm.txt
 MERGE_SAMPLE_FILE ?= merge_samples.txt
 
 GENCODE_VER ?= v33
+
+# is it a tumor-only dataset
+TUMOR_ONLY ?= false
 
 ############################################################
 ########### END MOST FREQUENTLY CUSTOMIZED PARAMS ##########
@@ -287,13 +290,13 @@ MIN_TN_AD_RATIO ?= 5.0
 endif
 
 ifeq ($(findstring IONTORRENT,$(SEQ_PLATFORM)),IONTORRENT)
-ifdef SAMPLE_PAIRS
+ifeq ($(TUMOR_ONLY),false)
 MIN_NORMAL_DEPTH ?= 10
 MIN_TUMOR_DEPTH ?= 10
 MIN_TUMOR_AD ?= 8
 MIN_TN_AD_RATIO ?= 10.0
 endif
-ifndef SAMPLE_PAIRS
+ifeq ($(TUMOR_ONLY),true)
 MIN_TUMOR_DEPTH ?= 20
 MIN_TUMOR_AD ?= 6
 MIN_AF ?= 0.1
