@@ -299,8 +299,10 @@ MIN_AF ?= 0.01
 endif
 ifeq ($(TUMOR_ONLY),true)
 MIN_TUMOR_DEPTH ?= 20
-MIN_TUMOR_AD ?= 6
+MIN_TUMOR_AD ?= 8
 MIN_AF ?= 0.1
+MAX_POP ?= 0.005
+MAX_HOM ?= 4
 endif
 endif
 

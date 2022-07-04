@@ -38,7 +38,8 @@ vcf/$1.pipeit.vcf : bam/$1.bam bam/$1.bam.bai
 	-c $$(ANNOVAR_HUMANDB) \
 	-o $1 -s $$(MIN_TUMOR_AD) -m $$(MIN_TUMOR_DEPTH) -g $$(MIN_AF) \
 	$$(if $$(PON_VCF),-d $$(PON_VCF),) \
-	$$(if $$(PIPEIT_JSON),-j $$(PIPEIT_JSON),) -a true -i $$(PIPEIT_INTERMEDIATE_FILES) && ln PipeIT/results/$1/$1.PipeIT.vcf $$@")
+	$$(if $$(PIPEIT_JSON),-j $$(PIPEIT_JSON),) -a true -i $$(PIPEIT_INTERMEDIATE_FILES) \
+	-k $$(MAX_POP) -b $$(MAX_HOM) && ln PipeIT/results/$1/$1.PipeIT.vcf $$@")
 endef
 $(foreach sample,$(SAMPLES), \
 	$(eval $(call pipeit-vcf-tumor-only,$(sample))))
