@@ -48,7 +48,7 @@ CENTROMERE_TABLE = $(ANN_DIR)/centromeres_hg19.txt
 ### TOOL-SPECIFIC REF ###
 
 SNP_EFF_GENOME = GRCh37.75
-DB_NSFP ?= $(REF_DIR)/snpeff/GRCh37/dbNSFP2.9.txt.gz
+DB_NSFP ?= $(REF_DIR)/dbNSFP/GRCh37/dbNSFP2.9.txt.gz
 
 endif
 HG19_IONREF_INC = true
