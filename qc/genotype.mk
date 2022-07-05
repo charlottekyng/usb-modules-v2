@@ -36,7 +36,7 @@ genotype/all$(PROJECT_PREFIX).$(GENOTYPE_CHR).snps_filtered.vcf : genotype/all$(
 	$(INIT) grep '^#' $< > $@ && grep -e '0/1' -e '1/1' $< >> $@ && $(RM) $<
 
 genotype/all$(PROJECT_PREFIX).$(GENOTYPE_CHR).%.clust.png : genotype/all$(PROJECT_PREFIX).$(GENOTYPE_CHR).%.vcf
-	$(call RUN,1,$(RESOURCE_REQ_HIGH_MEM),$(RESOURCE_REQ_MEDIUM),$(R_MODULE),"\
+	$(call RUN,1,$(RESOURCE_REQ_HIGH_MEM),$(RESOURCE_REQ_MEDIUM),$(R4_MODULE),"\
 	$(CLUSTER_VCF) --outPrefix genotype/all$(PROJECT_PREFIX).$(GENOTYPE_CHR).$* \
 	$(if $(findstring RNA,$(CAPTURE_METHOD)),--clusterType hetSameHom) $<")
 

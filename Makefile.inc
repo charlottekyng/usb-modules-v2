@@ -293,7 +293,7 @@ FASTQC ?= fastqc
 FASTQC_SUMMARY_PLOT = $(RSCRIPT) usb-modules-v2/qc/fastqcSummaryPlot.R
 PLOT_RNASEQ_METRICS = $(RSCRIPT) usb-modules-v2/qc/plotRnaseqMetrics.R
 
-CLUSTER_VCF = $(RSCRIPT) usb-modules-v2/qc/clusterVcf.R
+CLUSTER_VCF = $(R4SCRIPT) usb-modules-v2/qc/clusterVcf.R
 
 BOWTIE2 ?= bowtie2
 BWA_ALN ?= bwa aln
