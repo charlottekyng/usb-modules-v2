@@ -248,8 +248,8 @@ PYTHON ?= python
 PYTHON_ENV_ACTIVATE ?= ml load $(ANACONDA_MODULE) && source activate 
 PYTHON_ENV_DEACTIVATE = source deactivate
 
-SINGULARITY_EXEC ?= singularity exec --cleanenv -B $(shell pwd)
-SINGULARITY_RUN ?= singularity run --cleanenv -B $(shell pwd)
+SINGULARITY_EXEC ?= singularity exec --cleanenv --no-home -B /scicore/home/pissal00/GROUP
+SINGULARITY_RUN ?= singularity run --cleanenv --no-home -B /scicore/home/pissal00/GROUP
 
 R_LIBS ?= $(USR_DIR)/$(R_MODULE)/lib64/R/library
 R4_LIBS ?= $(USR_DIR)/$(R4_MODULE)/lib64/R/library
@@ -350,14 +350,14 @@ STRELKA2_SOMATIC_CONFIG = usb-modules-v2/variant_callers/somatic/configureStrelk
 CONFIGURE_STRELKA2_GERMLINE = $(PYTHON) $(USR_DIR)/local/strelka-2.9.10.centos6_x86_64/bin/configureStrelkaGermlineWorkflow.py
 STRELKA2_GERMLINE_CONFIG = usb-modules-v2/variant_callers/configureStrelkaGermlineWorkflow.py.ini
 
-TVC_ROOT_DIR ?= $(USR_DIR)/local/tvc-5.0.3-CentOS_7.3-x86_64-binary
-TVC = $(TVC_ROOT_DIR)/bin/variant_caller_pipeline.py
+PIPEIT_IMG ?= $(IMG_DIR)/PipeIT_2.0.0.img
+
+TVC_ROOT_DIR ?= /PipeIT_resources/usr/local
+TVC = $(SINGULARITY_EXEC) $(PIPEIT_IMG) $(TVC_ROOT_DIR)/bin/variant_caller_pipeline.py
 TVC_SOMATIC_JSON = usb-modules-v2/variant_callers/somatic/TVC_somatic_parameters.json
 TVC_SENSITIVE_JSON = usb-modules-v2/variant_callers/somatic/TVC_somatic_parameters_sensitive.json
 TVC_MOTIF ?= $(TVC_ROOT_DIR)/share/TVC/sse/ampliseqexome_germline_p1_hiq_motifset.txt
 TVC_NUM_CORES ?= 4
-
-PIPEIT_IMG ?= $(IMG_DIR)/PipeIT_2.0.0.img
 
 TS_IMG ?= $(IMG_DIR)/TS_v5.12.1.sp1_v1.0.1.img
 FUSION_TS_FILTER = $(RSCRIPT) usb-modules-v2/sv_callers/fusionTSfilter.R
