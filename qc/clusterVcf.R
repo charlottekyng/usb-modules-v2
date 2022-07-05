@@ -52,11 +52,11 @@ dev.off()
 fn <- paste(opt$outPrefix, ".heatmap.ward.pdf", sep = '')
 pdf(fn, height = max(10, 5+(ncol(gt)/5)), width = max(10, 5+(ncol(gt)/5)))
 null <- heatmap.2(as.matrix(dist(t(gt))), hclustfun=function(x){hclust(x, method='ward.D2')}, 
-	scale = 'none', trace = 'none', keysize = 0.3, cexRow = 1, cexCol = 1, margins = c(40,40))
+	scale = 'none', trace = 'none', keysize = 0.3, margins = c(10,10))
 dev.off()
 
 fn <- paste(opt$outPrefix, ".heatmap.completelink.pdf", sep = '')
 pdf(fn, height = max(10, 5+(ncol(gt)/5)), width = max(10, 5+(ncol(gt)/5)))
 null <- heatmap.2(as.matrix(dist(t(gt))),
-        scale = 'none', trace = 'none', keysize = 0.3, cexRow = 1, cexCol = 1, margins = c(40,40))
+        scale = 'none', trace = 'none', keysize = 0.3, margins = c(10,10))
 dev.off()
