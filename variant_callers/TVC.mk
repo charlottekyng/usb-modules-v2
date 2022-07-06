@@ -15,30 +15,25 @@ tvc_vcfs : $(foreach type,$(VARIANT_TYPES),$(call MAKE_VCF_FILE_LIST,$(type)) $(
 tvc_tables : $(foreach type,$(VARIANT_TYPES),$(call MAKE_TABLE_FILE_LIST,$(type)))
 
 
-tvc/dbsnp/%/TSVC_variants.vcf : bam/%.bam
+# TVC used to produce TSVC_variants.vcf and TSVC_variants.vcf.gz, but in the current TVC version we only get TSVC_variants.vcf that is actually bgzipped and with a .tbi index.
+# Rename it to avoid downstream errors
+tvc/dbsnp/%/TSVC_variants.vcf.gz : bam/%.bam
 	$(call RUN,$(TVC_NUM_CORES),$(RESOURCE_REQ_MEDIUM_MEM),$(RESOURCE_REQ_LONG),,"\
 	$(TVC) -s $(DBSNP_TARGETS_INTERVALS) -i $< -r $(REF_FASTA) -o $(@D) \
 	-N $(TVC_NUM_CORES) -p $(TVC_SOMATIC_JSON) -m $(TVC_MOTIF) \
 	$(if $(TARGETS_FILE_INTERVALS),-b $(TARGETS_FILE_INTERVALS)) \
-	-t $(TVC_ROOT_DIR) --primer-trim-bed $(PRIMER_TRIM_BED)")
+	-t $(TVC_ROOT_DIR) --primer-trim-bed $(PRIMER_TRIM_BED) &&\
+	mv $(basename $@) $@ &&mv $(basename $@).tbi $@.tbi")
 
-# TVC used to produce TSVC_variants.vcf and TSVC_variants.vcf.gz, but in the current TVC version we only get TSVC_variants.vcf that is actually bgzipped and with a .tbi index.
-# Rename it to avoid downstream errors
-tvc/dbsnp/%/TSVC_variants.vcf.gz : tvc/dbsnp/%/TSVC_variants.vcf
-	$(INIT) mv $< $@ && mv $<.tbi $@.tbi
 
 define tvc-vcf
-tvc/vcf/$1/TSVC_variants.vcf : bam/$1.bam bam/$1.bai
+tvc/vcf/$1/TSVC_variants.vcf.gz : bam/$1.bam bam/$1.bai
 	$$(call RUN,$$(TVC_NUM_CORES),$$(RESOURCE_REQ_MEDIUM_MEM),$$(RESOURCE_REQ_SHORT),,"\
 	$$(TVC) -i $$< -r $$(REF_FASTA) -o $$(@D) -N $(TVC_NUM_CORES) \
 	$$(if $(TARGETS_FILE_INTERVALS),-b $$(TARGETS_FILE_INTERVALS)) \
 	-p $$(TVC_SOMATIC_JSON) -m $$(TVC_MOTIF) \
-	-t $$(TVC_ROOT_DIR) --primer-trim-bed $$(PRIMER_TRIM_BED)")
-
-# TVC used to produce TSVC_variants.vcf and TSVC_variants.vcf.gz, but in the current TVC version we only get TSVC_variants.vcf that is actually bgzipped and with a .tbi index.
-# Rename it to avoid downstream errors
-tvc/vcf/$1/TSVC_variants.vcf.gz : tvc/vcf/$1/TSVC_variants.vcf
-	$$(INIT) mv $$< $$@ && mv $$<.tbi $$@.tbi
+	-t $$(TVC_ROOT_DIR) --primer-trim-bed $$(PRIMER_TRIM_BED) &&\
+	mv $$(basename $$@) $$@ &&mv $$(basename $$@).tbi $$@.tbi")
 
 
 tvc/vcf/$1/isec/0000.vcf : tvc/vcf/$1/TSVC_variants.multiallelic_ft.norm.left_align.vcf tvc/vcf/$1/TSVC_variants.biallelic_ft.vcf tvc/vcf/$1/TSVC_variants.multiallelic_ft.norm.left_align.vcf.gz tvc/vcf/$1/TSVC_variants.biallelic_ft.vcf.gz tvc/vcf/$1/TSVC_variants.multiallelic_ft.norm.left_align.vcf.gz.tbi tvc/vcf/$1/TSVC_variants.biallelic_ft.vcf.gz.tbi
