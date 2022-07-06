@@ -26,7 +26,7 @@ genotype/all$(PROJECT_PREFIX).$(GENOTYPE_CHR).snps.vcf : $(foreach sample,$(SAMP
 endif
 
 ifeq ($(findstring IONTORRENT,$(SEQ_PLATFORM)),IONTORRENT)
-genotype/all$(PROJECT_PREFIX).$(GENOTYPE_CHR).snps.vcf : $(foreach sample,$(SAMPLES),tvc/dbsnp/$(sample)/TSVC_variants.vcf)
+genotype/all$(PROJECT_PREFIX).$(GENOTYPE_CHR).snps.vcf : $(foreach sample,$(SAMPLES),tvc/dbsnp/$(sample)/TSVC_variants.vcf.gz)
 	$(call RUN,1,$(RESOURCE_REQ_HIGH_MEM),$(RESOURCE_REQ_MEDIUM),$(JAVA8_MODULE),"\
 	$(call GATK,CombineVariants,$(RESOURCE_REQ_HIGH_MEM_JAVA)) \
 	$(foreach vcf,$^,--variant $(vcf) ) -o $@ --genotypemergeoption UNSORTED -R $(REF_FASTA)")

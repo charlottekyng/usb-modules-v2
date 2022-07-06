@@ -21,12 +21,16 @@ tvc_somatic_tables : $(foreach type,$(VARIANT_TYPES),$(call MAKE_TABLE_FILE_LIST
 
 
 define tvc-somatic-vcf
-tvc/vcf/$1_$2/TSVC_variants.vcf.gz : bam/$1.bam bam/$1.bam.bai bam/$2.bam bam/$2.bam.bai
+tvc/vcf/$1_$2/TSVC_variants.vcf : bam/$1.bam bam/$1.bam.bai bam/$2.bam bam/$2.bam.bai
 	$$(call RUN,$$(TVC_NUM_CORES),$$(RESOURCE_REQ_HIGH_MEM),$$(RESOURCE_REQ_LONG),$(OPENBLAS_MODULE) $(PYTHON_MODULE),"\
 	$$(TVC) -i $$< -n $$(word 3,$$^) -r $$(REF_FASTA) -o $$(@D) -N $$(TVC_NUM_CORES) \
 	$$(if $$(TARGETS_FILE_INTERVALS),-b $$(TARGETS_FILE_INTERVALS)) -p $$(TVC_SOMATIC_JSON) -m $$(TVC_MOTIF) \
 	-t $$(TVC_ROOT_DIR) --primer-trim-bed $$(PRIMER_TRIM_BED) -g $$(basename $$(notdir $$<))")
 
+# TVC used to produce TSVC_variants.vcf and TSVC_variants.vcf.gz, but in the current TVC version we only get TSVC_variants.vcf that is actually bgzipped and with a .tbi index.
+# Rename it to avoid downstream errors
+tvc/vcf/$1_$2/TSVC_variants.vcf.gz : tvc/vcf/$1_$2/TSVC_variants.vcf
+	$$(INIT) mv $$< $$@ && mv $$<.tbi $$@.tbi
 
 tvc/vcf/$1_$2/isec/0000.vcf : tvc/vcf/$1_$2/TSVC_variants.multiallelic_ft.norm.left_align.vcf tvc/vcf/$1_$2/TSVC_variants.biallelic_ft.vcf tvc/vcf/$1_$2/TSVC_variants.multiallelic_ft.norm.left_align.vcf.gz tvc/vcf/$1_$2/TSVC_variants.biallelic_ft.vcf.gz tvc/vcf/$1_$2/TSVC_variants.multiallelic_ft.norm.left_align.vcf.gz.tbi tvc/vcf/$1_$2/TSVC_variants.biallelic_ft.vcf.gz.tbi
 	$$(call RUN,1,$$(RESOURCE_REQ_LOW_MEM),$$(RESOURCE_REQ_VSHORT),$$(BCFTOOLS_MODULE),"\
