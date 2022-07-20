@@ -265,6 +265,10 @@ kallisto :
 TARGETS += detin
 detin :
 	$(call RUN_MAKE,usb-modules-v2/qc/detin.mk)
+
+TARGETS += viper
+viper :
+	$(call RUN_MAKE,usb-modules-v2/rnaseq/viper.mk)
 #########################################################
 ## The set of targets below have NOT been tested,
 ## or are known to be broken/obsolete.
