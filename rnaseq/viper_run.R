@@ -29,6 +29,9 @@ count_mat.vpres <- viper(count_mat, regulon, verbose = FALSE)
 resdir="viper/"
 if(!dir.exists(resdir)){dir.create(resdir,  recursive = T)}
 
+# save table
+write.table(count_mat.vpres, file = paste0(resdir, prefix, ".viper_res.txt"), sep = "\t", col.names = NA, row.names = T, quote = F)
+
 pal <- colorRampPalette(rev(RColorBrewer::brewer.pal(9, "YlOrRd")))(100)
 
 # sample distance
@@ -42,9 +45,9 @@ heatmap(as.matrix(dd), Rowv = as.dendrogram(hclust(dd, method = "average")),
 dev.off()
 
 # compute the similarity between the columns of a gene expression or VIPER-predicted activity matrix
-viper_sim <-viperSimilarity(count_mat)
+viper_sim <-viperSimilarity(count_mat.vpres)
 
-# We can use the generic functions caleto 'scale' the similarity matrix in the range[-1;1], and the resulting matrix will be analogous to a correlation matrix.
+# We can use the generic function scale to 'scale' the similarity matrix in the range[-1;1], and the resulting matrix will be analogous to a correlation matrix.
 pdf(paste0(resdir, prefix, ".viper_similarity.pdf"), height = max(5,log(length(colnames(count_mat)),1.35)), width = max(5,log(length(colnames(count_mat)),1.35)))
 heatmap(as.matrix(as.dist(viper_sim)),
 	Rowv = as.dendrogram(hclust(as.dist(viper_sim), method = "average")),
