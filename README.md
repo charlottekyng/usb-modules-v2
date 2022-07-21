@@ -512,6 +512,17 @@ make rsem
 * RSEM-TPM/FPKM: transcripts-per-million and fragments-per-kilobase-million: see http://www.rna-seqblog.com/rpkm-fpkm-and-tpm-clearly-explained/
 
 
+#### VIPER
+VIPER can be run after RSEM. VIPER will do inference of protein activity from gene expression data. The current module will run `viper` using the expression matrix from RSEM (`expected_count.results_coding`, where in case of duplicate gene names, the one with the highest average count is retained). This will produce a tab-separated table (`viper/all<PROJECT_PREFIX>.viper_res.txt`) with the inferred activity for each regulator gene in the network across all samples, and two heatmps:
+1) `viper/all<PROJECT_PREFIX>.viper_sample_euclidean_distance.pdf`
+2) `viper/all<PROJECT_PREFIX>.viper_similarity.pdf`
+
+Heatmap 1: euclidean distance of the viper results table.
+
+Heatmap 2: matrix of similarity scores between sample pairs obtained by the `viperSimilarity` function.
+
+You can perform additional analyses and comparisons of samples using the VIPER package. For convenience, you can continue working on the R session file `viper/viper.session.RData` and follow the VIPER tutorial on [Bioconductor](https://www.bioconductor.org/packages/release/bioc/html/viper.html). 
+
 ### ChIP-seq peak detection
 MOSAICS is implemented but not very well tested. In particular, it almost always falls over with paired-end data.
 
