@@ -24,7 +24,7 @@ star/$(sample).Unmapped.out.mate1.gz $(if $(findstring true,$(PAIRED_END)),star/
 star/$(sample).Log.out.gz star/$(sample).Log.progress.out.gz)
 
 star/%.Aligned.sortedByCoord.out.bam : fastq/%.1.fastq.gz $(if $(findstring true,$(PAIRED_END)),fastq/%.2.fastq.gz)
-	$(call RUN,15,6G,$(RESOURCE_REQ_MEDIUM),$(STAR_MODULE),"\
+	$(call RUN,15,$(if $(findstring _,$(REF)),50G,32G),$(RESOURCE_REQ_MEDIUM),$(STAR_MODULE),"\
 	STAR --runMode alignReads --runThreadN 14 \
 	--genomeDir $(STAR_GENOME_DIR) \
 	--readFilesIn $< $(if $(findstring true,$(PAIRED_END)),$(word 2,$^)) \
