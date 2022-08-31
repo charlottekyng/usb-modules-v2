@@ -476,7 +476,7 @@ RSEM_CALC_EXPR ?= rsem-calculate-expression
 RSEM_GEN_DATA_MATRIX ?= usb-modules-v2/rnaseq/rsem-generate-data-matrix.pl
 RSEM_PROCCESS ?= usb-modules-v2/rnaseq/rsem_process.R
 
-VIPER_RUN ?= $(RSCRIPT) usb-modules-v2/rnaseq/viper_run.R
+VIPER_RUN ?= $(R4SCRIPT) usb-modules-v2/rnaseq/viper_run.R
 
 STAR_PROCESS ?= usb-modules-v2/rnaseq/star_process.R
 
