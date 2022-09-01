@@ -1,8 +1,5 @@
 include usb-modules-v2/Makefile.inc
 
-RSEM_NUM_CORES ?= 4
-RSEM_OPTIONS ?= --alignments --no-bam-output -p $(RSEM_NUM_CORES) --forward-prob 0
-
 LOGDIR ?= log/rsem.$(NOW)
 
 .DELETE_ON_ERROR:
