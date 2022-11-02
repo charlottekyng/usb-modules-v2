@@ -47,7 +47,7 @@ dup : $(shell rm -f metrics/all$(PROJECT_PREFIX).dup_metrics.txt) metrics/all$(P
 
 # interval metrics per sample
 metrics/%.hs_metrics.txt metrics/%.interval_hs_metrics.txt.gz : bam/%.bam bam/%.bam.bai
-	$(call RUN,1,$(RESOURCE_REQ_MEDIUM_MEM),$(RESOURCE_REQ_SHORT),$(R_MODULE) $(SAMTOOLS_MODULE),"\
+	$(call RUN,1,$(RESOURCE_REQ_MEDIUM_MEM),$(RESOURCE_REQ_SHORT),$(R_MODULE) $(SAMTOOLS_MODULE_GOOLF),"\
 	TMP=`mktemp`.intervals; TMPCOVERED=`mktemp`.covered_intervals; \
 	$(SAMTOOLS) view -H $< | grep '^@SQ' > \$$TMP &&  grep -P \"\t\" $(TARGETS_FILE_INTERVALS) | \
 	awk 'BEGIN {OFS = \"\t\"} { print \$$1$(,)\$$2+1$(,)\$$3$(,)\"+\"$(,)NR }' >> \$$TMP; \
@@ -59,7 +59,7 @@ metrics/%.hs_metrics.txt metrics/%.interval_hs_metrics.txt.gz : bam/%.bam bam/%.
 	gzip metrics/$*.interval_hs_metrics.txt")
 
 metrics/%.amplicon_metrics.txt metrics/%.interval_amplicon_metrics.txt.gz : bam/%.bam bam/%.bam.bai
-	$(call RUN,1,$(RESOURCE_REQ_MEDIUM_MEM),$(RESOURCE_REQ_SHORT),$(R_MODULE) $(SAMTOOLS_MODULE),"\
+	$(call RUN,1,$(RESOURCE_REQ_MEDIUM_MEM),$(RESOURCE_REQ_SHORT),$(R_MODULE) $(SAMTOOLS_MODULE_GOOLF),"\
 	TMP=`mktemp`.intervals; \
 	$(SAMTOOLS) view -H $< | grep '^@SQ' > \$$TMP && grep -P \"\t\" $(TARGETS_FILE_INTERVALS) | \
 	awk 'BEGIN {OFS = \"\t\"} { print \$$1$(,)\$$2+1$(,)\$$3$(,)\"+\"$(,)NR }' >> \$$TMP; \
@@ -70,7 +70,7 @@ metrics/%.amplicon_metrics.txt metrics/%.interval_amplicon_metrics.txt.gz : bam/
 
 # To avoid crazy RAM usage, sort the target bed to match the chr order in the BAM, and use the '-sorted' option
 metrics/%.per_base_depth.txt.gz : bam/%.bam bam/%.bam.bai
-	$(call RUN,1,$(RESOURCE_REQ_LOW_MEM),$(RESOURCE_REQ_SHORT),$(R_MODULE) $(SAMTOOLS_MODULE),"\
+	$(call RUN,1,$(RESOURCE_REQ_LOW_MEM),$(RESOURCE_REQ_SHORT),$(R_MODULE) $(SAMTOOLS_MODULE_GOOLF),"\
 	TMP=`mktemp`.chromosomes; \
 	$(SAMTOOLS) idxstats $< | cut -f 1-2 > \$$TMP; \
 	$(PURGE_AND_LOAD) $(BEDTOOLS_MODULE); \
