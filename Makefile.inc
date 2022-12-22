@@ -400,7 +400,7 @@ FACETS_GENE_CN = $(RSCRIPT) usb-modules-v2/copy_number/facetsGeneCN.R
 FACETS_GENE_CN_PLOT = $(RSCRIPT) usb-modules-v2/copy_number/facetsGeneCNPlot.R
 FACETS_CCF = $(RSCRIPT) usb-modules-v2/copy_number/facetsCCF.R
 
-MUTATION_SUMMARY_RSCRIPT = $(RSCRIPT) usb-modules-v2/summary/mutation_summary_excel.R
+MUTATION_SUMMARY_RSCRIPT = $(RSCRIPT) usb-modules-v2/summary/mutation_summary_excel.v2.R
 
 SIGNATURES = $(if $(findstring NONE,$(CAPTURE_METHOD)), signatures.genome.cosmic.v3.may2019, $(if $(findstring BAITS,$(CAPTURE_METHOD)),signatures.exome.cosmic.v3.may2019))
 DECONSTRUCTSIGS_TRI_COUNT_METHOD = default
