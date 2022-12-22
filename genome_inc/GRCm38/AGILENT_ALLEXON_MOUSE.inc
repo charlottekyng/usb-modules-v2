@@ -12,5 +12,5 @@ DBSNP_TARGETS_INTERVALS_COMMON ?= $(DBSNP)
 RESOURCE_REQ ?= medium
 
 # Annotation and reporting parameters
-SNP_EFF_FLAGS ?= -canon -no NEXT_PROT -no-downstream -no-intergenic -no-upstream -no-utr
+# SNP_EFF_FLAGS ?= -canon -no NEXT_PROT -no-downstream -no-intergenic -no-upstream -no-utr
 

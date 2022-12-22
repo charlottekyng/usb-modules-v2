@@ -11,5 +11,5 @@ TCRA_EXONS ?= $(BED_DIR)/S06588914_Agilent_Clinical_Exome_Padded_noHeader_noAnn.
 RESOURCE_REQ ?= medium
 
 # Annotation and reporting parameters
-SNP_EFF_FLAGS ?= -canon -no NEXT_PROT -no-downstream -no-intergenic -no-upstream -no-utr
+# SNP_EFF_FLAGS ?= -canon -no NEXT_PROT -no-downstream -no-intergenic -no-upstream -no-utr
 

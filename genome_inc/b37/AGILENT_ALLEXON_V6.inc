@@ -11,4 +11,4 @@ TCRA_EXONS ?= $(BED_DIR)/S07604514_Agilent_AllExon_V6_Padded_noHeader_noAnn.TCRA
 RESOURCE_REQ ?= medium
 
 # Annotation and reporting parameters
-SNP_EFF_FLAGS ?= -canon -no NEXT_PROT -no-downstream -no-intergenic -no-upstream -no-utr
+# SNP_EFF_FLAGS ?= -canon -no NEXT_PROT -no-downstream -no-intergenic -no-upstream -no-utr

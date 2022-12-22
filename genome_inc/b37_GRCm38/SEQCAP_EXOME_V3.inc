@@ -10,5 +10,5 @@ DBSNP_TARGETS_INTERVALS_COMMON ?= $(BED_DIR)SeqCap_EZ_Exome_v3_hg19_primary_targ
 RESOURCE_REQ ?= high
 
 # Annotation and reporting parameters
-SNP_EFF_FLAGS ?= -canon -no NEXT_PROT -no-downstream -no-intergenic -no-upstream -no-utr
+# SNP_EFF_FLAGS ?= -canon -no NEXT_PROT -no-downstream -no-intergenic -no-upstream -no-utr
 

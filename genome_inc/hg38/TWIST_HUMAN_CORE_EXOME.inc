@@ -11,4 +11,4 @@ TCRA_EXONS ?= $(BED_DIR)/Twist_Exome_Target_hg38.TCRA_exons.txt
 RESOURCE_REQ ?= medium
 
 # Annotation and reporting parameters
-SNP_EFF_FLAGS ?= -canon -no NEXT_PROT -no-downstream -no-intergenic -no-upstream -no-utr
+# SNP_EFF_FLAGS ?= -canon -no NEXT_PROT -no-downstream -no-intergenic -no-upstream -no-utr

@@ -380,7 +380,7 @@ ANN_FACETS ?= false
 MUTATION_SUMMARY_FORMAT ?= EXCEL
 INCLUDE_LNCRNA_IN_SUMMARY ?= false
 
-SNP_EFF_FLAGS ?= -canon -no NEXT_PROT -no-intergenic -noStats
+SNP_EFF_FLAGS ?= -canon -noNextProt -no-intergenic -no-downstream -no-upstream -no-utr -noStats -noInteraction
 
 EXAC_INFO_FIELDS ?= ExACnontcga_AC,ExACnontcga_AF
 EXACNONPSYCH_INFO_FIELDS ?= ALL
