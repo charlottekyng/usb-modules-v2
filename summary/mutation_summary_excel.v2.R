@@ -35,18 +35,17 @@ if (opt$cancerGenes != "") {
 	cancer_genes <- "xxyyzz" # in some refs (eg. mouse genome) GENE_SETS_LIST is not set. Just use a dummy gene name.
 }
 
-output_fields = c("TUMOR_SAMPLE", "NORMAL_SAMPLE", "ANN[*].GENE", "ANN[*].GENEID", "ANN[*].HGVS_P", "ANN[*].HGVS_C", "ANN[*].EFFECT", 
+output_fields = c("TUMOR_SAMPLE", "NORMAL_SAMPLE",
+	"CHROM", "POS", "ID", "REF", "ALT", "FILTER",
+	"ANN[*].GENE", "ANN[*].GENEID", "ANN[*].HGVS_P", "ANN[*].HGVS_C", "ANN[*].EFFECT", 
 	"ANN[*].IMPACT", "ANN[*].BIOTYPE", "ANN[*].FEATURE", "ANN[*].FEATUREID", "TUMOR.FA", "NORMAL.FA", "TUMOR.AF", "NORMAL.AF",
 	"TUMOR.DP", "NORMAL.DP", "TUMOR.FDP", "NORMAL.FDP", "TUMOR.AD", "NORMAL.AD", "TUMOR.AO", "NORMAL.AO", 
 	"TUMOR.FAO", "NORMAL.FAO", "TUMOR.RO", "NORMAL.RO", "TUMOR.FRO", "NORMAL.FRO",
 	"HOTSPOT_GENE", "HOTSPOT_HGVSp", "HOTSPOTNC_GENE", "HOTSPOTNC_HGVSc", "HOTSPOT3D_GENE", "HOTSPOT3D_HGVSp", "CancerGeneSets",
-	#"cancer_gene_census", "kandoth", "lawrence", "hap_insuf", 
 	"ExACnontcga_AC", "ExACnontcga_AF", 
 	"facetsCF", "facetsTCN_EM", "facetsLCN_EM", "facetsLOHCall", 
-	#"facetsMultiplicity", "ccf", "clonalStatus", "ccfConfUpper", "ccfConfLower",
-	#"dbNSFP_MutationTaster_pred", "dbNSFP_Polyphen2_HVAR_pred", "dbNSFP_Interpro_domain", 
 	"AMPLICON_NUM", "HRUN",
-	"CHROM", "POS", "ID", "REF", "ALT", "FILTER", "dbNSFP_Uniprot_acc")
+	"dbNSFP_Uniprot_acc")
 
 cat("loading input files\n")
 output <- lapply(files, function(file) {
