@@ -1,4 +1,4 @@
-cat ("Running mutation_summary_excel.R\n\n")
+cat ("Running mutation_summary_excel.v2.R\n\n")
 
 options(java.parameters = "-Xmx8000m")
 suppressPackageStartupMessages(library("optparse"))
@@ -124,14 +124,13 @@ if(nrow(output)>0) {
 			these_genes <- unlist(strsplit(x[["ANN[*].GENE"]], "|", fixed=T))
 
 			# if multiple genes, keep only cancer genes if they are present and if their IMPACT!="MODIFIER"
-			if (length(unique(these_genes)) > 1 & any(these_genes %in% cancer_genes)) {
+			if (length(unique(these_genes)) > 1 & any(these_genes %in% cancer_genes & these_impacts != "MODIFIER")) {
 				these_cancer_genes <- unique(these_genes[these_genes %in% cancer_genes & these_impacts !="MODIFIER" ])
 				
 				# return the ANN[*] indices for the final genes
 				return(which(unlist(strsplit(x[["ANN[*].GENE"]], "|", fixed=T)) %in% these_cancer_genes))
 			}
-			else {
-			# if multiple IMPACTs, choose the highest
+			else { # otherwise select genes based on IMPACT: if multiple IMPACTs of different kind, choose the highest
 			this_index <- 
 				if ("HIGH" %in% these_impacts) { which(these_impacts=="HIGH")
 				} else if ("MODERATE" %in% these_impacts) { which(these_impacts=="MODERATE")
