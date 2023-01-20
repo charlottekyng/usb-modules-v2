@@ -5,7 +5,6 @@ TARGETS_FILE_MUTATIONS ?= $(BED_DIR)/Agilent_CRE_V2_S30409818_Padded.bed
 TARGETS_FILE_GENES ?= $(BED_DIR)/S06588914_Agilent_Clinical_Exome_TargetGeneSymbols.txt
 DBSNP_TARGETS_INTERVALS ?= $(BED_DIR)/Agilent_CRE_V2_S30409818_Padded.dbsnp_138.vcf
 DBSNP_TARGETS_INTERVALS_COMMON ?= $(BED_DIR)/Agilent_CRE_V2_S30409818_Padded.dbsnp_138.common.monoallelic.vcf
-TCRA_EXONS ?= $(BED_DIR)/Agilent_CRE_V2_S30409818_Padded.TCRA_exons.txt
 
 # Resources
 RESOURCE_REQ ?= medium

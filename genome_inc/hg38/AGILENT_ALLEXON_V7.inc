@@ -6,7 +6,6 @@ TARGETS_FILE_MUTATIONS ?= $(BED_DIR)/allexonv7S31285117_Padded.bed
 DBSNP_TARGETS_INTERVALS ?= $(BED_DIR)/allexonv7S31285117_dbsnp_146.hg38.vcf
 #DBSNP_TARGETS_INTERVALS_COMMON ?= $(BED_DIR)/allexonv7S31285117_dbsnp_146.hg38.common.vcf
 DBSNP_TARGETS_INTERVALS_COMMON ?= $(BED_DIR)/allexonv7S31285117_dbsnp_146.hg38.common.monoallelic.vcf
-TCRA_EXONS ?= $(BED_DIR)/allexonv7S31285117_Padded.TCRA_exons.txt
 
 # Resources
 RESOURCE_REQ ?= medium

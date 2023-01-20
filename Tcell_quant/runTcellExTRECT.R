@@ -5,8 +5,8 @@ suppressPackageStartupMessages(library("optparse"))
 # define argument list and data types
 option_list <- list(
   make_option("--sample_id", type="character", default = NULL, help="Sample ID", metavar="character"),
-  make_option("--TCRA_exons", type="character", default = "TCRA_exons_hg38", help="TCRA exons. Should correspond to the target bed [default %default]", metavar="character"),
   make_option("--genome_build", type="character", default = "hg38", help="hg38 or hg19 [default %default]", metavar="character"),
+  make_option("--target_bed", type="character", default = NULL, help="target bed file [default %default]", metavar="character"),
   make_option("--purity", default = NULL, type = "numeric", help = "estimated tumor purity [default %default]"),
   make_option("--cncf", type="character", default = NULL, help="facets cncf file [default %default]", metavar="character"),
   make_option("--TCRA_cn", type="integer", default = 2, help="(alternative to cncf) ploidy of the TCRA locus [default %default]", metavar="character"),
@@ -42,8 +42,8 @@ if (length(arguments$args) < 1) {
 if(!dir.exists(opt$outdir)){dir.create(opt$outdir,  recursive = T)}
 
 cat("sample_id .....", paste0(opt$sample_id, "\n"))
-cat("TCRA_exons ....", paste0(opt$TCRA_exons, "\n"))
 cat("genome_build ..", paste0(opt$genome_build, "\n"))
+cat("target_bed ....", paste0(opt$target_bed, "\n"))
 cat("purity ........", paste0(opt$purity, "\n"))
 cat("cncf ..........", paste0(opt$cncf, "\n"))
 if (is.null(opt$cncf)) cat("TCRA_cn .......", paste0(opt$TCRA_cn, "\n"))
@@ -55,7 +55,16 @@ outdir <- sub("\\/\\/$", "/", paste0(opt$outdir, "/"))
 suppressPackageStartupMessages(library("TcellExTRECT"))
 suppressPackageStartupMessages(library("valr"))
 
-exons <- read.table(opt$TCRA_exons, header = T)
+if (!is.null(opt$target_bed)) {
+	exons <- createExonDFBed(opt$target_bed, opt$genome_build)
+	colnames(exons) <- c("chrom", "start", "end")
+} else {
+	exons <- get(paste0("TCRA_exons_", opt$genome_build))
+	# internal hg19 TCRA_exons does not have colnames set, will cause error below:
+	if (opt$genome_build == "hg19") {
+		colnames(exons) <- c("chrom", "start", "end")
+	}
+}
 
 if (opt$genome_build == "hg38") {
 	seg <- tcra_seg_hg38

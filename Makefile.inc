@@ -508,7 +508,7 @@ MSISENSOR ?= $(BIN_DIR)/msisensor_Linux_x86_64
 DETIN_DIR = /scicore/home/pissal00/GROUP/usr_nobackup/local/deTiN_2021-11-25/deTiN
 DETIN ?= python $(DETIN_DIR)/deTiN.py
 
-TCELLEXTRECT ?= $(RSCRIPT) usb-modules-v2/Tcell_quant/runTcellExTRECT.R
+TCELLEXTRECT ?= $(R4SCRIPT) usb-modules-v2/Tcell_quant/runTcellExTRECT.R
 
 endif
 MAKEFILE_INC = true

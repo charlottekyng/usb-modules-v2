@@ -5,7 +5,6 @@ TARGETS_FILE_MUTATIONS ?= $(BED_DIR)/Agilent_CREv1_S06588914_liftover_no_alt_Pad
 # TARGETS_FILE_GENES ?= $(BED_DIR)/wxs.GeneSymbols.txt
 DBSNP_TARGETS_INTERVALS ?= $(BED_DIR)/Agilent_CREv1_S06588914_liftover_no_alt_dbsnp_146.vcf
 DBSNP_TARGETS_INTERVALS_COMMON ?= $(BED_DIR)/Agilent_CREv1_S06588914_liftover_no_alt_dbsnp_146.common.monoallelic.vcf
-TCRA_EXONS ?= $(BED_DIR)/Agilent_CREv1_S06588914_liftover_no_alt_Padded.TCRA_exons.txt
 
 # Resources
 RESOURCE_REQ ?= medium

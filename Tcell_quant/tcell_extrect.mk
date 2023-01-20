@@ -17,7 +17,8 @@ tcell_extrect/$1_TCRA.txt.gz : tcell_extrect/$1.resTcellExTRECT.txt
 tcell_extrect/%.resTcellExTRECT.txt : bam/$1.bam facets/cncf/$1_$2.out facets/cncf/$1_$2.cncf.txt
 	$$(call RUN,1,$$(RESOURCE_REQ_MEDIUM_MEM),$$(RESOURCE_REQ_SHORT),$$(R4_MODULE) $$(SAMTOOLS_MODULE),"\
 	$$(TCELLEXTRECT) --sample_id $1 \
-	--TCRA_exons $$(TCRA_EXONS) \
+	--genome_build $$(REF) \
+	--target_bed $$(TARGETS_FILE_COVERED_INTERVALS) \
 	--purity `grep Purity $$(filter %.out,$$^) | cut -f2 -d'=' | tr -d ' ' | sed 's/NA/0.1/'` \
 	--cncf $$(filter %.cncf.txt,$$^) \
 	--outdir tcell_extrect \

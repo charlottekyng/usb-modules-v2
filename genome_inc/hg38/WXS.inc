@@ -6,7 +6,6 @@ TARGETS_FILE_MUTATIONS ?= $(BED_DIR)/wxs.gencode.$(GENCODE_VER).padded.bed
 DBSNP_TARGETS_INTERVALS ?= $(BED_DIR)/wxs.gencode.$(GENCODE_VER).padded.dbsnp_146.vcf
 #DBSNP_TARGETS_INTERVALS_COMMON ?= $(BED_DIR)/wxs.dbsnp_146.common.vcf
 DBSNP_TARGETS_INTERVALS_COMMON ?= $(BED_DIR)/wxs.gencode.$(GENCODE_VER).padded.dbsnp_146.common.monoallelic.vcf
-TCRA_EXONS ?= $(BED_DIR)/wxs.gencode.$(GENCODE_VER).padded.TCRA_exons.txt
 
 # Resources
 RESOURCE_REQ ?= medium
