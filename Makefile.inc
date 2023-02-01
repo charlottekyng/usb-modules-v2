@@ -351,7 +351,7 @@ STRELKA2_SOMATIC_CONFIG = usb-modules-v2/variant_callers/somatic/configureStrelk
 CONFIGURE_STRELKA2_GERMLINE = $(PYTHON) $(USR_DIR)/local/strelka-2.9.10.centos6_x86_64/bin/configureStrelkaGermlineWorkflow.py
 STRELKA2_GERMLINE_CONFIG = usb-modules-v2/variant_callers/configureStrelkaGermlineWorkflow.py.ini
 
-PIPEIT_IMG ?= $(IMG_DIR)/PipeIT_2.0.1.img
+PIPEIT_IMG ?= $(IMG_DIR)/PipeIT_2.0.5.img
 
 TVC_ROOT_DIR ?= /PipeIT_resources/usr/local
 TVC = $(SINGULARITY_EXEC) $(PIPEIT_IMG) $(TVC_ROOT_DIR)/bin/variant_caller_pipeline.py
