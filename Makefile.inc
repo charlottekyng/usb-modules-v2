@@ -399,6 +399,7 @@ FACETS = $(R4SCRIPT) usb-modules-v2/copy_number/facetsRun.R
 FACETS_GENE_CN = $(RSCRIPT) usb-modules-v2/copy_number/facetsGeneCN.R
 FACETS_GENE_CN_PLOT = $(RSCRIPT) usb-modules-v2/copy_number/facetsGeneCNPlot.R
 FACETS_CCF = $(RSCRIPT) usb-modules-v2/copy_number/facetsCCF.R
+FACETS_HETMARKFREQ = $(R4SCRIPT) usb-modules-v2/copy_number/facetsHetMarkFreq.R
 
 MUTATION_SUMMARY_RSCRIPT = $(RSCRIPT) usb-modules-v2/summary/mutation_summary_excel.v2.R
 

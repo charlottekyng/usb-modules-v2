@@ -13,7 +13,8 @@ FACETS_SUFFIX = $(SNPPILEUP_SUFFIX)_bin$(FACETS_WINDOW_SIZE)_mingc$(FACETS_MINGC
 facets : facets/cncf/all$(PROJECT_PREFIX).summary.txt facets/cncf/all$(PROJECT_PREFIX).geneCN.GL_ASCNA.pdf \
 facets/cncf/all$(PROJECT_PREFIX).geneCN.GL_LRR.pdf facets/cncf/all$(PROJECT_PREFIX).geneCN.cnlr.median.pdf \
 facets/cncf/all$(PROJECT_PREFIX).geneCN.tcn.em.pdf facets/cncf/all$(PROJECT_PREFIX).geneCN.lcn.em.pdf \
-facets/cncf/all$(PROJECT_PREFIX).cncf.txt facets/cncf/all$(PROJECT_PREFIX).cncf.pdf.tar.gz
+facets/cncf/all$(PROJECT_PREFIX).cncf.txt facets/cncf/all$(PROJECT_PREFIX).cncf.pdf.tar.gz \
+$(foreach pair,$(SAMPLE_PAIRS),facets/cncf/$(tumor.$(pair))_$(normal.$(pair)).HetMarkFreq.pdf)
 
 ifeq ($(findstring ILLUMINA,$(SEQ_PLATFORM)),ILLUMINA)
 facets/base_pos/%.gatk.dbsnp.vcf : gatk/dbsnp/%.gatk_snps.vcf gatk/vcf_ug/%.variants.vcf
@@ -120,7 +121,7 @@ facets/cncf/$1_$2.logR.pdf : facets/cncfTN/$1_$2_$$(FACETS_SUFFIX_FINAL).logR.pd
 
 endef
 $(foreach pair,$(SAMPLE_PAIRS),$(eval $(call facets-ln-files,$(tumor.$(pair)),$(normal.$(pair)))))
- 
+
 facets/cncf/all$(PROJECT_PREFIX).summary.txt : $(foreach pair,$(SAMPLE_PAIRS),facets/cncf/$(pair).out)
 	$(INIT) \
 	{ \
@@ -159,6 +160,20 @@ facets/cncf/all$(PROJECT_PREFIX).cncf.txt : $(foreach pair,$(SAMPLE_PAIRS),facet
 
 facets/cncf/all$(PROJECT_PREFIX).cncf.pdf.tar.gz : $(foreach pair,$(SAMPLE_PAIRS),facets/cncf/$(pair).cncf.pdf) $(foreach pair,$(SAMPLE_PAIRS),facets/cncf/$(pair).logR.pdf)
 	$(INIT) tar -czf $@ $^
+
+
+define facets-TN-swap-check
+facets/cncf/$1_$2.HetMarkFreq.pdf : facets/cncf/$1_$2.HetMarkFreq.txt
+	
+
+facets/cncf/$1_$2.HetMarkFreq.txt : facets/cncf/$1_$2.cncf.txt
+	$$(call RUN,1,$$(RESOURCE_REQ_LOW_MEM),$$(RESOURCE_REQ_VSHORT),$$(R4_MODULE),"\
+	$$(FACETS_HETMARKFREQ) --minMarks $$(FACETS_HETMARKFREQ_MINMARKS) \
+	--threshold $$(FACETS_HETMARKFREQ_THRESHOLD) \
+	$$<")
+
+endef
+$(foreach pair,$(SAMPLE_PAIRS),$(eval $(call facets-TN-swap-check,$(tumor.$(pair)),$(normal.$(pair)))))
 
 #include usb-modules-v2/variant_callers/TVC.mk
 #include usb-modules-v2/bam_tools/processBam.mk
