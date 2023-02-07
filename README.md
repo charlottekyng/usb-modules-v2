@@ -427,6 +427,17 @@ For Illumina RNA sequencing, cnvkit is implemeted (but currently not well tested
 make cnvkit
 ```
 
+<br>
+
+#### Identify tumor/normal swaps from facets results
+
+Tumor/normal sample swaps are not easy to spot. One possibility is to look into facets plots, notably the log-odds-ratio, and see if some segments have a fewer-than-usual number of markers (dots), similar to what we see in the X chromosome in samples from males. To facilitate this process, the facets module will automatically run a script that will plot the ratio of heterozygous vs. total number of markers (germline SNPs) that facets used for the analysis of each CN segment (`facets/cncf/tumor_normal.HetMarkFreq.pdf`), as well as the cumulative size (MB) of the genome that contains a ratio of heterozygous markers below a certain threshold (default: `FACETS_HETMARKFREQ_THRESHOLD=0.025`). In case of a correct tumor/normal assignment, the result (`facets/cncf/tumor_normal.HetMarkFreq.txt`) should be `0 MB`, and above zero in case of a swap.
+
+**Note**:
+1. This strategy assumes that all tumors have regions with LOH or amplifications, so when a tumor is swapped for normal, facet will fail to identify heterozygous germline SNPs (facets expects a normal heterozygous SNP allele frequency to be around 0.5).
+2. This strategy will likely fail for samples with very low tumor content, and/or tumors with a flat CN profile!
+
+
 ### TcellExTRECT
 TcellExTRECT is an R package to calculate T cell fractions from WES data from hg19 or hg38 aligned genomes.
 Read more at [https://github.com/McGranahanLab/TcellExTRECT)
