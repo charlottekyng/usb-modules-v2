@@ -14,7 +14,7 @@ facets : facets/cncf/all$(PROJECT_PREFIX).summary.txt facets/cncf/all$(PROJECT_P
 facets/cncf/all$(PROJECT_PREFIX).geneCN.GL_LRR.pdf facets/cncf/all$(PROJECT_PREFIX).geneCN.cnlr.median.pdf \
 facets/cncf/all$(PROJECT_PREFIX).geneCN.tcn.em.pdf facets/cncf/all$(PROJECT_PREFIX).geneCN.lcn.em.pdf \
 facets/cncf/all$(PROJECT_PREFIX).cncf.txt facets/cncf/all$(PROJECT_PREFIX).cncf.pdf.tar.gz \
-$(foreach pair,$(SAMPLE_PAIRS),facets/cncf/$(tumor.$(pair))_$(normal.$(pair)).HetMarkFreq.pdf)
+facets/cncf/all$(PROJECT_PREFIX).cncf.txt facets/cncf/all$(PROJECT_PREFIX).HetMarkFreq.txt
 
 ifeq ($(findstring ILLUMINA,$(SEQ_PLATFORM)),ILLUMINA)
 facets/base_pos/%.gatk.dbsnp.vcf : gatk/dbsnp/%.gatk_snps.vcf gatk/vcf_ug/%.variants.vcf
@@ -50,7 +50,7 @@ endif
 
 define facets-cval1-tumor-normal
 facets/cncfTN/$1_$2_$$(FACETS_SUFFIX).done : facets/snp_pileup/$1_$2_$$(SNPPILEUP_SUFFIX).bc.gz
-	$$(call RUN,1,$$(RESOURCE_REQ_LOW_MEM),$$(RESOURCE_REQ_VSHORT),$$(R4_MODULE),"\
+	$$(call RUN,1,$$(RESOURCE_REQ_MEDIUM_MEM),$$(RESOURCE_REQ_VSHORT),$$(R4_MODULE),"\
 	$$(FACETS) --pre_cval $$(FACETS_PRE_CVAL) \
 	--minNDepth $$(FACETS_SNP_PILEUP_MIN_DEPTH) \
 	--maxNDepth $$(FACETS_SNP_PILEUP_MAX_DEPTH) \
@@ -174,6 +174,14 @@ facets/cncf/$1_$2.HetMarkFreq.txt : facets/cncf/$1_$2.cncf.txt
 
 endef
 $(foreach pair,$(SAMPLE_PAIRS),$(eval $(call facets-TN-swap-check,$(tumor.$(pair)),$(normal.$(pair)))))
+
+comma := ,
+facets/cncf/all$(PROJECT_PREFIX).HetMarkFreq.txt : $(foreach pair,$(SAMPLE_PAIRS),facets/cncf/$(pair).HetMarkFreq.txt)
+	$(INIT) \
+	{ \
+	grep -r MB $^ | sed -E -e 's/.+\/(.+).HetMarkFreq.txt.([0-9\.]+) MB/\1\t\2/g' | sort -k2$(comma)2nr;\
+} >$@
+
 
 #include usb-modules-v2/variant_callers/TVC.mk
 #include usb-modules-v2/bam_tools/processBam.mk
