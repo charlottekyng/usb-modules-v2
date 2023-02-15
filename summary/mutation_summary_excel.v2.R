@@ -181,6 +181,14 @@ if(nrow(output)>0) {
 colnames(output) <- gsub("ANN....", "", colnames(output))
 
 
+# fix "." in ID
+output$ID <- apply(output, 1, function(x) {
+	if(as.character(x[["ID"]] == ".")) {
+		paste(x[["CHROM"]], x[["POS"]], x[["REF"]], x[["ALT"]], sep = "_")
+	} else {
+		x[["ID"]]
+	}
+})
 
 
 # make consensus variants if more than 1 caller
