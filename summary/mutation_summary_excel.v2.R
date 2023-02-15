@@ -180,6 +180,48 @@ if(nrow(output)>0) {
 
 colnames(output) <- gsub("ANN....", "", colnames(output))
 
+
+
+
+# make consensus variants if more than 1 caller
+# in that case we expect mutect2 and strelka2
+if(length(unique(output$Caller)) > 1 & all(output$Caller %in% c("mutect2", "strelka2"))) {
+	output$consensus_match <- apply(output, 1, function(x) {
+	if (all(c("mutect2", "strelka2") %in% output[["Caller"]][output[["ID"]] == x[["ID"]] & output[["TUMOR_SAMPLE"]] == x[["TUMOR_SAMPLE"]]])) {
+		return(1)
+	} else {
+		return(0)
+	}
+	})
+
+	# use mutect2 variants as final consensus variants
+	# (we don't need the first and last col anymore)
+	consensus <- output[output$consensus_match == 1 & output$Caller == "mutect2", !colnames(output) %in% c("Caller", "consensus_match")]
+	
+	# fetch variants supported by only one caller
+	singletons <- output[output$consensus_match == 0, !colnames(output) %in% c("consensus_match")]
+	
+	# distance of non-consensus variants to the closest variant from the alternate caller (for the corresponding sample)
+	singletons$dist_to_alt_caller <- apply(singletons, 1, function(x) {
+		min(abs(as.numeric(x[["POS"]]) - singletons[["POS"]][singletons[["Caller"]] != x[["Caller"]] & singletons[["TUMOR_SAMPLE"]] == x[["TUMOR_SAMPLE"]] & singletons[["CHROM"]] == x[["CHROM"]]]))
+	})
+
+	cat("\nWriting consensus files\n")
+	if(opt$outputFormat=="EXCEL") {
+		write.xlsx2(consensus, paste0(tools::file_path_sans_ext(opt$outFile), ".consensus.xlsx"), sheetName="consensus_variants", append=FALSE, showNA=FALSE, row.names=F)
+		write.xlsx2(singletons, paste0(tools::file_path_sans_ext(opt$outFile), ".singletons.xlsx"), sheetName="singletons_variants", append=FALSE, showNA=FALSE, row.names=F)
+		cat("\ndone\n")
+	} else if (opt$outputFormat=="TXT") {
+		write.table(consensus, paste0(tools::file_path_sans_ext(opt$outFile), ".consensus.txt"), sep="\t", row.names=F, quote=F, na="")
+		write.table(singletons, paste0(tools::file_path_sans_ext(opt$outFile), ".singletons.txt"), sep="\t", row.names=F, quote=F, na="")
+		cat("\ndone\n")
+	} else { 
+		stop("\nOutput format not recognized\n")
+	}
+}
+
+
+# write the main output last because it's a dependency in make
 cat("\nWriting output file\n")
 if(opt$outputFormat=="EXCEL") {
 	write.xlsx2(output, opt$outFile, sheetName="mutation_summary", append=FALSE, showNA=FALSE, row.names=F)
