@@ -427,7 +427,7 @@ PYCLONE_BURNIN ?= 1000
 PYCLONE_SEED ?= 1234567
 PYCLONE_MAKE_MUT_TXT ?= $(RSCRIPT) usb-modules-v2/clonality/pyclone_make_input.R
 PYCLONE_MAKE_CLUSTER_TABLE ?= $(RSCRIPT) usb-modules-v2/clonality/pyclone_make_cluster_table.R
-PYCLONE_DECONSTRUCTSIGS ?= $(RSCRIPT) usb-modules-v2/clonality/pyclone_deconstructSigs.R $(if $(findstring hg38,$(REF)), --hg38) $(if $(findstring NONE,$(CAPTURE_METHOD)), --signatures.ref $(SIGNATURES), $(if $(findstring BAITS,$(CAPTURE_METHOD)), --signatures.ref $(SIGNATURES)))
+PYCLONE_DECONSTRUCTSIGS ?= $(RSCRIPT) usb-modules-v2/clonality/pyclone_deconstructSigs.R $(if $(findstring hg38,$(REF)), --hg38) $(if $(findstring NONE,$(CAPTURE_METHOD)), --signatures.ref $(SIGNATURES), $(if $(findstring BAITS,$(CAPTURE_METHOD)), --signatures.ref $(SIGNATURES))) --tri.counts.method $(DECONSTRUCTSIGS_TRI_COUNT_METHOD)
 PYCLONE_POSTPY ?= $(RSCRIPT) usb-modules-v2/clonality/pyclone_postpy.R
 PYCLONE_POSTPY_MAXSD ?= 0.3
 

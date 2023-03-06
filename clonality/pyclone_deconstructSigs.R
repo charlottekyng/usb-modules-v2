@@ -6,7 +6,7 @@ if (!interactive()) {
 }
 
 optList <- list(
-	make_option("--tri.count.method", default = "exome2genome", help = "tri.count.method for deconstructSigs [default %default]"),
+	make_option("--tri.counts.method", default = "exome2genome", help = "tri.counts.method for deconstructSigs [default %default]"),
 	make_option("--num_iter", default = 100, type='integer', help = "number of re-sampling with replacement (at least 10, otherwise NA) [default %default]"),
 	make_option("--num_cores", default = 1, type='integer', help = "number of cores to use [default %default]"),
 	make_option("--min_muts_to_include", default = 15, type='integer', help = "minimum number of mutations required to derive signature [default %default]"),
@@ -57,7 +57,7 @@ if(!is.null(tab)) {
 				"--hg38",
 				"--num_iter", opt$num_iter,
 				"--min_muts_to_include", opt$min_muts_to_include,
-				"--tri.count.method", opt$tri.count.method,
+				"--tri.counts.method", opt$tri.counts.method,
 				"--num_cores", opt$num_cores,
 				"--seed", opt$seed,
 				"--outPrefix", paste(opt$outPrefix, ".tmp", sep=""),
@@ -67,7 +67,7 @@ if(!is.null(tab)) {
 			cmd <- paste("Rscript", opt$deconstructSigs_script,
 				"--num_iter", opt$num_iter,
 				"--min_muts_to_include", opt$min_muts_to_include,
-				"--tri.count.method", opt$tri.count.method,
+				"--tri.counts.method", opt$tri.counts.method,
 				"--num_cores", opt$num_cores,
 				"--seed", opt$seed,
 				"--outPrefix", paste(opt$outPrefix, ".tmp", sep=""),
