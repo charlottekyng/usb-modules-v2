@@ -1,3 +1,37 @@
+### Table of Contents
+- [Basic project set up](#basic-project-set-up)
+    + [Setting up sample sheets](#setting-up-sample-sheets)
+      - [Important note on sample names](#important-note-on-sample-names)
+    + [Setting up data directories](#setting-up-data-directories)
+    + [Setting up analysis parameters](#setting-up-analysis-parameters)
+- [Executing the modules](#executing-the-modules)
+    + [Alignment](#alignment)
+    + [QC](#qc)
+    + [Panel of Normals (PoN)](#panel-of-normals--pon-)
+    + [Germline variant calling](#germline-variant-calling)
+    + [Somatic variant calling](#somatic-variant-calling)
+  * [If you have experiments other than matched tumor-normal pairs/sets from frozen samples...](#if-you-have-experiments-other-than-matched-tumor-normal-pairs-sets-from-frozen-samples)
+    + [Somatic CNA detection](#somatic-cna-detection)
+      - [Identify tumor/normal swaps from facets results](#identify-tumor-normal-swaps-from-facets-results)
+    + [TcellExTRECT](#tcellextrect)
+    + [deTiN](#detin)
+    + [Mutational signatures](#mutational-signatures)
+      - [deconstructSigs](#deconstructsigs)
+      - [MutationalPatterns](#mutationalpatterns)
+    + [RNA-seq transcript quantification](#rna-seq-transcript-quantification)
+      - [VIPER](#viper)
+    + [ChIP-seq peak detection](#chip-seq-peak-detection)
+    + [Others/ downstream tools](#others--downstream-tools)
+    + [Note regarding sanity checks](#note-regarding-sanity-checks)
+- [Troubleshooting](#troubleshooting)
+    + [If it falls over immediately... (jobs not submitted)](#if-it-falls-over-immediately--jobs-not-submitted-)
+    + [If submitted jobs fail...](#if-submitted-jobs-fail)
+- [Example recipes](#example-recipes)
+- [Using nextflow on scicore](#using-nextflow-on-scicore)
+
+
+
+
 # Basic project set up
 
 Assuming the new project is called PROJ.
@@ -727,3 +761,25 @@ Or do everything at once, if nothing falls over, this will do everything sequent
 ```
 make fix_rg bam_metrics genotype tvc_somatic hotspot_screen mutation_summary
 ```
+
+
+# Using nextflow on scicore
+
+This has nothing to do with this pipeline but it's here in case users need to explore other workflows. [Nextflow](https://www.nextflow.io/docs/latest/index.html) is currently a very popular workflow manager, so chances are you might need to use it. Few tips for running nextflow on *sciCORE*:
+
+* Load a Java module, v.11 or above (eg. `ml Java/11.0.2`)
+* Use `/scicore/home/pissal00/GROUP/usr_nobackup/local/nextflow/23.04.0.5857/nextflow` (latest version as of Apr 2023, put it in your PATH or make an alias for convenience). You can also [install](<https://www.nextflow.io/docs/latest/getstarted.html#installation>) nextflow in your *home* directory.
+* Execute `nextflow` (with no options) once from the login node (this will fetch some files from the internet and put them in your *home* directory. If everything is fine the nexflow help message will appear. Now you can execute nextflow at any time without internet).
+* Make sure your *nextflow.config* has a "scicore" profile. You can use, or adapt `/scicore/home/pissal00/GROUP/usr_nobackup/local/nextflow/nextflow.config`.
+* Nextflow supports different environments, but on scicore you should use *singularity* (no docker). Your command to execute a nextflow workflow would look like this:
+```
+nextflow run my-workflow -profile singularity,scicore --options foo bar ...
+```
+That `-profile singularity,scicore` is key, it tells nextflow to use these profiles, which are defined in the `nextflow.config` file. (if `nextflow.config` is in your workdir or workflow root dir nextflow will pick it up automatically. If it's elsewhere or has a different file name, it can be passed to the command line).
+One can do much more with config files. For inspiration see `/scicore/home/pissal00/GROUP/usr_nobackup/nf-core/rnafusion-2.1.0/conf/base.config`, but for most use cases, a minimalist config is enough. 
+
+**Singularity**
+
+* `singularity` is available on scicore system-wide (no need to load any module).
+* You will need a singularity image saved on scicore, and make sure your nextflow scripts or configs point to that image (see how this was set up for `/scicore/home/pissal00/GROUP/usr_nobackup/SOCIBP/sequenza/nextflow.config`). Note that many public workflows (nf-core etc.) often fetch singularity images from the internet, which wont work on compute nodes. If that's the case make sure to prefetch the images.
+
