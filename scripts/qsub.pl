@@ -3,7 +3,8 @@
 
 use strict;
 use warnings;
-use lib "/scicore/home/pissal00/GROUP/usr_nobackup/local/perl5/lib/perl5/x86_64-linux-thread-multi/";
+use File::Basename;
+use lib dirname (__FILE__) . "/perl5_lib";
 
 use Schedule::DRMAAc qw/ :all /;
 use File::Temp();
