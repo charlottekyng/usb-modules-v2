@@ -181,13 +181,14 @@ $(if $(findstring $(QOS_30min),$3),--qos 30min,infinite))))),)
 ####### DEFINE PATHS/NAMES FOR SCRIPTS, BINARIES, MODULES #####
 ###############################################################
 
-USR_DIR ?= /scicore/home/pissal00/GROUP/usr_nobackup
+GROUP_DIR ?= /scicore/home/pissal00/GROUP
+USR_DIR ?= $(GROUP_DIR)/usr_nobackup
 JAR_DIR ?= $(USR_DIR)/local/lib/java
 SCRIPTS_DIR ?= $(USR_DIR)/local/scripts
 BIN_DIR ?= $(USR_DIR)/local/bin
 MODULE_SCRIPTS_DIR ?= usb-modules-v2/scripts
 LD_LIBRARY_PATH = $(USR_DIR)/local/MCR_R2014a/v83/runtime/glnxa64:$(USR_DIR)/local/MCR_R2014a/v83/bin/glnxa64:$(USR_DIR)/local/MCR_R2014a/v83/sys/os/glnxa64
-IMG_DIR ?= /scicore/home/pissal00/GROUP/virtual_env/img
+IMG_DIR ?= $(GROUP_DIR)/virtual_env/img
 HOTSPOTS_DIR ?= $(USR_DIR)/local/cancer_hotspots
 
 # use system $TEMPDIR on scicore (/scratch)
@@ -249,8 +250,8 @@ PYTHON ?= python
 PYTHON_ENV_ACTIVATE ?= ml load $(ANACONDA_MODULE) && source activate 
 PYTHON_ENV_DEACTIVATE = source deactivate
 
-SINGULARITY_EXEC ?= singularity exec --cleanenv --no-home -B /scicore/home/pissal00/GROUP
-SINGULARITY_RUN ?= singularity run --cleanenv --no-home -B /scicore/home/pissal00/GROUP
+SINGULARITY_EXEC ?= singularity exec --cleanenv --no-home -B $(GROUP_DIR)
+SINGULARITY_RUN ?= singularity run --cleanenv --no-home -B $(GROUP_DIR)
 
 R_LIBS ?= $(USR_DIR)/$(R_MODULE)/lib64/R/library
 R4_LIBS ?= $(USR_DIR)/$(R4_MODULE)/lib64/R/library
@@ -378,15 +379,15 @@ VARSCAN = $(JAVA) -Xmx$(RESOURCE_REQ_MEDIUM_MEM_JAVA) -jar $(VARSCAN_JAR)
 # VARSCAN ?= java -Xmx$(RESOURCE_REQ_LOW_MEM_JAVA) -jar \$$EBROOTVARSCAN/VarScan.v2.4.1.jar
 
 #SNP_EFF_CONFIG ?= usb-modules-v2/vcf_tools/snpEff.config
-SNP_EFF_DATA_DIR ?= /scicore/home/pissal00/GROUP/ref_nobackup/snpeff/4.3
+SNP_EFF_DATA_DIR ?= $(GROUP_DIR)/ref_nobackup/snpeff/4.3
 SNP_EFF = $(JAVA) -Xmx$(1) -jar \$$EBROOTSNPEFF/snpEff.jar
-SNP_EFF_OPTS = -i vcf -o vcf -configOption data.dir=$(SNP_EFF_DATA_DIR) -noStats $(SNP_EFF_FLAGS)
+SNP_EFF_OPTS = -i vcf -o vcf -configOption data.dir=$(SNP_EFF_DATA_DIR) -noStats $(SNP_EFF_FLAGS) -dataDir $(REF_DIR)/snpeff
 SNP_SIFT = $(JAVA) -Xmx$(1) -jar \$$EBROOTSNPEFF/SnpSift.jar
 #SNP_SIFT_OPTS = -c $(SNP_EFF_CONFIG)
 VCF_EFF_ONE_PER_LINE = $(PERL) \$$EBROOTSNPEFF/snpEff/scripts/vcfEffOnePerLine.pl
 VCF_JOIN_EFF = $(PERL) $(MODULE_SCRIPTS_DIR)/joinEff.pl
 
-VEP_CACHE_DIR ?= /scicore/home/pissal00/GROUP/ref_nobackup/vep/
+VEP_CACHE_DIR ?= $(GROUP_DIR)/ref_nobackup/vep/
 VEP ?= vep --cache --offline --dir_cache $(VEP_CACHE_DIR) --no_stats --force_overwrite --pick --format vcf --vcf --symbol --terms SO
 VEP_PLUGIN_DIR ?= $(USR_DIR)/downloads/VEP_plugins
 
@@ -421,7 +422,7 @@ PVACSEQ_PREPARE_VCF ?= $(PERL) usb-modules-v2/neoepitopes/pvacseq_prepare_vcf.pl
 
 LST = $(RSCRIPT) usb-modules-v2/mut_sigs/lst.R
 
-PYCLONE ?= $(PYTHON_ENV_ACTIVATE) /scicore/home/pissal00/GROUP/usr_nobackup/local/conda/pyclonenv; PyClone
+PYCLONE ?= $(PYTHON_ENV_ACTIVATE) $(GROUP_DIR)/usr_nobackup/local/conda/pyclonenv; PyClone
 PYCLONE_ITER ?= 10000
 PYCLONE_BURNIN ?= 1000
 PYCLONE_SEED ?= 1234567
@@ -463,7 +464,7 @@ MUTSIGCV ?= $(USR_DIR)/local/MutSigCV_1.4/run_MutSigCV.sh
 MCR ?= $(USR_DIR)/local/MCR_R2013a_glnxa64/v81/
 MUTSIGCV_MAKE_INPUT ?= $(RSCRIPT) usb-modules-v2/siggenes/make_mutSigCV_input.R
 
-YOUN_AND_SIMON ?= $(RSCRIPT) usb-modules-v2/siggenes/youn_and_simon.R
+YOUN_AND_SIMON ?= $(RSCRIPT) usb-modules-v2/siggenes/youn_and_simon.R --resources_dir $(USR_DIR)/local/youn_and_simon
 YOUN_AND_SIMON_MAKE_INPUT ?= $(RSCRIPT) usb-modules-v2/siggenes/youn_and_simon_make_input.R
 
 GISTIC ?= $(USR_DIR)/local/gistic_2.0.23/gp_gistic2_from_seg
@@ -506,7 +507,7 @@ MACS2 ?= macs
 
 MSISENSOR ?= $(BIN_DIR)/msisensor_Linux_x86_64
 
-DETIN_DIR = /scicore/home/pissal00/GROUP/usr_nobackup/local/deTiN_2021-11-25/deTiN
+DETIN_DIR = $(GROUP_DIR)/usr_nobackup/local/deTiN_2021-11-25/deTiN
 DETIN ?= python $(DETIN_DIR)/deTiN.py
 
 TCELLEXTRECT ?= $(R4SCRIPT) usb-modules-v2/Tcell_quant/runTcellExTRECT.R

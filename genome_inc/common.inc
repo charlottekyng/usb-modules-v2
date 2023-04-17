@@ -1,4 +1,4 @@
-REF_DIR = /scicore/home/pissal00/GROUP/ref_nobackup
+REF_DIR = $(GROUP_DIR)/ref_nobackup
 
 GENOME_DIR = $(REF_DIR)/genomes
 ANN_DIR = $(REF_DIR)/annotation_data/$(REF)

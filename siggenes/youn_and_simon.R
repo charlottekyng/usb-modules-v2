@@ -10,7 +10,8 @@ optList <- list(
 	make_option("--nonsilentFile", default = NULL, help = "nonsilent mutations file"),
 	make_option("--silentFile", default = NULL, help = "silent mutations file"),
 	make_option("--sequenceDataFile", default = NULL, help = "sequence data file"),
-	make_option("--numCases", default = NULL, help = "Number of cases in the mutations files")
+	make_option("--numCases", default = NULL, help = "Number of cases in the mutations files"),
+	make_option("--resources_dir", default = NULL, help = "Path to resource files")
 )
 
 parser <- OptionParser(usage = "%prog [options] [tumor-normal base counts file]", option_list = optList);
@@ -35,9 +36,9 @@ if (is.null(opt$nonsilentFile) | is.null(opt$silentFile)){
 }
 
 load(opt$sequenceDataFile)
-source("/scicore/home/pissal00/GROUP/usr_nobackup/local/youn_and_simon/function_library.r")
-load("/scicore/home/pissal00/GROUP/usr_nobackup/local/youn_and_simon/blosum_score.Rdata")
-load("/scicore/home/pissal00/GROUP/usr_nobackup/local/youn_and_simon/fetched.data.Rdata")
+source(paste0(opt$resources_dir, "/function_library.r"))
+load(paste0(opt$resources_dir, "/blosum_score.Rdata"))
+load(paste0(opt$resources_dir, "/fetched.data.Rdata"))
 
 read_data <- function(x) {
 	x <- read.delim(x, sep="\t", header=T, as.is=T)

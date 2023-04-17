@@ -465,7 +465,7 @@ CBS_SEG_ALPHAS ?= 0.01 0.0001 0.000001 0.0000000001
 
 VARSCAN_GENE_CN_OPTS = $(FACETS_GENE_CN_OPTS)
 
-CNVKIT_CORRELATION ?= /scicore/home/pissal00/GROUP/ref_nobackup/cnvkit_reference/cnvkit_correlation_tcga-lihc.tsv
+CNVKIT_CORRELATION ?= $(GROUP_DIR)/ref_nobackup/cnvkit_reference/cnvkit_correlation_tcga-lihc.tsv
 CNVKIT_GENE_CN_OPTS ?= $(FACETS_GENE_CN_OPTS)
 
 
