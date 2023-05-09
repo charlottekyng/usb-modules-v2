@@ -191,8 +191,6 @@ LD_LIBRARY_PATH = $(USR_DIR)/local/MCR_R2014a/v83/runtime/glnxa64:$(USR_DIR)/loc
 IMG_DIR ?= $(GROUP_DIR)/virtual_env/img
 HOTSPOTS_DIR ?= $(USR_DIR)/local/cancer_hotspots
 
-# use system $TEMPDIR on scicore (/scratch)
-export TMPDIR := $(TEMPDIR)
 export PATH := $(USR_DIR):$(PATH)
 export LD_LIBRARY_PATH := $(LD_LIBRARY_PATH)
 
