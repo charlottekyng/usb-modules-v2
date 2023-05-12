@@ -12,7 +12,7 @@
     + [Somatic variant calling](#somatic-variant-calling)
   * [If you have experiments other than matched tumor-normal pairs/sets from frozen samples...](#if-you-have-experiments-other-than-matched-tumor-normal-pairs-sets-from-frozen-samples)
     + [Somatic CNA detection](#somatic-cna-detection)
-      - [Identify tumor/normal swaps from facets results](#identify-tumor-normal-swaps-from-facets-results)
+      - [Identify tumor/normal swaps from facets results](#identify-tumornormal-swaps-from-facets-results)
     + [TcellExTRECT](#tcellextrect)
     + [deTiN](#detin)
     + [Mutational signatures](#mutational-signatures)
