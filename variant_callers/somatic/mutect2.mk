@@ -105,7 +105,7 @@ mutect2/$1_$2.mutect2.vcf.gz : mutect2/merge_vcf/$1_$2.mutect2.unfiltered.vcf.gz
 	$$(call GATK4241,FilterMutectCalls,$$(RESOURCE_REQ_MEDIUM_MEM_JAVA)) \
 	-R $$(REF_FASTA) \
 	-V mutect2/merge_vcf/$1_$2.mutect2.unfiltered.vcf.gz \
-	$$(if $$(findstring true,$$(TARGETS_LESS_1M)),,--contamination-table mutect2/contamination/$1.contamination.table) \
+	$$(if $$(findstring true,$$(TARGETS_LESS_1M)),,$$(if $$(findstring GRCm38,$$(REF)),,--contamination-table mutect2/contamination/$1.contamination.table)) \
 	--ob-priors mutect2/merge_vcf/$1_$2.mutect2.f1r2.tar.gz \
 	-O $$@")
 

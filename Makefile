@@ -103,8 +103,13 @@ mutect2_calculate_contamination :
 	$(call RUN_MAKE,usb-modules-v2/variant_callers/somatic/mutect2_calculate_contamination.mk)
 
 TARGETS += mutect2
+ifeq ($(REF),GRCm38)
+mutect2 :
+	$(call RUN_MAKE,usb-modules-v2/variant_callers/somatic/mutect2.mk)
+else
 mutect2 : mutect2_calculate_contamination
 	$(call RUN_MAKE,usb-modules-v2/variant_callers/somatic/mutect2.mk)
+endif
 
 TARGETS += bam_clipoverlap
 bam_clipoverlap :
