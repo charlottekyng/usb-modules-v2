@@ -5,8 +5,8 @@ TARGETS_FILE_INTERVALS ?= $(BED_DIR)/S0276129_Padded_noAnn_noHeader_GRCm37liftov
 TARGETS_FILE_MUTATIONS ?= $(BED_DIR)/S0276129_Padded_noAnn_noHeader_GRCm37liftover.bed
 TARGETS_FILE_GENES ?= $(BED_DIR)/S0276129_Targets.txt
 
-DBSNP_TARGETS_INTERVALS ?= $(BED_DIR)/S0276129_Padded_noAnn_noHeader_GRCm37liftover.mgp.v5.merged.snps_all.dbSNP142_noGT.vcf
-DBSNP_TARGETS_INTERVALS_COMMON ?= $(BED_DIR)/S0276129_Padded_noAnn_noHeader_GRCm37liftover.mgp.v5.merged.snps_all.dbSNP142_noGT.monoallelic.vcf
+DBSNP_TARGETS_INTERVALS ?= $(BED_DIR)/S0276129_Padded_noAnn_noHeader_GRCm37liftover.mgp.v6.merged.norm.snp.indels.sfiltered.vcf
+DBSNP_TARGETS_INTERVALS_COMMON ?= $(BED_DIR)/S0276129_Padded_noAnn_noHeader_GRCm37liftover.mgp.v6.merged.norm.snp.indels.sfiltered.monoallelic.vcf
 
 # Resources
 RESOURCE_REQ ?= medium
