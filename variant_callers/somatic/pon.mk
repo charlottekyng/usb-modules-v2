@@ -83,7 +83,7 @@ mutect2/pon/pon_db : mutect2/pon/pon.list
 mutect2/pon.mutect2.vcf.gz : mutect2/pon/pon_db
 	$(call RUN,1,$(RESOURCE_REQ_HIGH_MEM),$(RESOURCE_REQ_LONG),$(JAVA8_MODULE),"\
 	$(call GATK4241,CreateSomaticPanelOfNormals,$(RESOURCE_REQ_HIGH_MEM_JAVA)) \
-	$(if $$(findstring hg38,$(REF)),--germline-resource $(ANN_DIR)/af-only-gnomad.hg38.vcf.gz,$$(if $(findstring b37,$(REF)),--germline-resource $(ANN_DIR)/af-only-gnomad.raw.sites.b37.vcf.gz,,))\
+	$(if $(findstring hg38,$(REF)),--germline-resource $(ANN_DIR)/af-only-gnomad.hg38.vcf.gz,$(if $(findstring b37,$(REF)),--germline-resource $(ANN_DIR)/af-only-gnomad.raw.sites.b37.vcf.gz,$(if $(findstring GRCm38,$(REF)),--germline-resource $(ANN_DIR)/mgp.v6.merged.norm.snp.indels.sfiltered.af-only.vcf.gz,,)))\
 	-V gendb://$< -O $@ --min-sample-count $(PON_MIN_SAMPLES) -R $(REF_FASTA)")
 endif
 
