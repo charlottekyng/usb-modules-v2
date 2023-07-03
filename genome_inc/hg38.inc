@@ -5,7 +5,7 @@ include usb-modules-v2/genome_inc/common.inc
 REF_FASTA ?= $(GENOME_DIR)/Homo_sapiens_assembly38_gsa.fasta
 REF_DICT = $(REF_FASTA:.fasta=.dict)
 
-DBSNP ?= $(ANN_DIR)/dbsnp_146.hg38.vcf.gz
+DBSNP ?= $(ANN_DIR)/dbsnp_151.hg38.vcf.gz
 
 ifeq ($(findstring NONE,$(PANEL)),NONE)
 else
@@ -14,7 +14,7 @@ endif
 
 RESOURCE_REQ ?= high
 TARGETS_FILE_INTERVALS ?= $(REF_FASTA:.fasta=.bed)
-DBSNP_TARGETS_INTERVALS ?= $(DBSNP)
+DBSNP_TARGETS_INTERVALS ?= $(ANN_DIR)/dbsnp_151.hg38.common.vcf.gz
 
 ifeq ($(findstring bed,$(TARGETS_FILE_INTERVALS)),bed)
 CHROMOSOMES := $(shell grep -v '@' $(TARGETS_FILE_INTERVALS) | cut -f1 | sort -V | uniq)
