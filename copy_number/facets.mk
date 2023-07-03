@@ -10,11 +10,10 @@ LOGDIR ?= log/facets.$(NOW)
 SNPPILEUP_SUFFIX = q$(FACETS_SNP_PILEUP_MINMAPQ)_Q$(FACETS_SNP_PILEUP_MINBASEQ)_d$(FACETS_SNP_PILEUP_MAX_DEPTH)_r$(FACETS_SNP_PILEUP_MIN_DEPTH)
 FACETS_SUFFIX = $(SNPPILEUP_SUFFIX)_bin$(FACETS_WINDOW_SIZE)_mingc$(FACETS_MINGC)_maxgc$(FACETS_MAXGC)_nhet$(FACETS_MIN_NHET)_cval$(FACETS_CVAL)
 
-facets : facets/cncf/all$(PROJECT_PREFIX).summary.txt facets/cncf/all$(PROJECT_PREFIX).geneCN.GL_ASCNA.pdf \
-facets/cncf/all$(PROJECT_PREFIX).geneCN.GL_LRR.pdf facets/cncf/all$(PROJECT_PREFIX).geneCN.cnlr.median.pdf \
-facets/cncf/all$(PROJECT_PREFIX).geneCN.tcn.em.pdf facets/cncf/all$(PROJECT_PREFIX).geneCN.lcn.em.pdf \
-facets/cncf/all$(PROJECT_PREFIX).cncf.txt facets/cncf/all$(PROJECT_PREFIX).cncf.pdf.tar.gz \
-facets/cncf/all$(PROJECT_PREFIX).cncf.txt facets/cncf/all$(PROJECT_PREFIX).HetMarkFreq.txt
+facets : facets/cncf/all$(PROJECT_PREFIX).summary.txt facets/cncf/all$(PROJECT_PREFIX).cncf.txt\
+facets/cncf/all$(PROJECT_PREFIX).cncf.pdf.tar.gz facets/cncf/all$(PROJECT_PREFIX).HetMarkFreq.txt \
+$(if $(findstring NONE,$(PANEL)),facets/cncf/all$(PROJECT_PREFIX).geneCN.GL_ASCNA.pdf facets/cncf/all$(PROJECT_PREFIX).geneCN.GL_LRR.pdf facets/cncf/all$(PROJECT_PREFIX).geneCN.cnlr.median.pdf facets/cncf/all$(PROJECT_PREFIX).geneCN.tcn.em.pdf facets/cncf/all$(PROJECT_PREFIX).geneCN.lcn.em.pdf,)
+
 
 ifeq ($(findstring ILLUMINA,$(SEQ_PLATFORM)),ILLUMINA)
 facets/base_pos/%.gatk.dbsnp.vcf : gatk/dbsnp/%.gatk_snps.vcf gatk/vcf_ug/%.variants.vcf
@@ -50,7 +49,7 @@ endif
 
 define facets-cval1-tumor-normal
 facets/cncfTN/$1_$2_$$(FACETS_SUFFIX).done : facets/snp_pileup/$1_$2_$$(SNPPILEUP_SUFFIX).bc.gz
-	$$(call RUN,1,$$(RESOURCE_REQ_MEDIUM_MEM),$$(RESOURCE_REQ_VSHORT),$$(R4_MODULE),"\
+	$$(call RUN,1,$$(RESOURCE_REQ_MEDIUM_MEM),$$(RESOURCE_REQ_SHORT),$$(R4_MODULE),"\
 	$$(FACETS) --pre_cval $$(FACETS_PRE_CVAL) \
 	--minNDepth $$(FACETS_SNP_PILEUP_MIN_DEPTH) \
 	--maxNDepth $$(FACETS_SNP_PILEUP_MAX_DEPTH) \
