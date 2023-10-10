@@ -55,7 +55,7 @@ ggplot(cncf) + geom_segment(aes(x=start, y=nhet.freq, xend=end, yend=nhet.freq),
 	theme(axis.text.x=element_blank(), axis.ticks.x=element_blank()) +
 	theme(panel.spacing.x=unit(0.1, "lines")) +
 	xlab("Chromosome") +
-	ylim(c(0,0.20)) + # to be consistent between samples. I didn't observe values higher than 0.2 so far
+	ylim(c(0, ifelse(max(cncf$nhet.freq) < 0.20, 0.20, max(cncf$nhet.freq)))) + # to be consistent between samples. I didn't observe values higher than 0.2 so far
 	geom_hline(yintercept=opt$threshold, linetype="dashed", color = "red", size=0.1) +
 	ggtitle(basename(out_prefix))
 dev.off()
