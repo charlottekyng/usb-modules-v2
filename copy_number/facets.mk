@@ -12,7 +12,7 @@ FACETS_SUFFIX = $(SNPPILEUP_SUFFIX)_bin$(FACETS_WINDOW_SIZE)_mingc$(FACETS_MINGC
 
 facets : facets/cncf/all$(PROJECT_PREFIX).summary.txt facets/cncf/all$(PROJECT_PREFIX).cncf.txt\
 facets/cncf/all$(PROJECT_PREFIX).cncf.pdf.tar.gz facets/cncf/all$(PROJECT_PREFIX).HetMarkFreq.txt \
-$(if $(findstring NONE,$(PANEL)),facets/cncf/all$(PROJECT_PREFIX).geneCN.GL_ASCNA.pdf facets/cncf/all$(PROJECT_PREFIX).geneCN.GL_LRR.pdf facets/cncf/all$(PROJECT_PREFIX).geneCN.cnlr.median.pdf facets/cncf/all$(PROJECT_PREFIX).geneCN.tcn.em.pdf facets/cncf/all$(PROJECT_PREFIX).geneCN.lcn.em.pdf,)
+$(if $(findstring true,$(FACETS_RUN_GENE_CN)),facets/cncf/all$(PROJECT_PREFIX).geneCN.GL_ASCNA.pdf facets/cncf/all$(PROJECT_PREFIX).geneCN.GL_LRR.pdf facets/cncf/all$(PROJECT_PREFIX).geneCN.cnlr.median.pdf facets/cncf/all$(PROJECT_PREFIX).geneCN.tcn.em.pdf facets/cncf/all$(PROJECT_PREFIX).geneCN.lcn.em.pdf,)
 
 
 ifeq ($(findstring ILLUMINA,$(SEQ_PLATFORM)),ILLUMINA)

@@ -425,21 +425,21 @@ make facets
 * lcn.em: minor (lesser) copy number
 * clonal.cluster: clonal cluster
 
-3 versions of gene-level copy number alterations have been generated
-* GL_ASCNA: copy number status derived from total copy number. 
-    * 2: ≥ploidy+4 (amplification)
+If `FACETS_RUN_GENE_CN = true`, three versions of gene-level copy number alterations will be generated
+1. GL_ASCNA: copy number status derived from total copy number. 
+    * 2: ≥ ploidy+4 (amplification)
     * 1: ≥ ploidy+1 (low-level copy number gain)
     * 0: ploidy (copy number neutral)
     * -1: < ploidy but not 0 (heterozygous loss)
     * -2: total copy number = 0 (homozygous deletion)
 
-* GL_LRR: copy number status derived from log ratio
+2. GL_LRR: copy number status derived from log ratio
     * 2: amplification
     * 1: copy number gain
     * 0: copy number neutral
     * -1: copy number loss
     * -2: deep deletion
-* tcn.em: total copy number (absolute copy number)
+3. tcn.em: total copy number (absolute copy number)
 
 Additional files are 1) a list of amplifications and homozygous deletions derived from ASCNA (`*.ampdel.txt`) and 2) per-sample copy number profile figure (`*cncf.pdf`).
 
