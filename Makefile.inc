@@ -254,8 +254,8 @@ PYTHON ?= python
 PYTHON_ENV_ACTIVATE ?= ml load $(ANACONDA_MODULE) && source activate 
 PYTHON_ENV_DEACTIVATE = source deactivate
 
-SINGULARITY_EXEC ?= singularity exec --cleanenv --no-home -B $(GROUP_DIR)
-SINGULARITY_RUN ?= singularity run --cleanenv --no-home -B $(GROUP_DIR)
+SINGULARITY_EXEC ?= singularity exec --cleanenv --no-home -B $(GROUP_DIR)/../
+SINGULARITY_RUN ?= singularity run --cleanenv --no-home -B $(GROUP_DIR)/../
 
 R_LIBS ?= $(USR_DIR)/$(R_MODULE)/lib64/R/library
 R4_LIBS ?= $(USR_DIR)/$(R4_MODULE)/lib64/R/library
