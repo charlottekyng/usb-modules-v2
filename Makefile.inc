@@ -358,6 +358,8 @@ STRELKA2_GERMLINE_CONFIG = usb-modules-v2/variant_callers/configureStrelkaGermli
 
 PIPEIT_IMG ?= $(IMG_DIR)/PipeIT_2.0.5.img
 
+BAMIXCHECKER_IMG ?= $(IMG_DIR)/BAMixChecker/BAMixChecker_v1.0.1.sif
+
 TVC_ROOT_DIR ?= /PipeIT_resources/usr/local
 TVC = $(SINGULARITY_EXEC) $(PIPEIT_IMG) $(TVC_ROOT_DIR)/bin/variant_caller_pipeline.py
 TVC_SOMATIC_JSON = usb-modules-v2/variant_callers/somatic/TVC_somatic_parameters.json

@@ -90,6 +90,10 @@ TARGETS += genotype
 genotype :
 	$(call RUN_MAKE,usb-modules-v2/qc/genotype.mk)
 
+TARGETS += genotype2
+genotype2 :
+	$(call RUN_MAKE,usb-modules-v2/qc/genotype2.mk)
+
 TARGETS += mutation_summary
 mutation_summary :
 	$(call RUN_MAKE,usb-modules-v2/summary/mutationSummary.mk)
