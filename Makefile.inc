@@ -317,7 +317,8 @@ STRINGTIE ?= stringtie
 PICARD = $(JAVA) -Xmx$(RESOURCE_REQ_MEDIUM_MEM_JAVA) -jar $(USR_DIR)/local/picard_2.20.0/picard.jar $(1)
 #PICARD += MAX_RECORDS_IN_RAM=4000000 TMP_DIR=$(TMPDIR)
 #PICARD += REFERENCE_SEQUENCE=$(REF_FASTA) CREATE_INDEX=true
-#PICARD += VALIDATION_STRINGENCY=LENIENT
+# ReorderSam needs LENIENT when working on bams from bwa aln ("MAPQ should be 0 for unmapped read" error)
+PICARD += VALIDATION_STRINGENCY=LENIENT
 
 GATK = $(JAVA) -Xmx$(2) -jar $(JAR_DIR)/GenomeAnalysisTK-3.6/GenomeAnalysisTK-3.6.jar 
 GATK += -S LENIENT -T $(1) -filterNoBases
