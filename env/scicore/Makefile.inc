@@ -25,6 +25,7 @@ include usb-modules-v2/config.inc
 
 RUN_OPTS = $(if $(findstring false,$(USE_CLUSTER)),-l) -o $@ \
 $(if $(CLUSTER_ENGINE),-g $(CLUSTER_ENGINE)) $(if $(EXCLUDE_NODE),-x $(EXCLUDE_NODE)) \
+$(if $(PARTITION),--partition $(PARTITION)) \
 -S $(SHELL) --log_file $(LOG) $(if $(PROJECT_NAME),-p $(PROJECT_NAME)) -c 
 
 ## RUN is the main function!!

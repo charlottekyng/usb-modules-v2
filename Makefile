@@ -13,6 +13,7 @@ NUM_JOBS ?= 100
 # possible values: SGE, SLURM
 CLUSTER_ENGINE ?= SLURM
 EXCLUDE_NODE ?=
+PARTITION ?=
 
 NOW := $(shell date +"%F")
 MAKELOG = log/$(@).$(NOW).log

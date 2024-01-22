@@ -39,6 +39,7 @@ if __name__ == '__main__':
     parser.add_argument('--mail_type', default='END,FAIL,TIME_LIMIT', help='Mail Type')
     parser.add_argument('--mail_user', default=None, help='Mail User')
     parser.add_argument('--array', default=None, help='Number of Tasks and Parallel Tasks')
+    parser.add_argument('--partition', default=None, help='SLURM partition')
 
 
     
@@ -176,6 +177,8 @@ if __name__ == '__main__':
             qsub_args += " --mail-type {type} --mail-user {user}".format(type=args.mail_type, user=args.mail_user)       
         if args.array is not None:
             qsub_args += " --array {}".format(args.array)
+        if args.partition is not None:
+            qsub_args += " --partition {}".format(args.partition)
                        
         my_job = job.SLURMJob(job_script=job_script, qsub_args=qsub_args, out_file=args.out_file,
                             remote_check_servers=None)  # checking filesize on remote servers not supported
