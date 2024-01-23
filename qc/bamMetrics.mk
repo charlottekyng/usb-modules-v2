@@ -219,8 +219,9 @@ $(info SAMPLE $(SAMPLES))
 metrics/all$(PROJECT_PREFIX).rnaseq_metrics.txt : $(foreach sample,$(SAMPLES),metrics/$(sample).rnaseq_metrics.txt)
 	$(INIT) \
 	grep '^PF_BASES' $< > $@ && \
-	for i in $^; do sample=`echo $$i | sed 's:.*/::; s/\..*//'`; \
-		grep -A1 '^PF_BASES' $$i | tail -1 | awk -v sample=$$sample 'BEGIN { OFS = "\t" } { $$23=sample; print $$0 }'  >> $@; \
+	samp_col=`grep '^PF_BASES' $< | tr '\t' '\n' | grep -n SAMPLE | cut -f1 -d':'` && \
+	for i in $^; do sample=`basename $$i .rnaseq_metrics.txt`; \
+		grep -A1 '^PF_BASES' $$i | tail -1 | awk -v sample=$$sample -v col=$$samp_col 'BEGIN { OFS = "\t" } { $$col=sample; print $$0 }'  >> $@; \
 	done; 
 
 metrics/all$(PROJECT_PREFIX).normalized_coverage.rnaseq_metrics.txt : $(foreach sample,$(SAMPLES),metrics/$(sample).rnaseq_metrics.txt)
