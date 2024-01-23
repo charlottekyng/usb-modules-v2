@@ -227,7 +227,7 @@ metrics/all$(PROJECT_PREFIX).rnaseq_metrics.txt : $(foreach sample,$(SAMPLES),me
 metrics/all$(PROJECT_PREFIX).normalized_coverage.rnaseq_metrics.txt : $(foreach sample,$(SAMPLES),metrics/$(sample).rnaseq_metrics.txt)
 	$(INIT) \
 	grep -A101 '^normalized_position' $< | cut -f1 > $@ && \
-	for i in $^; do sample=`echo $$i | sed 's:.*/::; s/\..*//'`; \
+	for i in $^; do sample=`basename $$i .rnaseq_metrics.txt`; \
 		grep -A101 '^normalized_position' $$i | cut -f2 | sed "s/All_Reads/$$sample/" | paste $@ - > $@.tmp && mv $@.tmp $@; \
 	done;
 
