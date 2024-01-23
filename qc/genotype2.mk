@@ -34,5 +34,5 @@ genotype/BAMixChecker/Total_result.txt : $(foreach sample,$(SAMPLES),bam_splitnc
 	$(call RUN,6,$(RESOURCE_REQ_HIGH_MEM),$(RESOURCE_REQ_VSHORT),,"\
 	$(SINGULARITY_EXEC) $(BAMIXCHECKER_IMG) python /BAMixChecker-1.0.1/BAMixChecker.py -d bam_splitncigar \
 	-r $(REF_FASTA) \
-	-o genotype --OFFFileNameMatching -p 6)
+	-o genotype --OFFFileNameMatching -p 6")
 endif
