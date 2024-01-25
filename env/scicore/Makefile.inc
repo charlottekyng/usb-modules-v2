@@ -86,7 +86,6 @@ MUTECT_MODULE ?= MuTect/1.1.7-Java-1.7.0_80
 PICARD_MODULE ?= picard/2.9.2
 VARSCAN_MODULE ?= VarScan/2.4.1-Java-1.7.0_80
 ANACONDA_MODULE ?= Anaconda3/5.0.1
-#SINGULARITY_MODULE ?= Singularity/2.6.1 #deprecated on scicore. A newer singularity is available system-wide.
 VEP_MODULE ?= ensembl-vep/92.0-goolf-1.7.20-Perl-5.22.2
 MACS2_MODULE ?= MACS2/2.1.1.20160309-goolf-1.7.20-Python-2.7.11
 MATPLOTLIB_MODULE ?= matplotlib/3.1.1-fosscuda-2019b-Python-3.7.4
@@ -97,6 +96,8 @@ PYTHON ?= python
 PYTHON_ENV_ACTIVATE ?= ml load $(ANACONDA_MODULE) && source activate 
 PYTHON_ENV_DEACTIVATE = source deactivate
 
+#deprecated on scicore. A newer singularity is available system-wide:
+SINGULARITY_MODULE ?=
 SINGULARITY_EXEC ?= singularity exec --cleanenv --no-home -B $(GROUP_DIR)/../
 SINGULARITY_RUN ?= singularity run --cleanenv --no-home -B $(GROUP_DIR)/../
 

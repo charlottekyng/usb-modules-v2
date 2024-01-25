@@ -16,7 +16,7 @@ endif
 
 ifneq ($(findstring RNA,$(CAPTURE_METHOD)),RNA)
 genotype/BAMixChecker/Total_result.txt : $(foreach sample,$(SAMPLES),bam/$(sample).bam)
-	$(call RUN,6,$(RESOURCE_REQ_MEDIUM_MEM),$(RESOURCE_REQ_VSHORT),,"\
+	$(call RUN,6,$(RESOURCE_REQ_MEDIUM_MEM),$(RESOURCE_REQ_VSHORT),$(SINGULARITY_MODULE),"\
 	$(SINGULARITY_EXEC) $(BAMIXCHECKER_IMG) python /BAMixChecker-1.0.1/BAMixChecker.py -d bam \
 	$(if $(findstring BAITS,$(CAPTURE_METHOD)),-b $(TARGETS_FILE_INTERVALS),if $(findstring PCR,$(CAPTURE_METHOD)),-b $(TARGETS_FILE_INTERVALS),) \
 	-r $(REF_FASTA) \
