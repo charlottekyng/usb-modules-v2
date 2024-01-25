@@ -9,7 +9,7 @@ export
 # job-related options
 NUM_ATTEMPTS ?= 1
 USE_CLUSTER ?= true
-NUM_JOBS ?= 100
+NUM_JOBS ?= 50
 # possible values: SGE, SLURM
 CLUSTER_ENGINE ?= SLURM
 EXCLUDE_NODE ?=
