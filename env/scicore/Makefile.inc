@@ -230,7 +230,7 @@ VARSCAN = $(JAVA) -Xmx$(RESOURCE_REQ_MEDIUM_MEM_JAVA) -jar $(VARSCAN_JAR)
 #SNP_EFF_CONFIG ?= usb-modules-v2/vcf_tools/snpEff.config
 SNP_EFF_DATA_DIR ?= $(GROUP_DIR)/ref_nobackup/snpeff/4.3
 SNP_EFF = $(JAVA) -Xmx$(1) -jar \$$EBROOTSNPEFF/snpEff.jar
-SNP_EFF_OPTS = -i vcf -o vcf -configOption data.dir=$(SNP_EFF_DATA_DIR) -noStats $(SNP_EFF_FLAGS) -dataDir $(REF_DIR)/snpeff
+SNP_EFF_OPTS = -i vcf -o vcf -configOption data.dir=$(SNP_EFF_DATA_DIR) -noStats $(SNP_EFF_FLAGS)
 SNP_SIFT = $(JAVA) -Xmx$(1) -jar \$$EBROOTSNPEFF/SnpSift.jar
 #SNP_SIFT_OPTS = -c $(SNP_EFF_CONFIG)
 VCF_EFF_ONE_PER_LINE = $(PERL) \$$EBROOTSNPEFF/snpEff/scripts/vcfEffOnePerLine.pl
