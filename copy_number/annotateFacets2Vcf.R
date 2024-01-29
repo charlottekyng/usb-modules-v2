@@ -124,31 +124,52 @@ if (sum(!is.na(ol)) > 0) {
     vaf <- alt / (alt + ref)
 
     ccfFit <- computeCCF(vaf = vaf, tcn, lcn, purity = purity)
-	#print(ccfFit)
-    conf <- confCCF(alt = alt, ref = ref, tcn, lcn, purity = purity,
-                           multiplicity = ccfFit$multiplicity)
-    ccfLower <- conf$lower
-    ccfUpper <- conf$upper
-    clonalStatus <- ifelse(round(ccfLower, 2) >= 0.75, "clonal", 
-                           ifelse(round(ccfLower, 2) < 0.75 & ccfFit$ccf >= 0.8, 'likely_clonal', 
-                                  "subclonal"))
+    #print(ccfFit)
 
-    info(vcf)$facetsCF[!is.na(ol)] <- facetsGr$cf.em[ol[!is.na(ol)]]
-    info(vcf)$facetsTCN_EM[!is.na(ol)] <- facetsGr$tcn.em[ol[!is.na(ol)]]
-    info(vcf)$facetsLCN_EM[!is.na(ol)] <- facetsGr$lcn.em[ol[!is.na(ol)]]
-    info(vcf)$facetsMafR[!is.na(ol)] <- facetsGr$mafR[ol[!is.na(ol)]]
-    info(vcf)$facetsLOH[!is.na(ol)] <- facetsGr$lcn.em[ol[!is.na(ol)]] == 0
-    info(vcf)$facetsLOHCall[!is.na(ol)] <- ifelse(facetsGr$lcn.em[ol[!is.na(ol)]] == 0, 'true', 'false')
-    info(vcf)$facetsMultiplicity[!is.na(ol)] <- ccfFit$multiplicity
-    info(vcf)$ccf[!is.na(ol)] <- ccfFit$ccf
-    info(vcf)$clonalStatus[!is.na(ol)] <- clonalStatus
-    info(vcf)$ccfConfUpper[!is.na(ol)] <- ccfUpper
-    info(vcf)$ccfConfLower[!is.na(ol)] <- ccfLower
-    x <- is.na(info(vcf)$facetsLOH[!is.na(ol)])
-    if (sum(x) > 0) {
-        info(vcf)$facetsLOH[!is.na(ol)][x] <- facetsGr$mafR[ol[!is.na(ol)]][x] > medianMafR + sdMafR
-        info(vcf)$facetsLOHCall[!is.na(ol)][x] <- ifelse(facetsGr$mafR[ol[!is.na(ol)]][x] > medianMafR + sdMafR, 'true', 'false')
-    }
+	# edge cases with multi ALT will result in NA for ref/alt/vaf, which will break computeCCF
+	# track NAs and omit if present
+	if (sum(is.na(vaf)) == 0) {
+		conf <- confCCF(alt = alt, ref = ref, tcn, lcn, purity = purity,
+							multiplicity = ccfFit$multiplicity)
+		ccfLower <- conf$lower
+		ccfUpper <- conf$upper
+		clonalStatus <- ifelse(round(ccfLower, 2) >= 0.75, "clonal", 
+							ifelse(round(ccfLower, 2) < 0.75 & ccfFit$ccf >= 0.8, 'likely_clonal', 
+									"subclonal"))
+	} else {
+		na_idenx <- which(is.na(vaf))
+
+		conf <- confCCF(alt = alt[-na_idenx], ref = ref[-na_idenx], tcn[-na_idenx], lcn[-na_idenx], purity = purity[-na_idenx],
+							multiplicity = ccfFit$multiplicity[-na_idenx])
+
+		ccfLower <- conf$lower
+		ccfUpper <- conf$upper
+		clonalStatus <- ifelse(round(ccfLower, 2) >= 0.75, "clonal", 
+							ifelse(round(ccfLower, 2) < 0.75 & ccfFit$ccf >= 0.8, 'likely_clonal', 
+									"subclonal"))
+
+		# insert back the NAs where they should be
+		for (i in na_idenx) {
+			clonalStatus <- append(clonalStatus, NA, after = i-1)
+			}
+		}
+
+		info(vcf)$facetsCF[!is.na(ol)] <- facetsGr$cf.em[ol[!is.na(ol)]]
+		info(vcf)$facetsTCN_EM[!is.na(ol)] <- facetsGr$tcn.em[ol[!is.na(ol)]]
+		info(vcf)$facetsLCN_EM[!is.na(ol)] <- facetsGr$lcn.em[ol[!is.na(ol)]]
+		info(vcf)$facetsMafR[!is.na(ol)] <- facetsGr$mafR[ol[!is.na(ol)]]
+		info(vcf)$facetsLOH[!is.na(ol)] <- facetsGr$lcn.em[ol[!is.na(ol)]] == 0
+		info(vcf)$facetsLOHCall[!is.na(ol)] <- ifelse(facetsGr$lcn.em[ol[!is.na(ol)]] == 0, 'true', 'false')
+		info(vcf)$facetsMultiplicity[!is.na(ol)] <- ccfFit$multiplicity
+		info(vcf)$ccf[!is.na(ol)] <- ccfFit$ccf
+		info(vcf)$clonalStatus[!is.na(ol)] <- clonalStatus
+		info(vcf)$ccfConfUpper[!is.na(ol)] <- ccfUpper
+		info(vcf)$ccfConfLower[!is.na(ol)] <- ccfLower
+		x <- is.na(info(vcf)$facetsLOH[!is.na(ol)])
+		if (sum(x) > 0) {
+			info(vcf)$facetsLOH[!is.na(ol)][x] <- facetsGr$mafR[ol[!is.na(ol)]][x] > medianMafR + sdMafR
+			info(vcf)$facetsLOHCall[!is.na(ol)][x] <- ifelse(facetsGr$mafR[ol[!is.na(ol)]][x] > medianMafR + sdMafR, 'true', 'false')
+		}
 }
 
 writeVcf(vcf, opt$outFile)
