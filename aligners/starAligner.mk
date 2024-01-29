@@ -25,7 +25,7 @@ star/$(sample).Log.out.gz star/$(sample).Log.progress.out.gz)
 
 star/%.Aligned.sortedByCoord.out.bam : fastq/%.1.fastq.gz $(if $(findstring true,$(PAIRED_END)),fastq/%.2.fastq.gz)
 	$(call RUN,$(STAR_CPU),$(if $(findstring _,$(REF)),50G,32G),$(RESOURCE_REQ_MEDIUM),$(STAR_MODULE),"\
-	$(STAR) --runMode alignReads --runThreadN 14 \
+	$(STAR) --runMode alignReads --runThreadN $(STAR_CPU) \
 	--genomeDir $(STAR_GENOME_DIR) \
 	--readFilesIn $< $(if $(findstring true,$(PAIRED_END)),$(word 2,$^)) \
 	--readFilesCommand gunzip -c \
