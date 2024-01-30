@@ -18,7 +18,7 @@ if __name__ == '__main__':
     parser.add_argument('-v', '--env', default=None, help='anaconda env')
     parser.add_argument('--default_env', default=None, help='default anaconda env')
     parser.add_argument('-s', '--soft_memory', default='1G', help='soft memory limit per core')
-    parser.add_argument('-m', '--hard_memory', default='1G', help='hard memory limit per core')
+    parser.add_argument('-m', '--hard_memory', default='1G', help='hard memory limit per core (per job for slurm)')
     parser.add_argument('-n', '--num_cores', default=1, type=int, help='number of cores')
     parser.add_argument('--sge_parallel_env', default='smp', help='SGE parallel env')
     parser.add_argument('-w', '--walltime', default='6:00:00', help='wall time')
@@ -166,7 +166,7 @@ if __name__ == '__main__':
             qsub_args += " --cpus-per-task {}".format(args.num_cores)
         if args.hard_memory is not None:
             hard_mem_gb = int(math.ceil(job.human2bytes(args.hard_memory) / 1000000000.0))
-            qsub_args += " --mem-per-cpu {hard_mem_gb}".format(hard_mem_gb=args.hard_memory)             
+            qsub_args += " --mem {hard_mem_gb}".format(hard_mem_gb=args.hard_memory)
         if args.walltime is not None and args.qos is not None:
             qsub_args += " --time {time} --qos {qos}".format(time=args.walltime, qos=args.qos)
         if args.exclude_node is not None:
