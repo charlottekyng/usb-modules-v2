@@ -1,5 +1,5 @@
-ENV ?= scicore
-include usb-modules-v2/env/$(ENV)/Makefile.inc
+HPC ?= scicore
+include usb-modules-v2/env/$(HPC)/Makefile.inc
 
 
 # GLOBAL CONF:
