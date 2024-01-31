@@ -112,7 +112,7 @@ do {
     my $pid = fork;
     if ($pid == 0) {
         #print "$qmake $args &> $logfile\n";
-        exec "$qmake $args LOGDIR=$logdir &> $logfile";
+        exec "$qmake $args LOGDIR=$logdir > $logfile 2>&1";
     } else {
         my $mail_msg = "Command: $qmake $args\n";
         $mail_msg .=  "Attempt #: " . ($n + 1) . " of $attempts\n";
