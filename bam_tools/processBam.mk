@@ -74,7 +74,7 @@ index : $(addsuffix .bai,$(BAMS))
 # ReorderSam needs LENIENT when working on bams from bwa aln ("MAPQ should be 0 for unmapped read" error)
 %.reordered.bam : %.bam $(REF_DICT)
 	$(call RUN,1,$(RESOURCE_REQ_HIGH_MEM),$(RESOURCE_REQ_SHORT),$(JAVA8_MODULE),"\
-	$(call PICARD,ReorderSam,$(RESOURCE_REQ_HIGH_MEM_JAVA)) --VALIDATION_STRINGENCY=LENIENT I=$< O=$@ REFERENCE=$(REF_FASTA) && $(RM) $<")
+	$(call PICARD,ReorderSam,$(RESOURCE_REQ_HIGH_MEM_JAVA)) VALIDATION_STRINGENCY=LENIENT I=$< O=$@ SEQUENCE_DICTIONARY=$(REF_DICT) && $(RM) $<")
 
 %.sorted.bam : %.bam
 	$(call RUN,1,$(RESOURCE_REQ_MEDIUM_MEM),$(RESOURCE_REQ_LONG),$(JAVA8_MODULE),"\
