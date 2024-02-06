@@ -91,7 +91,7 @@ endef
 $(if $(TARGETS_FILE_INTERVALS_POOLS),\
 	$(foreach pool,$(TARGETS_FILE_INTERVALS_POOLS),\
 		$(foreach sample,$(SAMPLES),\
-			$(eval $(call amplicon-metrics-pools,$(sample),$(pool))))))			
+			$(eval $(call amplicon-metrics-pools,$(sample),$(pool))))))
 
 metrics/%.wgs_metrics.txt : bam/%.bam bam/%.bam.bai
 	$(call RUN,1,$(RESOURCE_REQ_MEDIUM_MEM),$(RESOURCE_REQ_SHORT),$(JAVA8_MODULE),"\
@@ -163,22 +163,22 @@ metrics/all$(PROJECT_PREFIX).hs_metrics.txt : $(foreach sample,$(SAMPLES),metric
 	sed '/^$$/d; /^#/d; s/SAMPLE.*//; s/BAIT_SET/SAMPLE/; s/\s$$//' $< | head -1; \
 	for metrics in $^; do \
 		samplename=$$(basename $${metrics%%.hs_metrics.txt}); \
-	    sed "/^#/d; /^BAIT/d; /^\$$/d; s/^hs/$$samplename/; s/\t\+$$//" $$metrics | grep "^$$samplename"; \
+		sed "/^#/d; /^BAIT/d; /^\$$/d; s/^hs/$$samplename/; s/\t\+$$//" $$metrics | grep "^$$samplename"; \
 	done; \
 	} > $@
 
 # summarize interval metrics into one file
+# (basename within make will strip extension; system basename will strip dir path, and optional extension)
 metrics/all$(PROJECT_PREFIX).interval_hs_metrics.txt.gz : $(foreach sample,$(SAMPLES),metrics/$(sample).interval_hs_metrics.txt.gz)
-	$(INIT) \
-	zcat $< | sed '/^#/d; /^$$/d' | cut -f 1-6 > $@.tmp; \
+	$(call RUN,1,$(RESOURCE_REQ_LOW_MEM),$(RESOURCE_REQ_VSHORT),,"\
+	zcat $< | sed '/^#/d; /^$$/d' | cut -f 1-6 > $(basename $@).tmp; \
 	for metrics in $^; do \
-		samplename=$$(basename $${metrics%%.interval_hs_metrics.txt.gz}); \
-		zcat $$metrics | sed '/^#/d; /^$$/d' | cut -f 7,8 | \
-		sed "s/mean_coverage/$${samplename}_mean_coverage/; s/normalized_coverage/$${samplename}_normalized_coverage/" | \
-		paste $@.tmp - | gzip > $@; \
-		cp $@ $@.tmp; \
-	done; \
-	rm -f $@.tmp
+		samplename=\$$(basename \$${metrics} .interval_hs_metrics.txt.gz); \
+		zcat \$$metrics | sed '/^#/d; /^$$/d' | cut -f 7-8 | \
+		sed \"s/mean_coverage/\$${samplename}_mean_coverage/; s/normalized_coverage/\$${samplename}_normalized_coverage/\" | \
+		paste $(basename $@).tmp - > $(basename $@); \
+		cp $(basename $@) $(basename $@).tmp; \
+	done && gzip $(basename $@) && rm -f $(basename $@).tmp")
 
 # summarize metrics into one file
 metrics/all$(PROJECT_PREFIX).amplicon_metrics.txt : $(foreach sample,$(SAMPLES),metrics/$(sample).amplicon_metrics.txt) $(if $(TARGETS_FILE_INTERVALS_POOLS),$(foreach pool,$(TARGETS_FILE_INTERVALS_POOLS),$(foreach sample,$(SAMPLES),metrics/$(sample).amplicon_metrics_$(shell basename $(pool)).txt)))
@@ -203,17 +203,17 @@ metrics/all$(PROJECT_PREFIX).wgs_metrics.txt : $(foreach sample,$(SAMPLES),metri
 
 
 # summarize interval metrics into one file
+# (basename within make will strip extension; system basename will strip dir path, and optional extension)
 metrics/all$(PROJECT_PREFIX).interval_amplicon_metrics.txt.gz : $(foreach sample,$(SAMPLES),metrics/$(sample).interval_amplicon_metrics.txt.gz)
-	$(INIT) \
-	zcat $< | sed '/^#/d; /^$$/d' | cut -f 1-6 > $@.tmp; \
+	$(call RUN,1,$(RESOURCE_REQ_LOW_MEM),$(RESOURCE_REQ_VSHORT),,"\
+	zcat $< | sed '/^#/d; /^$$/d' | cut -f 1-6 > $(basename $@).tmp; \
 	for metrics in $^; do \
-	samplename=$$(basename $${metrics%%.interval_amplicon_metrics.txt.gz}); \
-	zcat $$metrics | sed '/^#/d; /^$$/d' | cut -f 7,8 | \
-	sed "s/mean_coverage/$${samplename}_mean_coverage/; s/normalized_coverage/$${samplename}_normalized_coverage/" | \
-		paste $@.tmp - | gzip > $@; \
-		cp $@ $@.tmp; \
-	done; \
-	rm -f $@.tmp
+		samplename=\$$(basename \$${metrics} .interval_amplicon_metrics.txt.gz); \
+		zcat \$$metrics | sed '/^#/d; /^$$/d' | cut -f 7-8 | \
+		sed \"s/mean_coverage/\$${samplename}_mean_coverage/; s/normalized_coverage/\$${samplename}_normalized_coverage/\" | \
+		paste $(basename $@).tmp - > $(basename $@); \
+		cp $(basename $@) $(basename $@).tmp; \
+	done && gzip $(basename $@) && rm -f $(basename $@).tmp")
 
 $(info SAMPLE $(SAMPLES))
 metrics/all$(PROJECT_PREFIX).rnaseq_metrics.txt : $(foreach sample,$(SAMPLES),metrics/$(sample).rnaseq_metrics.txt)
