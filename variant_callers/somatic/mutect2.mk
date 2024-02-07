@@ -81,7 +81,7 @@ mutect2/merge_vcf/$1_$2.chr_vcf.list : $(foreach chr,$(CHROMOSOMES),mutect2/chr_
 
 mutect2/merge_vcf/$1_$2.mutect2.unfiltered.vcf.gz : mutect2/merge_vcf/$1_$2.chr_vcf.list
 	$$(call RUN,1,$$(RESOURCE_REQ_MEDIUM_MEM),$$(RESOURCE_REQ_LONG),$$(JAVA8_MODULE),"\
-	$$(PICARD) MergeVcfs I=$$^ O=$$@")
+	$$(call PICARD,MergeVcfs,$$(RESOURCE_REQ_MEDIUM_MEM_JAVA)) I=$$^ O=$$@")
 
 # Run LearnReadOrientationModel, needed for Read Orientation Artifacts detection
 mutect2/merge_vcf/$1_$2.mutect2.f1r2.tar.gz : $(foreach chr,$(CHROMOSOMES),mutect2/chr_vcf/$1_$2.$(chr).mutect2.f1r2.tar.gz)

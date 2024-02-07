@@ -57,7 +57,7 @@ mutect2/pon/$1.chr_vcf_pon.list : $(foreach chr,$(CHROMOSOMES),mutect2/pon/chr_v
 
 mutect2/pon/merged_vcf_pon/$1.mutect2.vcf.gz : mutect2/pon/$1.chr_vcf_pon.list
 	$$(call RUN,1,$$(RESOURCE_REQ_MEDIUM_MEM),$$(RESOURCE_REQ_LONG),$$(JAVA8_MODULE),"\
-	$$(PICARD) MergeVcfs I=$$< O=$$@ && $(RM) $<")
+	$$(call PICARD,MergeVcfs,$$(RESOURCE_REQ_MEDIUM_MEM_JAVA)) I=$$< O=$$@ && $(RM) $<")
 
 endef
 $(foreach normal,$(PANEL_OF_NORMAL_SAMPLES), $(eval $(call merge-chr-vcf-pon,$(normal))))
