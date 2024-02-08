@@ -113,12 +113,12 @@ mutect2/$1_$2.mutect2.vcf.gz : mutect2/merge_vcf/$1_$2.mutect2.unfiltered.vcf.gz
 # Modifications:
 # 1) swap tumor and normal columns, so that normal is before tumor.
 # 2) rename AF to FA
-# Note, the code below doesn't work in sh, needs to invoke bash.
 vcf/$1_$2.mutect2.vcf : mutect2/$1_$2.mutect2.vcf.gz
-	$$(INIT) bash -c "cat <(zgrep -e '^##' $$^ | sed 's/ID=AF/ID=FA/') \
-	             <(paste <(zgrep -v -e '^##' $$^ | cut -f 1-9 | sed 's/GT:AD:AF:/GT:AD:FA:/g') \
-	             <(zgrep -v -e '^##' $$^ | cut -f 11) \
-	             <(zgrep -v -e '^##' $$^ | cut -f 10)) > $$@";
+	$$(call RUN,1,$$(RESOURCE_REQ_LOW_MEM),$$(RESOURCE_REQ_VSHORT),,"\
+	cat <(zgrep -e '^##' $$^ | sed 's/ID=AF/ID=FA/') \
+	    <(paste <(zgrep -v -e '^##' $$^ | cut -f 1-9 | sed 's/GT:AD:AF:/GT:AD:FA:/g') \
+	    <(zgrep -v -e '^##' $$^ | cut -f 11) \
+	    <(zgrep -v -e '^##' $$^ | cut -f 10)) > $$@")
 
 endef
 $(foreach pair,$(SAMPLE_PAIRS), \

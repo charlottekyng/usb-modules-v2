@@ -159,8 +159,8 @@ HISAT2 ?= hisat2
 STRINGTIE ?= stringtie
 
 #PICARD = java -Xmx$(RESOURCE_REQ_MEDIUM_MEM_JAVA) -jar \$$EBROOTPICARD/picard.jar
-PICARD = $(JAVA) -Xmx$(RESOURCE_REQ_MEDIUM_MEM_JAVA) -jar $(USR_DIR)/local/picard_2.25.2/picard.jar $(1)
-#PICARD += MAX_RECORDS_IN_RAM=4000000 TMP_DIR=$(TMPDIR)
+PICARD = $(JAVA) -Xmx$(RESOURCE_REQ_MEDIUM_MEM_JAVA) -jar $(USR_DIR)/local/picard_2.25.2/picard.jar $(1) TMP_DIR=$(TMPDIR)
+#PICARD += MAX_RECORDS_IN_RAM=4000000
 #PICARD += REFERENCE_SEQUENCE=$(REF_FASTA) CREATE_INDEX=true
 
 GATK = $(JAVA) -Xmx$(2) -jar $(JAR_DIR)/GenomeAnalysisTK-3.6/GenomeAnalysisTK-3.6.jar 
@@ -229,7 +229,7 @@ VARSCAN = $(JAVA) -Xmx$(RESOURCE_REQ_MEDIUM_MEM_JAVA) -jar $(VARSCAN_JAR)
 # VARSCAN ?= java -Xmx$(RESOURCE_REQ_LOW_MEM_JAVA) -jar \$$EBROOTVARSCAN/VarScan.v2.4.1.jar
 
 #SNP_EFF_CONFIG ?= usb-modules-v2/vcf_tools/snpEff.config
-SNP_EFF_DATA_DIR ?= $(GROUP_DIR)/ref_nobackup/snpeff/4.3
+SNP_EFF_DATA_DIR ?= $(REF_DIR)p/snpeff/4.3
 SNP_EFF = $(JAVA) -Xmx$(1) -jar \$$EBROOTSNPEFF/snpEff.jar
 SNP_EFF_OPTS = -i vcf -o vcf -noStats $(SNP_EFF_FLAGS) -nodownload -dataDir $(SNP_EFF_DATA_DIR)
 SNP_SIFT = $(JAVA) -Xmx$(1) -jar \$$EBROOTSNPEFF/SnpSift.jar
@@ -237,7 +237,7 @@ SNP_SIFT = $(JAVA) -Xmx$(1) -jar \$$EBROOTSNPEFF/SnpSift.jar
 VCF_EFF_ONE_PER_LINE = $(PERL) \$$EBROOTSNPEFF/snpEff/scripts/vcfEffOnePerLine.pl
 VCF_JOIN_EFF = $(PERL) $(MODULE_SCRIPTS_DIR)/joinEff.pl
 
-VEP_CACHE_DIR ?= $(GROUP_DIR)/ref_nobackup/vep/
+VEP_CACHE_DIR ?= $(REF_DIR)/vep/
 VEP ?= vep --cache --offline --dir_cache $(VEP_CACHE_DIR) --no_stats --force_overwrite --pick --format vcf --vcf --symbol --terms SO
 VEP_PLUGIN_DIR ?= $(USR_DIR)/downloads/VEP_plugins
 

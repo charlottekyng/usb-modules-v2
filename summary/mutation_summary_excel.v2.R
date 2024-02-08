@@ -2,7 +2,7 @@ cat ("Running mutation_summary_excel.v2.R\n\n")
 
 options(java.parameters = "-Xmx8000m")
 suppressPackageStartupMessages(library("optparse"))
-suppressPackageStartupMessages(library("xlsx"))
+
 
 
 optList <- list(
@@ -216,8 +216,8 @@ if(length(unique(output$Caller)) > 1 & all(output$Caller %in% c("mutect2", "stre
 
 	cat("\nWriting consensus files\n")
 	if(opt$outputFormat=="EXCEL") {
-		write.xlsx2(consensus, paste0(tools::file_path_sans_ext(opt$outFile), ".consensus.xlsx"), sheetName="consensus_variants", append=FALSE, showNA=FALSE, row.names=F)
-		write.xlsx2(singletons, paste0(tools::file_path_sans_ext(opt$outFile), ".singletons.xlsx"), sheetName="singletons_variants", append=FALSE, showNA=FALSE, row.names=F)
+		openxlsx::write.xlsx(consensus, paste0(tools::file_path_sans_ext(opt$outFile), ".consensus.xlsx"), sheetName="consensus_variants", keepNA=T, na.string=".", rowNames=F)
+		openxlsx::write.xlsx(singletons, paste0(tools::file_path_sans_ext(opt$outFile), ".singletons.xlsx"), sheetName="singletons_variants", keepNA=T, na.string=".", rowNames=F)
 		cat("\ndone\n")
 	} else if (opt$outputFormat=="TXT") {
 		write.table(consensus, paste0(tools::file_path_sans_ext(opt$outFile), ".consensus.txt"), sep="\t", row.names=F, quote=F, na="")
@@ -232,7 +232,7 @@ if(length(unique(output$Caller)) > 1 & all(output$Caller %in% c("mutect2", "stre
 # write the main output last because it's a dependency in make
 cat("\nWriting output file\n")
 if(opt$outputFormat=="EXCEL") {
-	write.xlsx2(output, opt$outFile, sheetName="mutation_summary", append=FALSE, showNA=FALSE, row.names=F)
+	openxlsx::write.xlsx(output, opt$outFile, sheetName="mutation_summary", keepNA=T, na.string=".", rowNames=F)
 	cat("\ndone\n")
 } else if (opt$outputFormat=="TXT") {
 	write.table(output, opt$outFile, sep="\t", row.names=F, quote=F, na="")

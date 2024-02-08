@@ -19,7 +19,7 @@ NOW := $(shell date +"%F")
 MAKELOG = log/$(@).$(NOW).log
 
 ifeq ($(USE_CLUSTER),true)
-MAKE = usb-modules-v2/scripts/qmake.pl -n $@.$(NOW) -r $(NUM_ATTEMPTS) -m -s -- make
+ MAKE = usb-modules-v2/scripts/qmake.pl -n $@.$(NOW) -r $(NUM_ATTEMPTS) -m -s -- make SHELL=/bin/bash
 endif
 
 define RUN_MAKE_J

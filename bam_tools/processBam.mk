@@ -96,7 +96,7 @@ index : $(addsuffix .bai,$(BAMS))
 %.markdup.bam : %.bam %.bam.bai
 	$(call RUN,1,$(RESOURCE_REQ_VVHIGH_MEM),$(RESOURCE_REQ_LONG),$(JAVA8_MODULE),"\
 	$(MKDIR) metrics; \
-	$(call PICARD,MarkDuplicates,$(RESOURCE_REQ_VVHIGH_MEM_JAVA)) I=$< O=$@ TMP_DIR=$(TMPDIR) \
+	$(call PICARD,MarkDuplicates,$(RESOURCE_REQ_VVHIGH_MEM_JAVA)) I=$< O=$@ \
 	METRICS_FILE=metrics/$(call strip-suffix,$(@F)).dup_metrics.txt && $(RM) $^")
 
 %.rmdup.bam : %.bam

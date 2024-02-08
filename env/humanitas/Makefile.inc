@@ -2,176 +2,23 @@
 ############# DEFINE PATHS TO MAIN DIRS ###############
 #######################################################
 
-GROUP_DIR ?= /scicore/home/pissal00/GROUP
-USR_DIR ?= $(GROUP_DIR)/usr_nobackup
+GROUP_DIR ?= /home/ng_piscuoglio/pipeline
+USR_DIR ?= $(GROUP_DIR)/usr
 JAR_DIR ?= $(USR_DIR)/local/lib/java
-SCRIPTS_DIR ?= $(USR_DIR)/local/scripts
+# SCRIPTS_DIR ?= $(USR_DIR)/local/scripts
 BIN_DIR ?= $(USR_DIR)/local/bin
 MODULE_SCRIPTS_DIR ?= usb-modules-v2/scripts
 LD_LIBRARY_PATH = $(USR_DIR)/local/MCR_R2014a/v83/runtime/glnxa64:$(USR_DIR)/local/MCR_R2014a/v83/bin/glnxa64:$(USR_DIR)/local/MCR_R2014a/v83/sys/os/glnxa64
-IMG_DIR ?= $(GROUP_DIR)/virtual_env/img
+IMG_DIR ?= $(USR_DIR)/singularity
+CONDA_DIR ?= $(USR_DIR)/conda
 HOTSPOTS_DIR ?= $(USR_DIR)/local/cancer_hotspots
 
-export PATH := $(USR_DIR):$(PATH)
-export LD_LIBRARY_PATH := $(LD_LIBRARY_PATH)
+# export PATH := $(USR_DIR):$(PATH)
+# export LD_LIBRARY_PATH := $(LD_LIBRARY_PATH)
 
 
 include usb-modules-v2/config.inc
 
-############################################
-######## DEFINE SAMPLES/SETS ###############
-############################################
-
-
-ifndef MAKEFILE_INC
-
-PROJECT_NAME = $(shell pwd | sed 's:.*/projects/::; s:.*/data/::; s:.*kinglab/::; s:/:_:g')
-
-ifneq ($(wildcard $(SAMPLE_FILE)),)
-  SAMPLES ?= $(shell sed '/^\#/d' $(SAMPLE_FILE))
-endif
-ifneq ($(wildcard $(SAMPLE_PON_FILE)),)
-  PANEL_OF_NORMAL_SAMPLES ?= $(shell sed '/^\#/d' $(SAMPLE_PON_FILE))
-endif
-ifneq ($(wildcard $(SAMPLE_POOLEDNORM_FILE)),)
-  POOLED_NORM_SAMPLES ?= $(shell sed '/^\#/d' $(SAMPLE_POOLEDNORM_FILE))
-endif
-ifneq ($(wildcard $(MERGE_SAMPLE_FILE)),)
-  MERGE_SAMPLES ?= $(shell sed '/^\#/d' $(MERGE_SAMPLE_FILE))
-endif
-
-
-get_tumors = $(wordlist 1,$(shell expr $(words $1) - 1),$1)
-get_normal = $(lastword $1)
-get_space_sets = $(shell sed '/^\#/d; s/\s\+/ /g; s/\s\+$$//;' $(SAMPLE_SET_FILE) | sed -n '$(1)p')
-get_underscore_sets = $(shell sed '/^\#/d; s/\s\+/_/g; s/\s\+$$//;' $(SAMPLE_SET_FILE) | sed -n '$(1)p')
-
-ifneq ($(wildcard $(SAMPLE_SET_FILE)),)
-  NUM_SETS := $(shell sed '/^\#/d' $(SAMPLE_SET_FILE) | wc -l | cut -f 1 -d' ')
-  SETS_SEQ := $(shell seq 1 $(NUM_SETS))
-  $(foreach i,$(SETS_SEQ), \
-	  $(eval set.$i := $(call get_space_sets,$i)))
-  # define set_lookup.$(sample)
-  $(foreach i,$(SETS_SEQ), \
-	  $(foreach sample,$(set.$i), \
-		  $(eval set_lookup.$(sample) := $i)))
-  # define SAMPLE_SETS to contain sample_sample_normal
-  $(foreach i,$(SETS_SEQ), \
-	  $(eval SAMPLE_SETS += $(call get_underscore_sets,$i)))
-  # tumor.SET => tumors
-  $(foreach i,$(SETS_SEQ), \
-	$(eval tumor.$(call get_underscore_sets,$i) := $(call get_tumors,$(set.$i))))
-  # normal.SET => normal
-  $(foreach i,$(SETS_SEQ), \
-	$(eval normal.$(call get_underscore_sets,$i) := $(call get_normal,$(set.$i))))
-  NORMAL_SAMPLES = $(filter-out poolednorm,$(foreach i,$(SETS_SEQ),$(call get_normal,$(set.$i))))
-  TUMOR_SAMPLES = $(foreach i,$(SETS_SEQ),$(call get_tumors,$(set.$i)))
-  SAMPLE_PAIRS = $(foreach set,$(SAMPLE_SETS),$(foreach tumor,$(tumor.$(set)),$(tumor)_$(normal.$(set))))
-  # define tumor.pair and normal.pair to retrieve tumor/normal from pairs
-  $(foreach set,$(SAMPLE_SETS), \
-	  $(foreach tumor,$(tumor.$(set)), \
-		  $(eval tumor.$(tumor)_$(normal.$(set)) := $(tumor))))
-  $(foreach set,$(SAMPLE_SETS), \
-	  $(foreach tumor,$(tumor.$(set)), \
-		  $(eval normal.$(tumor)_$(normal.$(set)) := $(normal.$(set)))))
-  # tumor_normal.$(tumor) to retrieve tumor_normal
-  $(foreach set,$(SAMPLE_SETS), \
-	  $(foreach tumor,$(tumor.$(set)), \
-		  $(eval tumor_normal.$(tumor) := $(tumor)_$(normal.$(set)))))
-  $(foreach set,$(SAMPLE_SETS), \
-	  $(foreach tumor,$(tumor.$(set)), \
-		  $(eval tumor_normal.$(normal.$(set)) := $(tumor)_$(normal.$(set)))))
-  # set.$(sample) to retrieve sample sets (underscores)
-  $(foreach i,$(SETS_SEQ), \
-	  $(foreach sample,$(set.$i), \
-		  $(eval set.$(sample) := $(word $i,$(SAMPLE_SETS)))))
-  UNMATCHED_SAMPLES = $(shell sed '/^\#/d' $(SAMPLE_FILE) $(SAMPLE_SET_FILE) | tr ' ' '\n' | sort | uniq -u)
-
-  SAMPLE_SET_PAIRS = $(shell echo "$(SAMPLE_PAIRS) $(SAMPLE_SETS)" | tr ' ' '\n' | sort | uniq)
-  $(foreach set,$(SAMPLE_SET_PAIRS), \
-	$(eval samples.$(set) := $(shell echo "$(set)" | sed 's/_/ /g')))
-endif
-
-ifneq ($(wildcard $(SAMPLE_SPLIT_FILE)),)
-  A = $(shell sed '/^\#/d' $(SAMPLE_SPLIT_FILE) | cut -f1)
-  B = $(shell sed '/^\#/d' $(SAMPLE_SPLIT_FILE) | cut -f2)
-  $(foreach i,$(shell seq 1 $(words $(A))),$(eval split.$(word $i,$(A)) += $(word $i,$(B))))
-  UNSPLIT_SAMPLES = $(B)
-  SPLIT_SAMPLES = $(shell sed '/^\#/d' $(SAMPLE_SPLIT_FILE) | cut -f1 | sort | uniq)
-endif
-
-ALL_SAMPLES = $(SAMPLE_PAIRS) $(SAMPLES)
-COUNT_SAMPLES = $(shell expr `sed 's/\..*//; s:.*/::' <<< $1 | grep -o "_" | wc -l` + 1)
-PANEL_OF_NORMAL_SAMPLES ?= $(NORMAL_SAMPLES)
-POOLED_NORM_SAMPLES ?= $(NORMAL_SAMPLES)
-
-
-#######################################################
-########### DEFINE GENOME AND RESOURCES ###############
-#######################################################
-
-RESOURCE_REQ ?= medium
-include usb-modules-v2/genome_inc/$(REF).inc
-include usb-modules-v2/resources.inc
-
-#####################################
-### DEFINE BASIC FUNCTIONS ##########
-#####################################
-
-NO_RM ?= false
-ifeq ($(NO_RM),true)
-    RM := touch
-    RMR = touch
-else
-    RM := rm -f
-    RMR := rm -r
-endif
-
-# define $(,) and $( ) for escaping commas and spaces
-, := ,
-space :=
-space +=
-$(space) :=
-$(space) +=
-
-# $(call strip-suffix,filename)
-strip-suffix = $(firstword $(subst ., ,$(1)))
-
-LINK = ln -svf $(notdir $1) $(2) && touch $1
-NOW := $(shell date +"%F")
-MKDIR = mkdir -p -m 775
-MKDIRS = $(MKDIR) $(LOGDIR)/$(@D) $(@D)
-LOG = $(LOGDIR)/$(@).log
-UMASK = 002
-
-INIT = module purge; umask $(UMASK); $(MKDIRS); set -o pipefail;
-PURGE_AND_LOAD = module purge && module load $1
-#PURGE_AND_LOAD = export LMOD_DISABLE_SAME_NAME_AUTOSWAP='no' && module purge && module load $1
-
-MD5 = md5sum $(@:.md5=) > $@
-CHECK_MD5 = for i in {0..20}; do if md5sum -c $(filter %.md5,$^); then break; fi; sleep 5; done;
-<M = $(<:.md5=)
-^M = $(^:.md5=)
-@M = $(@:.md5=)
-<<M = $(word 2,$(^M))
-<<<M = $(word 3,$(^M))
-
-# $(call CHECK_VCF,vcf.file,target,command)
-# check for valid header, ie non-empty vcf file
-CHECK_VCF = if [ `grep -v '^\#' $1 | wc -l` -eq 0 ] && [ `grep '^\#CHROM' $1 | wc -l` -eq 1 ]; then cp $1 $2; else $3; fi
-CHECK_MAF = if [ `grep -v '^\#' $1 | wc -l` -eq 1 ] && [ `grep '^Hugo_Symbol' $1 | wc -l` -eq 1 ]; then cp $1 $2; else $3; fi
-CHECK_VCF_CMD = if [ `grep -v '^\#' $1 | wc -l` -eq 0 ] && [ `grep '^\#CHROM' $1 | wc -l` -eq 1 ]; then $2; else $3; fi
-CHECK_VCF_HIGH_MODERATE_CMD = if [ `grep -v '^\#' $1 | egrep "HIGH|MODERATE" | wc -l` -eq 0 ] && [ `grep '^\#CHROM' $1 | wc -l` -eq 1 ]; then $2; else $3; fi
-
-<< = $(word 2,$^)
-<<< = $(word 3,$^)
-<<<< = $(word 4,$^)
-<<<<< = $(word 5,$^)
-
-define R_INIT
-dir.create('$(@D)', showWarnings = F, recursive = T)
-qw <- function(x) unlist(strsplit(x, "[[:space:]]+"))
-endef
 
 ##########################################
 ##### DEFINE THE MAIN RUN FUNCTION #######
@@ -179,22 +26,24 @@ endef
 
 RUN_OPTS = $(if $(findstring false,$(USE_CLUSTER)),-l) -o $@ \
 $(if $(CLUSTER_ENGINE),-g $(CLUSTER_ENGINE)) $(if $(EXCLUDE_NODE),-x $(EXCLUDE_NODE)) \
--S $(SHELL) --log_file $(LOG) $(if $(PROJECT_NAME),-p $(PROJECT_NAME)) -c 
+--partition cpu \
+-S /bin/bash --log_file $(LOG) $(if $(PROJECT_NAME),-p $(PROJECT_NAME)) -c 
 
 ## RUN is the main function!!
 ## arg1 = number of cores
 ## arg2 = memory per core
 ## arg3 = wall time
 
-RUN = $(call PURGE_AND_LOAD,$(PYTHON_MODULE)); echo "\
-$(call PURGE_AND_LOAD,$4); " $5 | python usb-modules-v2/scripts/run.py $(RUN_OPTS) -n $1 -m $2 -w $3
+RUN = $(call PURGE_AND_LOAD,); echo "\
+$(call PURGE_AND_LOAD,$4); " $5 | python3 usb-modules-v2/scripts/run.py $(RUN_OPTS) -n $1 -m $2 -w $3
 
+# Pipeline was configured around scicore's time-based QOS. At Humanitas we have only one QOS for now.
 RUN += $(if $(findstring SLURM,$(CLUSTER_ENGINE)),\
-$(if $(findstring $(QOS_2w),$3),--qos 2weeks,\
-$(if $(findstring $(QOS_1w),$3),--qos 1week,\
-$(if $(findstring $(QOS_1d),$3),--qos 1day,\
-$(if $(findstring $(QOS_6h),$3),--qos 6hours,\
-$(if $(findstring $(QOS_30min),$3),--qos 30min,infinite))))),)
+$(if $(findstring $(QOS_2w),$3),--qos ng_piscuoglio,\
+$(if $(findstring $(QOS_1w),$3),--qos ng_piscuoglio,\
+$(if $(findstring $(QOS_1d),$3),--qos ng_piscuoglio,\
+$(if $(findstring $(QOS_6h),$3),--qos ng_piscuoglio,\
+$(if $(findstring $(QOS_30min),$3),--qos ng_piscuoglio,--qos ng_piscuoglio))))),)
 
 ###############################################################
 ####### DEFINE PATHS/NAMES FOR SCRIPTS, BINARIES, MODULES #####
@@ -205,64 +54,67 @@ UNZIP ?= /usr/bin/unzip
 GZIP ?= gzip -f
 GUNZIP ?= gunzip -c
 
-PERL_MODULE ?= Perl/5.22.2-goolf-1.7.20
-# R_MODULE ?= R/3.5.2-foss-2018b (breaks other modules that rely on local packages compiled for 3.5.0)
-R_MODULE ?= R/3.5.0-goolf-1.7.20
-R4_MODULE ?= R/4.0.3-foss-2018b
-JAVA6_MODULE ?= Java/1.6.0_24
-JAVA7_MODULE ?= Java/1.7.0_80
-JAVA8_MODULE ?= Java/8u212b03
-PYTHON_MODULE ?= Python/3.5.2-goolf-1.7.20
-SAMTOOLS_MODULE ?= SAMtools/1.9-foss-2018b
-SAMTOOLS_MODULE_GOOLF ?= SAMtools/1.7-goolf-1.7.20
-BCFTOOLS_MODULE ?= BCFtools/1.5-goolf-1.7.20
-BEDTOOLS_MODULE ?= BEDTools/2.26.0-goolf-1.7.20
-VCFTOOLS_MODULE ?= VCFtools/0.1.14-goolf-1.7.20-Perl-5.22.2
-BCL2FASTQ_MODULE ?= bcl2fastq/2.17.1.14-goolf-1.7.20
-TRIM_GALORE_MODULE ?= Trim_Galore/0.4.4-goolf-1.7.20-Perl-5.22.2
-CUTADAPT_MODULE ?= cutadapt/1.16-goolf-1.7.20-Python-2.7.11
-HTSLIB_MODULE ?= HTSlib/1.9-foss-2018b
+ANACONDA_MODULE ?= conda/anaconda3
+
+PERL_MODULE ?=
+R_CONDA ?= $(CONDA_DIR)/R_4.0.3
+R_MODULE ?= $(ANACONDA_MODULE) && source activate $(R_CONDA)
+R4_MODULE ?= $(ANACONDA_MODULE) && source activate $(R_CONDA)
+JAVA6_MODULE ?=
+JAVA7_MODULE ?=
+# GATK 3.6 needs java8:
+JAVA8_MODULE ?= $(ANACONDA_MODULE) && source activate $(CONDA_DIR)/java_1.8.0
+PYTHON_MODULE ?=
+SAMTOOLS_MODULE ?= samtools/1.13
+SAMTOOLS_MODULE_GOOLF ?= samtools/1.13
+BCFTOOLS_MODULE ?= bcftools/1.13
+BEDTOOLS_MODULE ?=
+VCFTOOLS_MODULE ?= vcftools/0.1.17
+BCL2FASTQ_MODULE ?= bcl2fastq/v2.20.0.422
+TRIM_GALORE_MODULE ?=
+CUTADAPT_MODULE ?= cutadapt/3.7
+HTSLIB_MODULE ?= htslib/1.13
 TABIX_MODULE ?= $(HTSLIB_MODULE)
-FASTQC_MODULE ?= FastQC/0.11.4-Java-1.7.0_21
-BOWTIE2_MODULE ?= Bowtie2/2.3.2-goolf-1.7.20
-BWA_MODULE ?= BWA/0.7.17-foss-2018b
-TOPHAT_MODULE ?= TopHat/2.0.6.Linux_x86_64
-STAR_MODULE ?= STAR/2.7.3a-foss-2018b
-STAR_FUSION_MODULE ?= STAR-Fusion/0.6.0-goolf-1.7.20-Perl-5.22.2
-HISAT2_MODULE ?= HISAT2/2.0.4-goolf-1.7.20
-STRINGTIE_MODULE ?= StringTie/1.3.3-goolf-1.7.20
-SNP_EFF_MODULE ?= snpEff/4.3t-Java-1.8.0_92
-CUFFLINKS_MODULE ?= Cufflinks/2.2.1-Linux_x86_64
-STRINGTIE_MODULE ?= StringTie/1.3.3-goolf-1.7.20
-RSEM_MODULE ?= RSEM/1.3.2-foss-2018b
-OPENBLAS_MODULE ?= OpenBLAS/0.2.13-GCC-4.8.4-LAPACK-3.5.0
-GATK36_MODULE ?= GATK/3.6-Java-1.8.0_92
-GATK40_MODULE ?= GATK/4.0.7.0-Java-1.8.0_92
-GATK42_MODULE ?= GATK/4.2.4.1-foss-2018b-Java-11
-MUTECT_MODULE ?= MuTect/1.1.7-Java-1.7.0_80
-PICARD_MODULE ?= picard/2.9.2
-VARSCAN_MODULE ?= VarScan/2.4.1-Java-1.7.0_80
-ANACONDA_MODULE ?= Anaconda3/5.0.1
-#SINGULARITY_MODULE ?= Singularity/2.6.1 #deprecated on scicore. A newer singularity is available system-wide.
-VEP_MODULE ?= ensembl-vep/92.0-goolf-1.7.20-Perl-5.22.2
-MACS2_MODULE ?= MACS2/2.1.1.20160309-goolf-1.7.20-Python-2.7.11
-MATPLOTLIB_MODULE ?= matplotlib/3.1.1-fosscuda-2019b-Python-3.7.4
+FASTQC_MODULE ?= fastqc/0.11.9
+BOWTIE2_MODULE ?=
+BWA_MODULE ?=
+TOPHAT_MODULE ?=
+STAR_MODULE ?=
+STAR_FUSION_MODULE ?=
+HISAT2_MODULE ?=
+STRINGTIE_MODULE ?=
+SNP_EFF_MODULE ?=
+CUFFLINKS_MODULE ?=
+RSEM_MODULE ?= $(ANACONDA_MODULE) && source activate $(CONDA_DIR)/rsem
+OPENBLAS_MODULE ?=
+MUTECT_MODULE ?=
+PICARD_MODULE ?=
+VARSCAN_MODULE ?=
 
-PERL ?= perl
+VEP_MODULE ?= vep/88.9
+MACS2_MODULE ?= $(ANACONDA_MODULE) && source activate $(CONDA_DIR)/macs2
+MATPLOTLIB_MODULE ?= matplotlib/3.4.3
+
+PERL ?= $(USR_DIR)/local/perl/5.16.3/bin/perl
+# on humanitas $TMPDIR is /tmp ($TMPDIR is set only on compute nodes)
+TMPDIR ?= /tmp
 JAVA ?= java -Djava.io.tmpdir=$(TMPDIR)
-PYTHON ?= python
-PYTHON_ENV_ACTIVATE ?= ml load $(ANACONDA_MODULE) && source activate 
-PYTHON_ENV_DEACTIVATE = source deactivate
 
+PYTHON ?= python
+PYTHON2 ?= python2
+
+SINGULARITY_MODULE ?= singularity/3.4.2
 SINGULARITY_EXEC ?= singularity exec --cleanenv --no-home -B $(GROUP_DIR)/../
 SINGULARITY_RUN ?= singularity run --cleanenv --no-home -B $(GROUP_DIR)/../
 
-R_LIBS ?= $(USR_DIR)/$(R_MODULE)/lib64/R/library
-R4_LIBS ?= $(USR_DIR)/$(R4_MODULE)/lib64/R/library
+# on scicore there are some R modules that use v3, therefore the two R variables
+# on humanitas everything runs in one version of R, but keeping the two variables for compatibility
+R_LIBS ?= $(USR_DIR)/R_lib/R_4.0.3
+R4_LIBS ?= $(R_LIBS)
 R ?= export R_LIBS=$(R_LIBS); R
-R4 ?= export R_LIBS=$(R4_LIBS); R
+R4 ?= $(R)
 RSCRIPT ?= export R_LIBS=$(R_LIBS); Rscript
-R4SCRIPT ?= export R_LIBS=$(R4_LIBS); Rscript
+R4SCRIPT ?= $(RSCRIPT)
 KNIT ?= $(RSCRIPT) $(MODULE_SCRIPTS_DIR)/knit.R
 SWEAVE ?= $(RSCRIPT) $(MODULE_SCRIPTS_DIR)/Sweave.R
 RBIND ?= $(RSCRIPT) $(MODULE_SCRIPTS_DIR)/rbind.R
@@ -302,29 +154,22 @@ PLOT_RNASEQ_METRICS = $(RSCRIPT) usb-modules-v2/qc/plotRnaseqMetrics.R
 CLUSTER_VCF = $(R4SCRIPT) usb-modules-v2/qc/clusterVcf.R
 
 BOWTIE2 ?= bowtie2
-BWA_ALN ?= bwa aln
-BWA_SAMSE ?= bwa samse
-BWA_SAMPE ?= bwa sampe
-BWA_MEM ?= bwa mem
+BWA_ALN ?= $(USR_DIR)/local/bwa/bwa-0.7.17/bwa aln
+BWA_SAMSE ?= $(USR_DIR)/local/bwa/bwa-0.7.17/bwa samse
+BWA_SAMPE ?= $(USR_DIR)/local/bwa/bwa-0.7.17/bwa sampe
+BWA_MEM ?= $(USR_DIR)/local/bwa/bwa-0.7.17/bwa mem
 TOPHAT ?= tophat
 TOPHAT2 ?= tophat2
-STAR ?= STAR
+STAR ?= $(USR_DIR)/local/STAR/STAR-2.7.3a/bin/Linux_x86_64_static/STAR
+STAR_CPU ?= 8
 STAR_FUSION ?= STAR-Fusion
 HISAT2 ?= hisat2
 STRINGTIE ?= stringtie
 
-#PICARD = java -Xmx$(RESOURCE_REQ_MEDIUM_MEM_JAVA) -jar \$$EBROOTPICARD/picard.jar
-PICARD = $(JAVA) -Xmx$(RESOURCE_REQ_MEDIUM_MEM_JAVA) -jar $(USR_DIR)/local/picard_2.20.0/picard.jar $(1)
-#PICARD += MAX_RECORDS_IN_RAM=4000000 TMP_DIR=$(TMPDIR)
-#PICARD += REFERENCE_SEQUENCE=$(REF_FASTA) CREATE_INDEX=true
-# ReorderSam needs LENIENT when working on bams from bwa aln ("MAPQ should be 0 for unmapped read" error)
-PICARD += VALIDATION_STRINGENCY=LENIENT
+PICARD = $(JAVA) -Xmx$(RESOURCE_REQ_MEDIUM_MEM_JAVA) -jar $(USR_DIR)/local/picard_2.25.2/picard.jar $(1) TMP_DIR=$(TMPDIR)
 
-GATK = $(JAVA) -Xmx$(2) -jar $(JAR_DIR)/GenomeAnalysisTK-3.6/GenomeAnalysisTK-3.6.jar 
+GATK = $(JAVA) -Xmx$(2) -jar $(JAR_DIR)/GenomeAnalysisTK-3.6/GenomeAnalysisTK-3.6.jar
 GATK += -S LENIENT -T $(1) -filterNoBases
-GATK37 = $(JAVA) -Xmx$(2) -jar $(JAR_DIR)/GenomeAnalysisTK-3.7/GenomeAnalysisTK-3.7.jar 
-GATK37 += -S LENIENT -T $(1) -filterNoBases
-
 GATK42 = gatk --java-options \"-Xmx$(2) -Xms$(2)\" $(1)
 GATK4120 = $(USR_DIR)/local/gatk-4.1.2.0/gatk --java-options \"-Xmx$(2) -Xms$(2)\" $(1)
 # gatk-4.1.3.0 is used in sufam (https://github.com/charlottekyng/usb-modules-v2/commit/f7f8ee6db4a33e48247812efc0430337af1d073c#commitcomment-36581870)
@@ -342,22 +187,18 @@ FIX_TVC_VCF = $(PERL) usb-modules-v2/variant_callers/fix_vcf_scripts/fix_tvc_vcf
 FIX_STRELKA2_VCF_INDELS = $(call PURGE_AND_LOAD,$(PYTHON_MODULE))&& $(PYTHON) usb-modules-v2/variant_callers/fix_vcf_scripts/fix_strelka2_vcf_indels.py
 FIX_STRELKA2_VCF_SNVS = $(call PURGE_AND_LOAD,$(PYTHON_MODULE))&& $(PYTHON) usb-modules-v2/variant_callers/fix_vcf_scripts/fix_strelka2_vcf_snvs.py
 
-#MUTECT ?= $(JAVA) -Xmx$(1) -jar $(JAR_DIR)/muTect-1.1.4.jar --analysis_type MuTect
-
-## For the future
-MUTECT ?= java -Xmx$(1) -jar \$$EBROOTMUTECT/mutect-1.1.7.jar --analysis_type MuTect
-#MUTECT2 ?= java -Xmx$(2) -jar \$$EBROOTGATK/GenomeAnalysisTK.jar --analysis_type MuTect2
+MUTECT ?=
 
 CONFIGURE_STRELKA = $(PERL) $(USR_DIR)/local/strelka_workflow-1.0.15/bin/configureStrelkaWorkflow.pl
 STRELKA_CONFIG = usb-modules-v2/variant_callers/somatic/strelka_config_bwa_default.ini
 
-# Strelka2 runs with python2, which is the default on Scicore, and does not need to be loaded.
-CONFIGURE_STRELKA2_SOMATIC = $(PYTHON) $(USR_DIR)/local/strelka-2.9.10.centos6_x86_64/bin/configureStrelkaSomaticWorkflow.py
+# Strelka2 runs with python2
+CONFIGURE_STRELKA2_SOMATIC = $(PYTHON2) $(USR_DIR)/local/strelka-2.9.10.centos6_x86_64/bin/configureStrelkaSomaticWorkflow.py
 STRELKA2_SOMATIC_CONFIG = usb-modules-v2/variant_callers/somatic/configureStrelkaSomaticWorkflow.py.ini
-CONFIGURE_STRELKA2_GERMLINE = $(PYTHON) $(USR_DIR)/local/strelka-2.9.10.centos6_x86_64/bin/configureStrelkaGermlineWorkflow.py
+CONFIGURE_STRELKA2_GERMLINE = $(PYTHON2) $(USR_DIR)/local/strelka-2.9.10.centos6_x86_64/bin/configureStrelkaGermlineWorkflow.py
 STRELKA2_GERMLINE_CONFIG = usb-modules-v2/variant_callers/configureStrelkaGermlineWorkflow.py.ini
 
-PIPEIT_IMG ?= $(IMG_DIR)/PipeIT_2.0.5.img
+PIPEIT_IMG ?= $(IMG_DIR)/PipeIT/PipeIT_2.0.5.img
 
 BAMIXCHECKER_IMG ?= $(IMG_DIR)/BAMixChecker/BAMixChecker_v1.0.1.sif
 
@@ -368,7 +209,7 @@ TVC_SENSITIVE_JSON = usb-modules-v2/variant_callers/somatic/TVC_somatic_paramete
 TVC_MOTIF ?= $(TVC_ROOT_DIR)/share/TVC/sse/ampliseqexome_germline_p1_hiq_motifset.txt
 TVC_NUM_CORES ?= 4
 
-TS_IMG ?= $(IMG_DIR)/TS_v5.12.1.sp1_v1.0.1.img
+TS_IMG ?= $(IMG_DIR)/TS/TS_v5.12.1.sp1_v1.0.1.img
 FUSION_TS_FILTER = $(RSCRIPT) usb-modules-v2/sv_callers/fusionTSfilter.R
 FUSION_TS_FILTER_MIN_TOTAL_READS ?= 500000
 FUSION_TS_FILTER_MIN_OVERALL_E2E_PERCENT ?= 0.7
@@ -382,19 +223,17 @@ FUSION_TS_FILTER_MIN_PARTNER_GENES_EXPRS ?= 20
 VARSCAN_JAR ?= $(JAR_DIR)/varscan/VarScan.v2.4.3.jar
 VARSCAN = $(JAVA) -Xmx$(RESOURCE_REQ_MEDIUM_MEM_JAVA) -jar $(VARSCAN_JAR)
 
-### For the future
-# VARSCAN ?= java -Xmx$(RESOURCE_REQ_LOW_MEM_JAVA) -jar \$$EBROOTVARSCAN/VarScan.v2.4.1.jar
 
 #SNP_EFF_CONFIG ?= usb-modules-v2/vcf_tools/snpEff.config
-SNP_EFF_DATA_DIR ?= $(GROUP_DIR)/ref_nobackup/snpeff/4.3
-SNP_EFF = $(JAVA) -Xmx$(1) -jar \$$EBROOTSNPEFF/snpEff.jar
-SNP_EFF_OPTS = -i vcf -o vcf -configOption data.dir=$(SNP_EFF_DATA_DIR) -noStats $(SNP_EFF_FLAGS) -dataDir $(REF_DIR)/snpeff
-SNP_SIFT = $(JAVA) -Xmx$(1) -jar \$$EBROOTSNPEFF/SnpSift.jar
+SNP_EFF_DATA_DIR ?= $(REF_DIR)/snpeff/4.3
+SNP_EFF = $(JAVA) -Xmx$(1) -jar $(USR_DIR)/local/snpEff/snpEff/snpEff.jar
+SNP_EFF_OPTS = -i vcf -o vcf -noStats $(SNP_EFF_FLAGS) -nodownload -dataDir $(SNP_EFF_DATA_DIR)
+SNP_SIFT = $(JAVA) -Xmx$(1) -jar $(USR_DIR)/local/snpEff/snpEff/SnpSift.jar
 #SNP_SIFT_OPTS = -c $(SNP_EFF_CONFIG)
-VCF_EFF_ONE_PER_LINE = $(PERL) \$$EBROOTSNPEFF/snpEff/scripts/vcfEffOnePerLine.pl
+VCF_EFF_ONE_PER_LINE = $(PERL) $(USR_DIR)/local/snpEff/snpEff/scripts/vcfEffOnePerLine.pl
 VCF_JOIN_EFF = $(PERL) $(MODULE_SCRIPTS_DIR)/joinEff.pl
 
-VEP_CACHE_DIR ?= $(GROUP_DIR)/ref_nobackup/vep/
+VEP_CACHE_DIR ?= $(REF_DIR)/vep/
 VEP ?= vep --cache --offline --dir_cache $(VEP_CACHE_DIR) --no_stats --force_overwrite --pick --format vcf --vcf --symbol --terms SO
 VEP_PLUGIN_DIR ?= $(USR_DIR)/downloads/VEP_plugins
 
@@ -402,7 +241,7 @@ VEP_PLUGIN_DIR ?= $(USR_DIR)/downloads/VEP_plugins
 ADD_GENE_LIST_ANNOTATION = $(RSCRIPT) usb-modules-v2/vcf_tools/addGeneListAnnotationToVcf.R
 ANNOTATE_FACETS_VCF = $(RSCRIPT) usb-modules-v2/copy_number/annotateFacets2Vcf.R
 
-FACETS_SNP_PILEUP = $(BIN_DIR)/snp-pileup
+FACETS_SNP_PILEUP = $(USR_DIR)/local/htstools/snp-pileup
 FACETS = $(R4SCRIPT) usb-modules-v2/copy_number/facetsRun.R
 FACETS_GENE_CN = $(RSCRIPT) usb-modules-v2/copy_number/facetsGeneCN.R
 FACETS_GENE_CN_PLOT = $(RSCRIPT) usb-modules-v2/copy_number/facetsGeneCNPlot.R

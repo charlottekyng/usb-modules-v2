@@ -37,6 +37,7 @@ use File::Glob ':glob';
 use File::Path;
 
 use Getopt::Std;
+use Net::Domain;
 
 my %opt;
 
@@ -45,7 +46,7 @@ getopts('n:smr:l:', \%opt);
 my $username = $ENV{LOGNAME} || $ENV{USER} || getpwuid($<);
 my $slackname = $slack_map{$username} || $username;
 my $project_name = $cwd;
-$project_name =~ s:.*/GROUP/::;
+#$project_name =~ s:.*/GROUP/::;
 #$project_name =~ s:.*/data/::;
 #$project_name =~ s:.*kinglab/::;
 $project_name =~ s:/:_:g;
@@ -111,12 +112,11 @@ do {
     mkpath $logdir;
     my $pid = fork;
     if ($pid == 0) {
-        #print "$qmake $args &> $logfile\n";
         exec "$qmake $args LOGDIR=$logdir > $logfile 2>&1";
     } else {
         my $mail_msg = "Command: $qmake $args\n";
         $mail_msg .=  "Attempt #: " . ($n + 1) . " of $attempts\n";
-        $mail_msg .=  "Hostname: " . $ENV{HOSTNAME}. "\n";
+        $mail_msg .=  "Hostname: " .Net::Domain::hostname. "\n";
         $mail_msg .=  "PID: $pid\n";
         $mail_msg .=  "Dir: $cwd\n";
         $mail_msg .=  "Log dir: $cwd/$logdir\n";
@@ -153,11 +153,11 @@ do {
             if ($retcode == 0) {
                 # op success
                 $slack_msg = "*COMPLETE* $slack_msg : $name";
-     #           system "$curl --data '$slack_msg' $fin_slack &> /dev/null";
+     #           system "$curl --data '$slack_msg' $fin_slack > /dev/null 2>&1";
             } else {
                 # op failure
                 $slack_msg = "*FAILURE* $slack_msg : $cwd/$logfile";
-     #           system "$curl --data '$slack_msg' $err_slack &> /dev/null";
+     #           system "$curl --data '$slack_msg' $err_slack > /dev/null 2>&1";
             }
         }
     }

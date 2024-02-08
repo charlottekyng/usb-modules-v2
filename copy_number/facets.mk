@@ -158,7 +158,8 @@ facets/cncf/all$(PROJECT_PREFIX).cncf.txt : $(foreach pair,$(SAMPLE_PAIRS),facet
 	done
 
 facets/cncf/all$(PROJECT_PREFIX).cncf.pdf.tar.gz : $(foreach pair,$(SAMPLE_PAIRS),facets/cncf/$(pair).cncf.pdf) $(foreach pair,$(SAMPLE_PAIRS),facets/cncf/$(pair).logR.pdf)
-	$(INIT) tar -czf $@ $^
+	$(call RUN,1,$(RESOURCE_REQ_LOW_MEM),$(RESOURCE_REQ_VSHORT),,"\
+	tar -czf $@ $^")
 
 
 define facets-TN-swap-check
