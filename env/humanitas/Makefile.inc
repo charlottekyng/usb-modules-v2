@@ -64,7 +64,7 @@ JAVA6_MODULE ?=
 JAVA7_MODULE ?=
 # GATK 3.6 needs java8:
 JAVA8_MODULE ?= $(ANACONDA_MODULE) && source activate $(CONDA_DIR)/java_1.8.0
-PYTHON_MODULE ?=
+PYTHON_MODULE ?= $(ANACONDA_MODULE) && source activate
 SAMTOOLS_MODULE ?= samtools/1.13
 SAMTOOLS_MODULE_GOOLF ?= samtools/1.13
 BCFTOOLS_MODULE ?= bcftools/1.13
@@ -90,10 +90,10 @@ OPENBLAS_MODULE ?=
 MUTECT_MODULE ?=
 PICARD_MODULE ?=
 VARSCAN_MODULE ?=
-
 VEP_MODULE ?= vep/88.9
 MACS2_MODULE ?= $(ANACONDA_MODULE) && source activate $(CONDA_DIR)/macs2
 MATPLOTLIB_MODULE ?= matplotlib/3.4.3
+PYCLONE_MODULE ?= $(ANACONDA_MODULE) && source activate $(CONDA_DIR)/pyclone
 
 PERL ?= $(USR_DIR)/local/perl/5.16.3/bin/perl
 # on humanitas $TMPDIR is /tmp ($TMPDIR is set only on compute nodes)
@@ -268,7 +268,7 @@ PVACSEQ_PREPARE_VCF ?= $(PERL) usb-modules-v2/neoepitopes/pvacseq_prepare_vcf.pl
 
 LST = $(RSCRIPT) usb-modules-v2/mut_sigs/lst.R
 
-PYCLONE ?= $(PYTHON_ENV_ACTIVATE) $(GROUP_DIR)/usr_nobackup/local/conda/pyclonenv; PyClone
+PYCLONE ?= PyClone
 PYCLONE_ITER ?= 10000
 PYCLONE_BURNIN ?= 1000
 PYCLONE_SEED ?= 1234567

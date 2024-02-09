@@ -89,12 +89,13 @@ ANACONDA_MODULE ?= Anaconda3/5.0.1
 VEP_MODULE ?= ensembl-vep/92.0-goolf-1.7.20-Perl-5.22.2
 MACS2_MODULE ?= MACS2/2.1.1.20160309-goolf-1.7.20-Python-2.7.11
 MATPLOTLIB_MODULE ?= matplotlib/3.1.1-fosscuda-2019b-Python-3.7.4
+PYCLONE_MODULE ?= $(ANACONDA_MODULE) && source activate $(USR_DIR)/local/conda/pyclonenv
 
 PERL ?= perl
 JAVA ?= java -Djava.io.tmpdir=$(TMPDIR)
 PYTHON ?= python
-PYTHON_ENV_ACTIVATE ?= ml load $(ANACONDA_MODULE) && source activate 
-PYTHON_ENV_DEACTIVATE = source deactivate
+# PYTHON_ENV_ACTIVATE ?= ml load $(ANACONDA_MODULE) && source activate 
+# PYTHON_ENV_DEACTIVATE = source deactivate
 
 #deprecated on scicore. A newer singularity is available system-wide:
 SINGULARITY_MODULE ?=
@@ -272,7 +273,7 @@ PVACSEQ_PREPARE_VCF ?= $(PERL) usb-modules-v2/neoepitopes/pvacseq_prepare_vcf.pl
 
 LST = $(RSCRIPT) usb-modules-v2/mut_sigs/lst.R
 
-PYCLONE ?= $(PYTHON_ENV_ACTIVATE) $(GROUP_DIR)/usr_nobackup/local/conda/pyclonenv; PyClone
+PYCLONE ?= PyClone
 PYCLONE_ITER ?= 10000
 PYCLONE_BURNIN ?= 1000
 PYCLONE_SEED ?= 1234567

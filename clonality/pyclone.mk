@@ -43,17 +43,15 @@ pyclone/tables/%.clusters.signatures.RData : pyclone/tables/%.loci.txt pyclone/t
 
 pyclone/tables/%.loci.txt : pyclone/configs/%.yaml pyclone/runs/%/alpha.tsv.bz2
 	$(call CHECK_PYCLONE_CONFIG,$<,$@,\
-	$(call RUN,1,$(RESOURCE_REQ_LOW_MEM),$(RESOURCE_REQ_LONG),,"\
+	$(call RUN,1,$(RESOURCE_REQ_LOW_MEM),$(RESOURCE_REQ_LONG),$(PYCLONE_MODULE),"\
 	$(PYCLONE) build_table --config_file $< --table_type loci \
-	--out_file $(subst cluster,loci,$@) --burnin $(PYCLONE_BURNIN) && \
-	$(PYTHON_ENV_DEACTIVATE)"))
+	--out_file $(subst cluster,loci,$@) --burnin $(PYCLONE_BURNIN)"))
 
 pyclone/runs/%/alpha.tsv.bz2 : pyclone/configs/%.yaml
 	$(MKDIR) $(@D); \
 	$(call CHECK_PYCLONE_CONFIG,$<,$@,\
-	$(call RUN,1,$(RESOURCE_REQ_LOW_MEM),$(RESOURCE_REQ_LONG),,"\
-	$(PYCLONE) run_analysis --config_file $< --seed $(PYCLONE_SEED) && \
-	$(PYTHON_ENV_DEACTIVATE)"))
+	$(call RUN,1,$(RESOURCE_REQ_LOW_MEM),$(RESOURCE_REQ_LONG),$(PYCLONE_MODULE),"\
+	$(PYCLONE) run_analysis --config_file $< --seed $(PYCLONE_SEED)"))
 
 define pyclone_make_config
 pyclone/configs/$1.run$3.yaml : $$(foreach tumor,$2,facets/cncf/$$(tumor)_$1.out pyclone/mutations/$$(tumor)_$1.run$3.mutations.yaml)
@@ -98,9 +96,8 @@ $(foreach set,$(SAMPLE_SETS),$(foreach run,1 2,\
 	$(wordlist 1,$(shell expr $(words $(subst _,$( ),$(set))) - 1),$(subst _,$( ),$(set))),$(run)))))
 
 pyclone/mutations/%.mutations.yaml : pyclone/mutations/%.mutations.txt
-	$(call RUN,1,$(RESOURCE_REQ_LOW_MEM),$(RESOURCE_REQ_VSHORT),,"\
-	$(PYCLONE) build_mutations_file --prior $(PYCLONE_PRIOR) --in_file $< --out_file $@ \
-	&& $(PYTHON_ENV_DEACTIVATE)")
+	$(call RUN,1,$(RESOURCE_REQ_LOW_MEM),$(RESOURCE_REQ_VSHORT),$(PYCLONE_MODULE),"\
+	$(PYCLONE) build_mutations_file --prior $(PYCLONE_PRIOR) --in_file $< --out_file $@")
 
 #define pyclone_make_mutations
 #pyclone/mutations/$1_$2.mutations.txt : $$(foreach prefix,$$(CALLER_PREFIX),tables/$1_$2.$$(call DOWMSTREAM_VCF_TABLE_SUFFIX,$$(prefix)).txt)
