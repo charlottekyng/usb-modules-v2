@@ -27,8 +27,7 @@ ifeq ($(findstring RNA,$(CAPTURE_METHOD)),RNA)
 bam_splitncigar/%.splitncigar.bam : bam/%.bam
 	$(call RUN,1,$(RESOURCE_REQ_VHIGH_MEM),$(RESOURCE_REQ_LONG),$(JAVA8_MODULE),"\
 	$(call GATK4241,SplitNCigarReads,$(RESOURCE_REQ_VHIGH_MEM_JAVA)) \
-	$(if $(findstring scicore,$(HPC)),--tmp-dir $$TEMPDIR,) \
-	$(if $(findstring humanitas,$(HPC)),--tmp-dir $$TMPDIR,) \
+	--tmp-dir $(TMPDIR) \
 	-R $(REF_FASTA) -I $< -O $@")
 
 genotype/BAMixChecker/Total_result.txt : $(foreach sample,$(SAMPLES),bam_splitncigar/$(sample).splitncigar.bam)
