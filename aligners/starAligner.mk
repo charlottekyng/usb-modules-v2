@@ -24,7 +24,7 @@ star/$(sample).Unmapped.out.mate1.gz $(if $(findstring true,$(PAIRED_END)),star/
 star/$(sample).Log.out.gz star/$(sample).Log.progress.out.gz)
 
 star/%.Aligned.sortedByCoord.out.bam : fastq/%.1.fastq.gz $(if $(findstring true,$(PAIRED_END)),fastq/%.2.fastq.gz)
-	$(call RUN,$(STAR_CPU),$(if $(findstring _,$(REF)),50G,32G),$(RESOURCE_REQ_MEDIUM),$(STAR_MODULE),"\
+	$(call RUN,$(STAR_CPU),$(if $(findstring _,$(REF)),100G,50G),$(RESOURCE_REQ_MEDIUM),$(STAR_MODULE),"\
 	$(STAR) --runMode alignReads --runThreadN $(STAR_CPU) \
 	--genomeDir $(STAR_GENOME_DIR) \
 	--readFilesIn $< $(if $(findstring true,$(PAIRED_END)),$(word 2,$^)) \
@@ -48,10 +48,12 @@ star/%.Aligned.toTranscriptome.out.bam : star/%.Aligned.sortedByCoord.out.bam
 	$(INIT) touch $@
 
 star/%.Chimeric.out.junction.gz : star/%.Aligned.sortedByCoord.out.bam
-	@if [ -f '$(basename $@)' ]; then $(INIT) $(GZIP) $(basename $@); fi
+	@if [ -f '$(basename $@)' ]; then \
+	$(call RUN,1,$(RESOURCE_REQ_LOW_MEM),$(RESOURCE_REQ_VSHORT),,"$(GZIP) $(basename $@)"); fi
 
 star/%.Chimeric.out.sam.gz : star/%.Aligned.sortedByCoord.out.bam
-	@if [ -f '$(basename $@)' ]; then $(INIT) $(GZIP) $(basename $@); fi
+	@if [ -f '$(basename $@)' ]; then \
+	$(call RUN,1,$(RESOURCE_REQ_LOW_MEM),$(RESOURCE_REQ_VSHORT),,"$(GZIP) $(basename $@)"); fi
 
 star/%.ReadsPerGene.out.tab : star/%.Aligned.sortedByCoord.out.bam
 	
@@ -60,19 +62,20 @@ star/%.Log.final.out : star/%.Aligned.sortedByCoord.out.bam
 	
 
 star/%.Log.out.gz : star/%.Aligned.sortedByCoord.out.bam
-	@if [ -f '$(basename $@)' ]; then $(INIT) $(GZIP) $(basename $@); fi
+	@if [ -f '$(basename $@)' ]; then \
+	$(call RUN,1,$(RESOURCE_REQ_LOW_MEM),$(RESOURCE_REQ_VSHORT),,"$(GZIP) $(basename $@)"); fi
 
 star/%.Log.progress.out.gz : star/%.Aligned.sortedByCoord.out.bam
-	@if [ -f '$(basename $@)' ]; then $(INIT) $(GZIP) $(basename $@); fi
+	@if [ -f '$(basename $@)' ]; then \
+	$(call RUN,1,$(RESOURCE_REQ_LOW_MEM),$(RESOURCE_REQ_VSHORT),,"$(GZIP) $(basename $@)"); fi
 
 star/%.Unmapped.out.mate1.gz : star/%.Aligned.sortedByCoord.out.bam
-	@if [ -f '$(basename $@)' ]; then $(INIT) $(GZIP) $(basename $@); fi
+	@if [ -f '$(basename $@)' ]; then \
+	$(call RUN,1,$(RESOURCE_REQ_LOW_MEM),$(RESOURCE_REQ_VSHORT),,"$(GZIP) $(basename $@)"); fi
 
 star/%.Unmapped.out.mate2.gz : star/%.Aligned.sortedByCoord.out.bam
-	@if [ -f '$(basename $@)' ]; then $(INIT) $(GZIP) $(basename $@); fi
-
-# %.gz : %
-# 	$(INIT) $(GZIP) $<
+	@if [ -f '$(basename $@)' ]; then \
+	$(call RUN,1,$(RESOURCE_REQ_LOW_MEM),$(RESOURCE_REQ_VSHORT),,"$(GZIP) $(basename $@)"); fi
 
 bam/%.bam : star/%.star.$(BAM_SUFFIX) 
 	$(INIT) ln -f $< $@
