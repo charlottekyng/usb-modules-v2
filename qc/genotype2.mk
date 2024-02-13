@@ -31,7 +31,7 @@ bam_splitncigar/%.splitncigar.bam : bam/%.bam
 	-R $(REF_FASTA) -I $< -O $@")
 
 genotype/BAMixChecker/Total_result.txt : $(foreach sample,$(SAMPLES),bam_splitncigar/$(sample).splitncigar.bam)
-	$(call RUN,6,$(RESOURCE_REQ_VHIGH_MEM),$(RESOURCE_REQ_VSHORT),,"\
+	$(call RUN,6,$(RESOURCE_REQ_VHIGH_MEM),$(RESOURCE_REQ_VSHORT),$(SINGULARITY_MODULE),"\
 	$(SINGULARITY_EXEC) $(BAMIXCHECKER_IMG) python /BAMixChecker-1.0.1/BAMixChecker.py -d bam_splitncigar \
 	-r $(REF_FASTA) \
 	-o genotype --OFFFileNameMatching -p 6")
