@@ -233,14 +233,14 @@ metrics/all$(PROJECT_PREFIX).normalized_coverage.rnaseq_metrics.txt : $(foreach 
 
 metrics/all$(PROJECT_PREFIX).rnaseq_report/index.html : metrics/all.rnaseq_metrics.txt metrics/all.normalized_coverage.rnaseq_metrics.txt
 	$(INIT) module load $(R_MODULE); $(PLOT_RNASEQ_METRICS) --outDir $(@D) $^
-      
+
 metrics/all$(PROJECT_PREFIX).alignment_summary_metrics.txt : $(foreach sample,$(SAMPLES),metrics/$(sample).alignment_summary_metrics.txt)
 	$(INIT) \
 	{ \
 	sed '/^$$/d; /^#/d; s/SAMPLE.*//; s/\s$$//; s/^/SAMPLE\t/;' $< | head -1; \
 	for metrics in $^; do \
 		samplename=$$(basename $${metrics%%.alignment_summary_metrics.txt}); \
-		sed "/^#/d; /^CATEGORY/d; /^\$$/d; s/^/$$samplename\t/; s/\t\+$$//" $$metrics | grep "^$$samplename"; \
+		sed "/^#/d; /^CATEGORY/d; /^READ_LENGTH/d; /^[0-9]/d; /^\$$/d; s/^/$$samplename\t/; s/\t\+$$//" $$metrics | grep "^$$samplename"; \
 	done; \
 	} >$@
 
