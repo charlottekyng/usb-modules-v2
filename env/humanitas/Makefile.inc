@@ -55,11 +55,14 @@ GZIP ?= gzip -f
 GUNZIP ?= gunzip -c
 
 ANACONDA_MODULE ?= conda/anaconda3
+SINGULARITY_MODULE ?= singularity/3.4.2
+SINGULARITY_EXEC ?= singularity exec --cleanenv -B $(GROUP_DIR)/../
+SINGULARITY_RUN ?= singularity run --cleanenv -B $(GROUP_DIR)/../
 
 PERL_MODULE ?=
 R_CONDA ?= $(CONDA_DIR)/R_4.0.3
-R_MODULE ?= $(ANACONDA_MODULE) && source activate $(R_CONDA)
-R4_MODULE ?= $(ANACONDA_MODULE) && source activate $(R_CONDA)
+R_MODULE ?= $(SINGULARITY_MODULE)
+R4_MODULE ?= $(SINGULARITY_MODULE)
 JAVA6_MODULE ?=
 JAVA7_MODULE ?=
 # GATK 3.6 needs java8:
@@ -103,18 +106,15 @@ JAVA ?= java -Djava.io.tmpdir=$(TMPDIR)
 PYTHON ?= python
 PYTHON2 ?= python2
 
-SINGULARITY_MODULE ?= singularity/3.4.2
-SINGULARITY_EXEC ?= singularity exec --cleanenv --no-home -B $(GROUP_DIR)/../
-SINGULARITY_RUN ?= singularity run --cleanenv --no-home -B $(GROUP_DIR)/../
-
 # on scicore there are some R modules that use v3, therefore the two R variables
 # on humanitas everything runs in one version of R, but keeping the two variables for compatibility
-R_LIBS ?= $(USR_DIR)/R_lib/R_4.0.3
+R_LIBS ?= $(USR_DIR)/R_lib/pipeline/Rocker_4.2.2
 R4_LIBS ?= $(R_LIBS)
-R ?= export R_LIBS=$(R_LIBS); R
+R ?= SINGULARITYENV_R_LIBS=$(R_LIBS) $(SINGULARITY_EXEC) $(IMG_DIR)/R_RStudio/Rocker_rstudio_4.2.2/Rocker_rstudio_4.2.2.sif R
 R4 ?= $(R)
-RSCRIPT ?= export R_LIBS=$(R_LIBS); Rscript
+RSCRIPT ?= SINGULARITYENV_R_LIBS=$(R_LIBS) $(SINGULARITY_EXEC) $(IMG_DIR)/R_RStudio/Rocker_rstudio_4.2.2/Rocker_rstudio_4.2.2.sif Rscript
 R4SCRIPT ?= $(RSCRIPT)
+
 KNIT ?= $(RSCRIPT) $(MODULE_SCRIPTS_DIR)/knit.R
 SWEAVE ?= $(RSCRIPT) $(MODULE_SCRIPTS_DIR)/Sweave.R
 RBIND ?= $(RSCRIPT) $(MODULE_SCRIPTS_DIR)/rbind.R
