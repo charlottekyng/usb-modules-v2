@@ -17,7 +17,8 @@ endif
 ifneq ($(findstring RNA,$(CAPTURE_METHOD)),RNA)
 genotype/BAMixChecker/Total_result.txt : $(foreach sample,$(SAMPLES),bam/$(sample).bam)
 	$(call RUN,6,$(RESOURCE_REQ_VHIGH_MEM),$(RESOURCE_REQ_MEDIUM),$(SINGULARITY_MODULE),"\
-	$(SINGULARITY_EXEC) $(BAMIXCHECKER_IMG) python /BAMixChecker-1.0.1/BAMixChecker.py -d bam \
+	echo $^ | tr ' ' '\n' > genotype/BAMixChecker/bamlist &&\
+	$(SINGULARITY_EXEC) $(BAMIXCHECKER_IMG) python /BAMixChecker-1.0.1/BAMixChecker.py -l genotype/BAMixChecker/bamlist \
 	$(if $(findstring BAITS,$(CAPTURE_METHOD)),-b $(TARGETS_FILE_INTERVALS),if $(findstring PCR,$(CAPTURE_METHOD)),-b $(TARGETS_FILE_INTERVALS),) \
 	-r $(REF_FASTA) \
 	-o genotype --OFFFileNameMatching -p 6")
@@ -32,7 +33,8 @@ bam_splitncigar/%.splitncigar.bam : bam/%.bam
 
 genotype/BAMixChecker/Total_result.txt : $(foreach sample,$(SAMPLES),bam_splitncigar/$(sample).splitncigar.bam)
 	$(call RUN,6,$(RESOURCE_REQ_VHIGH_MEM),$(RESOURCE_REQ_MEDIUM),$(SINGULARITY_MODULE),"\
-	$(SINGULARITY_EXEC) $(BAMIXCHECKER_IMG) python /BAMixChecker-1.0.1/BAMixChecker.py -d bam_splitncigar \
+	echo $^ | tr ' ' '\n' > genotype/BAMixChecker/bamlist &&\
+	$(SINGULARITY_EXEC) $(BAMIXCHECKER_IMG) python /BAMixChecker-1.0.1/BAMixChecker.py -l genotype/BAMixChecker/bamlist \
 	-r $(REF_FASTA) \
 	-o genotype --OFFFileNameMatching -p 6")
 endif
