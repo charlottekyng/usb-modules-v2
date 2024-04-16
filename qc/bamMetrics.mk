@@ -26,21 +26,21 @@ ifeq ($(CAPTURE_METHOD),CHIP)
 bam_metrics : flagstats
 endif
 
-hs_metrics : $(shell rm -f metrics/all$(PROJECT_PREFIX).hs_metrics.txt metrics/all$(PROJECT_PREFIX).interval_hs_metrics.txt.gz) metrics/all$(PROJECT_PREFIX).hs_metrics.txt metrics/all$(PROJECT_PREFIX).interval_hs_metrics.txt.gz
-amplicon_metrics : $(shell rm -f metrics/all$(PROJECT_PREFIX).hs_metrics.txt metrics/all$(PROJECT_PREFIX).interval_hs_metrics.txt.gz) metrics/all$(PROJECT_PREFIX).amplicon_metrics.txt metrics/all$(PROJECT_PREFIX).interval_amplicon_metrics.txt.gz
+hs_metrics : metrics/all$(PROJECT_PREFIX).hs_metrics.txt metrics/all$(PROJECT_PREFIX).interval_hs_metrics.txt.gz
+amplicon_metrics : metrics/all$(PROJECT_PREFIX).amplicon_metrics.txt metrics/all$(PROJECT_PREFIX).interval_amplicon_metrics.txt.gz
 per_base_depth : $(foreach sample,$(SAMPLES),metrics/$(sample).per_base_depth.txt.gz)
-wgs_metrics : $(shell rm -f metrics/all$(PROJECT_PREFIX).wgs_metrics.txt) metrics/all$(PROJECT_PREFIX).wgs_metrics.txt
-rna_metrics : $(shell rm -f metrics/all$(PROJECT_PREFIX).hs_metrics.txt metrics/all$(PROJECT_PREFIX).interval_hs_metrics.txt.gz) metrics/all$(PROJECT_PREFIX).rnaseq_metrics.txt metrics/all$(PROJECT_PREFIX).normalized_coverage.rnaseq_metrics.txt
+wgs_metrics : metrics/all$(PROJECT_PREFIX).wgs_metrics.txt
+rna_metrics : metrics/all$(PROJECT_PREFIX).rnaseq_metrics.txt metrics/all$(PROJECT_PREFIX).normalized_coverage.rnaseq_metrics.txt
 #metrics/all.rnaseq_report/index.html
-flagstats : $(shell rm -f metrics/all$(PROJECT_PREFIX).flagstats.txt) metrics/all$(PROJECT_PREFIX).flagstats.txt
-flagstatsQ30 : $(shell rm -f metrics/all$(PROJECT_PREFIX).flagstatsQ30.txt) metrics/all$(PROJECT_PREFIX).flagstatsQ30.txt
-alignment_summary_metrics : $(shell rm -f metrics/all$(PROJECT_PREFIX).alignment_summary_metrics.txt) metrics/all$(PROJECT_PREFIX).alignment_summary_metrics.txt
+flagstats : metrics/all$(PROJECT_PREFIX).flagstats.txt
+flagstatsQ30 : metrics/all$(PROJECT_PREFIX).flagstatsQ30.txt
+alignment_summary_metrics : metrics/all$(PROJECT_PREFIX).alignment_summary_metrics.txt
 #gc : $(foreach sample,$(SAMPLES),metrics/$(sample).gc_bias_metrics.txt)
 artifacts : $(foreach sample,$(SAMPLES),metrics/$(sample).artifact_metrics.error_summary_metrics)
 artifacts_wgs : $(foreach sample,$(SAMPLES),metrics/$(sample).wgs.artifact_metrics.error_summary_metrics)
 oxog : metrics/all$(PROJECT_PREFIX).oxog_metrics.txt
 oxog_wgs : $(foreach sample,$(SAMPLES),metrics/$(sample).wgs.oxog_metrics.txt)
-dup : $(shell rm -f metrics/all$(PROJECT_PREFIX).dup_metrics.txt) metrics/all$(PROJECT_PREFIX).dup_metrics.txt
+dup : metrics/all$(PROJECT_PREFIX).dup_metrics.txt
 
 #interval_report : metrics/interval_report/index.html
 #non_ref_metrics : $(foreach sample,$(SAMPLES),metrics/$(sample).interval_nonref_freq.txt)
