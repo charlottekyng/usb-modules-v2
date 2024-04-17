@@ -168,7 +168,7 @@ if(nrow(output)>0) {
 	if("CancerGeneSets" %in% colnames(output)) {
 		output$CancerGeneSets <- apply(output, 1, function(x) {
 			if(x[["CancerGeneSets"]] != ".") {
-				if(unlist(strsplit(x[["ANN[*].GENE"]], ", ", fixed = T)) %in% cancer_genes) {
+				if(any(unlist(strsplit(x[["ANN[*].GENE"]], ", ", fixed = T)) %in% cancer_genes)) {
 					x[["CancerGeneSets"]]
 				} else { "." }
 			} else { "." }
