@@ -14,7 +14,8 @@ endif
 
 RESOURCE_REQ ?= high
 TARGETS_FILE_INTERVALS ?= $(REF_FASTA:.fasta=.bed)
-DBSNP_TARGETS_INTERVALS ?= $(ANN_DIR)/dbsnp_151.hg38.common.vcf.gz
+DBSNP_TARGETS_INTERVALS ?= $(ANN_DIR)/dbsnp_151.hg38.vcf.gz
+DBSNP_COMMON ?= $(ANN_DIR)/dbsnp_151.hg38.common.vcf.gz
 
 ifeq ($(findstring bed,$(TARGETS_FILE_INTERVALS)),bed)
 CHROMOSOMES := $(shell grep -v '@' $(TARGETS_FILE_INTERVALS) | cut -f1 | sort -V | uniq)

@@ -166,6 +166,10 @@ endif
 #	$(call RUN_MAKE,usb-modules-v2/variant_callers/strelka2_germline.mk)
 #endif
 
+TARGETS += muse
+muse :
+	$(call RUN_MAKE,usb-modules-v2/variant_callers/somatic/muse.mk)
+
 TARGETS += varscan_cnv
 varscan_cnv :
 	$(call RUN_MAKE,usb-modules-v2/copy_number/varscanCNV.mk)

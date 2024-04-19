@@ -218,10 +218,12 @@ FUSION_TS_FILTER_MIN_BREAKPOINT_E2E_PERCENT ?= 0.6
 FUSION_TS_FILTER_MAX_BREAKPOINT_E2E_STRANDBIAS ?= 0.2
 FUSION_TS_FILTER_MIN_PARTNER_GENES_EXPRS ?= 20
 
-
-
 VARSCAN_JAR ?= $(JAR_DIR)/varscan/VarScan.v2.4.3.jar
 VARSCAN = $(JAVA) -Xmx$(RESOURCE_REQ_MEDIUM_MEM_JAVA) -jar $(VARSCAN_JAR)
+
+MUSE_IMG ?= $(IMG_DIR)/MuSE/MuSE_2.0.4.sif
+MUSE = $(SINGULARITY_EXEC) $(MUSE_IMG) MuSE
+FIX_MUSE_VCF = $(PERL) usb-modules-v2/variant_callers/fix_vcf_scripts/fix_muse_vcf.pl
 
 
 #SNP_EFF_CONFIG ?= usb-modules-v2/vcf_tools/snpEff.config
