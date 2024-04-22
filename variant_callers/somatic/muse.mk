@@ -22,7 +22,7 @@ muse_tables : $(call MAKE_TABLE_FILE_LIST,muse)
 
 define muse-tumor-normal
 muse/$1_$2.MuSE.txt : bam/$1.bam bam/$2.bam
-	$$(call RUN,$$(MUSE_NUM_CORES),$$(RESOURCE_REQ_VVHIGH_MEM),$$(RESOURCE_REQ_MEDIUM),$$(SINGULARITY_MODULE),"\
+	$$(call RUN,$$(MUSE_NUM_CORES),$$(RESOURCE_REQ_VVHIGH_MEM),$$(RESOURCE_REQ_LONG),$$(SINGULARITY_MODULE),"\
 	$$(MUSE) call \
 	-f $$(REF_FASTA) \
 	-O muse/$1_$2 \
