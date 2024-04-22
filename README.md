@@ -10,7 +10,7 @@
     + [Panel of Normals (PoN)](#panel-of-normals--pon-)
     + [Germline variant calling](#germline-variant-calling)
     + [Somatic variant calling](#somatic-variant-calling)
-  * [If you have experiments other than matched tumor-normal pairs/sets from frozen samples...](#if-you-have-experiments-other-than-matched-tumor-normal-pairs-sets-from-frozen-samples)
+      - [If you have experiments other than matched tumor-normal pairs/sets from frozen samples...](#if-you-have-experiments-other-than-matched-tumor-normal-pairs-sets-from-frozen-samples)
     + [Somatic CNA detection](#somatic-cna-detection)
       - [Identify tumor/normal swaps from facets results](#identify-tumornormal-swaps-from-facets-results)
     + [TcellExTRECT](#tcellextrect)
@@ -88,6 +88,17 @@ git pull
         SAMPLE2T SAMPLE2A
         SAMPLE2T SAMPLE2B
         ```
+
+IMPORTANT: Make sure there are no stray spaces/tabs at the end of the lines. Make sure there are no blank lines (after the last samples). Make sure you have unix linebreaks not Windows carriage returns.
+    ````
+    >cat -A sample_sets.txt
+    SSA001T^ISSA001N$          # OK
+    SSA002T^ISSA002N $         # stray space at the end
+    SSA005T^ISSA005N^I$        # stray tab at the end
+    SSA006T^I SSA006N$         # stray space in the middle
+    $                          # remove blank lines
+    ````
+	
 #### Important note on sample names
 
 The preferred format is XXXnnn[TN]mm, where 
@@ -229,6 +240,7 @@ make genotype          # This is useful for confirming that sample pairs/sets ca
 make facets_poolednorm # (Illumina only) This is useful for confirming that the germline samples are not contaminated with tumor cells
 make facets            # (Illumina only) This is useful for checking tumor content
 ```
+
 ### Panel of Normals (PoN)
 
 *Pre-requisites*: BAMs in `bam/` after alignment with an appropriate aligner.
@@ -387,7 +399,7 @@ Cancer gene sets:
 Sources: Kandoth et al (PMID 24132290), Lawrence et al (PMID 23770567), Schultze et al (PMID 25822088), Fujimoto et al (PMID 27064257), Martincorena et al (PMID 29056346), Bailey et al (PMID 30096302)
 See https://gdc.cancer.gov/resources-tcga-users/tcga-code-tables/tcga-study-abbreviations for TCGA code abbreviations
 
-## If you have experiments other than matched tumor-normal pairs/sets from frozen samples...
+#### If you have experiments other than matched tumor-normal pairs/sets from frozen samples...
 The defaults of the pipeline are tuned towards tumor-normal pairs/sets from frozen samples. If you have other sample types, you might have to consider adding the following steps:
 * for FFPE samples: formalin fixation artefacts are typically a strong enrichment of C>T/G>A variants at low VAF (<15%), 
 frequently accounting for 90%+ of all somatic variants identified. You may have to consider performing an additional filter by removing C>T/G>A variants <10% or <15%,or supported by <5 reads. You may also consider remove all variants with <5 reads, in which case you can set `MIN_TUMOR_AD = 5` (sorry there is no parameter to do a blanket filtering for VAF for now).
@@ -472,7 +484,7 @@ Tumor/normal sample swaps are not easy to spot. One possibility is to look into 
 2. This strategy will likely fail for samples with very low tumor content, and/or tumors with a flat CN profile!
 
 
-### TcellExTRECT
+### TcellExTRECT (calculate T cell fractions from WES)
 TcellExTRECT is an R package to calculate T cell fractions from WES data from hg19 or hg38 aligned genomes.
 Read more at [https://github.com/McGranahanLab/TcellExTRECT)
 
@@ -490,7 +502,7 @@ tcell_extrect/
 └── <sample>.txt.gz ............ Row coverage of the TCRA loci.
 ```
 
-### deTiN
+### deTiN (estimate %tumor in normal)
 DeTiN estimates tumor in normal (TiN) based on tumor and matched normal sequencing data. The estimate is based on both candidate SSNVs and aSCNAs.
 
 Read more at [https://github.com/getzlab/deTiN](https://github.com/getzlab/deTiN)
@@ -621,7 +633,7 @@ You can try, e.g., `make --debug=i -nf usb-modules-v2/aligners/bwamemAligner.mk 
 (the parameters in your project-level Makefile). This will produce a verbose dry-run of the files make is attempting to generate. 
 Here you can see where it stops finding the recipes. This is very useful for debugging, and for educational purposes if you want to know what is being done.
 
-1. Check your samples sheets. Make sure there are no stray spaces/tabs at the end of the lines. Make sure there are no blank lines (after the last samples).
+1. Check your samples sheets. Make sure there are no stray spaces/tabs at the end of the lines. Make sure there are no blank lines (after the last samples). Make sure you have unix linebreaks not Windows carriage returns.
     ````
     >cat -A sample_sets.txt
     SSA001T^ISSA001N$          # OK
