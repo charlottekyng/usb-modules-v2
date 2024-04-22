@@ -90,14 +90,14 @@ git pull
         ```
 
 IMPORTANT: Make sure there are no stray spaces/tabs at the end of the lines. Make sure there are no blank lines (after the last samples). Make sure you have unix linebreaks not Windows carriage returns.
-    ````
-    >cat -A sample_sets.txt
-    SSA001T^ISSA001N$          # OK
-    SSA002T^ISSA002N $         # stray space at the end
-    SSA005T^ISSA005N^I$        # stray tab at the end
-    SSA006T^I SSA006N$         # stray space in the middle
-    $                          # remove blank lines
-    ````
+```
+>cat -A sample_sets.txt
+SSA001T^ISSA001N$          # OK
+SSA002T^ISSA002N $         # stray space at the end
+SSA005T^ISSA005N^I$        # stray tab at the end
+SSA006T^I SSA006N$         # stray space in the middle
+$                          # remove blank lines
+```
 	
 #### Important note on sample names
 
