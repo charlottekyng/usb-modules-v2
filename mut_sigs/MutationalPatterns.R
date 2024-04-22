@@ -76,12 +76,12 @@ mut_mat <- mut_matrix(vcf_list = vcfs, ref_genome = ref_genome)
 cat("\nPlotting...\n")
 
 par(mar=c(2,2,2,2))
-pdf(file=paste0(opt$outPrefix, ".", sig_prefix, ".Spectrum.pdf"), height = 1.5*length(sample_names), width = 1.5*length(sample_names))
+pdf(file=paste0(opt$outPrefix, ".", sig_prefix, ".Spectrum.pdf"), height = 0.5*length(sample_names), width = 0.5*length(sample_names))
 plot_spectrum(type_occurrences, by = sample_names, CT = TRUE, legend = TRUE)
 dev.off()
 
 par(mar=c(2,2,2,2))
-pdf(file=paste0(opt$outPrefix, ".", sig_prefix, ".Profile_96.pdf"), height = 1.5*length(sample_names))
+pdf(file=paste0(opt$outPrefix, ".", sig_prefix, ".Profile_96.pdf"), height = length(sample_names))
 plot_96_profile(mut_mat, condensed = TRUE)
 dev.off()
 
@@ -96,7 +96,7 @@ cancer_signatures <- cancer_signatures[as.vector(new_order),]
 cos_sim_samples_signatures <- cos_sim_matrix(mut_mat, cancer_signatures)
 
 par(mar=c(2,2,2,2))
-pdf(file=paste0(opt$outPrefix, ".", sig_prefix, ".SimilarityHeatmap.pdf"), height = length(sample_names), width = 16)
+pdf(file=paste0(opt$outPrefix, ".", sig_prefix, ".SimilarityHeatmap.pdf"), height = 2+(length(sample_names)/3), width = 16)
 plot_cosine_heatmap(cos_sim_samples_signatures,cluster_rows = TRUE)
 dev.off()
 
@@ -109,12 +109,12 @@ select <- which(rowSums(fit_res$contribution) > 10)
 
 # Plots with relative contribution of signatures in each sample
 par(mar=c(2,2,2,2))
-pdf(file=paste0(opt$outPrefix, ".", sig_prefix, ".BarplotRelativeContribution.pdf"), height = length(sample_names))
+pdf(file=paste0(opt$outPrefix, ".", sig_prefix, ".BarplotRelativeContribution.pdf"), height = 2+(length(sample_names)/3))
 plot_contribution(fit_res$contribution[select,],cancer_signatures[,select],coord_flip = TRUE,mode = "relative")
 dev.off()
 
 par(mar=c(2,2,2,2))
-pdf(file=paste0(opt$outPrefix, ".", sig_prefix, ".HeatmapRelativeContribution.pdf"), height = length(sample_names), width = 12)
+pdf(file=paste0(opt$outPrefix, ".", sig_prefix, ".HeatmapRelativeContribution.pdf"), height = 2+(length(sample_names)/3), width = 12)
 plot_contribution_heatmap(fit_res$contribution,cluster_samples = FALSE,method = "complete")
 dev.off()
 
