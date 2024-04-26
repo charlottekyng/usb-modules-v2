@@ -36,7 +36,8 @@ while (my $line = <IN>) {
 		my @line = split /\t/, $line;
 
 		# print anything that has not been filtered out
-		if ($line[6] eq "." || $line[6] eq "PASS") {
+		# MuSE can have PASS and PASS;Tier[1-5] format
+		if ($line[6] eq "." || $line[6] eq "PASS" || $line[6] =~ /^PASS;Tier\d$/ ) {
 			print OUT $line."\n";
 
 		# print nothing if the mutation is outside of the target intervals
