@@ -39,7 +39,8 @@ muse/$1_$2.MuSE.vcf : muse/$1_$2.MuSE.txt
 	$$(if $$(findstring NONE,$$(BAITS)),-G,-E)")
 
 vcf/$1_$2.muse.vcf : muse/$1_$2.MuSE.vcf
-	$$(INIT) $$(FIX_MUSE_VCF) $$< | perl -ne 'if (/^#CHROM/) { s/NORMAL/$2/; s/TUMOR/$1/; } print;' > $$@
+	$$(INIT) $$(FIX_MUSE_VCF) $$< | perl -ne 'if (/^#CHROM/) { s/NORMAL/$2/; s/TUMOR/$1/; } print;' | \
+	$$(if $$(findstring NONE,$$(CAPTURE_METHOD)),sed -E 's/\t(Tier[1-5])\t/\tPASS;\1\t/',sed -E 's/\t(Tier[1-4])\t/\tPASS;\1\t/') > $$@
 
 endef
 $(foreach pair,$(SAMPLE_PAIRS),$(eval $(call muse-tumor-normal,$(tumor.$(pair)),$(normal.$(pair)))))
