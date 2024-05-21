@@ -97,6 +97,7 @@ VEP_MODULE ?= vep/88.9
 MACS2_MODULE ?= $(ANACONDA_MODULE) && source activate $(CONDA_DIR)/macs2
 MATPLOTLIB_MODULE ?= matplotlib/3.4.3
 PYCLONE_MODULE ?= $(ANACONDA_MODULE) && source activate $(CONDA_DIR)/pyclone
+SIG_PROFILER_MODULE ?= $(ANACONDA_MODULE) && source activate $(CONDA_DIR)/SigProfiler
 
 PERL ?= $(USR_DIR)/local/perl/5.16.3/bin/perl
 # on humanitas $TMPDIR is /tmp ($TMPDIR is set only on compute nodes)
@@ -261,6 +262,7 @@ MUT_SIG_COSMIC_DIR = $(REF_DIR)/mut_sig_cosmic
 MUT_SIG_COSMIC = signatures.exome.cosmic.v3.may2019
 MUTATIONALPATTERNS = $(RSCRIPT) usb-modules-v2/mut_sigs/MutationalPatterns.R --signatures $(MUT_SIG_COSMIC_DIR)/$(MUT_SIG_COSMIC).rda $(if $(findstring hg38,$(REF)),--ref hg38, $(if $(findstring b37,$(REF)),--ref hg19))
 
+SIG_PROFILER_ASSIGNMENT = $(PYTHON) usb-modules-v2/mut_sigs/run_SigProfilerAssignment.py
 
 PVACSEQ ?= pvacseq
 PVACTOOLS_IMG ?= $(IMG_DIR)/pvactools.img
