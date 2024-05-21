@@ -214,6 +214,10 @@ TARGETS	+= mutational_patterns
 mutational_patterns :
 	$(call RUN_MAKE,usb-modules-v2/mut_sigs/MutationalPatterns.mk)
 
+TARGETS	+= sig_profiler_assignment
+sig_profiler_assignment :
+	$(call RUN_MAKE,usb-modules-v2/mut_sigs/SigProfilerAssignment.mk)
+
 TARGETS += lst
 lst :
 	$(call RUN_MAKE,usb-modules-v2/mut_sigs/lst.mk)

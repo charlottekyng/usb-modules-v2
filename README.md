@@ -556,6 +556,19 @@ In most cases `caller` will be `mutect2`.
 Important parameter:
 1. MUT_SIG_COSMIC (currently only `signatures.exome.cosmic.v3.may2019`. Eventually we will add the possibility to load external signature files).
 
+#### SigProfilerAssignment
+Usage:
+```
+make sig_profiler_assignment CALLER_PREFIX=<caller>
+```
+In most cases `caller` will be `mutect2`.
+
+Optional parameters:
+1. SIG_PROFILER_COSMIC_VERSION (Defines the version of the COSMIC reference signatures. Takes a positive float among `1`, `2`, `3`, `3.1`, `3.2`, `3.3`, and `3.4`. The default value is `3.4`.).
+2. SIG_PROFILER_COSMIC_SIGNATURE_DB (Path to the input set of known mutational signatures (only in case that COSMIC reference signatures are not used), a tab delimited file that contains the signature matrix where the rows are mutation types and columns are signature IDs.) 
+3. SIG_PROFILER_COSMIC_EXCLUDE_SIG_SUBGROUPS (Removes the signatures corresponding to specific subtypes to improve refitting (only available when using default COSMIC reference signatures). The default value is `None`, which corresponds to use all COSMIC signatures.)
+
+
 ### RNA-seq transcript quantification
 RSEM is tested to be run after STAR alignment.
 ```

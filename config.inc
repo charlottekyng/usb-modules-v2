@@ -494,6 +494,42 @@ VARSCAN_CNV_MAX_SEG_SIZE ?= 100
 CBS_MPILEUP_OPTS ?= -q 1
 
 ##################################
+###### MUTATIONAL SIGNATURES #####
+##################################
+SIG_PROFILER_COSMIC_VERSION ?= 3.4
+
+ifeq ($(CAPTURE_METHOD),NONE)
+SIG_PROFILER_COSMIC_EXOME ?= False
+else
+SIG_PROFILER_COSMIC_EXOME ?= True
+endif
+
+ifeq ($(REF),hg38)
+ SIG_PROFILER_COSMIC_GENOME ?= GRCh38
+else ifeq ($(REF),hg38_GRCm38)
+ SIG_PROFILER_COSMIC_GENOME ?= GRCh38
+else ifeq ($(REF),hg38_gallus6a)
+ SIG_PROFILER_COSMIC_GENOME ?= GRCh38
+else ifeq ($(REF),b37)
+ SIG_PROFILER_COSMIC_GENOME ?= GRCh37
+else ifeq ($(REF),b37_GRCm38)
+ SIG_PROFILER_COSMIC_GENOME ?= GRCh37
+else ifeq ($(REF),b37_hbv_hcv)
+ SIG_PROFILER_COSMIC_GENOME ?= GRCh37
+else ifeq ($(REF),b37_hbv_hcv_GRCm38)
+ SIG_PROFILER_COSMIC_GENOME ?= GRCh37
+else ifeq ($(REF),hg19_ionref)
+ SIG_PROFILER_COSMIC_GENOME ?= GRCh37
+else ifeq ($(REF),GRCm38)
+ SIG_PROFILER_COSMIC_GENOME ?= mm10
+endif
+
+SIG_PROFILER_COSMIC_SIGNATURE_DB ?= 
+SIG_PROFILER_COSMIC_EXCLUDE_SIG_SUBGROUPS ?= 
+
+
+
+##################################
 ############# GISTIC ############
 ##################################
 

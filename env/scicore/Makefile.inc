@@ -85,11 +85,12 @@ OPENBLAS_MODULE ?= OpenBLAS/0.2.13-GCC-4.8.4-LAPACK-3.5.0
 MUTECT_MODULE ?= MuTect/1.1.7-Java-1.7.0_80
 PICARD_MODULE ?= picard/2.9.2
 VARSCAN_MODULE ?= VarScan/2.4.1-Java-1.7.0_80
-ANACONDA_MODULE ?= Anaconda3/5.0.1
+ANACONDA_MODULE ?= Anaconda3/2019.03
 VEP_MODULE ?= ensembl-vep/92.0-goolf-1.7.20-Perl-5.22.2
 MACS2_MODULE ?= MACS2/2.1.1.20160309-goolf-1.7.20-Python-2.7.11
 MATPLOTLIB_MODULE ?= matplotlib/3.1.1-fosscuda-2019b-Python-3.7.4
 PYCLONE_MODULE ?= $(ANACONDA_MODULE) && source activate $(USR_DIR)/local/conda/pyclonenv
+SIG_PROFILER_MODULE ?= $(ANACONDA_MODULE) && source activate $(USR_DIR)/local/conda/SigProfiler
 
 PERL ?= perl
 JAVA ?= java -Djava.io.tmpdir=$(TMPDIR)
@@ -266,6 +267,7 @@ MUT_SIG_COSMIC_DIR = $(REF_DIR)/mut_sig_cosmic
 MUT_SIG_COSMIC = signatures.exome.cosmic.v3.may2019
 MUTATIONALPATTERNS = $(RSCRIPT) usb-modules-v2/mut_sigs/MutationalPatterns.R --signatures $(MUT_SIG_COSMIC_DIR)/$(MUT_SIG_COSMIC).rda $(if $(findstring hg38,$(REF)),--ref hg38, $(if $(findstring b37,$(REF)),--ref hg19))
 
+SIG_PROFILER_ASSIGNMENT = $(PYTHON) usb-modules-v2/mut_sigs/run_SigProfilerAssignment.py
 
 PVACSEQ ?= pvacseq
 PVACTOOLS_IMG ?= $(IMG_DIR)/pvactools.img
