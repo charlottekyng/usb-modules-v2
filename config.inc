@@ -273,6 +273,14 @@ MUTECT_GT_MAX_ALT_IN_NORMAL_FRACTION ?= 0.5
 MUTECT_OTHER_OPTS ?= 
 MUTECT2_OTHER_OPTS ?= 
 
+CAVEMAN_NUM_CORES ?= 12
+CAVEMAN_NORMAL_CONTAMINATION ?= 0.1
+CAVEMAN_USE_CN ?= true
+CAVEMAN_CF_THRESHOLD ?= 0.3
+CAVEMAN_TUM_CN_DEFAULT ?= 2
+CAVEMAN_NORM_CN_DEFAULT ?= 2
+
+
 ################################################
 ###### Somatic variant filters #################
 ################################################
