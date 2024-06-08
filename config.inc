@@ -280,6 +280,7 @@ CAVEMAN_CF_THRESHOLD ?= 0.3
 CAVEMAN_TUM_CN_DEFAULT ?= 2
 CAVEMAN_NORM_CN_DEFAULT ?= 2
 
+USE_BAM_CLIPOVERLAP ?= true
 
 ################################################
 ###### Somatic variant filters #################

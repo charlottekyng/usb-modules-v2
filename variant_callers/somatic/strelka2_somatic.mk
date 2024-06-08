@@ -23,8 +23,8 @@ strelka2_vcfs : $(foreach type,$(VARIANT_TYPES),$(call MAKE_VCF_FILE_LIST,$(type
 strelka2_tables : $(foreach type,$(VARIANT_TYPES),$(call MAKE_TABLE_FILE_LIST,$(type)))
 
 define strelka2-tumor-normal
-# If PAIRED_END then look for BAMs in bam_clipoverlap folder.
-strelka2/$1_$2/runWorkflow.py : $(if $(findstring true,$(PAIRED_END)),bam_clipoverlap,bam)/$1.bam $(if $(findstring true,$(PAIRED_END)),bam_clipoverlap,bam)/$2.bam
+# If USE_BAM_CLIPOVERLAP then look for BAMs in bam_clipoverlap folder.
+strelka2/$1_$2/runWorkflow.py : $(if $(findstring true,$(USE_BAM_CLIPOVERLAP)),bam_clipoverlap,bam)/$1.bam $(if $(findstring true,$(USE_BAM_CLIPOVERLAP)),bam_clipoverlap,bam)/$2.bam
 	$$(call RUN,1,$$(RESOURCE_REQ_LOW_MEM),$$(RESOURCE_REQ_VSHORT),$$(PERL_MODULE),"\
 	rm -rf $$(@D) && \
 	$$(CONFIGURE_STRELKA2_SOMATIC) $$(if $$(findstring NONE,$$(PANEL)),,--exome) --tumorBam $$< --normalBam $$(<<) \
