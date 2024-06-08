@@ -226,6 +226,10 @@ MUSE_IMG ?= $(IMG_DIR)/MuSE/MuSE_2.0.4.sif
 MUSE = $(SINGULARITY_EXEC) $(MUSE_IMG) MuSE
 FIX_MUSE_VCF = $(PERL) usb-modules-v2/variant_callers/fix_vcf_scripts/fix_muse_vcf.pl
 
+CAVEMAN_IMG ?= $(IMG_DIR)/CaVEMan/cgpCaVEManWrapper_1.18.3.sif
+CAVEMAN ?= $(SINGULARITY_EXEC) $(CAVEMAN_IMG) caveman.pl
+FIX_CAVEMAN_VCF = $(PYTHON) usb-modules-v2/variant_callers/fix_vcf_scripts/fix_caveman_vcf.py
+MAKE_CAVEMAN_SEGS = $(RSCRIPT) usb-modules-v2/scripts/caveman_make_segs.R
 
 #SNP_EFF_CONFIG ?= usb-modules-v2/vcf_tools/snpEff.config
 SNP_EFF_DATA_DIR ?= $(REF_DIR)/snpeff/4.3
