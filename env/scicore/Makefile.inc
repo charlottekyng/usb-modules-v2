@@ -196,11 +196,12 @@ MUTECT ?= java -Xmx$(1) -jar \$$EBROOTMUTECT/mutect-1.1.7.jar --analysis_type Mu
 CONFIGURE_STRELKA = $(PERL) $(USR_DIR)/local/strelka_workflow-1.0.15/bin/configureStrelkaWorkflow.pl
 STRELKA_CONFIG = usb-modules-v2/variant_callers/somatic/strelka_config_bwa_default.ini
 
-# Strelka2 runs with python2, which is the default on Scicore, and does not need to be loaded.
-CONFIGURE_STRELKA2_SOMATIC = $(PYTHON) $(USR_DIR)/local/strelka-2.9.10.centos6_x86_64/bin/configureStrelkaSomaticWorkflow.py
+STRELKA2_IMG ?= $(IMG_DIR)/strelka2/strelka2_v2.9.10.sif
+CONFIGURE_STRELKA2_SOMATIC = $(SINGULARITY_EXEC) $(STRELKA2_IMG) configureStrelkaSomaticWorkflow.py
 STRELKA2_SOMATIC_CONFIG = usb-modules-v2/variant_callers/somatic/configureStrelkaSomaticWorkflow.py.ini
-CONFIGURE_STRELKA2_GERMLINE = $(PYTHON) $(USR_DIR)/local/strelka-2.9.10.centos6_x86_64/bin/configureStrelkaGermlineWorkflow.py
+CONFIGURE_STRELKA2_GERMLINE = $(SINGULARITY_EXEC) $(STRELKA2_IMG) configureStrelkaGermlineWorkflow.py
 STRELKA2_GERMLINE_CONFIG = usb-modules-v2/variant_callers/configureStrelkaGermlineWorkflow.py.ini
+STRELKA2 ?= $(SINGULARITY_EXEC) $(STRELKA2_IMG)
 
 PIPEIT_IMG ?= $(IMG_DIR)/PipeIT_2.0.5.img
 

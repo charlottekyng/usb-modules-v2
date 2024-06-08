@@ -33,7 +33,7 @@ strelka2/$1_$2/runWorkflow.py : $(if $(findstring true,$(PAIRED_END)),bam_clipov
 # Because we use 8 cores, mem per cpu request becomes unreasonably high (and job won't run if RESOURCE_REQ_LOW_MEM is set to a very high value). Use a fixed mem value instead (strelka2 uses very little RAM).
 strelka2/$1_$2/results/variants/somatic.indels.vcf.gz : strelka2/$1_$2/runWorkflow.py
 	$$(call RUN,$$(STRELKA2_NUM_CORES),2GB,$$(RESOURCE_REQ_SHORT),,"\
-	$$(<D)/runWorkflow.py -j $$(STRELKA2_NUM_CORES) -m local")
+	$$(STRELKA2) $$(<D)/runWorkflow.py -j $$(STRELKA2_NUM_CORES) -m local")
 
 strelka2/$1_$2/results/variants/somatic.snvs.vcf.gz : strelka2/$1_$2/results/variants/somatic.indels.vcf.gz
 
