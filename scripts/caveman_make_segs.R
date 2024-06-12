@@ -45,7 +45,7 @@ if(max(segs$cf.em[!is.na(segs$cf.em) & segs$cf.em < 1 ]) > opt$cf) {
 	cat("Writing", opt$outFile, "\n")
 	write.table(segs[c(opt$chrom_col, opt$start_col, opt$end_col, opt$tcn_col)], file=opt$outFile, sep="\t", row.names=F, col.names=F, quote=F, na="")
 } else {
-	# create empty file
-	cat("Max cf was equal or below the --cf threshold", opt$cf, "\nCreating an empty file instead.\n")
-	file.create(opt$outFile)
+	# create dummy file
+	cat("Max cf was equal or below the --cf threshold", opt$cf, "\nCreating a dummy file instead.\n")
+	cat("chr1", "1", "2", "0",file=opt$outFile, sep="\t")
 }
