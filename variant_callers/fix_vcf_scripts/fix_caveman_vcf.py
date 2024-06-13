@@ -181,14 +181,16 @@ with gzip.open(sys.argv[1], 'rt') as fileInput:
 			# Print to output.
 			# Format will be GT:FAZ:FCZ:FGZ:FTZ:RAZ:RCZ:RGZ:RTZ:PM:DP:AD:FA (GT must be first if available, otherwise GATK complains downstream, easiest is to append new tags after the original entry)
 			# Also swap normal/tumor columns
-			print(strArray[0] + "\t" \
-			+ strArray[1] + "\t" \
-			+ strArray[2] + "\t" \
-			+ strArray[3] + "\t" \
-			+ strArray[4] + "\t" \
-			+ strArray[5] + "\t" \
-			+ strArray[6] + "\t" \
-			+ strArray[7] + "\t" \
-			+ strArray[8] + ":DP:AD:FA" + "\t" \
-			+ strArray[10] + ":"  + str(tumorDP) + ":" + str(tumorREF) + "," + str(tumorALT) + ":" + str("{:.3f}".format(tumorFA)) + "\t" \
-			+ strArray[9] + ":" + str(normalDP) + ":" + str(normalREF) + "," + str(normalALT) + ":" + str("{:.3f}".format(normalFA)) )
+			# Also skip rare cases where REF and ALT are the same
+			if strArray[3] != strArray[4]:
+				print(strArray[0] + "\t" \
+				+ strArray[1] + "\t" \
+				+ strArray[2] + "\t" \
+				+ strArray[3] + "\t" \
+				+ strArray[4] + "\t" \
+				+ strArray[5] + "\t" \
+				+ strArray[6] + "\t" \
+				+ strArray[7] + "\t" \
+				+ strArray[8] + ":DP:AD:FA" + "\t" \
+				+ strArray[10] + ":"  + str(tumorDP) + ":" + str(tumorREF) + "," + str(tumorALT) + ":" + str("{:.3f}".format(tumorFA)) + "\t" \
+				+ strArray[9] + ":" + str(normalDP) + ":" + str(normalREF) + "," + str(normalALT) + ":" + str("{:.3f}".format(normalFA)) )
