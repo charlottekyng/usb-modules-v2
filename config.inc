@@ -282,6 +282,8 @@ CAVEMAN_NORM_CN_DEFAULT ?= 2
 
 USE_BAM_CLIPOVERLAP ?= true
 
+MANTA_NUM_CORES ?= 12
+
 ################################################
 ###### Somatic variant filters #################
 ################################################

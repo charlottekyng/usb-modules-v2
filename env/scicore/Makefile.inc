@@ -235,6 +235,9 @@ CAVEMAN ?= $(SINGULARITY_EXEC) $(CAVEMAN_IMG) caveman.pl
 FIX_CAVEMAN_VCF = $(PYTHON) usb-modules-v2/variant_callers/fix_vcf_scripts/fix_caveman_vcf.py
 MAKE_CAVEMAN_SEGS = $(RSCRIPT) usb-modules-v2/scripts/caveman_make_segs.R
 
+MANTA_IMG ?= $(IMG_DIR)/Manta/manta_1.6.0.sif
+MANTA ?= $(SINGULARITY_EXEC) $(MANTA_IMG)
+
 ### For the future
 # VARSCAN ?= java -Xmx$(RESOURCE_REQ_LOW_MEM_JAVA) -jar \$$EBROOTVARSCAN/VarScan.v2.4.1.jar
 
