@@ -300,6 +300,10 @@ TARGETS += manta
 manta :
 	$(call RUN_MAKE,usb-modules-v2/sv_callers/manta.mk)
 
+TARGETS += delly
+delly :
+	$(call RUN_MAKE,usb-modules-v2/sv_callers/delly.mk)
+
 #########################################################
 ## The set of targets below have NOT been tested,
 ## or are known to be broken/obsolete.

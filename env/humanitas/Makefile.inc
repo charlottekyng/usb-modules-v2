@@ -235,6 +235,9 @@ MAKE_CAVEMAN_SEGS = $(RSCRIPT) usb-modules-v2/scripts/caveman_make_segs.R
 MANTA_IMG ?= $(IMG_DIR)/Manta/manta_1.6.0.sif
 MANTA ?= $(SINGULARITY_EXEC) $(MANTA_IMG)
 
+DELLY_IMG ?= $(IMG_DIR)/Delly/delly_v1.2.6.sif
+DELLY ?= $(SINGULARITY_EXEC) $(DELLY_IMG)
+
 #SNP_EFF_CONFIG ?= usb-modules-v2/vcf_tools/snpEff.config
 SNP_EFF_DATA_DIR ?= $(REF_DIR)/snpeff/4.3
 SNP_EFF = $(JAVA) -Xmx$(1) -jar $(USR_DIR)/local/snpEff/snpEff/snpEff.jar
