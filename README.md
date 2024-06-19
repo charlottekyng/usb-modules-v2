@@ -279,10 +279,12 @@ For Illumina, mutect/2 (SNVs) and strelka/2 (indels) are implemented and tested.
 
 *Note*: It is generally advisable to run facets for CNAs before these. If you do not have facets results, you have to set `ANN_FACETS=false` in your `Makefile`.
 ```
-make mutect              ## for b37 and variants
-make strelka             ## for b37 and variants
-make mutect2             ## for hg38 and variants
-make strelka2            ## for hg38 and variants
+make mutect              ## deprecated
+make strelka             ## deprecated
+make mutect2             ## recommended
+make strelka2            ## recommended
+make muse                ## somehow old, could be used for consensus calling
+make caveman             ## somehow old, could be used for consensus calling
 make mutation_summary
 ```
 
@@ -293,22 +295,26 @@ make pipeit              ## use this
 make mutation_summary
 ```
 
-`mutation_summary` returns an Excel file for all mutations with simplified annotation. Here is a description of the fields included in the mutation summary:
-* IMPACT: Impact of effect (HIGH=frameshift indel, truncating, splice site and similar; MODERATE=missense, in-frame indel and similar; LOW=synonymous and similar) Details: snpeff.sourceforge.net/VCFannotationformat_v1.0.pdf
-* FA: variant allele fraction, meaning number of variant reads divided by total number of reads at the locus
-* DP: depth, meaning total number of reads at the locus
-* AD: ‘allelic depth’, meaning number of reference allele reads and number of variant allele reads, separated by a comma
-* Hotspot_*, Hotspot3D_*: mutation hotspots according to Chang et al (Cancer Discov 2017, cancerhotspots.org) and Gao et al (Genome Med 2017, 3dhotspots.org)
+**`mutation_summary`** returns an Excel file for all mutations with simplified annotation. Here is a description of the fields included in the mutation summary:
+* CHROM, POS, REF, ALT: chromosome position, reference and alternate (variant) alleles
+* ID: dbSNP ID, COSMIC ID
+* HGVS_P, HGVS_C, EFFECT, IMPACT: Gene effect of the variant determined by SnpEff. Details: snpeff.sourceforge.net/VCFannotationformat_v1.0.pdf
+* FA: *variant allele fraction*: number of variant reads divided by total number of reads at the locus
+* DP: *depth*: total number of reads at the locus
+* AD: *allelic depth*: number of reference allele reads and number of variant allele reads, separated by a comma
+* Hotspot_*, Hotspot3D_*: mutation hotspots according to Chang et al (Cancer Discov 2017, cancerhotspots.org) and Gao et al (Genome Med 2017, 3dhotspots.org). See https://github.com/charlottekyng/cancer_hotspots.
 * CancerGeneSets: list of cancer gene lists to which the gene belongs (see list below)
 * facetsCF: clonal fraction of the copy number segment at the locus (experimental, to be deprecated)
 * facetsTCN_EM: Total copy number at the locus
 * facetsLCN_EM: Lesser (minor) copy number at the locus
 * facetsLOHCall: loss of heterozygosity at the locus (i.e. LCN_EM=0)
-* CHROM, POS, REF, ALT: chromosome position, reference and alternate (variant) alleles
-* ID: dbSNP ID, COSMIC ID
 * ExACnontcga_AC/AF: Population level allele count (AC) and allele frequency (AF).
 
-*Important note re: multi-tumor cases and the FILTER field*: 
+**Important notes regarding mutation_summary**: It is made from `*.nonsynonymous_synonymous.txt` tables in `alltables` folder. Three excel files are generated (`*.xlsx`, `*.consensus.xlsx`, and `*.singletons.xlsx`). The consensus strategy is very crude: variants that are identical between two callers will end up in the consensus. This strategy will omit rare cases of dinucleotide variants and complex variants if they are encoded differently in each VCF/table. To help manually spot such cases, an additional column `dist_to_alt_caller` is added to `*.singletons.xlsx`. Very small values indicate that a variant is very close to another variant from the alternate caller.
+
+<u>The consensus part of the **`mutation_summary`** was originally made for strelka2 and mutect2 calls. It was not tested with more callers (!), and it will be improved in the future.</u>
+
+**Important note for multi-tumor cases and the FILTER field**: 
 For a given patient, somatic mutations found in one (or more) sample by the mutation calling pipeline were additionally 
 interrogated in all remaining tumor samples of this patient. (This "interrogation" is known to the pipeline as "sufam", FYI).
 “interrogation” and “interrogation_absent” in FILTER indicate mutations that were not called in the given sample but were 
@@ -483,6 +489,12 @@ Tumor/normal sample swaps are not easy to spot. One possibility is to look into 
 1. This strategy assumes that all tumors have regions with LOH or amplifications, so when a tumor is swapped for normal, facet will fail to identify heterozygous germline SNPs (facets expects a normal heterozygous SNP allele frequency to be around 0.5).
 2. This strategy will likely fail for samples with very low tumor content, and/or tumors with a flat CN profile!
 
+### Somatic SV callers
+`make manta`
+`make delly`
+`make svaba`
+
+**Note:** Results (VCFs) will be generated in the corresponding folders of each SV caller. No further annotation is implemented yet.
 
 ### TcellExTRECT (calculate T cell fractions from WES)
 TcellExTRECT is an R package to calculate T cell fractions from WES data from hg19 or hg38 aligned genomes.
