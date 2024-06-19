@@ -87,12 +87,12 @@ TARGETS += gatk
 gatk : 
 	$(call RUN_MAKE,usb-modules-v2/variant_callers/gatkVariantCaller.mk)
 
-TARGETS += genotype
-genotype :
+TARGETS += genotype_gatk
+genotype_gatk :
 	$(call RUN_MAKE,usb-modules-v2/qc/genotype.mk)
 
-TARGETS += genotype2
-genotype2 :
+TARGETS += genotype
+genotype :
 	$(call RUN_MAKE,usb-modules-v2/qc/genotype2.mk)
 
 TARGETS += mutation_summary
