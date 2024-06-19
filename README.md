@@ -13,6 +13,7 @@
       - [If you have experiments other than matched tumor-normal pairs/sets from frozen samples...](#if-you-have-experiments-other-than-matched-tumor-normal-pairs-sets-from-frozen-samples)
     + [Somatic CNA detection](#somatic-cna-detection)
       - [Identify tumor/normal swaps from facets results](#identify-tumornormal-swaps-from-facets-results)
+    + [Somatic SV callers](#somatic-sv-callers)
     + [TcellExTRECT](#tcellextrect)
     + [deTiN](#detin)
     + [Mutational signatures](#mutational-signatures)
@@ -495,10 +496,17 @@ Tumor/normal sample swaps are not easy to spot. One possibility is to look into 
 `make svaba`
 
 **Note:** Results (VCFs) will be generated in the corresponding folders of each SV caller. No further annotation is implemented yet.
+For more details see:
+
+https://github.com/Illumina/manta
+
+https://github.com/dellytools/delly
+
+https://github.com/walaj/svaba
 
 ### TcellExTRECT (calculate T cell fractions from WES)
 TcellExTRECT is an R package to calculate T cell fractions from WES data from hg19 or hg38 aligned genomes.
-Read more at [https://github.com/McGranahanLab/TcellExTRECT)
+Read more at https://github.com/McGranahanLab/TcellExTRECT
 
 *Pre-requisites:* tumor/normal WES datasets and `facets` results (`*.cncf.txt` and `*.out`)
 
