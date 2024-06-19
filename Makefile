@@ -304,6 +304,10 @@ TARGETS += delly
 delly :
 	$(call RUN_MAKE,usb-modules-v2/sv_callers/delly.mk)
 
+TARGETS += svaba
+svaba :
+	$(call RUN_MAKE,usb-modules-v2/sv_callers/svaba.mk)
+
 #########################################################
 ## The set of targets below have NOT been tested,
 ## or are known to be broken/obsolete.

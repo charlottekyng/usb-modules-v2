@@ -241,6 +241,9 @@ MANTA ?= $(SINGULARITY_EXEC) $(MANTA_IMG)
 DELLY_IMG ?= $(IMG_DIR)/Delly/delly_v1.2.6.sif
 DELLY ?= $(SINGULARITY_EXEC) $(DELLY_IMG)
 
+SVABA_IMG ?= $(IMG_DIR)/SvABA/svaba_1.2.0-ab39e3f.sif
+SVABA ?= $(SINGULARITY_EXEC) $(SVABA_IMG)
+
 ### For the future
 # VARSCAN ?= java -Xmx$(RESOURCE_REQ_LOW_MEM_JAVA) -jar \$$EBROOTVARSCAN/VarScan.v2.4.1.jar
 

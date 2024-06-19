@@ -284,6 +284,8 @@ USE_BAM_CLIPOVERLAP ?= true
 
 MANTA_NUM_CORES ?= 12
 
+SVABA_NUM_CORES ?= 8
+
 ################################################
 ###### Somatic variant filters #################
 ################################################

@@ -238,6 +238,9 @@ MANTA ?= $(SINGULARITY_EXEC) $(MANTA_IMG)
 DELLY_IMG ?= $(IMG_DIR)/Delly/delly_v1.2.6.sif
 DELLY ?= $(SINGULARITY_EXEC) $(DELLY_IMG)
 
+SVABA_IMG ?= $(IMG_DIR)/SvABA/svaba_1.2.0-ab39e3f.sif
+SVABA ?= $(SINGULARITY_EXEC) $(SVABA_IMG)
+
 #SNP_EFF_CONFIG ?= usb-modules-v2/vcf_tools/snpEff.config
 SNP_EFF_DATA_DIR ?= $(REF_DIR)/snpeff/4.3
 SNP_EFF = $(JAVA) -Xmx$(1) -jar $(USR_DIR)/local/snpEff/snpEff/snpEff.jar
