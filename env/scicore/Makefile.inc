@@ -306,11 +306,12 @@ EXPANDS_MAKE_INPUT ?= $(RSCRIPT) usb-modules-v2/clonality/expands_make_input.R
 EXPANDS ?= $(RSCRIPT) usb-modules-v2/clonality/expandsRun.R
 EXPANDS_NUM_CORES ?= 1
 
-ABSOLUTE_MAKE_MUTS ?= $(RSCRIPT) usb-modules-v2/clonality/absolute_make_muts.R
-ABSOLUTE_MAKE_SEGS ?= $(RSCRIPT) usb-modules-v2/clonality/absolute_make_segs.R
-ABSOLUTE_STEP1 ?= $(RSCRIPT) usb-modules-v2/clonality/absolute_step1.R
-ABSOLUTE_STEP2 ?= $(RSCRIPT) usb-modules-v2/clonality/absolute_step2.R
-ABSOLUTE_STEP3 ?= $(RSCRIPT) usb-modules-v2/clonality/absolute_step3.R
+ABSOLUTE_IMG ?= $(IMG_DIR)/absolute/absolute_v1.0.6_fixed_ccf_posterior_grid.sif
+ABSOLUTE_MAKE_MUTS ?= Rscript usb-modules-v2/clonality/absolute_make_muts.R
+ABSOLUTE_MAKE_SEGS ?= Rscript usb-modules-v2/clonality/absolute_make_segs.R
+ABSOLUTE_STEP1 ?= Rscript usb-modules-v2/clonality/absolute_step1.R
+ABSOLUTE_STEP2 ?= Rscript usb-modules-v2/clonality/absolute_step2.R
+ABSOLUTE_STEP3 ?= Rscript usb-modules-v2/clonality/absolute_step3.R
 ABSOLUTE_NUM_CORE ?= 1
 
 

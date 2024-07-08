@@ -242,8 +242,8 @@ TARGETS += macs2
 macs2 :
 	$(call RUN_MAKE,usb-modules-v2/chipseq/macs2.mk)
 
-TARGETS += absolute_seq
-absolute_seq :
+TARGETS += absolute
+absolute :
 	$(call RUN_MAKE,usb-modules-v2/clonality/absoluteSeq.mk)
 
 TARGETS += pyclone

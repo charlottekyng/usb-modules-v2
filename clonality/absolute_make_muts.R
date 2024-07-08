@@ -68,6 +68,9 @@ if(nrow(muts)==0) {
 		} else { cat ("maf_col and depth_col not in column names. Trying something else.") }
 	} else { stop ("ref_counts_col and var_counts_col, ad_col, or MAF_col and dp_col required.\n") }
 		
+	# remove chr prefix to fit facets names
+	muts[[opt$chrom_col]] <- sub("chr", "", muts[[opt$chrom_col]])
+	# rename sex chromosomes to fit facets
 	muts[which(muts[,opt$chrom_col]=="X"), opt$chrom_col] <- 23
 	muts[which(muts[,opt$chrom_col]=="Y"), opt$chrom_col] <- 24
 
