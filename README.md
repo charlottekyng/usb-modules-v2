@@ -90,7 +90,7 @@ git pull
         SAMPLE2T SAMPLE2B
         ```
 
-IMPORTANT: Make sure there are no stray spaces/tabs at the end of the lines. Make sure there are no blank lines (after the last samples). Make sure you have unix linebreaks not Windows carriage returns.
+IMPORTANT: Typos in the sample sheets are one of the most common reasons the pipeline falls over. Make sure there are no stray spaces/tabs at the end of the lines. Make sure there are no blank lines (after the last samples). Make sure you have _unix linebreaks_ not Windows carriage returns.
 ```
 >cat -A sample_sets.txt
 SSA001T^ISSA001N$          # OK
@@ -176,6 +176,9 @@ PAIRED_END = true
 # possible values: [SOMATIC|GERMLINE]
 ANALYSIS_TYPE = SOMATIC
 
+# specify which HPC you are using: [scicore|humanitas]
+HPC = humanitas
+
 include usb-modules-v2/Makefile
 ```
 Most parameters are automatically set to the basic appropriate values if you set these above parameters correctly, but there is a lot of room for customization.
@@ -237,7 +240,7 @@ Most of the following will work for both Illumina and Ion Torrent sequencing, un
 ```
 make bam_metrics       # This should be done for every dataset
 make fastqc            # This is occasionally useful for checking the quality of the sequencing (but isn't too useful most of the time)
-make genotype          # This is useful for confirming that sample pairs/sets came from the correct patient
+make genotype2         # This is useful for confirming that sample pairs/sets came from the correct patient
 make facets_poolednorm # (Illumina only) This is useful for confirming that the germline samples are not contaminated with tumor cells
 make facets            # (Illumina only) This is useful for checking tumor content
 ```
@@ -341,67 +344,10 @@ Cancer gene sets:
 * FUJIMOTO_HCC: SMGs from Fujimoto et al
 * CANCER_GENE_CENSUS_TIER1_V88: Cancer Gene Census Tier 1 v88
 * CANCER_GENE_CENSUS_TIERS1_AND_2_V88: Cancer Gene Census Tiers 1 and 2 v88
-* MARTINCORENA_ACC: ACC SMGs from Martincorena et al
-* MARTINCORENA_BLCA: BLCA SMGs from Martincorena et al
-* MARTINCORENA_BRCA: BRCA SMGs from Martincorena et al
-* MARTINCORENA_CESC: CESC SMGs from Martincorena et al
-* MARTINCORENA_COREAD: COREAD SMGs from Martincorena et al
-* MARTINCORENA_ESCA: ESCA SMGs from Martincorena et al
-* MARTINCORENA_GBM: GBM SMGs from Martincorena et al
-* MARTINCORENA_HNSC: HNSC SMGs from Martincorena et al
-* MARTINCORENA_KICH: KICH SMGs from Martincorena et al
-* MARTINCORENA_KIRC: KIRC SMGs from Martincorena et al
-* MARTINCORENA_KIRP: KIRP SMGs from Martincorena et al
-* MARTINCORENA_LAML: LAML SMGs from Martincorena et al
-* MARTINCORENA_LGG: LGG SMGs from Martincorena et al
-* MARTINCORENA_LIHC: LIHC SMGs from Martincorena et al
-* MARTINCORENA_LUAD: LUAD SMGs from Martincorena et al
-* MARTINCORENA_LUSC: LUSC SMGs from Martincorena et al
-* MARTINCORENA_MESO: MESO SMGs from Martincorena et al
-* MARTINCORENA_OV: OV SMGs from Martincorena et al
-* MARTINCORENA_PAAD: PAAD SMGs from Martincorena et al
-* MARTINCORENA_PCPG: PCPG SMGs from Martincorena et al
-* MARTINCORENA_PRAD: PRAD SMGs from Martincorena et al
-* MARTINCORENA_SARC: SARC SMGs from Martincorena et al
-* MARTINCORENA_SKCM: SKCM SMGs from Martincorena et al
-* MARTINCORENA_STAD: STAD SMGs from Martincorena et al
-* MARTINCORENA_TGCT: TGCT SMGs from Martincorena et al
-* MARTINCORENA_THYM: THYM SMGs from Martincorena et al
-* MARTINCORENA_UCEC: UCEC SMGs from Martincorena et al
-* MARTINCORENA_UCS: UCS SMGs from Martincorena et al
+* MARTINCORENA_<cancer_type>: <cancer_type> SMGs from Martincorena et al
 * MARTINCORENA_PANCANCER: PANCAN SMGs from Martincorena et al
-* BAILEY_ACC: ACC SMGs from Bailey et al
-* BAILEY_BLCA: BLCA SMGs from Bailey et al
-* BAILEY_BRCA: BRCA SMGs from Bailey et al
-* BAILEY_CESC: CESC SMGs from Bailey et al
-* BAILEY_CHOL: CHOL SMGs from Bailey et al
-* BAILEY_COADREAD: COADREAD SMGs from Bailey et al
-* BAILEY_DLBC: DLBL SMGs from Bailey et al
-* BAILEY_ESCA: ESCA SMGs from Bailey et al
-* BAILEY_GBM: GBM SMGs from Bailey et al
-* BAILEY_HNSC: HNSC SMGs from Bailey et al
-* BAILEY_KICH: KICH SMGs from Bailey et al
-* BAILEY_KIRC: KIRC SMGs from Bailey et al
-* BAILEY_KIRP: KIRP SMGs from Bailey et al
-* BAILEY_LAML: LAML SMGs from Bailey et al
-* BAILEY_LGG: LGG SMGs from Bailey et al
-* BAILEY_LIHC: LIHC SMGs from Bailey et al
-* BAILEY_LUAD: LUAD SMGs from Bailey et al
-* BAILEY_LUSC: LUSC SMGs from Bailey et al
-* BAILEY_MESO: MESO SMGs from Bailey et al
-* BAILEY_OV: OV SMGs from Bailey et al
-* BAILEY_PAAD: PAAD SMGs from Bailey et al
+* BAILEY_<cancer_type>: <cancer_type> SMGs from Bailey et al
 * BAILEY_PANCAN: PANCAN SMGs from Bailey et al
-* BAILEY_PCPG: PCPG SMGs from Bailey et al
-* BAILEY_PRAD: PRAD SMGs from Bailey et al
-* BAILEY_SARC: SARC SMGs from Bailey et al
-* BAILEY_SKCM: SKCM SMGs from Bailey et al
-* BAILEY_STAD: STAD SMGs from Bailey et al
-* BAILEY_THCA: THCA SMGs from Bailey et al
-* BAILEY_THYM: THYM SMGs from Bailey et al
-* BAILEY_UCEC: UCEC SMGs from Bailey et al
-* BAILEY_UCS: UCS SMGs from Bailey et al
-* BAILEY_UVM: UVM SMGs from Bailey et al
 
 Sources: Kandoth et al (PMID 24132290), Lawrence et al (PMID 23770567), Schultze et al (PMID 25822088), Fujimoto et al (PMID 27064257), Martincorena et al (PMID 29056346), Bailey et al (PMID 30096302)
 See https://gdc.cancer.gov/resources-tcga-users/tcga-code-tables/tcga-study-abbreviations for TCGA code abbreviations
@@ -475,7 +421,7 @@ For Ion Torrent DNA sequencing, Varscan is implemented and tested.
 make varscan_cnv
 ```
 
-For Illumina RNA sequencing, cnvkit is implemeted (but currently not well tested or documented).
+For Illumina RNA sequencing, cnvkit is implemented (but currently not well tested or documented).
 ```
 make cnvkit
 ```
@@ -627,9 +573,8 @@ There are a lot more...
 For exome analysis, there are a few things that are useful. These should work if you use them in the context of the suggested recipes below. Some of them may only work on the b37 genome.
 You may run into errors if you run them outside of the context of in-house, standard data as they have complex (and cryptic) rules to obtain input files. 
 ```
-make deconstruct_sigs # For mutational signatures, requires mutations
 make lst              # For the detection of large-scale transitions, requires facets output
-make msisensor        # For the detection of microsatellite instability, requires bam files only
+make msisensor        # For the detection of microsatellite instability, requires bam files
 make pyclone          # For clonality analysis, requires mutations and facets output
 make absolute_seq     # For clonality analysis, requires mutations and facets output (see note below)
 make pvacseq          # For the detection of neo-antigens, requires mutations (not well tested...)
@@ -709,17 +654,20 @@ or there were transient system glitches that cause something to be stuck. If the
 ---
 
 # Example recipes
-Assuming that you have set up the above correctly, 
-here are some suggested recipes that are valid sequences.
+Assuming that you have set up the project correctly, here are some suggested recipes that are valid sequences and will execute the basic analysis.
 
-#### Whole-exome sequencing on Illumina
+#### Whole-exome/genome sequencing on Illumina for somatic analysis
 ```
-make bwamem genotype bam_metrics facets mutect(2) strelka(2) mutation_summary (deconstruct_sigs lst msisensor pyclone) [absolute_seq pvacseq]
+make bwamem genotype2 bam_metrics facets mutect2 strelka2 mutation_summary lst msisensor
+make sig_profiler_assignment CALLER_PREFIX=mutect2
 ```
-Those in parentheses `()` will work, those in brackets `[]` may fall over.
+#### Whole-exome/genome sequencing on Illumina for germline analysis
+```
+make bwamem genotype2 bam_metrics gatk
+```
 #### RNA-sequencing on Illumina
 ```
-make star bam_metrics rsem (cnvkit)
+make star genotype2 bam_metrics rsem
 ```
 #### ChIP-seq on Illumina (75bp reads or longer)
 ```
@@ -731,14 +679,81 @@ make bwaaln mosaics
 ```
 #### Targeted panel sequencing on Ion Torrent (from bam files from the Torrent server)
 ```
-make fix_rg genotype bam_metrics tvc_somatic varscan_cnv hotspot_screen mutation_summary
+make fix_rg genotype2 bam_metrics tvc_somatic varscan_cnv hotspot_screen mutation_summary
 ```
-#### Whole-genome sequencing on Illumina for germline analysis
-```
-make bwamem bam_metrics gatk
-```
+## Example use case 1: Whole-genome somatic analysis
 
-## Example use case 1: What to do when you get a set of Ion Torrent genomic data ##
+1. Go to the project directory
+    ```
+    PROJ_DIR=PROJ
+    mkdir $PROJ_DIR
+    cd $PROJ_DIR
+    ```
+
+1. Clone the code base
+    ```
+    git clone https://github.com/charlottekyng/usb-modules-v2.git
+    ```
+
+1. Copy the Makefile_template to $PROJ (don't move or the file would disappear from the repo)
+    ```
+    cp usb-modules-v2/Makefile_templates/Makefile_template_all_basic_options Makefile
+    ```
+    Edit the file, remove the lines related to RNA-seq:
+   ```
+   REF=hg38
+   HPC=humanitas
+   ```
+1. Rename the bam files to <sample_name>.bam and put them in $PROJ_DIR/unprocessed_bam
+    ```
+    mkdir $PROJ_DIR/unprocessed_bam
+    cd $PROJ_DIR/unprocessed_bam
+    ```
+
+1. Make samples.txt
+    ```
+    ls *bam | perl -p -e "s/\.bam//g;" > ../samples.txt
+    cd ..
+    ```
+
+1. Make sample_sets.txt. This file should be one patient per row. 
+Each row should consist of the tumor samples, tab-delimited,  followed by the matched normal sample as the last name on the row
+
+1. Now fix read groups to ensure downstream processing do not fall over
+    ```
+    make fix_rg
+    ```
+
+1. Generate some sequencing statistics
+    ```
+    make bam_metrics
+    ```
+
+1. Genotype to make sure there are no mismatched samples
+    ```
+    make genotype2
+    ```
+
+1. Run CNA calling (also for checking purity and ploidy, and possible T/N swaps)
+    ```
+    make facets
+    ```
+1. Call somatic mutations
+    ```
+    make mutect2 strelka2
+    ```
+1. Make an Excel table of the mutations
+    ```
+    make mutation_summary
+    ```
+1. Get mutational signatures
+    ```
+    make sig_profiler_assignment CALLER_PREFIX=mutect2
+    make msisensor
+    ```
+Now would be the time to check the data: following the [QC & troubleshooting guide](https://docs.google.com/document/d/1mYBtUjVO9K3hUlHus0qoh-KJHH2WmYDnTzix8AELAQA).
+    
+## Example use case 2: What to do when you get a set of Ion Torrent genomic data ##
 
 1. Go to the project directory
     ```
