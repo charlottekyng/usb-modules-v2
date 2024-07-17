@@ -245,6 +245,7 @@ if(opt$outputFormat=="EXCEL") {
 	cat("\ndone\n")
 } else if (opt$outputFormat=="TXT") {
 	lapply(names(output_list), function(x) write.table(output_list[[x]], paste0(tools::file_path_sans_ext(opt$outFile), ".", x, ".txt"), sep="\t", row.names=F, quote=F, na=""))
+	write.table(output, opt$outFile, sep="\t", row.names=F, quote=F, na="")
 	cat("\ndone\n")
 } else { 
 	stop("\nOutput format not recognized\n")
