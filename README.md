@@ -658,7 +658,7 @@ Assuming that you have set up the project correctly, here are some suggested rec
 
 #### Whole-exome/genome sequencing on Illumina for somatic analysis
 ```
-make bwamem genotype2 bam_metrics facets mutect2 strelka2 mutation_summary lst msisensor
+make bwamem genotype bam_metrics facets mutect2 strelka2 mutation_summary lst msisensor
 make sig_profiler_assignment CALLER_PREFIX=mutect2
 ```
 #### Whole-exome/genome sequencing on Illumina for germline analysis
@@ -685,12 +685,12 @@ make fix_rg genotype2 bam_metrics tvc_somatic varscan_cnv hotspot_screen mutatio
 
 1. Go to the project directory
     ```
-    PROJ_DIR=PROJ
+    PROJ_DIR=PROJ # set this to your data project directory
     mkdir $PROJ_DIR
     cd $PROJ_DIR
     ```
 
-1. Clone the code base
+1. Clone the code base to the project directory
     ```
     git clone https://github.com/charlottekyng/usb-modules-v2.git
     ```
@@ -699,10 +699,12 @@ make fix_rg genotype2 bam_metrics tvc_somatic varscan_cnv hotspot_screen mutatio
     ```
     cp usb-modules-v2/Makefile_templates/Makefile_template_all_basic_options Makefile
     ```
-    Edit the file, remove the lines related to RNA-seq:
+    Edit the file, remove the lines related to RNA-seq and set the following:
    ```
-   REF=hg38
-   HPC=humanitas
+   REF=hg38            # reference genome
+   HPC=humanitas       # HPC environment
+   PANEL=NONE          # target panel. For WGS, no target panel therefore NONE
+   CAPTURE_METHOD=NONE # capture method. For WGS, no target capture therefore NONE
    ```
 1. Rename the bam files to <sample_name>.bam and put them in $PROJ_DIR/unprocessed_bam
     ```
@@ -717,9 +719,9 @@ make fix_rg genotype2 bam_metrics tvc_somatic varscan_cnv hotspot_screen mutatio
     ```
 
 1. Make sample_sets.txt. This file should be one patient per row. 
-Each row should consist of the tumor samples, tab-delimited,  followed by the matched normal sample as the last name on the row
+Each row should consist of the tumor samples, tab-delimited, followed by the matched normal sample as the last name on the row
 
-1. Now fix read groups to ensure downstream processing do not fall over
+1. Now fix read groups to ensure downstream processing does not fall over
     ```
     make fix_rg
     ```
@@ -731,7 +733,7 @@ Each row should consist of the tumor samples, tab-delimited,  followed by the ma
 
 1. Genotype to make sure there are no mismatched samples
     ```
-    make genotype2
+    make genotype
     ```
 
 1. Run CNA calling (also for checking purity and ploidy, and possible T/N swaps)
