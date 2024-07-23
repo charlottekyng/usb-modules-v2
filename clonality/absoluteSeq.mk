@@ -4,14 +4,17 @@ include usb-modules-v2/variant_callers/somatic/somaticVariantCaller.inc
 LOGDIR = log/absoluteSeq.$(NOW)
 
 ifndef ABSOLUTE_CALLER_PREFIX
-ifneq ($(words $(CALLER_PREFIX)),1)
-  $(info CALLER_PREFIX contains more than one variant caller)
-  $(info Choose only one by executing: make absolute CALLER_PREFIX=<variant caller>. Setting ABSOLUTE_CALLER_PREFIX to any number of variant caller prefixes overrides this (eg. useful when using SNV-only + indel-only callers))
+  $(info ABSOLUTE_CALLER_PREFIX is not set)
   $(info  )
   exit:
 	val=1 && exit $${val}
 endif
+
+ifneq ($(words $(ABSOLUTE_CALLER_PREFIX)),1)
+  $(info warning: ABSOLUTE_CALLER_PREFIX contains more than one variant caller)
+  $(info  )
 endif
+
 
 .DELETE_ON_ERROR:
 .SECONDARY:
@@ -23,7 +26,7 @@ whoami = $(shell whoami)
 absolute : $(if $(findstring true,$(ABSOLUTE_STEP_3)),absolute/step3/reviewed/all$(PROJECT_PREFIX).$(whoami).ABSOLUTE.table.txt,absolute/step2/all$(PROJECT_PREFIX).PP-calls_tab.review.$(whoami).txt)
 
 define absolute_make_mutations
-absolute/mutations/$1_$2.mutations.txt : $$(foreach prefix,$$(CALLER_PREFIX),tables/$1_$2.$$(call DOWMSTREAM_VCF_TABLE_SUFFIX,$$(prefix)).txt)
+absolute/mutations/$1_$2.mutations.txt : $$(foreach prefix,$$(ABSOLUTE_CALLER_PREFIX),tables/$1_$2.$$(call DOWMSTREAM_VCF_TABLE_SUFFIX,$$(prefix)).txt)
 	$$(call RUN,1,$$(RESOURCE_REQ_LOW_MEM),$$(RESOURCE_REQ_VSHORT),$$(SINGULARITY_MODULE) ,"\
 	$$(SINGULARITY_EXEC) $$(ABSOLUTE_IMG) Rscript $(MODULE_SCRIPTS_DIR)/rbind.R --tumorNormal $$^ > $$@.tmp1 && \
 	$$(SINGULARITY_EXEC) $$(ABSOLUTE_IMG) Rscript usb-modules-v2/summary/mutation_summary_excel.v2.R --outFile $$@.tmp2 --outputFormat TXT $$@.tmp1 && \
