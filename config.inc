@@ -595,6 +595,8 @@ STAR_FUSION_MIN_ALT_PCT_JUNC_NORMAL ?= 5
 ####### CLONALITY ################
 ##################################
 
+ABSOLUTE_CALLER_PREFIX ?=
+
 ABSOLUTE_STEP_3 ?= false
 ABSOLUTE_MAKE_MUTS_OPT ?=
 ABSOLUTE_MAKE_SEGS_OPT ?=

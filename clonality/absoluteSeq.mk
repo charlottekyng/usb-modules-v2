@@ -3,12 +3,14 @@ include usb-modules-v2/variant_callers/somatic/somaticVariantCaller.inc
 
 LOGDIR = log/absoluteSeq.$(NOW)
 
+ifndef ABSOLUTE_CALLER_PREFIX
 ifneq ($(words $(CALLER_PREFIX)),1)
   $(info CALLER_PREFIX contains more than one variant caller)
-  $(info Choose only one by executing: make absolute_seq CALLER_PREFIX=<variant caller>)
+  $(info Choose only one by executing: make absolute CALLER_PREFIX=<variant caller>. Setting ABSOLUTE_CALLER_PREFIX to any number of variant caller prefixes overrides this (eg. useful when using SNV-only + indel-only callers))
   $(info  )
   exit:
 	val=1 && exit $${val}
+endif
 endif
 
 .DELETE_ON_ERROR:
