@@ -559,6 +559,36 @@ Heatmap 2: matrix of similarity scores between sample pairs obtained by the `vip
 
 You can perform additional analyses and comparisons of samples using the VIPER package. For convenience, you can continue working on the R session file `viper/viper.session.RData` and follow the VIPER tutorial on [Bioconductor](https://www.bioconductor.org/packages/release/bioc/html/viper.html). 
 
+### ABSOLUTE 
+ABSOLUTE provides various models of tumor cell purity and ploidy for subsequent manual solution selection.
+
+Only Absolute "total" is currently available (Absolute "allelic" might be implemented in the future).
+
+Read more: [ABSOLUTE](https://doi.org/10.1038%2Fnbt.2203)
+
+Prerequisites for the Absolute module are variant caller tables and facets results.
+
+**Note about variant callers:** You will have to chose a variant caller prefix by setting `ABSOLUTE_CALLER_PREFIX` in your Makefile. In most cases you will want to use a single caller, otherwise the input for Absolute will likely have duplicate entries (the repercussions of this was not tested). But you might want to set two callers if you use an SNV-only and an indel-only caller.
+
+Absolute has 3 steps:
+1. Running and summarising Absolute
+2. Selection of Absolute solutions
+3. Review Absolute
+
+```
+make absolute
+```
+
+Results will be in the `absolute` folder. You will need to manually edit the text file `absolute/step2/all.PP-calls_tab.review.<your_username>.txt` by entering the solution number in the first column called "override". If the first solution is the best fit add `1` in the corresponding row. If a different solution has a better fit, add the number of that solution. The top solutions for each sample are summarised in `absolute/step2/all.PP-modes.plots.pdf`, but you might want to check additional solutions in the PDF files in the `step1` subfolder. Read [here](https://www.genepattern.org/analyzing-absolute-data#gsc.tab=0) about these plots and tips on selecting solutions, as well as [this presentation](https://software.broadinstitute.org/cancer/cga/sites/default/files/data/tools/absolute/ABSOLUTE%20training.pptx).
+
+Once you entered the final solutions for all samples you can proceed to the final step by setting `ABSOLUTE_STEP_3=true` (either in your Makefile, or directly in the command line) and execute the module again
+
+```
+make absolute ABSOLUTE_STEP_3=true
+```
+
+Final results will appear in the `step3` subfolder.
+
 ### ChIP-seq peak detection
 MOSAICS is implemented but not very well tested. In particular, it almost always falls over with paired-end data.
 
@@ -576,12 +606,8 @@ You may run into errors if you run them outside of the context of in-house, stan
 make lst              # For the detection of large-scale transitions, requires facets output
 make msisensor        # For the detection of microsatellite instability, requires bam files
 make pyclone          # For clonality analysis, requires mutations and facets output
-make absolute_seq     # For clonality analysis, requires mutations and facets output (see note below)
 make pvacseq          # For the detection of neo-antigens, requires mutations (not well tested...)
 ```
-
-_Note regarding absolute_seq_, it would attempt to run all 3 steps, choosing the default solutions. But, it does not always run to the end, as RunAbsolute error handing is not great.
-
 
 ### Note regarding sanity checks
 
