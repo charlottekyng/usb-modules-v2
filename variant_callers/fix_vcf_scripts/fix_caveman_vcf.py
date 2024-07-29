@@ -33,7 +33,8 @@ with gzip.open(sys.argv[1], 'rt') as fileInput:
 				print("##FORMAT=<ID=FA,Number=2,Type=Float,Description=\"Allele fractions of alternate alleles\">")
 			elif strLine.startswith("#CHROM"):
 				print("#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO\tFORMAT\tTUMOR\tNORMAL")
-			else:
+			# Omit DS from the header ("DBSnp ID of known SNP") because in conflict with sufam (HaplotypeCaller) where DS means "downsampling". DS will not appear in the variants because we are not using DBSnp during the call
+			elif not strLine.startswith("##INFO=<ID=DS"):
 				print(strLine)
 		else:
 			# Split the entire tab-delimited line into an array
