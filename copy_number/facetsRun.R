@@ -198,8 +198,11 @@ if (!is.null(fit)) {
 	dev.off()
 	
 	# save cncf table
+	old_scipen=getOption("scipen")
+	options(scipen=10)
 	write.table(fit$cncf, str_c(opt$outPrefix, ".cncf.txt"), row.names = F, quote = F, sep = '\t')
-	
+	options(scipen=old_scipen)
+
 	# save results and metrics
 	ff = str_c(opt$outPrefix, ".out")
 	cat("# Version =", version, "\n", file = ff, append = T)
@@ -272,8 +275,11 @@ if (length(rownames(fit$cncf)) > opt$max_segs) {
 		dev.off()
 		
 		# save cncf table
+		old_scipen=getOption("scipen")
+	        options(scipen=10)
 		write.table(fit$cncf, str_c(dirname(opt$outPrefix), "/rerun/", basename(opt$outPrefix), ".rerun_cval", cval2, ".cncf.txt"), row.names = F, quote = F, sep = '\t')
-		
+		options(scipen=old_scipen)
+
 		# save results and metrics
 		ff = str_c(dirname(opt$outPrefix), "/rerun/", basename(opt$outPrefix), ".rerun_cval", cval2, ".out")
 		cat("# Version =", version, "\n", file = ff, append = T)
