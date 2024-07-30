@@ -1,6 +1,7 @@
 include usb-modules-v2/Makefile.inc
 include usb-modules-v2/variant_callers/variantCaller.inc
 
+
 LOGDIR ?= log/facets.$(NOW)
 
 .SECONDARY:
