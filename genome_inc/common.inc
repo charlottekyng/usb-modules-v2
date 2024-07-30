@@ -9,7 +9,11 @@ ifeq ($(HPC),scicore)
   ANN_DIR = $(REF_DIR)/annotation_data/$(REF)
   BED_DIR = $(REF_DIR)/target_beds/$(REF)
 
-  FACETS_TARGETS_INTERVALS ?= $(DBSNP_TARGETS_INTERVALS)
+  ifeq ($(CAPTURE_METHOD),NONE)
+    FACETS_TARGETS_INTERVALS ?= $(DBSNP_COMMON)
+  else
+    FACETS_TARGETS_INTERVALS ?= $(DBSNP_TARGETS_INTERVALS)
+  endif
 
   STAR_GENOME_DIR ?= $(REF_DIR)/genome_index/star_$(REF)
   STAR_CTAT_DIR ?= $(ANN_DIR)/STAR-FusionFilter
@@ -38,7 +42,11 @@ ifeq ($(HPC),humanitas)
   ANN_DIR = $(GENOME_DIR)/annotation
   BED_DIR = $(REF_DIR)/target_beds/$(REF)
 
-  FACETS_TARGETS_INTERVALS ?= $(DBSNP_TARGETS_INTERVALS)
+  ifeq ($(CAPTURE_METHOD),NONE)
+    FACETS_TARGETS_INTERVALS ?= $(DBSNP_COMMON)
+  else
+    FACETS_TARGETS_INTERVALS ?= $(DBSNP_TARGETS_INTERVALS)
+  endif
 
   STAR_GENOME_DIR ?= $(GENOME_DIR)/index/star_$(REF)
   STAR_CTAT_DIR ?=
