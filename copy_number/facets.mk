@@ -49,7 +49,7 @@ endif
 
 define facets-cval1-tumor-normal
 facets/cncfTN/$1_$2_$$(FACETS_SUFFIX).done : facets/snp_pileup/$1_$2_$$(SNPPILEUP_SUFFIX).bc.gz
-	$$(call RUN,1,$$(RESOURCE_REQ_MEDIUM_MEM),$$(RESOURCE_REQ_SHORT),$$(R4_MODULE),"\
+	$$(call RUN,1,$$(if $$(findstring NONE,$$(CAPTURE_METHOD)),$$(RESOURCE_REQ_HIGH_MEM),$$(RESOURCE_REQ_MEDIUM_MEM)),$$(RESOURCE_REQ_SHORT),$$(R4_MODULE),"\
 	$$(FACETS) --pre_cval $$(FACETS_PRE_CVAL) \
 	--minNDepth $$(FACETS_SNP_PILEUP_MIN_DEPTH) \
 	--maxNDepth $$(FACETS_SNP_PILEUP_MAX_DEPTH) \
