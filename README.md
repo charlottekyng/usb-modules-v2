@@ -7,26 +7,23 @@
 - [Executing the modules](#executing-the-modules)
     + [Alignment](#alignment)
     + [QC](#qc)
-    + [Panel of Normals (PoN)](#panel-of-normals--pon-)
+    + [Panel of Normals (PoN)](#panel-of-normals-pon)
     + [Germline variant calling](#germline-variant-calling)
     + [Somatic variant calling](#somatic-variant-calling)
-      - [If you have experiments other than matched tumor-normal pairs/sets from frozen samples...](#if-you-have-experiments-other-than-matched-tumor-normal-pairs-sets-from-frozen-samples)
     + [Somatic CNA detection](#somatic-cna-detection)
       - [Identify tumor/normal swaps from facets results](#identify-tumornormal-swaps-from-facets-results)
     + [Somatic SV callers](#somatic-sv-callers)
-    + [TcellExTRECT](#tcellextrect)
-    + [deTiN](#detin)
+    + [TcellExTRECT (calculate T cell fractions from WES)](#tcellextrect-calculate-t-cell-fractions-from-wes)
+    + [deTiN (estimate %tumor in normal)](#detin-estimate-tumor-in-normal)
     + [Mutational signatures](#mutational-signatures)
       - [deconstructSigs](#deconstructsigs)
       - [MutationalPatterns](#mutationalpatterns)
     + [RNA-seq transcript quantification](#rna-seq-transcript-quantification)
       - [VIPER](#viper)
     + [ChIP-seq peak detection](#chip-seq-peak-detection)
-    + [Others/ downstream tools](#others--downstream-tools)
+    + [Other downstream tools](#other-downstream-tools)
     + [Note regarding sanity checks](#note-regarding-sanity-checks)
 - [Troubleshooting](#troubleshooting)
-    + [If it falls over immediately... (jobs not submitted)](#if-it-falls-over-immediately--jobs-not-submitted-)
-    + [If submitted jobs fail...](#if-submitted-jobs-fail)
 - [Example recipes](#example-recipes)
 - [Using nextflow on scicore](#using-nextflow-on-scicore)
 
@@ -465,7 +462,7 @@ Results:
 tcell_extrect/
 ├── <sample>.plotTcellExTRECT.pdf ... TCRA loci coverage plots.
 ├── <sample>.resTcellExTRECT.txt .... final result summary (tab delimited, 1 header, 1 row).
-└── <sample>.txt.gz ............ Row coverage of the TCRA loci.
+└── <sample>_TCRA.txt.gz ............ Row coverage of the TCRA loci.
 ```
 
 ### deTiN (estimate %tumor in normal)
@@ -597,7 +594,7 @@ MOSAICS is implemented but not very well tested. In particular, it almost always
 make mosaics
 ```
 
-### Others/ downstream tools
+### Other downstream tools
 There are a lot more... 
 
 For exome analysis, there are a few things that are useful. These should work if you use them in the context of the suggested recipes below. Some of them may only work on the b37 genome.
