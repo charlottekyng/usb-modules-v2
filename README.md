@@ -460,9 +460,10 @@ The analysis will be performed only on the TCRA exons present in the correspondi
 Results:
 ```
 tcell_extrect/
+├── all.resTcellExTRECT.txt ......... final result summary of all samples (tab delimited).
 ├── <sample>.plotTcellExTRECT.pdf ... TCRA loci coverage plots.
-├── <sample>.resTcellExTRECT.txt .... final result summary (tab delimited, 1 header, 1 row).
-└── <sample>_TCRA.txt.gz ............ Row coverage of the TCRA loci.
+├── <sample>.resTcellExTRECT.txt .... result summary (tab delimited, 1 header, 1 row).
+└── <sample>_TCRA.txt ............... raw coverage of the TCRA loci.
 ```
 
 ### deTiN (estimate %tumor in normal)

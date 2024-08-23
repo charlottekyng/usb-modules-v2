@@ -6,7 +6,7 @@ LOGDIR ?= log/tcell_extrect.$(NOW)
 .DELETE_ON_ERROR: 
 .PHONY : tcell_extrect
 
-tcell_extrect : $(foreach pair,$(SAMPLE_PAIRS),tcell_extrect/$(tumor.$(pair)).resTcellExTRECT.txt)
+tcell_extrect : tcell_extrect/all.resTcellExTRECT.txt
 
 define extrect
 tcell_extrect/$1.resTcellExTRECT.txt : bam/$1.bam facets/cncf/$1_$2.out facets/cncf/$1_$2.cncf.txt
@@ -20,3 +20,7 @@ tcell_extrect/$1.resTcellExTRECT.txt : bam/$1.bam facets/cncf/$1_$2.out facets/c
 	$$(filter %.bam,$$^)")
 endef
 $(foreach pair,$(SAMPLE_PAIRS),$(eval $(call extrect,$(tumor.$(pair)),$(normal.$(pair)))))
+
+tcell_extrect/all.resTcellExTRECT.txt : $(foreach pair,$(SAMPLE_PAIRS),tcell_extrect/$(tumor.$(pair)).resTcellExTRECT.txt) 
+	$(INIT) \
+	cat $^ | sed '1p;/sample/d' > $@
