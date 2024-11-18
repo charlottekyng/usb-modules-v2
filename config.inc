@@ -332,7 +332,7 @@ endif
 ifeq ($(findstring tvc,$(MUT_CALLER)),tvc)
 USE_NFT ?= false
 ANN_NFT ?= true
-PON_VCF ?= tvc/pon.tvc.vcf
+PON_VCF ?= tvc/pon.tvc.vcf.gz
 endif
 
 ifeq ($(findstring pipeit,$(MUT_CALLER)),pipeit)
@@ -343,7 +343,7 @@ endif
 ifeq ($(findstring ILLUMINA,$(SEQ_PLATFORM)),ILLUMINA)
 USE_NFT ?= true
 ANN_NFT ?= false
-PON_VCF ?= mutect2/pon.mutect2.vcf
+PON_VCF ?= mutect2/pon.mutect2.vcf.gz
 endif
 
 FILTER_OXOG ?= false
@@ -511,10 +511,9 @@ CBS_MPILEUP_OPTS ?= -q 1
 ##################################
 SIG_PROFILER_COSMIC_VERSION ?= 3.4
 
-ifeq ($(CAPTURE_METHOD),NONE)
-SIG_PROFILER_COSMIC_EXOME ?= False
-else
-SIG_PROFILER_COSMIC_EXOME ?= True
+SIG_PROFILER_COSMIC_EXOME ?= 
+ifeq ($(CAPTURE_METHOD),BAITS)
+SIG_PROFILER_COSMIC_EXOME = True
 endif
 
 ifeq ($(REF),hg38)

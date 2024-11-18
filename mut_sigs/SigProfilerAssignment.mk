@@ -17,19 +17,18 @@ endif
 
 sig_profiler_assignment : SigProfilerAssignment/JOB_METADATA_SPA.txt
 
-SigProfilerAssignment/input/$(foreach pair,$(SAMPLE_PAIRS),$(pair).$(CALLER_PREFIX).*.hotspot.pass.vcf) : $(foreach pair,$(SAMPLE_PAIRS),vcf/$(pair).$(CALLER_PREFIX).*.hotspot.pass.vcf)
-	$(call RUN,1,$(RESOURCE_REQ_LOW_MEM),$(RESOURCE_REQ_VSHORT),,"\
-	$(RM) SigProfilerAssignment/input/* &&\
-	ln $^ SigProfilerAssignment/input")
+#SigProfilerAssignment/input/$(foreach pair,$(SAMPLE_PAIRS),$(pair).$(CALLER_PREFIX).*.hotspot.pass.vcf) : $(foreach pair,$(SAMPLE_PAIRS),vcf/$(pair).$(CALLER_PREFIX).*.hotspot.pass.vcf)
+#	$(call RUN,1,$(RESOURCE_REQ_LOW_MEM),$(RESOURCE_REQ_VSHORT),,"\
+#	$(RM) SigProfilerAssignment/input/* &&\
+#	ln $^ SigProfilerAssignment/input")
 
 SigProfilerAssignment/JOB_METADATA_SPA.txt : $(foreach pair,$(SAMPLE_PAIRS),vcf/$(pair).$(CALLER_PREFIX).*.hotspot.pass.vcf)
 	$(call RUN,1,$(RESOURCE_REQ_MEDIUM_MEM),$(RESOURCE_REQ_MEDIUM),$(SIG_PROFILER_MODULE),"\
-	$(RM) -r SigProfilerAssignment/* && mkdir SigProfilerAssignment/input &&\
-	ln $^ SigProfilerAssignment/input &&\
-	$(SIG_PROFILER_ASSIGNMENT) --samples SigProfilerAssignment --output SigProfilerAssignment \
+	$(RM) -r SigProfilerAssignment/* && mkdir SigProfilerAssignment/input && \
+	ln $^ SigProfilerAssignment/input && \
+	$(SIG_PROFILER_ASSIGNMENT) --samples SigProfilerAssignment/input --output SigProfilerAssignment \
 	--cosmic_version $(SIG_PROFILER_COSMIC_VERSION) \
-	--exome $(SIG_PROFILER_COSMIC_EXOME) \
+	$(if $(findstring True,$(SIG_PROFILER_COSMIC_EXOME)),--exome) \
 	--genome_build $(SIG_PROFILER_COSMIC_GENOME) \
-	$(ifdef($(SIG_PROFILER_COSMIC_SIGNATURE_DB),--signature_database $(SIG_PROFILER_COSMIC_SIGNATURE_DB))) \
-	$(ifdef($(SIG_PROFILER_COSMIC_EXCLUDE_SIG_SUBGROUPS),--signature_database $(SIG_PROFILER_COSMIC_EXCLUDE_SIG_SUBGROUPS)))")
-
+	$(if $(SIG_PROFILER_COSMIC_SIGNATURE_DB),--signature_database $(SIG_PROFILER_COSMIC_SIGNATURE_DB)) \
+	$(if $(SIG_PROFILER_COSMIC_EXCLUDE_SIG_SUBGROUPS),--signature_database $(SIG_PROFILER_COSMIC_EXCLUDE_SIG_SUBGROUPS))")
