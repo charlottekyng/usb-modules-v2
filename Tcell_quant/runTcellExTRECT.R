@@ -60,10 +60,8 @@ if (!is.null(opt$target_bed)) {
 	colnames(exons) <- c("chrom", "start", "end")
 } else {
 	exons <- get(paste0("TCRA_exons_", opt$genome_build))
-	# internal hg19 TCRA_exons does not have colnames set, will cause error below:
-	if (opt$genome_build == "hg19") {
-		colnames(exons) <- c("chrom", "start", "end")
-	}
+	# internal "TCRA_exons" table does not have colnames, will cause error below:
+	colnames(exons) <- c("chrom", "start", "end")
 }
 
 if (opt$genome_build == "hg38") {

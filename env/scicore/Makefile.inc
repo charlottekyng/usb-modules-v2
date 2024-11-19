@@ -381,5 +381,5 @@ MSISENSOR ?= $(BIN_DIR)/msisensor_Linux_x86_64
 DETIN_DIR = $(GROUP_DIR)/usr_nobackup/local/deTiN_2021-11-25/deTiN
 DETIN ?= python $(DETIN_DIR)/deTiN.py
 
-TCELLEXTRECT ?= $(R4SCRIPT) usb-modules-v2/Tcell_quant/runTcellExTRECT.R
-
+TCELLEXTRECT_IMG ?= $(IMG_DIR)/TcellExTRECT/TcellExTRECT_v1.0.1.sif
+TCELLEXTRECT ?= $(SINGULARITY_EXEC) $(TCELLEXTRECT_IMG) Rscript usb-modules-v2/Tcell_quant/runTcellExTRECT.R
