@@ -12,7 +12,7 @@ LD_LIBRARY_PATH = $(USR_DIR)/local/MCR_R2014a/v83/runtime/glnxa64:$(USR_DIR)/loc
 IMG_DIR ?= $(USR_DIR)/singularity
 CONDA_DIR ?= $(USR_DIR)/conda
 HOTSPOTS_DIR ?= $(USR_DIR)/local/cancer_hotspots
-
+NICE ?= 1000
 # export PATH := $(USR_DIR):$(PATH)
 # export LD_LIBRARY_PATH := $(LD_LIBRARY_PATH)
 
@@ -26,7 +26,7 @@ include usb-modules-v2/config.inc
 
 RUN_OPTS = $(if $(findstring false,$(USE_CLUSTER)),-l) -o $@ \
 $(if $(CLUSTER_ENGINE),-g $(CLUSTER_ENGINE)) $(if $(EXCLUDE_NODE),-x $(EXCLUDE_NODE)) \
---partition cpu \
+--partition cpu --nice=$(NICE) \
 -S /bin/bash --log_file $(LOG) $(if $(PROJECT_NAME),-p $(PROJECT_NAME)) -c 
 
 ## RUN is the main function!!
