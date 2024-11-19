@@ -9,7 +9,7 @@
 # v3:
 #  set seed
 #  use a default pre_cval
-#  use only one cval (remove cval2; cval1 -> cval)
+#  use only one cval (remove cval2; cval -> cval)
 #  increase cval by 50 if hyperfragmented (save as additional result files).
 #  add max_segs to define hyperfragmentation.
 # v3.1:
@@ -185,9 +185,14 @@ if (!is.null(fit)) {
 	id <- paste(opt$tumorName, opt$normalName, sep = '_')
 	out$IGV = formatSegmentOutput(out, id)
 	
-	# plot facets results
+	# plot facets results in both pdf and png
 	if(sum(out$out$num.mark)<=10000) { height=4; width=7} else { height=6; width=9}
 	pdf(file = str_c(opt$outPrefix, ".cncf.pdf"), height = height, width = width)
+	plotSample(out, fit)
+	dev.off()
+	#not tested yet
+        if(sum(out$out$num.mark)<=10000) { height=4*80; width=7*80} else { height=6*80; width=9*80}
+	png(file = str_c(opt$outPrefix, ".cncf.png"), height = height, width = width)
 	plotSample(out, fit)
 	dev.off()
 	
