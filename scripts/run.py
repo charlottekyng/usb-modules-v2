@@ -22,6 +22,7 @@ if __name__ == '__main__':
     parser.add_argument('-n', '--num_cores', default=1, type=int, help='number of cores')
     parser.add_argument('--sge_parallel_env', default='smp', help='SGE parallel env')
     parser.add_argument('-w', '--walltime', default='6:00:00', help='wall time')
+    parser.add_argument('--nice', default=None, help='priority')
     parser.add_argument('-c', '--check', default=False, action='store_true', help='check for non-zero file size')
     parser.add_argument('-d', '--docker', default=False, action='store_true', help='request docker support')
     parser.add_argument('-I', '--internet', default=False, action='store_true', help='request internet access')
@@ -179,6 +180,9 @@ if __name__ == '__main__':
             qsub_args += " --array {}".format(args.array)
         if args.partition is not None:
             qsub_args += " --partition {}".format(args.partition)
+        if args.nice is not None:
+            qsub_args += " --nice={}".format(args.nice)
+
                        
         my_job = job.SLURMJob(job_script=job_script, qsub_args=qsub_args, out_file=args.out_file,
                             remote_check_servers=None)  # checking filesize on remote servers not supported
