@@ -10,12 +10,12 @@ BIN_DIR ?= $(USR_DIR)/local/bin
 MODULE_SCRIPTS_DIR ?= usb-modules-v2/scripts
 LD_LIBRARY_PATH = $(USR_DIR)/local/MCR_R2014a/v83/runtime/glnxa64:$(USR_DIR)/local/MCR_R2014a/v83/bin/glnxa64:$(USR_DIR)/local/MCR_R2014a/v83/sys/os/glnxa64
 IMG_DIR ?= $(USR_DIR)/singularity
+
 CONDA_DIR ?= $(USR_DIR)/conda
 HOTSPOTS_DIR ?= $(USR_DIR)/local/cancer_hotspots
 NICE ?= 1000
 # export PATH := $(USR_DIR):$(PATH)
 # export LD_LIBRARY_PATH := $(LD_LIBRARY_PATH)
-
 
 include usb-modules-v2/config.inc
 
@@ -34,16 +34,22 @@ $(if $(CLUSTER_ENGINE),-g $(CLUSTER_ENGINE)) $(if $(EXCLUDE_NODE),-x $(EXCLUDE_N
 ## arg2 = memory per core
 ## arg3 = wall time
 
+# At Humanitas we only have 1 QOS (ng_piscuoglio) and wall time can be ignored, so is hardcoded to 1 week. Both these conditions could change in the future. 
 RUN = $(call PURGE_AND_LOAD,); echo "\
-$(call PURGE_AND_LOAD,$4); " $5 | python3 usb-modules-v2/scripts/run.py $(RUN_OPTS) -n $1 -m $2 -w $3
+$(call PURGE_AND_LOAD,$4); " $5 | python3 usb-modules-v2/scripts/run.py $(RUN_OPTS) -n $1 -m $2 -w $(QOS_1w) --qos ng_piscuoglio
+
+# Old definition we will have to use in case one of the aforementioned conditions should change
+#RUN = $(call PURGE_AND_LOAD,); echo "\
+#$(call PURGE_AND_LOAD,$4); " $5 | python3 usb-modules-v2/scripts/run.py $(RUN_OPTS) -n $1 -m $2 -w $3
 
 # Pipeline was configured around scicore's time-based QOS. At Humanitas we have only one QOS for now.
-RUN += $(if $(findstring SLURM,$(CLUSTER_ENGINE)),\
-$(if $(findstring $(QOS_2w),$3),--qos ng_piscuoglio,\
-$(if $(findstring $(QOS_1w),$3),--qos ng_piscuoglio,\
-$(if $(findstring $(QOS_1d),$3),--qos ng_piscuoglio,\
-$(if $(findstring $(QOS_6h),$3),--qos ng_piscuoglio,\
-$(if $(findstring $(QOS_30min),$3),--qos ng_piscuoglio,--qos ng_piscuoglio))))),)
+#RUN += $(if $(findstring SLURM,$(CLUSTER_ENGINE)),\
+#$(if $(findstring $(QOS_2w),$3),--qos ng_piscuoglio,\
+#$(if $(findstring $(QOS_1w),$3),--qos ng_piscuoglio,\
+#$(if $(findstring $(QOS_1d),$3),--qos ng_piscuoglio,\
+#$(if $(findstring $(QOS_6h),$3),--qos ng_piscuoglio,\
+#$(if $(findstring $(QOS_30min),$3),--qos ng_piscuoglio,--qos ng_piscuoglio))))),)
+
 
 ###############################################################
 ####### DEFINE PATHS/NAMES FOR SCRIPTS, BINARIES, MODULES #####
@@ -371,6 +377,7 @@ MOSAICS_CONSTRUCTBINS ?= $(RSCRIPT) usb-modules-v2/chipseq/mosaics_constructBins
 MACS2 ?= macs
 
 MSISENSOR ?= $(BIN_DIR)/msisensor_Linux_x86_64
+MSISENSORPRO ?= $(BIN_DIR)/msisensor-pro-v1.3.0
 
 DETIN_DIR = $(GROUP_DIR)/usr_nobackup/local/deTiN_2021-11-25/deTiN
 DETIN ?= python $(DETIN_DIR)/deTiN.py

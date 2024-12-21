@@ -84,6 +84,8 @@ MUTSIGCV_SEQ_REF_DIR ?= $(MUTSIGCV_REF_DIR)/chr_files_hg38/
 #YOUN_AND_SIMON_SEQ_DATA ?= $(ANN_DIR)/youn_and_simon_sequence_data.RData
 
 MSISENSOR_REF ?= $(REF_DIR)/msi_reference/hg38.txt
+MSISENSORPRO_REF ?= $(REF_DIR)/msipro_reference/hg38.txt
+
 CNVKIT_GENE_RESOURCE ?= $(ANN_DIR)/cnvkit_gene_resource.txt
 
 DETIN_PICKLE ?= $(ANN_DIR)/ExAC.r0.3.nontcga.sites.edited4detin.pickle

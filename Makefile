@@ -233,6 +233,10 @@ lst :
 TARGETS += msisensor
 msisensor :
 	$(call RUN_MAKE,usb-modules-v2/mut_sigs/msiSensor.mk)
+ 
+TARGETS += msisensorpro
+msisensorpro :
+	$(call RUN_MAKE,usb-modules-v2/mut_sigs/msiSensorPro.mk)
 
 TARGETS += mosaics
 mosaics :
