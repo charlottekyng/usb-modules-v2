@@ -30,9 +30,11 @@ strelka2/$1_$2/runWorkflow.py : $(if $(findstring true,$(USE_BAM_CLIPOVERLAP)),b
 	$$(CONFIGURE_STRELKA2_SOMATIC) $$(if $$(findstring NONE,$$(PANEL)),,--exome) --tumorBam $$< --normalBam $$(<<) \
 	--referenceFasta $$(REF_FASTA) --config $$(STRELKA2_SOMATIC_CONFIG) --runDir $$(@D)")
 
-# Because we use 8 cores, mem per cpu request becomes unreasonably high (and job won't run if RESOURCE_REQ_LOW_MEM is set to a very high value). Use a fixed mem value instead (strelka2 uses very little RAM).
+# Because we use 8 cores, mem per cpu request becomes unreasonably high
+# (and job won't run if RESOURCE_REQ_LOW_MEM is set to a very high value).
+# Use a fixed mem value instead (strelka2 uses very little RAM). For most WGS, even 2GB is enough
 strelka2/$1_$2/results/variants/somatic.indels.vcf.gz : strelka2/$1_$2/runWorkflow.py
-	$$(call RUN,$$(STRELKA2_NUM_CORES),2GB,$$(RESOURCE_REQ_SHORT),$$(SINGULARITY_MODULE),"\
+	$$(call RUN,$$(STRELKA2_NUM_CORES),4GB,$$(RESOURCE_REQ_SHORT),$$(SINGULARITY_MODULE),"\
 	$$(STRELKA2) $$(<D)/runWorkflow.py -j $$(STRELKA2_NUM_CORES) -m local")
 
 strelka2/$1_$2/results/variants/somatic.snvs.vcf.gz : strelka2/$1_$2/results/variants/somatic.indels.vcf.gz
