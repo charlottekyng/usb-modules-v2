@@ -15,7 +15,7 @@ svaba : svaba_vcfs
 svaba_vcfs : $(foreach pair,$(SAMPLE_PAIRS),svaba/$(tumor.$(pair)).svaba.somatic.sv.vcf)
 
 define svaba-tumor-normal
-svaba/$1.svaba.somatic.sv.vcf : bam/$1.bam bam/$2.bam
+svaba/$1.contigs.bam : bam/$1.bam bam/$2.bam
 	$$(call RUN,$$(SVABA_NUM_CORES),$$(RESOURCE_REQ_HIGH_MEM),$$(RESOURCE_REQ_MEDIUM),$$(SINGULARITY_MODULE),"\
 	$$(SVABA) svaba run \
 	-t $$< \
@@ -32,3 +32,7 @@ svaba/$1.svaba.somatic.sv.vcf : bam/$1.bam bam/$2.bam
 endef
 $(foreach pair,$(SAMPLE_PAIRS),$(eval $(call svaba-tumor-normal,$(tumor.$(pair)),$(normal.$(pair)))))
 
+%.svaba.somatic.sv.vcf : %.contigs.bam
+	
+
+include usb-modules-v2/vcf_tools/vcftools.mk
