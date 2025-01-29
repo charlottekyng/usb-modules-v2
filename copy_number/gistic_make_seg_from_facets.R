@@ -19,7 +19,6 @@ optList <- list(
                 make_option("--outFile", default = NULL, help = "out file name")
                 )
 
-
 parser <- OptionParser(usage = "%prog [options] [facets Rdata file]", option_list = optList)
 arguments <- parse_args(parser, positional_arguments = T)
 opt <- arguments$options;
@@ -38,7 +37,12 @@ if (length(arguments$args) < 1) {
   stop();
 }
 
+# the facets object loaded has arguments and opt, so we need to overwrite those in the facets object
+arguments2 <- arguments
+opt2 <- opt
 load(arguments$args[1])
+arguments <- arguments2
+opt <- opt2
 
 # Fetch columns from cncf
 GISTICseg <- fit$cncf[c("chrom", "start", "end", "num.mark")]
@@ -55,6 +59,7 @@ GISTICseg$Sample <- apply(GISTICseg, 1, function(x) {opt$sampleName} )
 # add Seg.CN (cnlr.median - dipLogR)
 GISTICseg$Seg.CN <- apply(fit$cncf["cnlr.median"], 1, function(x) {x - fit$dipLogR})
 
+head(GISTICseg)
 # Order columns
 GISTICseg <- GISTICseg[c("Sample", "chrom", "start", "end", "num.mark", "Seg.CN")]
 

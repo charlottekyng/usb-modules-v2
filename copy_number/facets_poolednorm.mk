@@ -12,14 +12,14 @@ $(foreach sample,$(SAMPLES),$(if $(findstring poolednorm,$(sample)),$(info poole
 SAMPLES_FILT = $(foreach sample,$(SAMPLES),$(if $(findstring poolednorm,$(sample)),,$(sample)))
 $(info SAMPLES_FILT ${SAMPLES_FILT})
 
-facets_poolednorm : $(foreach cval1,$(FACETS_CVAL1),$(foreach sample,$(SAMPLES_FILT),facets/cncf_poolednorm_$(cval1)/$(sample)_poolednorm.out) facets/cncf_poolednorm_$(cval1)/all$(PROJECT_PREFIX).summary.txt facets/cncf_poolednorm_$(cval1)/all$(PROJECT_PREFIX).geneCN.GL_ASCNA.txt)
+facets_poolednorm : $(foreach cval,$(FACETS_CVAL),$(foreach sample,$(SAMPLES_FILT),facets/cncf_poolednorm_$(cval)/$(sample)_poolednorm.out) facets/cncf_poolednorm_$(cval)/all$(PROJECT_PREFIX).summary.txt facets/cncf_poolednorm_$(cval)/all$(PROJECT_PREFIX).geneCN.GL_ASCNA.txt)
 
 ifeq ($(findstring ILLUMINA,$(SEQ_PLATFORM)),ILLUMINA)
 define snp-pileup-tumor-poolednorm
 facets/snp_pileup/$1_poolednorm.bc.gz : bam/$1.bam bam/poolednorm.bam $$(if $$(findstring true,$$(FACETS_GATK_VARIANTS)),facets/base_pos/$1.gatk.dbsnp.vcf,$$(FACETS_TARGETS_INTERVALS)) bam/$1.bam.bai bam/poolednorm.bam.bai
-	$$(call RUN,1,$$(RESOURCE_REQ_LOW_MEM),$$(RESOURCE_REQ_SHORT),,"\
+	$$(call RUN,1,$$(RESOURCE_REQ_HIGH_MEM),$$(RESOURCE_REQ_MEDIUM),,"\
 	$$(FACETS_SNP_PILEUP) \
-	-A -d $$(FACETS_SNP_PILEUP_MAX_DEPTH) -g -q $$(FACETS_SNP_PILEUP_MINMAPQ) \
+	-A -P $$(FACETS_SNP_PILEUP_PSEUDO_SNPS) -d $$(FACETS_SNP_PILEUP_MAX_DEPTH) -g -q $$(FACETS_SNP_PILEUP_MINMAPQ) \
 	-Q $$(FACETS_SNP_PILEUP_MINBASEQ) -r $$(FACETS_SNP_PILEUP_MIN_DEPTH)$$(,)0 \
 	$$(word 3,$$^) $$@ $$(word 2,$$^) $$(word 1,$$^)")
 endef
@@ -29,7 +29,7 @@ endif
 ifeq ($(findstring IONTORRENT,$(SEQ_PLATFORM)),IONTORRENT)
 define snp-pileup-tumor-poolednorm
 facets/snp_pileup/$1_poolednorm.bc.gz : tvc/dbsnp/$1/TSVC_variants.vcf tvc/dbsnp/poolednorm/TSVC_variants.vcf
-	$$(call RUN,1,$$(RESOURCE_REQ_HIGH_MEM),$$(RESOURCE_REQ_SHORT),$$(SNP_EFF_MODULE) $$(JAVA8_MODULE),"\
+	$$(call RUN,1,$$(RESOURCE_REQ_HIGH_MEM),$$(RESOURCE_REQ_MEDIUM),$$(SNP_EFF_MODULE) $$(JAVA8_MODULE),"\
 	$$(call GATK,CombineVariants,$$(RESOURCE_REQ_HIGH_MEM)) \
 	$$(foreach vcf,$$^,--variant $$(vcf) ) --genotypemergeoption UNSORTED -R $$(REF_FASTA) | \
 	$$(call SNP_SIFT,$$(RESOURCE_REQ_LOW_MEM_JAVA)) extractFields - CHROM POS REF ALT GEN[0].FRO GEN[0].FAO GEN[0].FXX GEN[0].FXX GEN[1].FRO GEN[1].FAO GEN[1].FXX GEN[1].FXX | \
@@ -41,20 +41,25 @@ endef
 $(foreach sample,$(SAMPLES_FILT),$(eval $(call snp-pileup-tumor-poolednorm,$(sample))))
 endif
 
-define facets-cval1-sample
+define facets-cval-sample
 facets/cncf_poolednorm_$1/$2_poolednorm.out : facets/snp_pileup/$2_poolednorm.bc.gz
-	$$(call RUN,1,$$(RESOURCE_REQ_LOW_MEM),$$(RESOURCE_REQ_VSHORT),$$(R_MODULE),"\
-	$$(FACETS) --minNDepth $$(FACETS_SNP_PILEUP_MIN_DEPTH) \
-	--maxNDepth $$(FACETS_SNP_PILEUP_MAX_DEPTH) --snp_nbhd $$(FACETS_WINDOW_SIZE) \
-	--minGC $$(FACETS_MINGC) --maxGC $$(FACETS_MAXGC) --unmatched TRUE \
-	--cval1 $1 --genome $$(REF) --min_nhet $$(FACETS_MIN_NHET) \
+	$$(call RUN,1,$$(RESOURCE_REQ_HIGH_MEM),$$(RESOURCE_REQ_MEDIUM),$$(R_MODULE),"\
+	$$(FACETS) --pre_cval $$(FACETS_PRE_CVAL) \
+	--minNDepth $$(FACETS_SNP_PILEUP_MIN_DEPTH) \
+	--maxNDepth $$(FACETS_SNP_PILEUP_MAX_DEPTH) \
+	--snp_nbhd $$(FACETS_WINDOW_SIZE) \
+	--minGC $$(FACETS_MINGC) --maxGC $$(FACETS_MAXGC) \
+	--unmatched TRUE \
+	--cval $1 --genome $$(REF) --min_nhet $$(FACETS_MIN_NHET) \
+	--max_segs $$(FACETS_MAX_SEGS) \
+	--tumorName $2 --normalName "poolednorm" \
 	--outPrefix $$* $$<")
 
 facets/cncf_poolednorm_$1/$2_poolednorm.Rdata : facets/cncf_poolednorm_$1/$2_poolednorm.out
 facets/cncf_poolednorm_$1/$2_poolednorm.cncf.txt : facets/cncf_poolednorm_$1/$2_poolednorm.out
 
 endef
-$(foreach cval1,$(FACETS_CVAL1),$(foreach sample,$(SAMPLES_FILT),$(eval $(call facets-cval1-sample,$(cval1),$(sample)))))
+$(foreach cval,$(FACETS_CVAL),$(foreach sample,$(SAMPLES_FILT),$(eval $(call facets-cval-sample,$(cval),$(sample)))))
 
 define facets-merge-poolednorm
 facets/cncf_poolednorm_$1/all$(PROJECT_PREFIX).summary.txt : $$(foreach sample,$$(SAMPLES_FILT),facets/cncf_poolednorm_$1/$$(sample)_poolednorm.out)
@@ -71,7 +76,7 @@ facets/cncf_poolednorm_$1/all$(PROJECT_PREFIX).geneCN.GL_ASCNA.txt : $$(foreach 
 	$$(call RUN,1,$$(RESOURCE_REQ_MEDIUM_MEM),$$(RESOURCE_REQ_SHORT),$$(R_MODULE),"\
 	$$(FACETS_GENE_CN) $$(FACETS_GENE_CN_OPTS) --genesFile $(TARGETS_FILE_GENES) --outFile facets/cncf_poolednorm_$1/all$(PROJECT_PREFIX).geneCN $$^")
 endef
-$(foreach cval1,$(FACETS_CVAL1),$(eval $(call facets-merge-poolednorm,$(cval1))))
+$(foreach cval,$(FACETS_CVAL),$(eval $(call facets-merge-poolednorm,$(cval))))
 
 #include usb-modules-v2/copy_number/facets.mk
 #include usb-modules-v2/variant_callers/gatk.mk

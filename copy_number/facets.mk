@@ -8,11 +8,12 @@ LOGDIR ?= log/facets.$(NOW)
 .DELETE_ON_ERROR:
 .PHONY : facets
 
-SNPPILEUP_SUFFIX = q$(FACETS_SNP_PILEUP_MINMAPQ)_Q$(FACETS_SNP_PILEUP_MINBASEQ)_d$(FACETS_SNP_PILEUP_MAX_DEPTH)_r$(FACETS_SNP_PILEUP_MIN_DEPTH)
+SNPPILEUP_SUFFIX = q$(FACETS_SNP_PILEUP_MINMAPQ)_Q$(FACETS_SNP_PILEUP_MINBASEQ)_d$(FACETS_SNP_PILEUP_MAX_DEPTH)_r$(FACETS_SNP_PILEUP_MIN_DEPTH)_P$(FACETS_SNP_PILEUP_PSEUDO_SNPS)
 FACETS_SUFFIX = $(SNPPILEUP_SUFFIX)_bin$(FACETS_WINDOW_SIZE)_mingc$(FACETS_MINGC)_maxgc$(FACETS_MAXGC)_nhet$(FACETS_MIN_NHET)_cval$(FACETS_CVAL)
 
 facets : facets/cncf/all$(PROJECT_PREFIX).summary.txt facets/cncf/all$(PROJECT_PREFIX).cncf.txt\
-facets/cncf/all$(PROJECT_PREFIX).cncf.pdf.tar.gz facets/cncf/all$(PROJECT_PREFIX).HetMarkFreq.txt \
+facets/cncf/all$(PROJECT_PREFIX).cncf.pdf.tar.gz facets/cncf/all$(PROJECT_PREFIX).cncf.png.tar.gz facets/cncf/all$(PROJECT_PREFIX).HetMarkFreq.txt \
+$(foreach pair,$(SAMPLE_PAIRS),facets/cncf/$(pair).Rdata) \
 $(if $(findstring true,$(FACETS_RUN_GENE_CN)),facets/cncf/all$(PROJECT_PREFIX).geneCN.GL_ASCNA.pdf facets/cncf/all$(PROJECT_PREFIX).geneCN.GL_LRR.pdf facets/cncf/all$(PROJECT_PREFIX).geneCN.cnlr.median.pdf facets/cncf/all$(PROJECT_PREFIX).geneCN.tcn.em.pdf facets/cncf/all$(PROJECT_PREFIX).geneCN.lcn.em.pdf,)
 
 
@@ -50,7 +51,7 @@ endif
 
 define facets-cval1-tumor-normal
 facets/cncfTN/$1_$2_$$(FACETS_SUFFIX).done : facets/snp_pileup/$1_$2_$$(SNPPILEUP_SUFFIX).bc.gz
-	$$(call RUN,1,$$(if $$(findstring NONE,$$(CAPTURE_METHOD)),$$(RESOURCE_REQ_HIGH_MEM),$$(RESOURCE_REQ_MEDIUM_MEM)),$$(RESOURCE_REQ_SHORT),$$(R4_MODULE),"\
+	$$(call RUN,1,$$(if $$(findstring NONE,$$(CAPTURE_METHOD)),$$(RESOURCE_REQ_VHIGH_MEM),$$(RESOURCE_REQ_MEDIUM_MEM)),$$(RESOURCE_REQ_SHORT),$$(R4_MODULE),"\
 	$$(FACETS) --pre_cval $$(FACETS_PRE_CVAL) \
 	--minNDepth $$(FACETS_SNP_PILEUP_MIN_DEPTH) \
 	--maxNDepth $$(FACETS_SNP_PILEUP_MAX_DEPTH) \
@@ -62,7 +63,7 @@ facets/cncfTN/$1_$2_$$(FACETS_SUFFIX).done : facets/snp_pileup/$1_$2_$$(SNPPILEU
 	--outPrefix facets/cncfTN/$1_$2_$$(FACETS_SUFFIX) $$<")
 
 
-facets/cncfTN/$1_$2_$$(FACETS_SUFFIX).Rdata facets/cncfTN/$1_$2_$$(FACETS_SUFFIX).cncf.txt facets/cncfTN/$1_$2_$$(FACETS_SUFFIX).cncf.pdf facets/cncfTN/$1_$2_$$(FACETS_SUFFIX).logR.pdf facets/cncfTN/$1_$2_$$(FACETS_SUFFIX).out: facets/cncfTN/$1_$2_$$(FACETS_SUFFIX).done
+facets/cncfTN/$1_$2_$$(FACETS_SUFFIX).Rdata facets/cncfTN/$1_$2_$$(FACETS_SUFFIX).cncf.txt facets/cncfTN/$1_$2_$$(FACETS_SUFFIX).cncf.pdf facets/cncfTN/$1_$2_$$(FACETS_SUFFIX).cncf.png facets/cncfTN/$1_$2_$$(FACETS_SUFFIX).logR.pdf facets/cncfTN/$1_$2_$$(FACETS_SUFFIX).out: facets/cncfTN/$1_$2_$$(FACETS_SUFFIX).done
 	
 
 endef
@@ -106,6 +107,16 @@ facets/cncf/$1_$2.cncf.pdf : facets/cncfTN/$1_$2_$$(FACETS_SUFFIX_FINAL).cncf.pd
 		mkdir -p facets/cncf/rerun && \
 		ln -f facets/cncfTN/rerun/$1_$2_$$(FACETS_SUFFIX).rerun*.cncf.pdf facets/cncf/rerun/$1_$2_$$$$(echo facets/cncfTN/rerun/$1_$2_$$(FACETS_SUFFIX).rerun*.cncf.pdf | sed 's/.*rerun_cval/rerun_cval/')  && \
 		ln -f -s rerun/$$$$(basename facets/cncf/rerun/$1_$2_rerun*.cncf.pdf) $$(@); \
+	else ln -f $$(<) $$(@); fi; \
+}
+
+facets/cncf/$1_$2.cncf.png : facets/cncfTN/$1_$2_$$(FACETS_SUFFIX_FINAL).cncf.png
+	$$(INIT) \
+	{ \
+	if test -f facets/cncfTN/rerun/$1_$2_$$(FACETS_SUFFIX).rerun*.cncf.png; then \
+		mkdir -p facets/cncf/rerun && \
+		ln -f facets/cncfTN/rerun/$1_$2_$$(FACETS_SUFFIX).rerun*.cncf.png facets/cncf/rerun/$1_$2_$$$$(echo facets/cncfTN/rerun/$1_$2_$$(FACETS_SUFFIX).rerun*.cncf.png | sed 's/.*rerun_cval/rerun_cval/')  && \
+		ln -f -s rerun/$$$$(basename facets/cncf/rerun/$1_$2_rerun*.cncf.png) $$(@); \
 	else ln -f $$(<) $$(@); fi; \
 }
 
@@ -162,6 +173,9 @@ facets/cncf/all$(PROJECT_PREFIX).cncf.pdf.tar.gz : $(foreach pair,$(SAMPLE_PAIRS
 	$(call RUN,1,$(RESOURCE_REQ_LOW_MEM),$(RESOURCE_REQ_VSHORT),,"\
 	tar -czf $@ $^")
 
+facets/cncf/all$(PROJECT_PREFIX).cncf.png.tar.gz : $(foreach pair,$(SAMPLE_PAIRS),facets/cncf/$(pair).cncf.png) 
+	$(call RUN,1,$(RESOURCE_REQ_LOW_MEM),$(RESOURCE_REQ_VSHORT),,"\
+	tar -czf $@ $^")
 
 define facets-TN-swap-check
 facets/cncf/$1_$2.HetMarkFreq.pdf : facets/cncf/$1_$2.HetMarkFreq.txt

@@ -272,6 +272,11 @@ if (length(rownames(fit$cncf)) > opt$max_segs) {
 		pdf(file = str_c(dirname(opt$outPrefix), "/rerun/", basename(opt$outPrefix), ".rerun_cval", cval2, ".cncf.pdf"), height = height, width = width)
 		plotSample(out, fit)
 		dev.off()
+
+		if(sum(out$out$num.mark)<=10000) { height=4*80; width=7*80} else { height=6*80; width=9*80}
+                png(file = str_c(dirname(opt$outPrefix), "/rerun/", basename(opt$outPrefix), ".rerun_cval", cval2, ".cncf.png"), height = height, width = width)
+		plotSample(out, fit)
+		dev.off()
 		
 		# plot only logR
 		if(sum(out$out$num.mark)<=10000) { height=2.5; width=7} else { height=2.5; width=8}
