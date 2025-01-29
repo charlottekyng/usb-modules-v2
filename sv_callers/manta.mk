@@ -25,10 +25,10 @@ manta/$1/runWorkflow.py : bam/$1.bam bam/$2.bam
 	$$(if $$(findstring hg38,$$(REF)),--callRegions usb-modules-v2/resources/hg38_main_chr.bed.gz,) \
 	--runDir $$(@D)")
 
-# manta uses little RAM, 1G per cpu is enough
+# manta uses little RAM, 2G per cpu should be enough
 manta/$1/results/variants/somaticSV.vcf.gz : manta/$1/runWorkflow.py
-	$$(call RUN,$$(MANTA_NUM_CORES),$$(MANTA_NUM_CORES)G,$$(RESOURCE_REQ_MEDIUM),$$(SINGULARITY_MODULE),"\
-	$$(MANTA) $$< -j $$(MANTA_NUM_CORES) -g $$(MANTA_NUM_CORES)")
+	$$(call RUN,$$(MANTA_NUM_CORES),$$(MANTA_MEM)G,$$(RESOURCE_REQ_MEDIUM),$$(SINGULARITY_MODULE),"\
+	$$(MANTA) $$< -j $$(MANTA_NUM_CORES) -g $$(MANTA_MEM)")
 
 endef
 $(foreach pair,$(SAMPLE_PAIRS),$(eval $(call manta-tumor-normal,$(tumor.$(pair)),$(normal.$(pair)))))

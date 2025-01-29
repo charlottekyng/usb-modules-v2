@@ -283,7 +283,7 @@ CAVEMAN_NORM_CN_DEFAULT ?= 2
 USE_BAM_CLIPOVERLAP ?= true
 
 MANTA_NUM_CORES ?= 12
-
+MANTA_MEM ?= 24
 SVABA_NUM_CORES ?= 8
 
 ################################################
