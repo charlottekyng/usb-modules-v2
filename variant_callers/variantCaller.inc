@@ -8,7 +8,7 @@ VCF_FILTERS += $(if $(or $(findstring GRCm38,$(REF)),$(findstring SOMATIC,$(ANAL
 else
 VCF_FILTERS =
 endif
-VCF_FILTER_SUFFIX = $(subst $( ),.,$(strip $(call VCF_FILTERS)))
+VCF_FILTER_SUFFIX = $(subst $(space),.,$(strip $(call VCF_FILTERS)))
 
 ### Annotation
 ifeq ($(findstring true,$(ANNOTATE_VARIANTS)),true)
@@ -19,11 +19,11 @@ VCF_ANNS = norm left_align post_bcftools $(if $(findstring GRCm38,$(REF)),eff db
 else 
 VCF_ANNS =
 endif
-VCF_ANNS_SUFFIX = $(subst $( ),.,$(strip $(VCF_ANNS)))
+VCF_ANNS_SUFFIX = $(subst $(space),.,$(strip $(VCF_ANNS)))
 
 ####
 
-VCF_SUFFIX = $(subst $( ),.,$(strip $1 $(VCF_FILTER_SUFFIX) $(VCF_ANNS_SUFFIX)))
+VCF_SUFFIX = $(subst $(space),.,$(strip $1 $(VCF_FILTER_SUFFIX) $(VCF_ANNS_SUFFIX)))
 
 VCF_SUFFIXES = $(foreach type,$1,$(call VCF_SUFFIX,$(type)))
 

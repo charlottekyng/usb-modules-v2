@@ -2,7 +2,7 @@
 ##################### SCICORE #########################
 #######################################################
 
-ifeq ($(HPC),scicore)
+ifeq ($(findstring scicore,$(HPC)),scicore)
   REF_DIR = $(GROUP_DIR)/ref_nobackup
 
   GENOME_DIR = $(REF_DIR)/genomes

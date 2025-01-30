@@ -37,7 +37,11 @@ GENE_REF_FLAT = $(ANN_DIR)/refFlat.txt
 
 #### TOOL SPECIFIC OPTIONS ####
 
-SNP_EFF_GENOME = GRCm38.86
+ifeq ($(findstring scicore_ubuntu,$(HPC)),scicore_ubuntu)
+  SNP_EFF_GENOME = GRCm38.99
+else
+  SNP_EFF_GENOME = GRCm38.86
+endif
 
 
 endif

@@ -92,8 +92,8 @@ pyclone/configs/$1.run$3.yaml : $$(foreach tumor,$2,facets/cncf/$$(tumor)_$1.out
 	done
 endef
 $(foreach set,$(SAMPLE_SETS),$(foreach run,1 2,\
-	$(eval $(call pyclone_make_config,$(lastword $(subst _,$( ),$(set))),\
-	$(wordlist 1,$(shell expr $(words $(subst _,$( ),$(set))) - 1),$(subst _,$( ),$(set))),$(run)))))
+	$(eval $(call pyclone_make_config,$(lastword $(subst _,$(space),$(set))),\
+	$(wordlist 1,$(shell expr $(words $(subst _,$(space),$(set))) - 1),$(subst _,$(space),$(set))),$(run)))))
 
 pyclone/mutations/%.mutations.yaml : pyclone/mutations/%.mutations.txt
 	$(call RUN,1,$(RESOURCE_REQ_LOW_MEM),$(RESOURCE_REQ_VSHORT),$(PYCLONE_MODULE),"\

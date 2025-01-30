@@ -51,16 +51,16 @@ cnvkit/cns/$1.cns.scaled : $$(foreach sample,$2,cnvkit/cns/$$(sample).cns) cnvki
 	$$(CNVKIT_SCALE_SEGMENTS) $$^")
 endef
 $(foreach set,$(SAMPLE_SETS),\
-	$(eval $(call cnvkit-scale-segments,$(lastword $(subst _,$( ),$(set))),\
-	$(wordlist 1,$(shell expr $(words $(subst _,$( ),$(set))) - 1),$(subst _,$( ),$(set))))))
+	$(eval $(call cnvkit-scale-segments,$(lastword $(subst _,$(space),$(set))),\
+	$(wordlist 1,$(shell expr $(words $(subst _,$(space),$(set))) - 1),$(subst _,$(space),$(set))))))
 
 define cnvkit-scale-segments2
 cnvkit/cns/$1.cns.scaled : cnvkit/cns/$2.cns.scaled
 	
 endef
 $(foreach set,$(SAMPLE_SETS),\
-	$(foreach sample,$(wordlist 1,$(shell expr $(words $(subst _,$( ),$(set))) - 1),$(subst _,$( ),$(set))),\
-		$(eval $(call cnvkit-scale-segments2,$(sample),$(lastword $(subst _,$( ),$(set)))))))
+	$(foreach sample,$(wordlist 1,$(shell expr $(words $(subst _,$(space),$(set))) - 1),$(subst _,$(space),$(set))),\
+		$(eval $(call cnvkit-scale-segments2,$(sample),$(lastword $(subst _,$(space),$(set)))))))
 
 cnvkit/cnr/%.cnr.scaled : cnvkit/cnr/%.cnr
 	ln $< $@
