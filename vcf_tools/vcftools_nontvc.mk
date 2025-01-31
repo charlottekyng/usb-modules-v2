@@ -72,7 +72,7 @@ else
 # Using <$$(call CHECK_VCF_CMD,$$@.tmp,cp $$@.tmp $$@,> or hardcoding the same check in the code below works in some cases, but breaks when sample sets are larger.
 # The error complains about grep (from the conditional) not finding $$@.tmp. But $$@.tmp should be created (and the log says it is). I don't get it.
 # An alternative to hide grep's exit code 1 is to wrap it in a <{grep ... || true; }> construct (https://stackoverflow.com/questions/6550484/prevent-grep-returning-an-error-when-input-doesnt-match)
-vcf/$3.%.sufam.tmp : $$(foreach tumor,$$(wordlist 1,$$(shell expr $$(words $$(subst _,$$( ),$3)) - 1),$$(subst _,$$( ),$3)),vcf/$$(tumor)_$$(lastword $$(subst _,$$( ),$3)).%.vcf)
+vcf/$3.%.sufam.tmp : $$(foreach tumor,$$(wordlist 1,$$(shell expr $$(words $$(subst _,$$(space),$3)) - 1),$$(subst _,$$(space),$3)),vcf/$$(tumor)_$$(lastword $$(subst _,$$(space),$3)).%.vcf)
 	$$(call RUN,1,$$(RESOURCE_REQ_HIGH_MEM),$$(RESOURCE_REQ_SHORT),$$(JAVA8_MODULE),"\
 		$$(call GATK,CombineVariants,$$(RESOURCE_REQ_HIGH_MEM_JAVA)) \
 		$$(foreach vcf,$$^,--variant $$(vcf) ) -o $$@.tmp --genotypemergeoption UNSORTED \
@@ -130,8 +130,8 @@ endif #ifeq ($3,$2)
 endef #define sufam
 
 $(foreach set,$(SAMPLE_SETS),\
-	$(foreach tumor,$(wordlist 1,$(shell expr $(words $(subst _,$( ),$(set))) - 1),$(subst _,$( ),$(set))),\
-		$(eval $(call sufam,$(tumor),$(lastword $(subst _,$( ),$(set))),$(subst $(tumor)_,,$(set))))))
+	$(foreach tumor,$(wordlist 1,$(shell expr $(words $(subst _,$(space),$(set))) - 1),$(subst _,$(space),$(set))),\
+		$(eval $(call sufam,$(tumor),$(lastword $(subst _,$(space),$(set))),$(subst $(tumor)_,,$(set))))))
 
 include usb-modules-v2/variant_callers/somatic/pon.mk
 

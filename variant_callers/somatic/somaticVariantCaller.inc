@@ -13,7 +13,7 @@ VCF_FILTERS += $(if $(findstring GRCm38,$(REF)),,hotspot) pass
 else
 VCF_FILTERS =
 endif
-VCF_FILTER_SUFFIX = $(subst $( ),.,$(strip $(VCF_FILTERS)))
+VCF_FILTER_SUFFIX = $(subst $(space),.,$(strip $(VCF_FILTERS)))
 
 
 ### Annotation
@@ -34,12 +34,12 @@ endif
 else 
 VCF_ANNS =
 endif
-VCF_ANNS_SUFFIX = $(subst $( ),.,$(strip $(VCF_ANNS)))
+VCF_ANNS_SUFFIX = $(subst $(space),.,$(strip $(VCF_ANNS)))
 
 ### 
 
 
-VCF_SUFFIX = $(subst $( ),.,$(strip $1 $(VCF_FILTER_SUFFIX) $(VCF_ANNS_SUFFIX)))
+VCF_SUFFIX = $(subst $(space),.,$(strip $1 $(VCF_FILTER_SUFFIX) $(VCF_ANNS_SUFFIX)))
 
 VCF_SUFFIXES = $(foreach type,$1,$(call VCF_SUFFIX,$(type)))
 
@@ -83,8 +83,8 @@ DOWNSTREAM_EFF_TYPES ?= $(word 1,$(TABLE_EFF_TYPES))
 DOWMSTREAM_VCF_TABLE_SUFFIX_ALLEFFTYPES ?= $(call VCF_SUFFIXES,$1).tab
 DOWMSTREAM_VCF_TABLE_SUFFIX ?= $(call VCF_SUFFIXES,$1).tab.$(DOWNSTREAM_EFF_TYPES)
 
-SUFAM_ANN_SUFFIX = $(subst $( ),.,$(strip $(if $(findstring GRCm38,$(REF)),,hotspot) $(call SOMATIC_ANNS,$1)))
-SUFAM_SUFFIX = $(subst $( ),.,$(strip $1 $(SUFAM_ANN_SUFFIX)))
+SUFAM_ANN_SUFFIX = $(subst $(space),.,$(strip $(if $(findstring GRCm38,$(REF)),,hotspot) $(call SOMATIC_ANNS,$1)))
+SUFAM_SUFFIX = $(subst $(space),.,$(strip $1 $(SUFAM_ANN_SUFFIX)))
 SUFAM_VCF_SUFFIXES = $(foreach type,$1,$(call SUFAM_SUFFIX,$(type)))
 SUFAM_TABLE_SUFFIXES = $(foreach suff,$(call SUFAM_VCF_SUFFIXES,$1),\
 	 $(foreach ext,$(SOMATIC_TABLE_EXTENSIONS),$(suff).$(ext)))

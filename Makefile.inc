@@ -116,10 +116,14 @@ endif
 
 # define $(,) and $( ) for escaping commas and spaces
 , := ,
-space :=
-space +=
-$(space) :=
-$(space) +=
+# $( ) variable not working in make v4.3 (empty variable name error for '$(space) :=':
+# space :=
+# space +=
+# $(space) :=
+# $(space) +=
+E :=
+space := $E $E
+
 
 # $(call strip-suffix,filename)
 strip-suffix = $(firstword $(subst ., ,$(1)))

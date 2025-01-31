@@ -24,8 +24,8 @@ rsem/%.isoforms.results : rsem/%.genes.results
 define rsem-gen-dat-matrix
 rsem/all$$(PROJECT_PREFIX).$1.$2.results : $$(foreach sample,$$(SAMPLES),rsem/$$(sample).$1.results)
 	$$(call RUN,1,$$(RESOURCE_REQ_LOW_MEM),$$(RESOURCE_REQ_VSHORT),$$(PERL_MODULE) $$(R_MODULE),"\
-	$$(RSEM_GEN_DATA_MATRIX) $$(word 3,$$(subst .,$$( ),$$@)) $$^ | sed 's/rsem\///g;' | \
-	sed \"s/\.$$(word 2,$$(subst .,$$( ),$$@))\.results//g\" | tr -d \"\\\"\" > $$@.tmp && \
+	$$(RSEM_GEN_DATA_MATRIX) $$(word 3,$$(subst .,$$(space),$$@)) $$^ | sed 's/rsem\///g;' | \
+	sed \"s/\.$$(word 2,$$(subst .,$$(space),$$@))\.results//g\" | tr -d \"\\\"\" > $$@.tmp && \
 	$$(RSCRIPT) $$(RSEM_PROCCESS) --inputRSEMFile $$@.tmp --gtf $$(GENCODE_GENE_GTF) --outputFile $$@ && $$(RM) $$@.tmp")
 endef
 $(foreach type1,genes,\
@@ -36,8 +36,8 @@ $(foreach type1,genes,\
 define rsem-gen-dat-matrix-coding
 rsem/all$$(PROJECT_PREFIX).$1.$2.results_coding : $$(foreach sample,$$(SAMPLES),rsem/$$(sample).$1.results)
 	$$(call RUN,1,$$(RESOURCE_REQ_LOW_MEM),$$(RESOURCE_REQ_VSHORT),$$(PERL_MODULE) $$(R_MODULE),"\
-	$$(RSEM_GEN_DATA_MATRIX) $$(word 3,$$(subst .,$$( ),$$@)) $$^ | sed 's/rsem\///g;' | \
-	sed \"s/\.$$(word 2,$$(subst .,$$( ),$$@))\.results//g\" | tr -d \"\\\"\" > $$@.tmp && \
+	$$(RSEM_GEN_DATA_MATRIX) $$(word 3,$$(subst .,$$(space),$$@)) $$^ | sed 's/rsem\///g;' | \
+	sed \"s/\.$$(word 2,$$(subst .,$$(space),$$@))\.results//g\" | tr -d \"\\\"\" > $$@.tmp && \
 	$$(RSCRIPT) $$(RSEM_PROCCESS) --inputRSEMFile $$@.tmp --gtf $$(GENCODE_GENE_GTF) --outputFile $$@ --geneBiotype protein_coding \
 	&& $$(RM) $$@.tmp")
 endef
