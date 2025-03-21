@@ -602,7 +602,7 @@ For exome analysis, there are a few things that are useful. These should work if
 You may run into errors if you run them outside of the context of in-house, standard data as they have complex (and cryptic) rules to obtain input files. 
 ```
 make lst              # For the detection of large-scale transitions, requires facets output
-make msisensor        # For the detection of microsatellite instability, requires bam files
+make msisensorpro     # For the detection of microsatellite instability, requires bam files
 make pyclone          # For clonality analysis, requires mutations and facets output
 make pvacseq          # For the detection of neo-antigens, requires mutations (not well tested...)
 ```
