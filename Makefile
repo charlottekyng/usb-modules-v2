@@ -304,6 +304,10 @@ TARGETS += manta
 manta :
 	$(call RUN_MAKE,usb-modules-v2/sv_callers/manta.mk)
 
+TARGETS += manta_diploid
+manta_diploid :
+	$(call RUN_MAKE,usb-modules-v2/sv_callers/manta_diploid.mk)
+
 TARGETS += delly
 delly :
 	$(call RUN_MAKE,usb-modules-v2/sv_callers/delly.mk)
