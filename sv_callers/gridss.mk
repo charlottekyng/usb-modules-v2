@@ -1,26 +1,22 @@
-MUT_CALLER = delly
+#template for gridss
+MUT_CALLER = gridss
 
-# Run delly on tumour-normal matched pairs
+# Run gridss on tumour-normal matched pairs
 
 include usb-modules-v2/Makefile.inc
 
-LOGDIR ?= log/delly.$(NOW)
-PHONY += delly
+LOGDIR ?= log/gridss.$(NOW)
+PHONY += gridss
 
 .DELETE_ON_ERROR:
 .SECONDARY:
 .PHONY: $(PHONY)
 
-delly : delly/sample_info.txt delly_vcfs
-
-delly_dir:
-	mkdir -p delly
-
-delly/sample_info.txt : delly_dir $(SAMPLE_SET_FILE)
-	grep -v '#' $(<<) | sed -E -e "s/\t/\ttumor/g" -e "s/\$$/\tcontrol/" | sed 's/tumor/&\n/g' > $@
-
+delly : delly_vcfs
 delly_vcfs : $(foreach pair,$(SAMPLE_PAIRS),delly/$(tumor.$(pair)).somatic.vcf)
 
+delly/sample_info.txt : sample_sets.txt
+	grep -v '#' $^ | sed -E -e "s/\t/\ttumor/g" -e "s/$$/\tcontrol/" -e "s/tumor/tumor\n/g" > $@
 
 define delly-tumor-normal
 # Main call
@@ -73,3 +69,4 @@ delly/$1.somatic.vcf : delly/$1.somatic.bcf
 
 endef
 $(foreach pair,$(SAMPLE_PAIRS),$(eval $(call delly-tumor-normal,$(tumor.$(pair)),$(normal.$(pair)))))
+
