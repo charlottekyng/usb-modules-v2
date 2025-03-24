@@ -25,9 +25,9 @@ svaba/$1.contigs.bam : bam/$1.bam bam/$2.bam
 	-G $$(REF_FASTA) \
 	$$(if $$(findstring BAITS,$$(CAPTURE_METHOD)),--region $$(TARGETS_FILE_COVERED_INTERVALS),) \
 	-D $$(DBSNP_TARGETS_INTERVALS) \
-	--blacklist $$(if $$(findstring hg38,$$(REF)),usb-modules-v2/resources/human.hg38.excl.bed,\
-	$$(if $$(findstring b37,$$(REF)),usb-modules-v2/resources/human.hg19.excl.bed,\
-	$$(if $$(findstring GRCm38,$$(REF)),usb-modules-v2/resources/mouse.mm10.excl.bed,)))")
+	--blacklist $$(if $$(findstring hg38,$$(REF)),$$(BED_DIR)/human.hg38.excl.bed,\
+	$$(if $$(findstring b37,$$(REF)),$$(BED_DIR)/human.hg19.excl.bed,\
+	$$(if $$(findstring GRCm38,$$(REF)),$$(BED_DIR)/mouse.mm10.excl.bed,)))")
 
 endef
 $(foreach pair,$(SAMPLE_PAIRS),$(eval $(call svaba-tumor-normal,$(tumor.$(pair)),$(normal.$(pair)))))

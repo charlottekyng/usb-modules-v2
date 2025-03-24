@@ -22,7 +22,7 @@ manta/$1/runWorkflow.py : bam/$1.bam bam/$2.bam
 	--normalBam $$(<<) \
 	--referenceFasta $$(REF_FASTA) \
 	$$(if $$(findstring BAITS,$$(CAPTURE_METHOD)),--exome,) \
-	$$(if $$(findstring hg38,$$(REF)),--callRegions usb-modules-v2/resources/hg38_main_chr.bed.gz,) \
+	$$(if $$(findstring hg38,$$(REF)),--callRegions $$(BED_DIR)/hg38_main_chr.bed.gz,) \
 	--runDir $$(@D)")
 
 # manta uses little RAM, 2G per cpu should be enough

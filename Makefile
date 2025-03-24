@@ -510,7 +510,7 @@ brass :
 	$(call RUN_MAKE,modules/sv_callers/brass.mk)
 
 TARGETS += gridss
-brass :
+gridss :
 	$(call RUN_MAKE,modules/sv_callers/gridss.mk)
 
 TARGETS += mutsig_report

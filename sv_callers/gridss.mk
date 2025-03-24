@@ -12,61 +12,48 @@ PHONY += gridss
 .SECONDARY:
 .PHONY: $(PHONY)
 
-delly : delly_vcfs
-delly_vcfs : $(foreach pair,$(SAMPLE_PAIRS),delly/$(tumor.$(pair)).somatic.vcf)
+gridss : gridss_vcfs
 
-delly/sample_info.txt : sample_sets.txt
-	grep -v '#' $^ | sed -E -e "s/\t/\ttumor/g" -e "s/$$/\tcontrol/" -e "s/tumor/tumor\n/g" > $@
+gridss_dir:
+	mkdir -p gridss
 
-define delly-tumor-normal
+gridss_vcfs : gridss_dir
+	$(foreach pair,$(SAMPLE_PAIRS),gridss/$(tumor.$(pair)).somatic.vcf)
+
+
+define gridss-tumor-normal
+
 # Main call
-delly/$1.bcf : bam/$1.bam bam/$2.bam
+gridss/$1.vcf : bam/$2.bam bam/$1.bam
 	$$(call RUN,1,$$(RESOURCE_REQ_HIGH_MEM),$$(RESOURCE_REQ_MEDIUM),$$(SINGULARITY_MODULE),"\
-	$$(DELLY) delly call \
-	-x $$(if $$(findstring hg38,$$(REF)),usb-modules-v2/resources/human.hg38.excl.bed,\
-	$$(if $$(findstring b37,$$(REF)),usb-modules-v2/resources/human.hg19.excl.bed,\
-	$$(if $$(findstring GRCm38,$$(REF)),usb-modules-v2/resources/mouse.mm10.excl.bed,))) \
-	-g $$(REF_FASTA) \
+	$$(GRIDSS) gridss \
+	$$(if $$(or $$(findstring hg38,$$(REF)), $$(findstring b37,$$(REF))),\
+	    -b $$(if $$(findstring hg38,$$(REF)),$$(BED_DIR)/ENCFF356LFX.bed,\
+		   $$(BED_DIR)/ENCFF001TDO.bed),) \
+	-r $$(REF_FASTA) \
 	-o $$@ \
 	$$^")
 
-# Somatic pre-filtering
-delly/$1.pre.bcf : delly/$1.bcf delly/sample_info.txt
-	$$(call RUN,1,1G,$$(RESOURCE_REQ_VSHORT),$$(SINGULARITY_MODULE),"\
-	$$(DELLY) delly filter \
-	-f somatic \
-	-o $$@ \
-	-s $$(<<) \
-	$$<")
 
-# Genotype pre-filtered somatic sites across all normal samples.
-# Do it with all normals in one go. If this becomes too slow with many normals modify this part to run per each normal and then merge.
-# Eventually we might want to be able to pass external normals as well.
-delly/$1.geno.bcf : delly/$1.pre.bcf bam/$1.bam bam/$2.bam $(foreach normal,$(PANEL_OF_NORMAL_SAMPLES),bam/$(normal).bam)
-	$$(call RUN,1,$$(RESOURCE_REQ_HIGH_MEM),$$(RESOURCE_REQ_LONG),$$(SINGULARITY_MODULE),"\
-	$$(DELLY) delly call \
-	-x $$(if $$(findstring hg38,$$(REF)),usb-modules-v2/resources/human.hg38.excl.bed,\
-	$$(if $$(findstring b37,$$(REF)),usb-modules-v2/resources/human.hg19.excl.bed,\
-	$$(if $$(findstring GRCm38,$$(REF)),usb-modules-v2/resources/mouse.mm10.excl.bed,))) \
-	-g $$(REF_FASTA) \
-	-v $$< \
-	-o $$@ \
-	$$(filter-out $$<,$$^)")
+#creating the PoN
+mkdir -p pondir
+java -Xmx8g \
+	-cp ~/dev/gridss/target/gridss-2.10.2-gridss-jar-with-dependencies.jar \
+	gridss.GeneratePonBedpe \
+	$(ls -1 *.vcf.gz | awk ' { print "INPUT=" $0 }' | head -$n) \
+	O=pondir/gridss_pon_breakpoint.bedpe \
+	SBO=pondir/gridss_pon_single_breakend.bed \
+	REFERENCE_SEQUENCE=$ref_genome
 
-# Post-filter
-delly/$1.somatic.bcf : delly/$1.geno.bcf delly/sample_info.txt
-	$$(call RUN,1,1G,$$(RESOURCE_REQ_VSHORT),$$(SINGULARITY_MODULE),"\
-	$$(DELLY) delly filter \
-	-f somatic \
-	-o $$@ \
-	-s $$(<<) \
-	$$<")
-
-# convert to vcf
-delly/$1.somatic.vcf : delly/$1.somatic.bcf
-	$$(call RUN,1,1G,$$(RESOURCE_REQ_VSHORT),$$(BCFTOOLS_MODULE),"\
-	bcftools view $$^ > $$@")
+# Somatic filtering
+gridss_somatic_filter \
+  --pondir refdata/hg19/dbs/gridss/pon3792v1/ \
+  --input all_calls.vcf \
+  --output high_confidence_somatic.vcf.gz \
+  --fulloutput high_and_low_confidence_somatic.vcf.gz \
+  --scriptdir $(dirname $(which gridss_somatic_filter)) \
+  -n 1 \
+  -t 2
 
 endef
-$(foreach pair,$(SAMPLE_PAIRS),$(eval $(call delly-tumor-normal,$(tumor.$(pair)),$(normal.$(pair)))))
-
+$(foreach pair,$(SAMPLE_PAIRS),$(eval $(call gridss-tumor-normal,$(tumor.$(pair)),$(normal.$(pair)))))
