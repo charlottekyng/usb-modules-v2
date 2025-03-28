@@ -321,7 +321,7 @@ svaba :
 	$(call RUN_MAKE,usb-modules-v2/sv_callers/svaba.mk)
 
 TARGETS += sv_pon
-pon :
+sv_pon :
 	$(call RUN_MAKE,usb-modules-v2/sv_callers/sv_pon.mk)
 
 #########################################################

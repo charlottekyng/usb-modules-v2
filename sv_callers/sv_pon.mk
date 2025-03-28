@@ -12,7 +12,7 @@ gridss_ref:
 	$$(call RUN,1,$$(RESOURCE_REQ_HIGH_MEM),$$(RESOURCE_REQ_MEDIUM),$$(SINGULARITY_MODULE),"\
 	$$(GRIDSS) gridss \
 	-s setupreference \
-	-r $$(REF_FASTA)
+	-r $$(REF_FASTA)"
 
 sv_pon : gridss/pondir/gridss_pon_breakpoint.bedpe gridss/pondir/gridss_pon_single_breakend.bed
 
@@ -25,16 +25,16 @@ gridss/pondir/%.normal.vcf : bam/%.bam
 	$$(if $$(findstring b37,$$(REF)),-b $$(BED_DIR)/ENCFF356LFX.bed $$(BED_DIR)/ENCFF001TDO.bed,) \
 	-r $$(REF_FASTA) \
 	-o $$@ \
-	$$<")
+	$$<")"
 
 #creating the main PoN
 gridss/pondir/gridss_pon_breakpoint.bedpe gridss/pondir/gridss_pon_single_breakend.bed: gridss/pondir/*.normal.vcf
 	$$(call RUN,1,$$(RESOURCE_REQ_HIGH_MEM),$$(RESOURCE_REQ_MEDIUM),$$(SINGULARITY_MODULE),"\
 		$$(GRIDSS) GeneratePonBedpe \
-		-INPUT $$(ls -1 gridss/pondir/*.normal.vcf) \
+		-INPUT $$< \
 		-OUTPUT_BEDPE gridss/pondir/gridss_pon_breakpoint.bedpe \
 		-OUTPUT_BED gridss/pondir/gridss_pon_single_breakend.bed \
-		-REFERENCE_SEQUENCE $$(REF_FASTA)
+		-REFERENCE_SEQUENCE $$(REF_FASTA)"
 
 endef
 
