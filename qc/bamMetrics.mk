@@ -103,7 +103,7 @@ metrics/%.rnaseq_metrics.txt : bam/%.bam bam/%.bam.bai
 		$(call PICARD,CollectRnaSeqMetrics,$(RESOURCE_REQ_MEDIUM_MEM_JAVA)) \
 		REF_FLAT=$(GENE_REF_FLAT) RIBOSOMAL_INTERVALS=$(RIBOSOMAL_INTERVALS) \
 		STRAND_SPECIFICITY=$(STRAND_SPECIFICITY) \
-		INPUT=$< OUTPUT=$@ CHART_OUTPUT=$@.pdf VERBOSITY=ERROR REFERENCE_SEQUENCE=$(REF_FASTA)")
+		INPUT=$< OUTPUT=$@ VERBOSITY=ERROR REFERENCE_SEQUENCE=$(REF_FASTA)")
 
 metrics/%.alignment_summary_metrics.txt : bam/%.bam bam/%.bam.bai
 	$(call RUN,1,$(RESOURCE_REQ_MEDIUM_MEM),$(RESOURCE_REQ_SHORT),$(JAVA8_MODULE),"\
