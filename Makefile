@@ -102,7 +102,7 @@ mutation_summary :
 TARGETS += pon
 pon :
 	$(call RUN_MAKE,usb-modules-v2/variant_callers/somatic/pon.mk)
-
+	
 TARGETS += mutect2_calculate_contamination
 mutect2_calculate_contamination :
 	$(call RUN_MAKE,usb-modules-v2/variant_callers/somatic/mutect2_calculate_contamination.mk)
@@ -304,6 +304,13 @@ TARGETS += manta
 manta :
 	$(call RUN_MAKE,usb-modules-v2/sv_callers/manta.mk)
 
+TARGETS += brass
+brass :
+	$(call RUN_MAKE,usb-modules-v2/sv_callers/brass.mk)
+
+TARGETS += gridss
+gridss :
+	$(call RUN_MAKE,usb-modules-v2/sv_callers/gridss.mk)
 
 TARGETS += delly
 delly :
@@ -312,6 +319,10 @@ delly :
 TARGETS += svaba
 svaba :
 	$(call RUN_MAKE,usb-modules-v2/sv_callers/svaba.mk)
+
+TARGETS += sv_pon
+pon :
+	$(call RUN_MAKE,usb-modules-v2/sv_callers/sv_pon.mk)
 
 #########################################################
 ## The set of targets below have NOT been tested,
@@ -505,15 +516,6 @@ norm_copynum :
 TARGETS += recurrent_mutations
 recurrent_mutations :
 	$(call RUN_MAKE,modules/recurrent_mutations/report.mk)
-
-TARGETS += brass
-brass :
-	$(call RUN_MAKE,modules/sv_callers/brass.mk)
-
-TARGETS += gridss
-gridss :
-	$(call RUN_MAKE,modules/sv_callers/gridss.mk)
-
 
 TARGETS += mutsig_report
 mutsig_report :
