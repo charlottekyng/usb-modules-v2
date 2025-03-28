@@ -7,6 +7,8 @@ PHONY += sv_pon
 .DELETE_ON_ERROR:
 .PHONY : $(PHONY)
 
+sv_pon : gridss_ref gridss/pondir/gridss_pon_breakpoint.bedpe gridss/pondir/gridss_pon_single_breakend.bed
+
 #setup reference to run just once for all samples
 gridss_ref:
 	$$(call RUN,1,$$(RESOURCE_REQ_HIGH_MEM),$$(RESOURCE_REQ_MEDIUM),$$(SINGULARITY_MODULE),"\
@@ -14,7 +16,6 @@ gridss_ref:
 	-s setupreference \
 	-r $$(REF_FASTA)")
 
-sv_pon : gridss/pondir/gridss_pon_breakpoint.bedpe gridss/pondir/gridss_pon_single_breakend.bed
 
 define gridss-pon
 # Main call for normal pairs needed for PoN
@@ -26,16 +27,14 @@ gridss/pondir/%.normal.vcf : bam/%.bam
 	-r $$(REF_FASTA) \
 	-o $$@ \
 	$$<")
+endef
+$(foreach normal,$(PANEL_OF_NORMAL_SAMPLES), $(eval $(call gridss-pon,$(normal))))
 
 #creating the main PoN
-gridss/pondir/gridss_pon_breakpoint.bedpe gridss/pondir/gridss_pon_single_breakend.bed: gridss/pondir/*.normal.vcf
+gridss/pondir/gridss_pon_breakpoint.bedpe gridss/pondir/gridss_pon_single_breakend.bed: $(patsubst %,gridss/pondir/%.normal.vcf, $(PANEL_OF_NORMAL_SAMPLES))
 	$$(call RUN,1,$$(RESOURCE_REQ_HIGH_MEM),$$(RESOURCE_REQ_MEDIUM),$$(SINGULARITY_MODULE),"\
 		$$(GRIDSS) GeneratePonBedpe \
 		-INPUT $$< \
 		-OUTPUT_BEDPE gridss/pondir/gridss_pon_breakpoint.bedpe \
 		-OUTPUT_BED gridss/pondir/gridss_pon_single_breakend.bed \
 		-REFERENCE_SEQUENCE $$(REF_FASTA)")
-
-endef
-
-$(foreach normal,$(PANEL_OF_NORMAL_SAMPLES), $(eval $(call gridss-pon,$(normal))))
