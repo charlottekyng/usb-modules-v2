@@ -13,30 +13,26 @@ PHONY += delly
 
 delly : delly/sample_info.txt delly_vcfs
 
-delly_dir:
-	mkdir -p delly
-
-delly/sample_info.txt : delly_dir $(SAMPLE_SET_FILE)
-	grep -v '#' $(<<) | sed -E -e "s/\t/\ttumor/g" -e "s/\$$/\tcontrol/" | sed 's/tumor/&\n/g' > $@
+delly/sample_info.txt : $(SAMPLE_SET_FILE)
+	grep -v '#' $(<) | sed -E -e "s/\t/\ttumor/g" -e "s/\$$/\tcontrol/" | sed 's/tumor/&\n/g' > $@
 
 delly_vcfs : $(foreach pair,$(SAMPLE_PAIRS),delly/$(tumor.$(pair)).somatic.vcf)
-
 
 define delly-tumor-normal
 # Main call
 delly/$1.bcf : bam/$1.bam bam/$2.bam
 	$$(call RUN,1,$$(RESOURCE_REQ_HIGH_MEM),$$(RESOURCE_REQ_MEDIUM),$$(SINGULARITY_MODULE),"\
 	$$(DELLY) delly call \
-	-x $$(if $$(findstring hg38,$$(REF)),usb-modules-v2/resources/human.hg38.excl.bed,\
-	$$(if $$(findstring b37,$$(REF)),usb-modules-v2/resources/human.hg19.excl.bed,\
-	$$(if $$(findstring GRCm38,$$(REF)),usb-modules-v2/resources/mouse.mm10.excl.bed,))) \
+	$$(if $$(findstring hg38,$$(REF)),-x usb-modules-v2/resources/human.hg38.excl.bed) \
+	$$(if $$(findstring b37,$$(REF)),-x usb-modules-v2/resources/human.hg19.excl.bed) \
+	$$(if $$(findstring GRCm38,$$(REF)),-x usb-modules-v2/resources/mouse.mm10.excl.bed) \
 	-g $$(REF_FASTA) \
 	-o $$@ \
 	$$^")
 
 # Somatic pre-filtering
 delly/$1.pre.bcf : delly/$1.bcf delly/sample_info.txt
-	$$(call RUN,1,1G,$$(RESOURCE_REQ_VSHORT),$$(SINGULARITY_MODULE),"\
+	$$(call RUN,1,1G,$$(RESOURCE_REQ_MEDIUM),$$(SINGULARITY_MODULE),"\
 	$$(DELLY) delly filter \
 	-f somatic \
 	-o $$@ \
@@ -49,9 +45,9 @@ delly/$1.pre.bcf : delly/$1.bcf delly/sample_info.txt
 delly/$1.geno.bcf : delly/$1.pre.bcf bam/$1.bam bam/$2.bam $(foreach normal,$(PANEL_OF_NORMAL_SAMPLES),bam/$(normal).bam)
 	$$(call RUN,1,$$(RESOURCE_REQ_HIGH_MEM),$$(RESOURCE_REQ_LONG),$$(SINGULARITY_MODULE),"\
 	$$(DELLY) delly call \
-	-x $$(if $$(findstring hg38,$$(REF)),usb-modules-v2/resources/human.hg38.excl.bed,\
-	$$(if $$(findstring b37,$$(REF)),usb-modules-v2/resources/human.hg19.excl.bed,\
-	$$(if $$(findstring GRCm38,$$(REF)),usb-modules-v2/resources/mouse.mm10.excl.bed,))) \
+	$$(if $$(findstring hg38,$$(REF)),-x usb-modules-v2/resources/human.hg38.excl.bed) \
+	$$(if $$(findstring b37,$$(REF)),-x usb-modules-v2/resources/human.hg19.excl.bed) \
+	$$(if $$(findstring GRCm38,$$(REF)),-x usb-modules-v2/resources/mouse.mm10.excl.bed) \
 	-g $$(REF_FASTA) \
 	-v $$< \
 	-o $$@ \

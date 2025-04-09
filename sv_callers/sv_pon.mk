@@ -11,10 +11,10 @@ sv_pon : gridss_ref gridss/pondir/gridss_pon_breakpoint.bedpe gridss/pondir/grid
 
 #setup reference to run just once for all samples
 gridss_ref:
-	$$(call RUN,1,$$(RESOURCE_REQ_HIGH_MEM),$$(RESOURCE_REQ_MEDIUM),$$(SINGULARITY_MODULE),"\
-	$$(GRIDSS) gridss \
+	$(call RUN,1,$(RESOURCE_REQ_HIGH_MEM),$(RESOURCE_REQ_MEDIUM),$(SINGULARITY_MODULE),"\
+	$(GRIDSS) gridss \
 	-s setupreference \
-	-r $$(REF_FASTA)")
+	-r $(REF_FASTA)")
 
 
 define gridss-pon

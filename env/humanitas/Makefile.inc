@@ -12,6 +12,7 @@ LD_LIBRARY_PATH = $(USR_DIR)/local/MCR_R2014a/v83/runtime/glnxa64:$(USR_DIR)/loc
 IMG_DIR ?= $(USR_DIR)/singularity
 
 CONDA_DIR ?= $(USR_DIR)/conda
+SV_PON_DIR ?= $(GROUP_DIR)/ref/PoN/hg38/wgs/PDAC_AMPAC/gridss/pondir/
 HOTSPOTS_DIR ?= $(USR_DIR)/local/cancer_hotspots
 NICE ?= 1000
 # export PATH := $(USR_DIR):$(PATH)
@@ -62,8 +63,8 @@ GUNZIP ?= gunzip -c
 
 ANACONDA_MODULE ?= conda/anaconda3
 SINGULARITY_MODULE ?= singularity/4.1.2
-SINGULARITY_EXEC ?= singularity exec --cleanenv -B $(GROUP_DIR)/../ $(if SINGULARITY_BIND, -B $(SINGULARITY_BIND),)
-SINGULARITY_RUN ?= singularity run --cleanenv -B $(GROUP_DIR)/../ $(if SINGULARITY_BIND, -B $(SINGULARITY_BIND),)
+SINGULARITY_EXEC ?= singularity exec --cleanenv -B $(GROUP_DIR)/../ $(if SINGULARITY_BIND, -B $(SINGULARITY_BIND))
+SINGULARITY_RUN ?= singularity run --cleanenv -B $(GROUP_DIR)/../ $(if SINGULARITY_BIND, -B $(SINGULARITY_BIND))
 
 
 PERL_MODULE ?=
