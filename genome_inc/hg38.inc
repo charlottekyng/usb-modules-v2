@@ -18,9 +18,9 @@ DBSNP_TARGETS_INTERVALS ?= $(ANN_DIR)/dbsnp_151.hg38.vcf.gz
 DBSNP_COMMON ?= $(ANN_DIR)/dbsnp_151.hg38.common.vcf.gz
 
 ifeq ($(findstring bed,$(TARGETS_FILE_INTERVALS)),bed)
-CHROMOSOMES := $(shell grep -v '@' $(TARGETS_FILE_INTERVALS) | cut -f1 | sort -V | uniq)
+CHROMOSOMES := $(shell grep -v '@' $(TARGETS_FILE_INTERVALS) | awk '$$1 !~ /^chrUn/ && $$1 !~ /_random$$/' | cut -f1 | sort -V | uniq)
 else
-CHROMOSOMES ?= $(foreach chr $(shell seq 1 22),chr$(chr)) chrX $(if $(findstring true,$(INCLUDE_CHR_Y)),chrY) chrM
+CHROMOSOMES ?= $(foreach chr,$(shell seq 1 22),chr$(chr)) chrX $(if $(findstring true,$(INCLUDE_CHR_Y)),chrY) chrM
 endif
 
 RECAL_CHR = chr2
