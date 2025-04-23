@@ -36,14 +36,14 @@ define brass-tumor-normal
 # Main call
 
 brass/$1_$2.brass_wrap.log : bam/$1.bam bam/$2.bam bam/$1.bam.bas bam/$2.bam.bas
-	$$(call RUN,2,8G,$$(RESOURCE_REQ_MEDIUM),$$(SINGULARITY_MODULE),"\
+	$$(call RUN,2,32G,$$(RESOURCE_REQ_MEDIUM),$$(SINGULARITY_MODULE),"\
 	$$(BRASS) brass.pl $$(BRASS_OPTS) \
 	-ss $$(SAMPSTAT)/$2.txt \
 	-t $$< \
-	-c 2 \
 	-n $$(<<) \
 	-tn $1 \
 	-nn $2 \
+	-c 2 \
 	-o brass/$1_$2 && touch $$@")
 
 endef
