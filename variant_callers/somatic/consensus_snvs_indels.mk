@@ -22,7 +22,7 @@ $(info SAMPLE_PAIRS = $(SAMPLE_PAIRS))
 
 # Main target to create consensus VCF
 all: $(foreach pair,$(SAMPLE_PAIRS), \
-	vcf/$(tumor.$(pair))_$(normal.$(pair)).consensus_$(TYPE).$(CALLER_STRING).som_ad_ft.nft.hotspot.pass.vcf)
+	vcf/$(tumor.$(pair))_$(normal.$(pair)).consensus_$(TYPE).$(MIN_CALLERS).$(CALLER_STRING).som_ad_ft.nft.hotspot.pass.vcf)
 
 
 # Preprocess step to normalize and annotate each caller's VCF
@@ -41,7 +41,7 @@ $(foreach pair,$(SAMPLE_PAIRS), \
 
 # Generate consensus VCF for each sample pair and all callers with bcftools isec
 define consensus
-vcf/$1_$2.consensus_$(TYPE).$(CALLER_STRING).som_ad_ft.nft.hotspot.pass.vcf: $(foreach caller,$(CALLERS),vcf/$1_$2.$(caller).som_ad_ft.nft.hotspot.pass.norm.tagged.vcf.gz)
+vcf/$1_$2.consensus_$(TYPE).$(MIN_CALLERS).$(CALLER_STRING).som_ad_ft.nft.hotspot.pass.vcf: $(foreach caller,$(CALLERS),vcf/$1_$2.$(caller).som_ad_ft.nft.hotspot.pass.norm.tagged.vcf.gz)
 	$$(INIT) module load $$(BCFTOOLS_MODULE); \
 	bcftools isec -n+$(MIN_CALLERS) -w1 $(foreach caller,$(CALLERS),vcf/$1_$2.$(caller).som_ad_ft.nft.hotspot.pass.norm.tagged.vcf.gz) -o $$@
 	rm -f $(foreach caller,$(CALLERS),vcf/$1_$2.$(caller).som_ad_ft.nft.hotspot.pass.norm.tagged.vcf.gz)
