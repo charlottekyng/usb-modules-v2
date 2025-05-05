@@ -22,7 +22,7 @@ $(info SAMPLE_PAIRS = $(SAMPLE_PAIRS))
 
 # Main target to create consensus VCF
 all: $(foreach pair,$(SAMPLE_PAIRS), \
-	vcf/$(tumor.$(pair))_$(normal.$(pair)).consensus_$(TYPE).$(CALLER_STRING).som_ad_ft.nft.hotspot.pass.norm.tagged.vcf.gz)
+	vcf/$(tumor.$(pair))_$(normal.$(pair)).consensus_$(TYPE).$(CALLER_STRING).som_ad_ft.nft.hotspot.pass.vcf)
 
 
 # Preprocess step to normalize and annotate each caller's VCF
@@ -41,14 +41,14 @@ $(foreach pair,$(SAMPLE_PAIRS), \
 
 # Generate consensus VCF for each sample pair and all callers with bcftools isec
 define consensus
-vcf/$1_$2.consensus_$(TYPE).$(CALLER_STRING).som_ad_ft.nft.hotspot.pass.norm.tagged.vcf.gz: $(foreach caller,$(CALLERS),vcf/$1_$2.$(caller).som_ad_ft.nft.hotspot.pass.norm.tagged.vcf.gz)
+vcf/$1_$2.consensus_$(TYPE).$(CALLER_STRING).som_ad_ft.nft.hotspot.pass.vcf: $(foreach caller,$(CALLERS),vcf/$1_$2.$(caller).som_ad_ft.nft.hotspot.pass.norm.tagged.vcf.gz)
 	$$(INIT) module load $$(BCFTOOLS_MODULE); \
 	bcftools isec -n+$(MIN_CALLERS) -w1 $(foreach caller,$(CALLERS),vcf/$1_$2.$(caller).som_ad_ft.nft.hotspot.pass.norm.tagged.vcf.gz) \
 		-Oz -o vcf/tmp.$1_$2.consensus.vcf.gz
 	bcftools annotate \
 		--header-lines <(echo '##INFO=<ID=CALLERS,Number=.,Type=String,Description="Variant caller(s) that detected this variant">') \
 		-I +'%INFO/CALLERS=$(MIN_CALLERS) out of $(CALLERS)' \
-		-Oz -o $$@ \
+		-o $$@ \
 		vcf/tmp.$1_$2.consensus.vcf.gz
 	rm -f vcf/tmp.$1_$2.consensus.vcf.gz
 	rm -f $(foreach caller,$(CALLERS),vcf/$1_$2.$(caller).som_ad_ft.nft.hotspot.pass.norm.tagged.vcf.gz)
