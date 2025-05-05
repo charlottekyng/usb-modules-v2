@@ -99,6 +99,10 @@ TARGETS += mutation_summary
 mutation_summary :
 	$(call RUN_MAKE,usb-modules-v2/summary/mutationSummary.mk)
 
+TARGETS += consensus_snvs_indels
+consensus_snvs_indels :
+	$(call RUN_MAKE,usb-modules-v2/variant_callers/somatic/consensus_snvs_indels.mk)
+
 TARGETS += pon
 pon :
 	$(call RUN_MAKE,usb-modules-v2/variant_callers/somatic/pon.mk)
