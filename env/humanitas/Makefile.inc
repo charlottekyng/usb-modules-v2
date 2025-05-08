@@ -10,7 +10,7 @@ BIN_DIR ?= $(USR_DIR)/local/bin
 MODULE_SCRIPTS_DIR ?= usb-modules-v2/scripts
 LD_LIBRARY_PATH = $(USR_DIR)/local/MCR_R2014a/v83/runtime/glnxa64:$(USR_DIR)/local/MCR_R2014a/v83/bin/glnxa64:$(USR_DIR)/local/MCR_R2014a/v83/sys/os/glnxa64
 IMG_DIR ?= $(USR_DIR)/singularity
-
+SINGULARITY_BIND ?=
 CONDA_DIR ?= $(USR_DIR)/conda
 SV_PON_DIR ?= $(GROUP_DIR)/ref/PoN/hg38/wgs/PDAC_AMPAC/gridss/pondir/
 HOTSPOTS_DIR ?= $(USR_DIR)/local/cancer_hotspots
@@ -248,6 +248,9 @@ DELLY ?= $(SINGULARITY_EXEC) $(DELLY_IMG)
 
 BRASS_IMG ?= $(IMG_DIR)/BRASS/brass_v6.3.4.sif
 BRASS ?= $(SINGULARITY_EXEC) $(BRASS_IMG)
+
+CPGBIGWIG_IMG ?= $(IMG_DIR)/cpgbigwig/cgpbigwig.sif
+CPGBIGWIG ?= $(SINGULARITY_EXEC) $(CPGBIGWIG_IMG)
 
 GRIDSS_IMG ?= $(IMG_DIR)/GRIDSS/GRIDSS_2.13.1.sif
 GRIDSS ?= $(SINGULARITY_EXEC) $(GRIDSS_IMG)
