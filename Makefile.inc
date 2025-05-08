@@ -158,6 +158,7 @@ CHECK_VCF_HIGH_MODERATE_CMD = if [ `grep -v '^\#' $1 | egrep "HIGH|MODERATE" | w
 <<< = $(word 3,$^)
 <<<< = $(word 4,$^)
 <<<<< = $(word 5,$^)
+<<<<<< = $(word 6,$^)
 
 define R_INIT
 dir.create('$(@D)', showWarnings = F, recursive = T)
