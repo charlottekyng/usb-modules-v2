@@ -1,4 +1,5 @@
 include usb-modules-v2/Makefile.inc
+include usb-modules-v2/variant_callers/somatic/somaticVariantCaller.inc
 
 # Usage: make TYPE=snvs or make TYPE=indels
 TYPE ?= snvs
@@ -9,25 +10,21 @@ MIN_CALLERS ?= 2
 
 LOGDIR ?= log/consensus_$(TYPE).$(NOW)
 
-PHONY += all
+PHONY += all consensus_tables
 
 .DELETE_ON_ERROR:
 .SECONDARY:
 .PHONY: $(PHONY)
 
-$(info TYPE = $(TYPE))
-$(info CALLERS = $(CALLERS))
-$(info CALLER_STRING = $(CALLER_STRING))
-$(info SAMPLE_PAIRS = $(SAMPLE_PAIRS))
-
 # Main target to create consensus VCF
-all: $(foreach pair,$(SAMPLE_PAIRS), \
-	vcf/$(tumor.$(pair))_$(normal.$(pair)).consensus_$(TYPE).$(MIN_CALLERS).$(CALLER_STRING).som_ad_ft.nft.hotspot.pass.vcf)
+all: consensus_tables $(foreach pair,$(SAMPLE_PAIRS),vcf/$(tumor.$(pair))_$(normal.$(pair)).consensus.$(CALLER_STRING).som_ad_ft.nft.hotspot.pass.sufam.eff.dbsnp.cosmic.exac_nontcga.clinvar.gene_ann.nsfp.vcf)
 
+consensus_tables : $(call MAKE_TABLE_FILE_LIST,consensus.$(CALLER_STRING))
 
 # Preprocess step to normalize and annotate each caller's VCF
 define preprocess
-vcf/$1_$2.$3.som_ad_ft.nft.hotspot.pass.norm.tagged.vcf.gz: vcf/$1_$2.$3.som_ad_ft.nft.hotspot.pass.vcf
+vcf/$1_$2.$3.norm.tagged.vcf.gz: vcf/$1_$2.$3.som_ad_ft.nft.hotspot.pass.sufam.eff.dbsnp.cosmic.exac_nontcga.clinvar.gene_ann.nsfp.vcf
+
 	$$(INIT) module load $$(BCFTOOLS_MODULE); \
 	bcftools norm -f $(REF_FASTA) -m -both $$< -Oz -o $$@
 	bcftools index $$@
@@ -41,11 +38,11 @@ $(foreach pair,$(SAMPLE_PAIRS), \
 
 # Generate consensus VCF for each sample pair and all callers with bcftools isec
 define consensus
-vcf/$1_$2.consensus_$(TYPE).$(MIN_CALLERS).$(CALLER_STRING).som_ad_ft.nft.hotspot.pass.vcf: $(foreach caller,$(CALLERS),vcf/$1_$2.$(caller).som_ad_ft.nft.hotspot.pass.norm.tagged.vcf.gz)
+vcf/$1_$2.consensus.$(CALLER_STRING).som_ad_ft.nft.hotspot.pass.sufam.eff.dbsnp.cosmic.exac_nontcga.clinvar.gene_ann.nsfp.vcf: $(foreach caller,$(CALLERS),vcf/$1_$2.$(caller).norm.tagged.vcf.gz)
 	$$(INIT) module load $$(BCFTOOLS_MODULE); \
-	bcftools isec -n+$(MIN_CALLERS) -w1 $(foreach caller,$(CALLERS),vcf/$1_$2.$(caller).som_ad_ft.nft.hotspot.pass.norm.tagged.vcf.gz) -o $$@
-	rm -f $(foreach caller,$(CALLERS),vcf/$1_$2.$(caller).som_ad_ft.nft.hotspot.pass.norm.tagged.vcf.gz)
-	rm -f $(foreach caller,$(CALLERS),vcf/$1_$2.$(caller).som_ad_ft.nft.hotspot.pass.norm.tagged.vcf.gz.csi)
+	bcftools isec -n+$(MIN_CALLERS) -w1 $(foreach caller,$(CALLERS),vcf/$1_$2.$(caller).norm.tagged.vcf.gz) -o $$@
+	rm -f $(foreach caller,$(CALLERS),vcf/$1_$2.$(caller).norm.tagged.vcf.gz)
+	rm -f $(foreach caller,$(CALLERS),vcf/$1_$2.$(caller).norm.tagged.vcf.gz.csi)
 endef
 
 
@@ -53,3 +50,5 @@ endef
 $(foreach pair,$(SAMPLE_PAIRS), \
 	$(eval $(call consensus,$(tumor.$(pair)),$(normal.$(pair)))) \
 )
+
+include usb-modules-v2/vcf_tools/vcftools.mk
