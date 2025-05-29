@@ -63,8 +63,8 @@ GUNZIP ?= gunzip -c
 
 ANACONDA_MODULE ?= conda/anaconda3
 SINGULARITY_MODULE ?= singularity/4.1.2
-SINGULARITY_EXEC ?= singularity exec --cleanenv -B $(GROUP_DIR)/../ $(if SINGULARITY_BIND, -B $(SINGULARITY_BIND))
-SINGULARITY_RUN ?= singularity run --cleanenv -B $(GROUP_DIR)/../ $(if SINGULARITY_BIND, -B $(SINGULARITY_BIND))
+SINGULARITY_EXEC ?= singularity exec --cleanenv -B $(GROUP_DIR)/../ $(if $(SINGULARITY_BIND), -B $(SINGULARITY_BIND))
+SINGULARITY_RUN ?= singularity run --cleanenv -B $(GROUP_DIR)/../ $(if $(SINGULARITY_BIND), -B $(SINGULARITY_BIND))
 
 
 PERL_MODULE ?=
