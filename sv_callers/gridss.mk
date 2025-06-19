@@ -26,7 +26,7 @@ gridss/$1.vcf : bam/$2.bam bam/$1.bam
 	$$(if $$(findstring hg38,$$(REF)),-b $$(BED_DIR)/ENCFF356LFX.bed) \
 	$$(if $$(findstring b37,$$(REF)),-b $$(BED_DIR)/ENCFF001TDO.bed) \
 	-r $$(REF_FASTA) \
-	-s preprocess,assemble,call \
+	-s preprocess$$(,)assemble$$(,)call \
 	--skipsoftcliprealignment \
 	-o $$@ \
 	$$^")
