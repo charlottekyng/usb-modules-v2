@@ -21,11 +21,13 @@ define gridss-tumor-normal
 
 # Main call for tumor-normal pairs
 gridss/$1.vcf : bam/$2.bam bam/$1.bam
-	$$(call RUN,1,$$(RESOURCE_REQ_HIGH_MEM),$$(RESOURCE_REQ_MEDIUM),$$(SINGULARITY_MODULE),"\
+	$$(call RUN,8,$$(RESOURCE_REQ_HIGH_MEM),$$(RESOURCE_REQ_MEDIUM),$$(SINGULARITY_MODULE),"\
 	$$(GRIDSS) gridss \
 	$$(if $$(findstring hg38,$$(REF)),-b $$(BED_DIR)/ENCFF356LFX.bed) \
 	$$(if $$(findstring b37,$$(REF)),-b $$(BED_DIR)/ENCFF001TDO.bed) \
 	-r $$(REF_FASTA) \
+	-s preprocess,assemble,call \
+	--skipsoftcliprealignment \
 	-o $$@ \
 	$$^")
 
@@ -33,7 +35,7 @@ gridss/$1.vcf : bam/$2.bam bam/$1.bam
 gridss/$1.somatic.vcf : gridss/$1.vcf $(SV_PON_DIR)
 	$$(call RUN,1,$$(RESOURCE_REQ_HIGH_MEM),$$(RESOURCE_REQ_MEDIUM),$$(SINGULARITY_MODULE),"\
 	$$(GRIDSS) gridss_somatic_filter \
-	--pondir $$(<<)) \
+	--pondir $$(<<) \
 	--input $$< \
 	--output $$@ \
 	--fulloutput gridss/$1.full.vcf.gz \
