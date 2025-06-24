@@ -34,12 +34,12 @@ gridss/$1.vcf : bam/$2.bam bam/$1.bam
 # Somatic filtering
 gridss/$1.somatic.vcf : gridss/$1.vcf $(SV_PON_DIR)
 	$$(call RUN,1,$$(RESOURCE_REQ_HIGH_MEM),$$(RESOURCE_REQ_MEDIUM),$$(SINGULARITY_MODULE),"\
-	$$(GRIDSS) gridss_somatic_filter \
+	$$(GRIDSS) Rscript $$(IMG_DIR)/GRIDSS/gridss-2.13.2/scripts/gridss_somatic_filter \
 	--pondir $$(<<) \
 	--input $$< \
 	--output $$@ \
 	--fulloutput gridss/$1.full.vcf.gz \
-	--scriptdir $(dirname $(which gridss_somatic_filter))")
+	--scriptdir $$(IMG_DIR)/GRIDSS/gridss-2.13.2/scripts/")
 
 endef
 
