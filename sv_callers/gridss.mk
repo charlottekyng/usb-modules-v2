@@ -21,6 +21,7 @@ define gridss-tumor-normal
 
 # Main call for tumor-normal pairs
 gridss/$1.vcf : bam/$2.bam bam/$1.bam
+	mkdir -p gridss/gridss_tmp && \
 	$$(call RUN,8,$$(RESOURCE_REQ_HIGH_MEM),$$(RESOURCE_REQ_MEDIUM),$$(SINGULARITY_MODULE),"\
 	$$(GRIDSS) gridss \
 	$$(if $$(findstring hg38,$$(REF)),-b $$(BED_DIR)/ENCFF356LFX.bed) \
@@ -28,6 +29,7 @@ gridss/$1.vcf : bam/$2.bam bam/$1.bam
 	-r $$(REF_FASTA) \
 	-s preprocess$$(,)assemble$$(,)call \
 	--skipsoftcliprealignment \
+	--workingdir gridss/gridss_tmp \
 	-o $$@ \
 	$$^")
 
