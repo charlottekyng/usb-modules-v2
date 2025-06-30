@@ -35,8 +35,8 @@ if (length(arguments$args) != 2) {
 # barcodes on y axis
 if ("showtext" %in% rownames(installed.packages())) {
     suppressMessages(library(showtext))
-    font.add("DejaVuSansMono", "DejaVuSansMono.ttf")
-    showtext.auto()
+    font_add("DejaVuSansMono", "DejaVuSansMono.ttf")
+    showtext_auto()
     fontfamily <- "DejaVuSansMono"
 } else {
     fontfamily <- "serif"

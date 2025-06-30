@@ -78,9 +78,13 @@ genesGR <- genes %$% GRanges(seqnames = chrom, ranges = IRanges(start, end), ban
 
 cat ("Start reading Rdata files\n")
 mm <- lapply(facetsFiles, function(f) {
-	attach(f) # for some reason we get errors downstream if using 'load'.
-	tab <- fit$cncf
-	detach()
+
+	# Load only the required objects into a local environment
+	cat("Reading file ", f, "\n")
+	e <- new.env()
+	load(f, envir = e)
+
+	tab <- e$fit$cncf
 	tab$chrom[which(tab$chrom==23)] <- "X"
 	tabGR <- tab %$% GRanges(seqnames = chrom, ranges = IRanges(start, end))
 	mcols(tabGR) <- tab %>% select(num.mark,cnlr.median:mafR.clust,cf.em:lcn.em)
@@ -100,20 +104,25 @@ mm <- lapply(facetsFiles, function(f) {
 		df$GL_ASCNA[df$tcn.em >= ploidy + 4] <- 2
 	}
 	if ("GL_LRR" %in% opt$summaryType) {
-		attach(f)
-		noise <- median(abs(out$jointseg$cnlr-  unlist(apply(out$out[,c("cnlr.median", "num.mark")], 1, 
-			function(x) {rep(x[1], each=x[2])}))))
 
-		lrr <- sort(out$jointseg$cnlr)
-		lrr <- lrr[round(0.25*length(lrr)):round(0.75*length(lrr))] 
+        lrr <- sort(e$out$jointseg$cnlr)
+        lrr <- lrr[round(0.25 * length(lrr)):round(0.75 * length(lrr))]
+
 		df$GL_LRR <- 0
 		df$GL_LRR[df$cnlr.median < median(lrr)-(2.5*sd(lrr))] <- -1
 		df$GL_LRR[df$cnlr.median < median(lrr)-(7*sd(lrr))] <- -2
 		df$GL_LRR[df$cnlr.median > median(lrr)+(2*sd(lrr))] <- 1
 		df$GL_LRR[df$cnlr.median > median(lrr)+(6*sd(lrr))] <- 2
-		detach()
 	}
-	df %>% select(hgnc, GL_ASCNA, GL_LRR, tcn.em, lcn.em, cnlr.median, cf.em) %>% ungroup
+	
+	df %<>% select(hgnc, GL_ASCNA, GL_LRR, tcn.em, lcn.em, cnlr.median, cf.em) %>% ungroup()
+	return(df)
+	rm(lrr, tab, ploidy, fo, tabGR, e, df)
+    gc()
+
+	cat("Finished reading file ", f, "\n")
+
+
 })
 names(mm) <- facetsFiles
 for (f in facetsFiles) {
