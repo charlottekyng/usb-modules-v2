@@ -49,7 +49,7 @@ plot_heatmap <- function(facets_tab, plot_file, sample_names=NULL, col=c("red", 
     chrsep <- cumsum(rle(mm$chrom)$lengths)
     chrmid <- c(0,chrsep[-length(chrsep)]) + (rle(mm$chrom)$lengths/2)
 
-    pdf(plot_file, width=7, height=10*length(sample_names))
+    pdf(plot_file, width=12, height=10*length(sample_names))
     par(mfrow=c(length(sample_names),1), mar=c(8,.5*(max(sapply(sample_names,nchar))),1,2))
     lapply(sample_names, function(x, mm) {
         mm2 <- mm[,rev(x)]; #for (i in 1:ncol(mm2)) { mm2[,i] <- as.numeric(mm2[,i]) }
