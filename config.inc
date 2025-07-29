@@ -57,7 +57,12 @@ SAMPLE_POOLEDNORM_FILE ?= samples.poolednorm.txt
 
 MERGE_SAMPLE_FILE ?= merge_samples.txt
 
-GENCODE_VER ?= v33
+
+ifeq ($(HPC),ubelix)
+  GENCODE_VER ?= v48
+else
+  GENCODE_VER ?= v33
+endif
 
 # is it a tumor-only dataset
 TUMOR_ONLY ?= false

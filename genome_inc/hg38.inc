@@ -69,14 +69,19 @@ GENE_REF_FLAT = $(ANN_DIR)/refFlat.txt
 
 GISTIC_REF ?= $(REF_DIR)/gistic/hg38.UCSC.add_miR.160920.refgene.mat
 
-ifeq ($(findstring scicore_ubuntu,$(HPC)),scicore_ubuntu)
+ifeq ($(HPC),scicore_ubuntu)
+  SNP_EFF_GENOME = GRCh38.99
+else ifeq ($(HPC),ubelix)
   SNP_EFF_GENOME = GRCh38.99
 else
   SNP_EFF_GENOME = GRCh38.86
 endif
 
-
-DB_NSFP ?= $(REF_DIR)/dbNSFP/GRCh38/dbNSFP3.2a.txt.gz
+ifeq ($(HPC),ubelix)
+  DB_NSFP ?= $(REF_DIR)/dbNSFP/5.2a/dbNSFP5.2a_grch38.gz
+else
+  DB_NSFP ?= $(REF_DIR)/dbNSFP/GRCh38/dbNSFP3.2a.txt.gz
+endif
 
 #MOSAICS_CHRFILE = $(GENOME_DIR)/human_g1k_v37_decoy.mosaics.chrfile
 
