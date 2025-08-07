@@ -11,9 +11,9 @@ LOGDIR ?= log/facets.$(NOW)
 SNPPILEUP_SUFFIX = q$(FACETS_SNP_PILEUP_MINMAPQ)_Q$(FACETS_SNP_PILEUP_MINBASEQ)_d$(FACETS_SNP_PILEUP_MAX_DEPTH)_r$(FACETS_SNP_PILEUP_MIN_DEPTH)_P$(FACETS_SNP_PILEUP_PSEUDO_SNPS)
 FACETS_SUFFIX = $(SNPPILEUP_SUFFIX)_bin$(FACETS_WINDOW_SIZE)_mingc$(FACETS_MINGC)_maxgc$(FACETS_MAXGC)_nhet$(FACETS_MIN_NHET)_cval$(FACETS_CVAL)
 
-facets : facets/cncf/all$(PROJECT_PREFIX).summary.txt facets/cncf/all$(PROJECT_PREFIX).cncf.txt\
-facets/cncf/all$(PROJECT_PREFIX).cncf.pdf.tar.gz facets/cncf/all$(PROJECT_PREFIX).cncf.png.tar.gz facets/cncf/all$(PROJECT_PREFIX).HetMarkFreq.txt \
-$(foreach pair,$(SAMPLE_PAIRS),facets/cncf/$(pair).Rdata) \
+facets : facets/cncf/all$(PROJECT_PREFIX).summary.txt facets/cncf/all$(PROJECT_PREFIX).cncf.txt facets/cncf/all$(PROJECT_PREFIX).HetMarkFreq.txt \
+facets/cncf/all$(PROJECT_PREFIX).cncf.pdf.tar.gz facets/cncf/all$(PROJECT_PREFIX).cncf.png.tar.gz facets/cncf/all$(PROJECT_PREFIX).cncf.txt.tar.gz \
+	$(foreach pair,$(SAMPLE_PAIRS),facets/cncf/$(pair).Rdata) \
 $(if $(findstring true,$(FACETS_RUN_GENE_CN)),facets/cncf/all$(PROJECT_PREFIX).geneCN.GL_ASCNA.pdf facets/cncf/all$(PROJECT_PREFIX).geneCN.GL_LRR.pdf facets/cncf/all$(PROJECT_PREFIX).geneCN.cnlr.median.pdf facets/cncf/all$(PROJECT_PREFIX).geneCN.tcn.em.pdf facets/cncf/all$(PROJECT_PREFIX).geneCN.lcn.em.pdf,)
 
 
@@ -169,13 +169,17 @@ facets/cncf/all$(PROJECT_PREFIX).cncf.txt : $(foreach pair,$(SAMPLE_PAIRS),facet
 		sed '/^chrom/d; s/^23/X/;' $$cncf | sed "s/^/$$samplename\t/" >> $@; \
 	done
 
-facets/cncf/all$(PROJECT_PREFIX).cncf.pdf.tar.gz : $(foreach pair,$(SAMPLE_PAIRS),facets/cncf/$(pair).cncf.pdf) $(foreach pair,$(SAMPLE_PAIRS),facets/cncf/$(pair).logR.pdf)
+facets/cncf/all$(PROJECT_PREFIX).cncf.pdf.tar.gz : $(foreach pair,$(SAMPLE_PAIRS),facets/cncf/$(pair).cncf.pdf)
 	$(call RUN,1,$(RESOURCE_REQ_LOW_MEM),$(RESOURCE_REQ_VSHORT),,"\
-	tar -czf $@ $^")
+	tar -chzf $@ $^")
 
 facets/cncf/all$(PROJECT_PREFIX).cncf.png.tar.gz : $(foreach pair,$(SAMPLE_PAIRS),facets/cncf/$(pair).cncf.png) 
 	$(call RUN,1,$(RESOURCE_REQ_LOW_MEM),$(RESOURCE_REQ_VSHORT),,"\
-	tar -czf $@ $^")
+	tar -chzf $@ $^")
+
+facets/cncf/all$(PROJECT_PREFIX).cncf.txt.tar.gz : $(foreach pair,$(SAMPLE_PAIRS),facets/cncf/$(pair).cncf.txt)
+	$(call RUN,1,$(RESOURCE_REQ_LOW_MEM),$(RESOURCE_REQ_VSHORT),,"\
+	tar -chzf $@ $^")
 
 define facets-TN-swap-check
 facets/cncf/$1_$2.HetMarkFreq.pdf : facets/cncf/$1_$2.HetMarkFreq.txt
