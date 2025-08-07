@@ -57,7 +57,12 @@ SAMPLE_POOLEDNORM_FILE ?= samples.poolednorm.txt
 
 MERGE_SAMPLE_FILE ?= merge_samples.txt
 
-GENCODE_VER ?= v33
+
+ifeq ($(HPC),ubelix)
+  GENCODE_VER ?= v48
+else
+  GENCODE_VER ?= v33
+endif
 
 # is it a tumor-only dataset
 TUMOR_ONLY ?= false
@@ -625,6 +630,7 @@ PVACSEQ_ALGO ?= NetMHCpan
 PVACSEQ_USE_LOCAL_IEDB ?= true
 
 RSEM_NUM_CORES ?= 4
+RSEM_CALC_PME ?=
 
 ifeq ($(STRAND_SPECIFICITY),NONE)
 RSEM_STRANDEDNESS ?= none
@@ -636,7 +642,7 @@ ifeq ($(STRAND_SPECIFICITY),SECOND_READ_TRANSCRIPTION_STRAND)
 RSEM_STRANDEDNESS ?= reverse
 endif
 
-RSEM_OPTIONS ?= --alignments --no-bam-output -p $(RSEM_NUM_CORES) --strandedness $(RSEM_STRANDEDNESS)
+RSEM_OPTIONS ?= --alignments --no-bam-output -p $(RSEM_NUM_CORES) --strandedness $(RSEM_STRANDEDNESS) $(if $(RSEM_CALC_PME),--calc-pme) --temporary-folder $(TMPDIR)/rsem_temp
 
 endif
 CONFIG_INC = true
