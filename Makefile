@@ -182,6 +182,10 @@ TARGETS += caveman
 caveman :
 	$(call RUN_MAKE,usb-modules-v2/variant_callers/somatic/caveman.mk)
 
+TARGETS += deepsomatic
+deepsomatic :
+	$(call RUN_MAKE,usb-modules-v2/variant_callers/somatic/deepsomatic.mk)
+
 TARGETS += varscan_cnv
 varscan_cnv :
 	$(call RUN_MAKE,usb-modules-v2/copy_number/varscanCNV.mk)

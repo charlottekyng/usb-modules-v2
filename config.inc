@@ -289,7 +289,15 @@ USE_BAM_CLIPOVERLAP ?= true
 
 MANTA_NUM_CORES ?= 12
 MANTA_MEM ?= 24
+
 SVABA_NUM_CORES ?= 8
+
+DEEPSOMATIC_NUM_CORES ?= 12
+ifeq ($(CAPTURE_METHOD),BAITS)
+  DEEPSOMATIC_MODEL ?= $(if $(findstring true,$(TUMOR_ONLY)),WES_TUMOR_ONLY,WES)
+else
+  DEEPSOMATIC_MODEL ?= $(if $(findstring true,$(TUMOR_ONLY)),WGS_TUMOR_ONLY,WGS)
+endif
 
 ################################################
 ###### Somatic variant filters #################

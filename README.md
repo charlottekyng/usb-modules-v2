@@ -360,6 +360,14 @@ frequently accounting for 90%+ of all somatic variants identified. You may have 
 	Proceed to regular somatic mutations/CNA calling. If you don't have normals captured and sequenced in the same project, find the closest thing from our collection of data. Any normal is better than no normal.
 	* make a panel of normal for filtering mutations. 
 
+#### Tumor-only somatic calling (without poolednorm)
+Use `make deepsomatic` to call somatic variants without `poolednorm_bam`. You will have to:
+* Set `TUMOR_ONLY = true` in your Makefile.
+* Should not have `sample_sets.txt` in the workdir (as this triggers VCF filtering using the matched normal, causing an error).
+
+By default, deepsomatic's model will automatically be set to `WES_TUMOR_ONLY` or `WGS_TUMOR_ONLY`. If you have FFPE samples, or other sequencing types, you can use other models by setting `DEEPSOMATIC_MODEL` in your Makefile (see https://github.com/google/deepsomatic).
+
+**Note about `deepsomatic`**: for now it only works in tumor-only mode. However, deepsomatic can also be used with a matched normal. The pipeline will run it, but it will fail during the VCF depth filtering because deepsomatic does not output the normal sample in the VCF. This will be changed in future versions.
 
 ### Somatic CNA detection
 
