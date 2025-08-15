@@ -364,6 +364,7 @@ frequently accounting for 90%+ of all somatic variants identified. You may have 
 Use `make deepsomatic` to call somatic variants without `poolednorm_bam`. You will have to:
 * Set `TUMOR_ONLY = true` in your Makefile.
 * Should not have `sample_sets.txt` in the workdir (as this triggers VCF filtering using the matched normal, causing an error).
+* Set `USE_SUFAM = false` in your Makefile (otherwise the pipeline looks for sample pairs, causing an error).
 
 By default, deepsomatic's model will automatically be set to `WES_TUMOR_ONLY` or `WGS_TUMOR_ONLY`. If you have FFPE samples, or other sequencing types, you can use other models by setting `DEEPSOMATIC_MODEL` in your Makefile (see https://github.com/google/deepsomatic).
 
