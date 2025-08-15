@@ -374,7 +374,7 @@ PIZZLY_FLATTEN_JSON ?= $(USR_DIR)/local/pizzly_v0.37.3/scripts/flatten_json.py
 MOSAICS_RUN ?= $(RSCRIPT) usb-modules-v2/chipseq/mosaics_run.R
 MOSAICS_CONSTRUCTBINS ?= $(RSCRIPT) usb-modules-v2/chipseq/mosaics_constructBins.R
 
-MACS2 ?= macs
+MACS2 ?= macs2
 
 MSISENSOR ?= $(BIN_DIR)/msisensor_Linux_x86_64
 
