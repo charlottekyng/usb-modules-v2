@@ -731,11 +731,11 @@ make sig_profiler_assignment CALLER_PREFIX=mutect2
 ```
 #### Whole-exome/genome sequencing on Illumina for germline analysis
 ```
-make bwamem genotype2 bam_metrics gatk
+make bwamem genotype bam_metrics gatk
 ```
 #### RNA-sequencing on Illumina
 ```
-make star genotype2 bam_metrics rsem
+make star genotype bam_metrics rsem
 ```
 #### ChIP-seq on Illumina (75bp reads or longer)
 ```
@@ -747,7 +747,7 @@ make bwaaln mosaics
 ```
 #### Targeted panel sequencing on Ion Torrent (from bam files from the Torrent server)
 ```
-make fix_rg genotype2 bam_metrics tvc_somatic varscan_cnv hotspot_screen mutation_summary
+make fix_rg genotype bam_metrics tvc_somatic varscan_cnv hotspot_screen mutation_summary
 ```
 ## Example use case 1: Whole-genome somatic analysis
 
