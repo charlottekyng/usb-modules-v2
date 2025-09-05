@@ -253,7 +253,7 @@ Most of the following will work for both Illumina and Ion Torrent sequencing, un
 ```
 make bam_metrics       # This should be done for every dataset
 make fastqc            # This is occasionally useful for checking the quality of the sequencing (but isn't too useful most of the time)
-make genotype2         # This is useful for confirming that sample pairs/sets came from the correct patient
+make genotype         # This is useful for confirming that sample pairs/sets came from the correct patient
 make facets_poolednorm # (Illumina only) This is useful for confirming that the germline samples are not contaminated with tumor cells
 make facets            # (Illumina only) This is useful for checking tumor content
 ```
