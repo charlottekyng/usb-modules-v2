@@ -53,7 +53,7 @@ git pull
 
 ### Setting up sample sheets
 
-1. Sample sheet (required, default: `samples.txt`), consisting of a single column of sample names. 
+1. Sample sheet (required, default: `samples.txt`), consisting of a single column of sample names. This sample sheet is used for all single-sample operations, such as alignment, QC metrics, single-sample variant calling.
     ```
     SAMPLE1T
     SAMPLE1N
@@ -63,13 +63,13 @@ git pull
     SAMPLE3T2
     SAMPLE3N
     ```
-1. Sample sets (required for `ANALYSIS_TYPE = SOMATIC`, default: `sample_sets.txt`, consisting of samples within sample sheet above, each row contains all samples from a given individual, with the germline sample last, tab or space delimited
+1. Sample sets (required for `ANALYSIS_TYPE = SOMATIC`, default: `sample_sets.txt`), consisting of samples within sample sheet above, each row contains all samples from a given individual, with the germline sample last, tab or space delimited. This sample sets file is used for all patient-specific operations, i.e. somatic analyses.
     ```
     SAMPLE1T SAMPLE1N
     SAMPLE2T SAMPLE2N
     SAMPLE3T1 SAMPLE3T2 SAMPLE3N
     ```
-1. Sample splits (required for one of these two scenarios, depending on your data, default: `samples.split.txt`)
+1. Sample splits (required for one of these two scenarios, depending on your data, default: `samples.split.txt`), note all samples in this file *must* appear in the `samples.txt` file and vice versa. This sample splits file is used for merging fastq/bams.
     1. multiple sets of fastqs per sample, in which case the first column is the <SAMPLE_NAME>, the second column is <SAMPLE_NAME>\_<RUN_NAME>. This is usually required with Illumina sequencing, since the samples are usually multiplexed and sequenced over several lanes/runs. See below on setting up the `unprocessed_fastq` directory; or 
         ```
         SAMPLE1N SAMPLE1N_RUN1
@@ -108,7 +108,7 @@ The preferred format is XXXnnn[TN]mm, where
 Obviously, this format does not apply to all types of projects, and some variation is of course permissible.
 Here are the rules
 * all alphanumeric characters are allowed `[A-Za-z0-9]` 
-* _ABSOLUTE NO_ white space or underscore (`_`)
+* _ABSOLUTELY NO_ white space or underscore (`_`)
 * the only (tested) permissible symbol is `-`. Most other symbols are either known to break the pipeline or are untested.
 * sample names should start with an alphabet [A-Za-z], although it is not know if the pipeline would actually fall over otherwise.
 
@@ -156,7 +156,7 @@ _before_ the `include usb-modules-v2/Makefile` line.
 Here are the most basic ones and these should almost always be specified.
 ```
 # example values:  b37, hg19_ionref, hg38 etc. Values permitted will have a `usb-modules-v2/genome_inc/$<REF>` directory
-REF = b37
+REF = hg38
 
 # possible values: [ILLUMINA|IONTORRENT]
 SEQ_PLATFORM = ILLUMINA
@@ -173,7 +173,7 @@ PAIRED_END = true
 # possible values: [SOMATIC|GERMLINE]
 ANALYSIS_TYPE = SOMATIC
 
-# specify which HPC you are using: [scicore|humanitas]
+# specify which HPC you are using: [scicore|humanitas|ubelix|scicore_ubuntu] 
 HPC = humanitas
 
 include usb-modules-v2/Makefile
@@ -183,6 +183,22 @@ Most parameters are automatically set to the basic appropriate values if you set
 Not all combinations of REF and PANEL are permissible. With the exception of `PANEL=NONE`, make sure your combination exists as a `usb-modules-v2/genome_inc/$<REF>/$<PANEL>.inc` file.
 
 Additional user-configurable parameters are defined (with default values) in the `usb-modules-v2/config.inc` file. 
+
+Here are some commonly used application-specific parameters:
+
+```
+# For somatic variant calling with strelka2 when your PE reads are not expected to overlap a lot (it is a heavy operation)
+USE_BAM_CLIPOVERLAP = false
+
+# If you need to call small variants from RNA-seq data
+POST_PROCESS_RNA_BAM = true
+
+# If you need FACETS-predicted copy number values annotated to variant VCFs. This is actually usually needed.
+ANN_FACETS = true
+
+# For somatic small variant calling, you might want to specify. See the ref/PoN directory for available PoN. Otherwise, the pipeline will build a PoN from your current dataset
+PON_VCF = /home/ng_piscuoglio/pipeline/ref/PoN/hg38/wgs/PDAC_AMPAC/mutect2/pon.mutect2.vcf.gz
+```
 
 Some `Makefile` templates are provided in `usb-modules-v2/Makefile_templates/`. Please *copy* them to your project directory and do not remove them from `usb-modules-v2/`.
 ```
@@ -237,7 +253,7 @@ Most of the following will work for both Illumina and Ion Torrent sequencing, un
 ```
 make bam_metrics       # This should be done for every dataset
 make fastqc            # This is occasionally useful for checking the quality of the sequencing (but isn't too useful most of the time)
-make genotype          # This is useful for confirming that sample pairs/sets came from the correct patient
+make genotype2         # This is useful for confirming that sample pairs/sets came from the correct patient
 make facets_poolednorm # (Illumina only) This is useful for confirming that the germline samples are not contaminated with tumor cells
 make facets            # (Illumina only) This is useful for checking tumor content
 ```
@@ -253,7 +269,7 @@ The main purpose of PoN is to account for technology-specific sequencing artefac
 For generating the PoN, the most straightforward approach is to use a SAMPLE_PON_FILE (default is `samples.pon.txt`), which contains a list of normal samples to be used.
 If you have matched tumor and normal samples, and you have not defined a SAMPLE_PON_FILE, the PoN will be created from the normals listed in `sample_sets.txt`. The default location of the PoN in case of IonTorrent is `tvc/pon.tvc.vcf` and in case of Illumina `mutect2/pon.mutect2.vcf`.
 
-It is common practice to use a third-party PoN. Just make sure to put the PoN VCF file in its expected location (see above) before running the variant calling modules. Alternatively, you can use a different location of the PoN VCF by setting the `PON_VCF` variable in your `Makefile`.
+It is common practice to use a third-party PoN. Just make sure to put the PoN VCF file in its expected location (see above) before running the variant calling modules. Alternatively, you can use a different location of the PoN VCF by setting the `PON_VCF` variable in your `Makefile`. We have a set of PoNs for our internal use under `ref/PoN`
 
 ### Germline variant calling
 
@@ -286,7 +302,7 @@ make mutect2             ## recommended
 make strelka2            ## recommended
 make muse                ## somehow old, could be used for consensus calling
 make caveman             ## somehow old, could be used for consensus calling
-make mutation_summary
+make mutation_summary    ## to generate an Excel file for protein-coding variants, with simplified columns (see below)
 ```
 
 For Ion Torrent, TVC (both SNVs and indels) is implemented and tested.
@@ -490,12 +506,34 @@ Usage: `make detin`
 *Pre-requisites:* variant calls.
 When running mutational signatures modules, you need to specify only one `CALLER_PREFIX`. For example:
 ```
-make deconstruct_sigs CALLER_PREFIX=mutect2
+make sig_profiler_assignment CALLER_PREFIX=mutect2
 ```
 
-Currently implemented: `deconstruct_sigs` & `mutational_patterns`.
+Currently implemented: `SigProfilerAssignment`, `deconstruct_sigs` & `mutational_patterns`.
 
-#### deconstructSigs
+#### SigProfilerAssignment
+Usage:
+```
+make sig_profiler_assignment CALLER_PREFIX=<caller>
+```
+In most cases `caller` will be `mutect2`.
+
+Optional parameters:
+1. SIG_PROFILER_COSMIC_VERSION (Defines the version of the COSMIC reference signatures. Takes a positive float among `1`, `2`, `3`, `3.1`, `3.2`, `3.3`, and `3.4`. The default value is `3.4`.).
+2. SIG_PROFILER_COSMIC_SIGNATURE_DB (Path to the input set of known mutational signatures (only in case that COSMIC reference signatures are not used), a tab delimited file that contains the signature matrix where the rows are mutation types and columns are signature IDs.) 
+3. SIG_PROFILER_COSMIC_EXCLUDE_SIG_SUBGROUPS (Removes the signatures corresponding to specific subtypes to improve refitting (only available when using default COSMIC reference signatures). The default value is `None`, which corresponds to use all COSMIC signatures.)
+
+#### MutationalPatterns
+Usage:
+```
+make mutational_patterns CALLER_PREFIX=<caller>
+```
+In most cases `caller` will be `mutect2`.
+
+Important parameter:
+1. MUT_SIG_COSMIC (currently only `signatures.exome.cosmic.v3.may2019`. Eventually we will add the possibility to load external signature files).
+
+#### deconstructSigs (DEPRACATED)
 Usage:
 ```
 make deconstruct_sigs CALLER_PREFIX=<caller>
@@ -519,27 +557,6 @@ If `SIGNATURES` does not match any of the internal signatures listed above, the 
 **Note** that the signature matrix should match your genome build and type of data. The internal signatures `*.cosmic.v3.may2019` are based on `hg19`.
 It is recommended to keep the default `DECONSTRUCTSIGS_TRI_COUNT_METHOD`, and to provide the signature reference that matches your data. If you have `hg38` and you need the exome-normalised signatures you can use `/scicore/home/pissal00/GROUP/ref_nobackup/mut_sig_cosmic/COSMIC_v3.2_SBS_GRCh38_exome-sigfit.txt`, which was normalised using the `convert_signatures()` function from [sigfit](https://github.com/kgori/sigfit).
 
-#### MutationalPatterns
-Usage:
-```
-make mutational_patterns CALLER_PREFIX=<caller>
-```
-In most cases `caller` will be `mutect2`.
-
-Important parameter:
-1. MUT_SIG_COSMIC (currently only `signatures.exome.cosmic.v3.may2019`. Eventually we will add the possibility to load external signature files).
-
-#### SigProfilerAssignment
-Usage:
-```
-make sig_profiler_assignment CALLER_PREFIX=<caller>
-```
-In most cases `caller` will be `mutect2`.
-
-Optional parameters:
-1. SIG_PROFILER_COSMIC_VERSION (Defines the version of the COSMIC reference signatures. Takes a positive float among `1`, `2`, `3`, `3.1`, `3.2`, `3.3`, and `3.4`. The default value is `3.4`.).
-2. SIG_PROFILER_COSMIC_SIGNATURE_DB (Path to the input set of known mutational signatures (only in case that COSMIC reference signatures are not used), a tab delimited file that contains the signature matrix where the rows are mutation types and columns are signature IDs.) 
-3. SIG_PROFILER_COSMIC_EXCLUDE_SIG_SUBGROUPS (Removes the signatures corresponding to specific subtypes to improve refitting (only available when using default COSMIC reference signatures). The default value is `None`, which corresponds to use all COSMIC signatures.)
 
 
 ### RNA-seq transcript quantification
@@ -598,10 +615,12 @@ Final results will appear in the `step3` subfolder.
 
 ### ChIP-seq peak detection
 MOSAICS is implemented but not very well tested. In particular, it almost always falls over with paired-end data.
+MACS2 should work.
 
 *Pre-requisites:* BAMs in `bam/` after alignment with an appropriate aligner (bwaaln or bwamem).
 ```
 make mosaics
+make macs2
 ```
 
 ### Other downstream tools
@@ -684,6 +703,22 @@ Check for typos. Check the log to see if the parameters for individual steps are
 or there were transient system glitches that cause something to be stuck. If the tool fails on the same sample several times, then tell Charlotte...
 
 1. If your parameters seem to be correct but the commands in the log file are not correct, there could be a bug (or ten).
+
+### To do a dryrun...
+
+It is often a good idea to do a dry run of the pipeline to check that the commands being generated are correct.
+
+An example of how this can be done:
+Add an alias to your `~/.bashrc`
+```
+alias drymake="grep -v include Makefile | grep -v \"#\" | tr -sd \" \" \"\" | tr -s \"\n\" \" \"
+```
+Then to test a module, e.g. facets
+```
+make -nf usb-modules-v2/copy_number/facets.mk `drymake`|less
+```
+This prints the commands and jobs to be submitted to less without actually running the code. Here you can work through the commands to check parameters, to check the order of the commands etc etc.
+
 ---
 
 # Example recipes
