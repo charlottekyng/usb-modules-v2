@@ -137,5 +137,18 @@ include usb-modules-v2/variant_callers/somatic/pon.mk
 
 endif #ifdef SAMPLE_PAIRS
 
+ifeq ($(findstring true,$(TUMOR_ONLY)),true)
+define som-ad-ft-tumor-only
+vcf/$1.%.som_ad_ft.vcf : vcf/$1.%.vcf
+	$$(call RUN,1,$$(RESOURCE_REQ_MEDIUM_MEM),$$(RESOURCE_REQ_SHORT),$$(JAVA8_MODULE),"\
+		$$(call GATK,VariantFiltration,$$(RESOURCE_REQ_MEDIUM_MEM_JAVA)) -R $$(REF_FASTA) -V $$< -o $$@ \
+		--filterExpression 'vc.getGenotype(\"$1\").getAD().1 < $(MIN_TUMOR_AD)' \
+		--filterName tumorVarAlleleDepth \
+		--filterExpression 'vc.getGenotype(\"$1\").getDP() <= $$(MIN_TUMOR_DEPTH)' \
+		--filterName depthFilter && sed -i 's/getGenotype(\"\([^\"]*\)\")/getGenotype(\1)/g' $$@ && $$(RM) $$< $$<.idx")
+endef
+$(foreach sample,$(SAMPLES),$(eval $(call som-ad-ft-tumor-only,$(sample))))
+endif
+
 VCFTOOLS_MK_NONTVC = true
 endif

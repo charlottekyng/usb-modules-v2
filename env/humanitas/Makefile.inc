@@ -258,6 +258,10 @@ GRIDSS ?= $(SINGULARITY_EXEC) $(GRIDSS_IMG)
 SVABA_IMG ?= $(IMG_DIR)/SvABA/svaba_1.2.0-ab39e3f.sif
 SVABA ?= $(SINGULARITY_EXEC) $(SVABA_IMG)
 
+DEEPSOMATIC_IMG ?= $(IMG_DIR)/deepsomatic/deepsomatic_1.9.0.sif
+DEEPSOMATIC ?= $(SINGULARITY_EXEC) $(DEEPSOMATIC_IMG)
+
+
 #SNP_EFF_CONFIG ?= usb-modules-v2/vcf_tools/snpEff.config
 SNP_EFF_DATA_DIR ?= $(REF_DIR)/snpeff/4.3
 SNP_EFF = $(JAVA) -Xmx$(1) -jar $(USR_DIR)/local/snpEff/snpEff/snpEff.jar
@@ -385,7 +389,7 @@ PIZZLY_FLATTEN_JSON ?= $(USR_DIR)/local/pizzly_v0.37.3/scripts/flatten_json.py
 MOSAICS_RUN ?= $(RSCRIPT) usb-modules-v2/chipseq/mosaics_run.R
 MOSAICS_CONSTRUCTBINS ?= $(RSCRIPT) usb-modules-v2/chipseq/mosaics_constructBins.R
 
-MACS2 ?= macs
+MACS2 ?= macs2
 
 MSISENSOR ?= $(BIN_DIR)/msisensor_Linux_x86_64
 MSISENSORPRO ?= $(BIN_DIR)/msisensor-pro-v1.3.0

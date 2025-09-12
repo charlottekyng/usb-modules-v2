@@ -2,26 +2,25 @@
 ############# DEFINE PATHS TO MAIN DIRS ###############
 #######################################################
 
-GROUP_DIR ?= /scicore/home/pissal00/GROUP
-USR_DIR ?= $(GROUP_DIR)/usr_nobackup
-JAR_DIR ?= $(USR_DIR)/local/lib/java
+GROUP_DIR ?= /storage/research/dbmr_rubin_lab/pipeline
+USR_DIR ?= $(GROUP_DIR)/usr
+JAR_DIR ?=
 SCRIPTS_DIR ?= $(USR_DIR)/local/scripts
-BIN_DIR ?= $(USR_DIR)/local/bin
+BIN_DIR ?=
 MODULE_SCRIPTS_DIR ?= usb-modules-v2/scripts
 LD_LIBRARY_PATH = $(USR_DIR)/local/MCR_R2014a/v83/runtime/glnxa64:$(USR_DIR)/local/MCR_R2014a/v83/bin/glnxa64:$(USR_DIR)/local/MCR_R2014a/v83/sys/os/glnxa64
-IMG_DIR ?= $(GROUP_DIR)/virtual_env/img
+IMG_DIR ?= $(GROUP_DIR)/img
 HOTSPOTS_DIR ?= $(USR_DIR)/local/cancer_hotspots
 
-export PATH := $(USR_DIR):$(PATH)
-export LD_LIBRARY_PATH := $(LD_LIBRARY_PATH)
-
+# export PATH := $(USR_DIR):$(PATH)
+# export LD_LIBRARY_PATH := $(LD_LIBRARY_PATH)
 
 include usb-modules-v2/config.inc
-
 
 ##########################################
 ##### DEFINE THE MAIN RUN FUNCTION #######
 ##########################################
+
 
 RUN_OPTS = $(if $(findstring false,$(USE_CLUSTER)),-l) -o $@ \
 $(if $(CLUSTER_ENGINE),-g $(CLUSTER_ENGINE)) $(if $(EXCLUDE_NODE),-x $(EXCLUDE_NODE)) \
@@ -37,11 +36,12 @@ RUN = $(call PURGE_AND_LOAD,$(PYTHON_MODULE)); echo "\
 $(call PURGE_AND_LOAD,$4); " $5 | python usb-modules-v2/scripts/run.py $(RUN_OPTS) -n $1 -m $2 -w $3
 
 RUN += $(if $(findstring SLURM,$(CLUSTER_ENGINE)),\
-$(if $(findstring $(QOS_2w),$3),--qos 2weeks,\
-$(if $(findstring $(QOS_1w),$3),--qos 1week,\
-$(if $(findstring $(QOS_1d),$3),--qos 1day,\
-$(if $(findstring $(QOS_6h),$3),--qos 6hours,\
-$(if $(findstring $(QOS_30min),$3),--qos 30min,infinite))))),)
+$(if $(findstring $(QOS_2w),$3),--qos job_cpu_long,\
+$(if $(findstring $(QOS_1w),$3),--qos job_cpu_long,\
+$(if $(findstring $(QOS_1d),$3),--qos job_cpu,\
+$(if $(findstring $(QOS_6h),$3),--qos job_cpu,\
+$(if $(findstring $(QOS_30min),$3),--qos job_cpu,job_cpu_long))))),)
+
 
 ###############################################################
 ####### DEFINE PATHS/NAMES FOR SCRIPTS, BINARIES, MODULES #####
@@ -52,55 +52,61 @@ UNZIP ?= /usr/bin/unzip
 GZIP ?= gzip -f
 GUNZIP ?= gunzip -c
 
-PERL_MODULE ?= Perl/5.36.0-GCCcore-12.2.0
+PERL_MODULE ?= Perl-bundle-CPAN/5.38.2-GCCcore-13.3.0
 # will run R via singularity
 # R_MODULE ?= R/3.5.0-goolf-1.7.20
 # R4_MODULE ?= R/4.0.3-foss-2018b
-JAVA6_MODULE ?=
-JAVA7_MODULE ?=
-# GATK 3.6 needs java8:
-JAVA8_MODULE ?= Java/1.8.0_311
-PYTHON_MODULE ?= Python/3.8.6-GCCcore-10.2.0
-SAMTOOLS_MODULE ?= SAMtools/1.20-GCC-13.2.0
-SAMTOOLS_MODULE_GOOLF ?= SAMtools/1.20-GCC-13.2.0
-BCFTOOLS_MODULE ?= BCFtools/1.19-GCC-13.2.0
-BEDTOOLS_MODULE ?= BEDTools/2.30.0-GCC-11.3.0
+# JAVA6_MODULE ?=
+# JAVA7_MODULE ?=
+# gatk-v3.7-0 won't work properly with java above 8. Current system default is 1.8.0, works fine:
+JAVA8_MODULE ?=
+PYTHON_MODULE ?=
+SAMTOOLS_MODULE ?= SAMtools/1.13-GCC-10.3.0
+SAMTOOLS_MODULE_GOOLF ?= SAMtools/1.13-GCC-10.3.0
+BCFTOOLS_MODULE ?= BCFtools/1.12-GCC-10.3.0
+BEDTOOLS_MODULE ?= BEDTools/2.30.0-GCC-10.3.0
 VCFTOOLS_MODULE ?= VCFtools/0.1.16-GCC-10.3.0
 BCL2FASTQ_MODULE ?=
-TRIM_GALORE_MODULE ?= Trim_Galore/0.6.10-GCCcore-11.3.0
-CUTADAPT_MODULE ?= cutadapt/4.2-GCCcore-11.3.0
-HTSLIB_MODULE ?= HTSlib/1.19.1-GCC-13.2.0
+TRIM_GALORE_MODULE ?=
+CUTADAPT_MODULE ?= cutadapt/3.4-GCCcore-10.3.0
+HTSLIB_MODULE ?= HTSlib/1.12-GCC-10.3.0
 TABIX_MODULE ?= $(HTSLIB_MODULE)
-FASTQC_MODULE ?= FastQC/0.12.1-Java-21
-BOWTIE2_MODULE ?= Bowtie2/2.5.1-GCC-13.2.0
-BWA_MODULE ?= BWA/0.7.18-GCCcore-13.2.0
+FASTQC_MODULE ?= FastQC/0.11.9-Java-11
+BOWTIE2_MODULE ?= Bowtie2/2.4.4-GCC-10.3.0
+BWA_MODULE ?= BWA/0.7.17-GCC-10.3.0
 TOPHAT_MODULE ?=
 STAR_MODULE ?=
 STAR_FUSION_MODULE ?=
-HISAT2_MODULE ?= HISAT2/2.2.1-gompi-2023b
+HISAT2_MODULE ?= HISAT2/2.2.1-gompi-2021a
 STRINGTIE_MODULE ?=
-SNP_EFF_MODULE ?= snpEff/5.0e-GCCcore-11.2.0-Java-11
+SNP_EFF_MODULE ?=
 CUFFLINKS_MODULE ?=
-RSEM_MODULE ?= RSEM/1.3.3-foss-2023b
+RSEM_MODULE ?= RSEM/1.3.3-foss-2021a
 OPENBLAS_MODULE ?= OpenBLAS/0.3.27-GCC-13.3.0
 MUTECT_MODULE ?=
-PICARD_MODULE ?= picard/2.26.2-Java-11
+PICARD_MODULE ?=
 VARSCAN_MODULE ?=
 ANACONDA_MODULE ?=
 VEP_MODULE ?=
-MACS2_MODULE ?= MACS2/2.2.9.1-foss-2023a
-MATPLOTLIB_MODULE ?= matplotlib/3.9.2-gfbf-2024a
+MACS2_MODULE ?= MACS2/2.2.7.1-foss-2021a
+MATPLOTLIB_MODULE ?= matplotlib/3.4.2-foss-2021a
 PYCLONE_MODULE ?=
 SIG_PROFILER_MODULE ?=
 
 PERL ?= perl
-JAVA ?= java -Djava.io.tmpdir=$(TMPDIR)
 PYTHON ?= python
+PYTHON2 ?= python2
+
+# shell $TMPDIR is set only on compute nodes (resolves to /scratch/local/<job id>), on login this is empty. Pass it properly
+TMPDIR ?= \$$TMPDIR
+JAVA ?= java -Djava.io.tmpdir=$(TMPDIR)
 
 SINGULARITY_EXEC ?= singularity exec --cleanenv --no-home -B $(GROUP_DIR)/../
 SINGULARITY_RUN ?= singularity run --cleanenv --no-home -B $(GROUP_DIR)/../
 
-R_LIBS ?= $(USR_DIR)/R/Rocker_4.2.2
+# on scicore there are some R modules that use v3, therefore the two R variables
+# here everything runs in one version of R, but keeping the two variables for compatibility
+R_LIBS ?= $(USR_DIR)/R_lib/Rocker_4.2.2
 R4_LIBS ?= $(R_LIBS)
 R ?= SINGULARITYENV_R_LIBS=$(R_LIBS) $(SINGULARITY_EXEC) $(IMG_DIR)/R_RStudio/Rocker_rstudio_4.2.2/Rocker_rstudio_4.2.2.sif R
 R4 ?= $(R)
@@ -114,7 +120,7 @@ RBIND ?= $(RSCRIPT) $(MODULE_SCRIPTS_DIR)/rbind.R
 SAMTOOLS ?= samtools
 BCFTOOLS ?= bcftools
 BEDTOOLS ?= bedtools
-IGVTOOLS ?= $(USR_DIR)/local/IGV_2.12.0/igvtools
+IGVTOOLS ?= $(USR_DIR)/local/IGV_2.16.1/igvtools
 VCFTOOLS ?= vcftools
 VCFTOOLS_MERGE ?= vcf-merge
 BCL2FASTQ ?= bcl2fastq
@@ -126,7 +132,7 @@ BAM_READCOUNT ?= $(BIN_DIR)/bam-readcount
 BAMUTIL ?= $(USR_DIR)/local/bamUtil/bin/bam
 VCF_SORT ?= $(PERL) $(SCRIPTS_DIR)/vcfsorter.pl
 FASTQ_TRIMMER = $(PERL) usb-modules-v2/fastq_tools/trimFastq.pl
-VCF_PASS ?= usb-modules-v2/vcf_tools/extract_pass_vcf.pl
+VCF_PASS ?= $(PERL) usb-modules-v2/vcf_tools/extract_pass_vcf.pl
 
 ifeq ($(ADAPTOR_POS),3prime)
 CUTADAPT_OPTS ?= -a $(ADAPTOR_SEQ) $(if $(findstring true,$(PAIRED_END)),-A $(ADAPTOR_SEQ))
@@ -152,7 +158,7 @@ BWA_SAMPE ?= bwa sampe
 BWA_MEM ?= bwa mem
 TOPHAT ?= tophat
 TOPHAT2 ?= tophat2
-STAR ?= $(USR_DIR)/local/STAR-2.7.3a/bin/Linux_x86_64_static/STAR
+STAR ?= $(USR_DIR)/local/STAR_2.7.11b/Linux_x86_64_static/STAR
 STAR_CPU ?= 14
 STAR_FUSION ?= STAR-Fusion
 HISAT2 ?= hisat2
@@ -161,10 +167,10 @@ STRINGTIE ?= stringtie
 
 PICARD = $(JAVA) -Xmx$(RESOURCE_REQ_MEDIUM_MEM_JAVA) -jar $(USR_DIR)/local/picard_2.25.2/picard.jar $(1) TMP_DIR=$(TMPDIR)
 
-GATK = $(JAVA) -Xmx$(2) -jar $(JAR_DIR)/GenomeAnalysisTK-3.6/GenomeAnalysisTK-3.6.jar 
+GATK = $(JAVA) -Xmx$(2) -jar $(USR_DIR)/local/gatk-3.7/GenomeAnalysisTK-3.7.jar 
 GATK += -S LENIENT -T $(1) -filterNoBases
 
-GATK42 = gatk --java-options \"-Xmx$(2) -Xms$(2)\" $(1)
+GATK42 = $(USR_DIR)/local/gatk-4.2.4.1/gatk --java-options \"-Xmx$(2) -Xms$(2)\" $(1)
 GATK4120 = $(USR_DIR)/local/gatk-4.1.2.0/gatk --java-options \"-Xmx$(2) -Xms$(2)\" $(1)
 # gatk-4.1.3.0 is used in sufam (https://github.com/charlottekyng/usb-modules-v2/commit/f7f8ee6db4a33e48247812efc0430337af1d073c#commitcomment-36581870)
 GATK4130 = $(USR_DIR)/local/gatk-4.1.3.0/gatk --java-options \"-Xmx$(2) -Xms$(2)\" $(1)
@@ -178,8 +184,8 @@ FIX_VARSCAN_VCF = $(PERL) usb-modules-v2/variant_callers/fix_vcf_scripts/fix_var
 FIX_STRELKA_VCF = $(PERL) usb-modules-v2/variant_callers/fix_vcf_scripts/fix_strelka_vcf.pl
 FIX_TVC_VCF = $(PERL) usb-modules-v2/variant_callers/fix_vcf_scripts/fix_tvc_vcf.pl
 # These need pyhton3:
-FIX_STRELKA2_VCF_INDELS = $(call PURGE_AND_LOAD,$(PYTHON_MODULE))&& $(PYTHON) usb-modules-v2/variant_callers/fix_vcf_scripts/fix_strelka2_vcf_indels.py
-FIX_STRELKA2_VCF_SNVS = $(call PURGE_AND_LOAD,$(PYTHON_MODULE))&& $(PYTHON) usb-modules-v2/variant_callers/fix_vcf_scripts/fix_strelka2_vcf_snvs.py
+FIX_STRELKA2_VCF_INDELS = $(PYTHON) usb-modules-v2/variant_callers/fix_vcf_scripts/fix_strelka2_vcf_indels.py
+FIX_STRELKA2_VCF_SNVS = $(PYTHON) usb-modules-v2/variant_callers/fix_vcf_scripts/fix_strelka2_vcf_snvs.py
 
 MUTECT ?=
 
@@ -234,16 +240,21 @@ DELLY ?= $(SINGULARITY_EXEC) $(DELLY_IMG)
 SVABA_IMG ?= $(IMG_DIR)/SvABA/svaba_1.2.0-ab39e3f.sif
 SVABA ?= $(SINGULARITY_EXEC) $(SVABA_IMG)
 
+DEEPSOMATIC_IMG ?= $(IMG_DIR)/deepsomatic/deepsomatic_1.9.0.sif
+DEEPSOMATIC ?= $(SINGULARITY_EXEC) $(DEEPSOMATIC_IMG)
+
 ### For the future
 # VARSCAN ?= java -Xmx$(RESOURCE_REQ_LOW_MEM_JAVA) -jar \$$EBROOTVARSCAN/VarScan.v2.4.1.jar
 
 #SNP_EFF_CONFIG ?= usb-modules-v2/vcf_tools/snpEff.config
 SNP_EFF_DATA_DIR ?= $(REF_DIR)/snpeff/5.0
-SNP_EFF = $(JAVA) -Xmx$(1) -jar \$$EBROOTSNPEFF/snpEff.jar
+
+# needs java 21, available locally:
+SNP_EFF = $(USR_DIR)/local/java/jdk-21.0.8/bin/java -Xmx$(1) -jar $(USR_DIR)/local/snpEff/v.5.2f/snpEff.jar
 SNP_EFF_OPTS = -i vcf -o vcf -noStats $(SNP_EFF_FLAGS) -nodownload -dataDir $(SNP_EFF_DATA_DIR)
-SNP_SIFT = $(JAVA) -Xmx$(1) -jar \$$EBROOTSNPEFF/SnpSift.jar
+SNP_SIFT = $(USR_DIR)/local/java/jdk-21.0.8/bin/java -Xmx$(1) -jar $(USR_DIR)/local/snpEff/v.5.2f/SnpSift.jar
 #SNP_SIFT_OPTS = -c $(SNP_EFF_CONFIG)
-VCF_EFF_ONE_PER_LINE = $(PERL) \$$EBROOTSNPEFF/scripts/vcfEffOnePerLine.pl
+VCF_EFF_ONE_PER_LINE = $(PERL) $(USR_DIR)/local/snpEff/v.5.2f/scripts/_OLD/vcfEffOnePerLine.pl
 VCF_JOIN_EFF = $(PERL) $(MODULE_SCRIPTS_DIR)/joinEff.pl
 
 VEP_CACHE_DIR ?= $(REF_DIR)/vep/
@@ -254,7 +265,8 @@ VEP_PLUGIN_DIR ?= $(USR_DIR)/downloads/VEP_plugins
 ADD_GENE_LIST_ANNOTATION = $(RSCRIPT) usb-modules-v2/vcf_tools/addGeneListAnnotationToVcf.R
 ANNOTATE_FACETS_VCF = $(RSCRIPT) usb-modules-v2/copy_number/annotateFacets2Vcf.R
 
-FACETS_SNP_PILEUP = $(USR_DIR)/local/snp_pileup_0.1.1_ubuntu/snp-pileup
+FACETS_SNP_PILEUP_IMG ?= $(IMG_DIR)/snp-pileup/snp-pileup.v0.6.1.sif
+FACETS_SNP_PILEUP = $(SINGULARITY_EXEC) $(FACETS_SNP_PILEUP_IMG) snp-pileup
 FACETS = $(R4SCRIPT) usb-modules-v2/copy_number/facetsRun.R
 FACETS_GENE_CN = $(RSCRIPT) usb-modules-v2/copy_number/facetsGeneCN.R
 FACETS_GENE_CN_PLOT = $(RSCRIPT) usb-modules-v2/copy_number/facetsGeneCNPlot.R
