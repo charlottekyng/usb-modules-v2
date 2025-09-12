@@ -1,13 +1,13 @@
 include usb-modules-v2/Makefile.inc
 
-LOGDIR ?= log/sv_pon.$(NOW)
+LOGDIR ?= log/gridss_pon.$(NOW)
 
-PHONY += sv_pon gridss_pon_beds
+PHONY += gridss_pon gridss_pon_beds
 
 .DELETE_ON_ERROR:
 .PHONY : $(PHONY)
 
-sv_pon : $(REF_FASTA).gridsscache $(REF_FASTA).dict $(patsubst %,gridss/pondir/%.normal.vcf, $(PANEL_OF_NORMAL_SAMPLES)) gridss_pon_beds
+gridss_pon : $(REF_FASTA).gridsscache $(REF_FASTA).dict $(patsubst %,gridss/pondir/%.normal.vcf, $(PANEL_OF_NORMAL_SAMPLES)) gridss_pon_beds
 
 # Setup reference only once
 $(REF_FASTA).gridsscache $(REF_FASTA).dict:
@@ -18,7 +18,7 @@ $(REF_FASTA).gridsscache $(REF_FASTA).dict:
 	-r $(REF_FASTA)")
 
 # Main function to run gridss on panel of normals gridss is optimized for 32G and 8 cores
-define gridss-pon
+define generate-gridss-pon
 gridss/pondir/%.normal.vcf : bam/%.bam $$(REF_FASTA).gridsscache $$(REF_FASTA).dict
 	mkdir -p gridss/gridss_tmp && \
 	$$(call RUN,8,$$(RESOURCE_REQ_HIGH_MEM),$$(RESOURCE_REQ_MEDIUM),$$(SINGULARITY_MODULE),"\
@@ -32,7 +32,7 @@ gridss/pondir/%.normal.vcf : bam/%.bam $$(REF_FASTA).gridsscache $$(REF_FASTA).d
 	-o $$@ \
 	$$<")
 endef
-$(foreach normal,$(PANEL_OF_NORMAL_SAMPLES),$(eval $(call gridss-pon,$(normal))))
+$(foreach normal,$(PANEL_OF_NORMAL_SAMPLES),$(eval $(call generate-gridss-pon,$(normal))))
 
 # Dedicated rule for bedpe+bed generation
 gridss_pon_beds: $(patsubst %,gridss/pondir/%.normal.vcf, $(PANEL_OF_NORMAL_SAMPLES))

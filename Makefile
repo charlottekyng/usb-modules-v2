@@ -324,9 +324,9 @@ TARGETS += svaba
 svaba :
 	$(call RUN_MAKE,usb-modules-v2/sv_callers/svaba.mk)
 
-TARGETS += sv_pon
-sv_pon :
-	$(call RUN_MAKE,usb-modules-v2/sv_callers/sv_pon.mk)
+TARGETS += gridss_pon
+gridss_pon :
+	$(call RUN_MAKE,usb-modules-v2/sv_callers/gridss_pon.mk)
 
 #########################################################
 ## The set of targets below have NOT been tested,
