@@ -16,14 +16,18 @@ PHONY += all consensus_tables
 .SECONDARY:
 .PHONY: $(PHONY)
 
+VCF_LONGEST_SUFFIX = $(shell ls vcf/*.vcf |grep -v consensus| awk '{ print length, $$0 }' | sort -nr | head -1 | cut -d. -f3- | sed s/.vcf//)
+
 # Main target to create consensus VCF
-all: consensus_tables $(foreach pair,$(SAMPLE_PAIRS),vcf/$(tumor.$(pair))_$(normal.$(pair)).consensus.$(CALLER_STRING).som_ad_ft.nft.hotspot.pass.sufam.eff.dbsnp.cosmic.exac_nontcga.clinvar.gene_ann.nsfp.vcf)
+all: consensus_tables $(foreach pair,$(SAMPLE_PAIRS),vcf/$(tumor.$(pair))_$(normal.$(pair)).consensus.$(CALLER_STRING).$(VCF_LONGEST_SUFFIX).vcf)
 
 consensus_tables : $(call MAKE_TABLE_FILE_LIST,consensus.$(CALLER_STRING))
 
+
 # Preprocess step to normalize and annotate each caller's VCF
 define preprocess
-vcf/$1_$2.$3.norm.tagged.vcf.gz: vcf/$1_$2.$3.som_ad_ft.nft.hotspot.pass.sufam.eff.dbsnp.cosmic.exac_nontcga.clinvar.gene_ann.nsfp.vcf
+
+vcf/$1_$2.$3.norm.tagged.vcf.gz: vcf/$1_$2.$3.$(VCF_LONGEST_SUFFIX).vcf
 
 	$$(INIT) module load $$(BCFTOOLS_MODULE); \
 	bcftools norm -f $(REF_FASTA) -m -both $$< -Oz -o $$@
@@ -38,7 +42,7 @@ $(foreach pair,$(SAMPLE_PAIRS), \
 
 # Generate consensus VCF for each sample pair and all callers with bcftools isec
 define consensus
-vcf/$1_$2.consensus.$(CALLER_STRING).som_ad_ft.nft.hotspot.pass.sufam.eff.dbsnp.cosmic.exac_nontcga.clinvar.gene_ann.nsfp.vcf: $(foreach caller,$(CALLERS),vcf/$1_$2.$(caller).norm.tagged.vcf.gz)
+vcf/$1_$2.consensus.$(CALLER_STRING).$(VCF_LONGEST_SUFFIX).vcf: $(foreach caller,$(CALLERS),vcf/$1_$2.$(caller).norm.tagged.vcf.gz)
 	$$(INIT) module load $$(BCFTOOLS_MODULE); \
 	bcftools isec -n+$(MIN_CALLERS) -w1 $(foreach caller,$(CALLERS),vcf/$1_$2.$(caller).norm.tagged.vcf.gz) -o $$@
 	rm -f $(foreach caller,$(CALLERS),vcf/$1_$2.$(caller).norm.tagged.vcf.gz)
