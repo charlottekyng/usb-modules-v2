@@ -650,7 +650,7 @@ ifeq ($(STRAND_SPECIFICITY),SECOND_READ_TRANSCRIPTION_STRAND)
 RSEM_STRANDEDNESS ?= reverse
 endif
 
-RSEM_OPTIONS ?= --alignments --no-bam-output -p $(RSEM_NUM_CORES) --strandedness $(RSEM_STRANDEDNESS) $(if $(RSEM_CALC_PME),--calc-pme) --temporary-folder $(TMPDIR)/rsem_temp
+RSEM_OPTIONS ?= --alignments --no-bam-output -p $(RSEM_NUM_CORES) --strandedness $(RSEM_STRANDEDNESS) $(if $(RSEM_CALC_PME),--calc-pme)
 
 endif
 CONFIG_INC = true

@@ -14,6 +14,7 @@ define rsem-calc-expression
 rsem/$1.genes.results : star/$1.Aligned.toTranscriptome.out.bam 
 	$$(call RUN,$$(RSEM_NUM_CORES),$$(RESOURCE_REQ_HIGH_MEM),$$(RESOURCE_REQ_MEDIUM),$$(RSEM_MODULE),"\
 	$$(RSEM_CALC_EXPR) $$(RSEM_OPTIONS) $$(if $$(findstring true,$$(PAIRED_END)),--paired-end) \
+	--temporary-folder $$(TMPDIR)/rsem_$1.temp \
 	$$< $$(RSEM_INDEX) $$(@D)/$1")
 endef
 $(foreach sample,$(SAMPLES),\
