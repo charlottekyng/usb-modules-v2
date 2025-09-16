@@ -10,28 +10,28 @@ MIN_CALLERS ?= 2
 
 LOGDIR ?= log/consensus_$(TYPE).$(NOW)
 
-PHONY += all consensus_tables
+PHONY += all clean
 
 .DELETE_ON_ERROR:
 .SECONDARY:
 .PHONY: $(PHONY)
 
-VCF_LONGEST_SUFFIX = $(shell ls vcf/*.vcf |grep -v consensus| awk '{ print length, $$0 }' | sort -nr | head -1 | cut -d. -f3- | sed s/.vcf//)
+#clean intermediate files
+all: consensus_tables consensus_vcfs
+	rm -f vcf/*.norm2.vcf.gz vcf/*.norm2.vcf.gz.csi
 
-# Main target to create consensus VCF
-all: consensus_tables $(foreach pair,$(SAMPLE_PAIRS),vcf/$(tumor.$(pair))_$(normal.$(pair)).consensus.$(CALLER_STRING).$(VCF_LONGEST_SUFFIX).vcf)
-
+consensus_vcfs : $(call MAKE_VCF_FILE_LIST,consensus.$(CALLER_STRING)) 
 consensus_tables : $(call MAKE_TABLE_FILE_LIST,consensus.$(CALLER_STRING))
 
+# Generate the suffix
+CONSENSUS_VCFS := $(call MAKE_VCF_FILE_LIST,consensus.$(CALLER_STRING))
+FIRST_VCF := $(firstword $(CONSENSUS_VCFS))
+VCF_SUFFIX := $(shell echo $(FIRST_VCF) |cut -d. -f$$(($(words $(CALLERS))+3))- | sed s/.vcf//)
 
 # Preprocess step to normalize and annotate each caller's VCF
 define preprocess
-
-vcf/$1_$2.$3.norm.tagged.vcf.gz: vcf/$1_$2.$3.$(VCF_LONGEST_SUFFIX).vcf
-
-	$$(INIT) module load $$(BCFTOOLS_MODULE); \
-	bcftools norm -f $(REF_FASTA) -m -both $$< -Oz -o $$@
-	bcftools index $$@
+vcf/$1_$2.$3.som_ad_ft.nft.hotspot.pass.norm2.vcf.gz : vcf/$1_$2.$3.som_ad_ft.nft.hotspot.pass.vcf
+vcf/$1_$2.$3.som_ad_ft.nft.hotspot.pass.norm2.vcf.gz.csi : vcf/$1_$2.$3.som_ad_ft.nft.hotspot.pass.norm2.vcf.gz
 endef
 # Loop through each sample pair and caller to preprocess each VCF
 $(foreach pair,$(SAMPLE_PAIRS), \
@@ -42,14 +42,12 @@ $(foreach pair,$(SAMPLE_PAIRS), \
 
 # Generate consensus VCF for each sample pair and all callers with bcftools isec
 define consensus
-vcf/$1_$2.consensus.$(CALLER_STRING).$(VCF_LONGEST_SUFFIX).vcf: $(foreach caller,$(CALLERS),vcf/$1_$2.$(caller).norm.tagged.vcf.gz)
-	$$(INIT) module load $$(BCFTOOLS_MODULE); \
-	bcftools isec -n+$(MIN_CALLERS) -w1 $(foreach caller,$(CALLERS),vcf/$1_$2.$(caller).norm.tagged.vcf.gz) -o $$@
-	rm -f $(foreach caller,$(CALLERS),vcf/$1_$2.$(caller).norm.tagged.vcf.gz)
-	rm -f $(foreach caller,$(CALLERS),vcf/$1_$2.$(caller).norm.tagged.vcf.gz.csi)
+vcf/$1_$2.consensus.$(CALLER_STRING).vcf : $(foreach caller,$(CALLERS),vcf/$1_$2.$(caller).som_ad_ft.nft.hotspot.pass.norm2.vcf.gz.csi)
+	$$(call RUN,1,$$(RESOURCE_REQ_LOW_MEM),$$(RESOURCE_REQ_VSHORT),$$(BCFTOOLS_MODULE),"\
+	$$(BCFTOOLS) isec -n+$$(MIN_CALLERS) -w1 $$(basename $$^) -o $$@")
+
+vcf/$1_$2.consensus.$(CALLER_STRING).$(VCF_SUFFIX).vcf : vcf/$1_$2.consensus.$(CALLER_STRING).vcf
 endef
-
-
 # Loop through each sample pair and generate consensus VCFs
 $(foreach pair,$(SAMPLE_PAIRS), \
 	$(eval $(call consensus,$(tumor.$(pair)),$(normal.$(pair)))) \

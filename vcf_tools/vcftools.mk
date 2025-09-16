@@ -17,6 +17,10 @@ LOGDIR ?= log/vcf.$(NOW)
 	$(call RUN,1,$(RESOURCE_REQ_LOW_MEM),$(RESOURCE_REQ_VSHORT),$(TABIX_MODULE),"\
 	sleep 5 && $(BGZIP) -c -f $< >$@ && sleep 5")
 
+%.vcf.gz.csi : %.vcf.gz
+	$(call RUN,1,$(RESOURCE_REQ_LOW_MEM),$(RESOURCE_REQ_VSHORT),$(BCFTOOLS_MODULE),"\
+	sleep 5 && $(BCFTOOLS) index $<")
+
 %.vcf.gz.tbi : %.vcf.gz
 	$(call RUN,1,$(RESOURCE_REQ_LOW_MEM),$(RESOURCE_REQ_VSHORT),$(TABIX_MODULE),"\
 	sleep 5 && $(TABIX) -f $< && sleep 5")
@@ -165,6 +169,10 @@ comma := ,
 	$(call CHECK_VCF,$<,$@,\
 	$(call RUN,1,$(RESOURCE_REQ_LOW_MEM),$(RESOURCE_REQ_VSHORT),$(BCFTOOLS_MODULE),"\
 	$(BCFTOOLS) norm -m -both $< | grep -v \"##contig\" > $@"))
+
+%.norm2.vcf.gz : %.vcf
+	$(call RUN,1,$(RESOURCE_REQ_LOW_MEM),$(RESOURCE_REQ_VSHORT),$(BCFTOOLS_MODULE),"\
+	$(BCFTOOLS) norm -f $(REF_FASTA) -m -both $< -Oz -o $@")
 
 %.left_align.vcf : %.vcf
 	$(call CHECK_VCF,$<,$@,\
