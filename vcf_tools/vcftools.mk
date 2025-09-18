@@ -124,7 +124,7 @@ comma := ,
 	head -n \$$line $<.tmp-hotspot.eff.OnePerLine_hotspot_merged.annotate.vcf > $@ &&\
 	cat $(HOTSPOTS_DIR)/vcf_info_header.txt >> $@ &&\
 	tail -n+\`echo \$$line + 1 | bc -l\` $<.tmp-hotspot.eff.OnePerLine_hotspot_merged.annotate.vcf >> $@ &&\
-	$(RM) $< $<.tmp-hotspot*"))
+	$(RM) $< $<.idx $<.tmp-hotspot*"))
 
 %.nft.vcf : %.vcf $(PON_VCF)
 	$(call RUN,1,$(RESOURCE_REQ_MEDIUM_MEM),$(RESOURCE_REQ_SHORT),$(JAVA8_MODULE),"\
@@ -134,7 +134,8 @@ comma := ,
 %.pass.vcf : %.vcf
 	$(call CHECK_VCF,$<,$@,\
 	$(call RUN,1,$(RESOURCE_REQ_LOW_MEM),$(RESOURCE_REQ_VSHORT),,"\
-		$(VCF_PASS) -n $(VCF_PASS_MAX_FILTERS) $< $@ $(subst pass,fail,$@)"))
+		$(VCF_PASS) -n $(VCF_PASS_MAX_FILTERS) $< $@ $(subst pass,fail,$@) &&\
+		$(RM) $< $<.idx"))
 
 
 ## This is definitely broken
@@ -194,13 +195,14 @@ comma := ,
 %.eff.vcf : %.vcf %.vcf.idx
 	$(call CHECK_VCF,$<,$@,\
 		$(call RUN,1,$(RESOURCE_REQ_MEDIUM_MEM),$(RESOURCE_REQ_SHORT),$(SNP_EFF_MODULE),"\
-		$(call SNP_EFF,$(RESOURCE_REQ_MEDIUM_MEM_JAVA)) ann $(SNP_EFF_OPTS) -noStats $(SNP_EFF_GENOME) $< > $@"))
+		$(call SNP_EFF,$(RESOURCE_REQ_MEDIUM_MEM_JAVA)) ann $(SNP_EFF_OPTS) -noStats $(SNP_EFF_GENOME) $< > $@ && $(RM) $^ $<*"))
 
 %.nsfp.vcf : %.vcf %.vcf.idx
 	$(call CHECK_VCF,$<,$@,\
 		$(call RUN,1,$(RESOURCE_REQ_MEDIUM_MEM),$(RESOURCE_REQ_SHORT),$(SNP_EFF_MODULE),"\
-		$(call SNP_SIFT,$(RESOURCE_REQ_MEDIUM_MEM_JAVA)) dbnsfp $(SNP_SIFT_OPTS) -db $(DB_NSFP) $< | \
-		sed '/^##INFO=<ID=dbNSFP/ s/Character/String/' \
+		$(call SNP_SIFT,$(RESOURCE_REQ_MEDIUM_MEM_JAVA)) dbnsfp $(SNP_SIFT_OPTS) -db $(DB_NSFP) \
+		$(if $(findstring hg38,$(REF)),-f 'rs_dbSNP$(,)hg19_chr$(,)hg19_pos(1-based)$(,)HGVSc_VEP$(,)HGVSp_VEP$(,)VEP_canonical$(,)clinvar_id$(,)clinvar_clnsig$(,)clinvar_trait$(,)MutPred2_score$(,)MutPred2_rankscore$(,)MutPred2_pred$(,)MutPred2_top5_mechanisms$(,)MVP_score$(,)MVP_rankscore$(,)gMVP_score$(,)gMVP_rankscore$(,)AlphaMissense_score$(,)AlphaMissense_rankscore$(,)AlphaMissense_pred$(,)PHACTboost_score$(,)PHACTboost_rankscore$(,)Aloft_Fraction_transcripts_affected$(,)Aloft_prob_Tolerant$(,)Aloft_prob_Recessive$(,)Aloft_prob_Dominant$(,)Aloft_pred$(,)Aloft_Confidence$(,)CADD_raw$(,)CADD_raw_rankscore$(,)CADD_phred$(,)fathmm-XF_coding_score$(,)fathmm-XF_coding_rankscore$(,)fathmm-XF_coding_pred$(,)AllofUs_ALL_AC$(,)AllofUs_ALL_AN$(,)AllofUs_ALL_AF$(,)AllofUs_POPMAX_AF$(,)AllofUs_POPMAX_AC$(,)AllofUs_POPMAX_AN$(,)AllofUs_POPMAX_POP$(,)gnomAD4.1_joint_flag$(,)gnomAD4.1_joint_AC$(,)gnomAD4.1_joint_AN$(,)gnomAD4.1_joint_AF$(,)gnomAD4.1_joint_nhomalt$(,)gnomAD4.1_joint_POPMAX_AC$(,)gnomAD4.1_joint_POPMAX_AN$(,)gnomAD4.1_joint_POPMAX_AF$(,)gnomAD4.1_joint_POPMAX_nhomalt$(,)ALFA_Total_AC$(,)ALFA_Total_AN$(,)ALFA_Total_AF$(,)dbNSFP_POPMAX_AF$(,)dbNSFP_POPMAX_AC$(,)dbNSFP_POPMAX_POP',,) \
+		$< | sed '/^##INFO=<ID=dbNSFP/ s/Character/String/' \
 		> $@ && $(RM) $^"))
 
 #%.gatk_eff.vcf : %.vcf %.vcf.idx
@@ -258,7 +260,7 @@ $(foreach sample,$(SAMPLES),$(eval $(call hrun-sample,$(sample))))
 
 %.exac_nontcga.vcf : %.vcf %.vcf.idx 
 	$(call CHECK_VCF,$<,$@,\
-		$(call RUN,1,$(RESOURCE_REQ_HIGH_MEM),$(RESOURCE_REQ_VSHORT),$(SNP_EFF_MODULE),"\
+	$(call RUN,1,$(RESOURCE_REQ_HIGH_MEM),$(RESOURCE_REQ_VSHORT),$(SNP_EFF_MODULE),"\
 	$(call SNP_SIFT,$(RESOURCE_REQ_HIGH_MEM_JAVA)) annotate $(SNP_SIFT_OPTS) $(EXAC_NONTCGA) \
 	$< > $@ && $(RM) $^"))
 
@@ -422,7 +424,7 @@ sufamscreen/%.opl_tab.txt : sufamscreen/%.vcf
 
 %.tab.txt : %.opl_tab.txt
 	$(call RUN,1,$(RESOURCE_REQ_MEDIUM_MEM),$(RESOURCE_REQ_VSHORT),$(PERL_MODULE),"\
-	$(VCF_JOIN_EFF) < $< > $@")
+	$(VCF_JOIN_EFF) < $< > $@ && $(RM) $<")
 	
 
 # merge tables

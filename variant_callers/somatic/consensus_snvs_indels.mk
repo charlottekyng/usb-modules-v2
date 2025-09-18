@@ -18,7 +18,7 @@ PHONY += all clean
 
 #clean intermediate files
 all: consensus_tables consensus_vcfs
-	rm -f vcf/*.norm2.vcf.gz vcf/*.norm2.vcf.gz.csi
+	rm -f vcf/*.norm2.vcf.gz vcf/*.norm2.vcf.gz.csi vcf/*consensus.$(CALLER_STRING).vcf
 
 consensus_vcfs : $(call MAKE_VCF_FILE_LIST,consensus.$(CALLER_STRING)) 
 consensus_tables : $(call MAKE_TABLE_FILE_LIST,consensus.$(CALLER_STRING))
@@ -44,7 +44,7 @@ $(foreach pair,$(SAMPLE_PAIRS), \
 define consensus
 vcf/$1_$2.consensus.$(CALLER_STRING).vcf : $(foreach caller,$(CALLERS),vcf/$1_$2.$(caller).som_ad_ft.nft.hotspot.pass.norm2.vcf.gz.csi)
 	$$(call RUN,1,$$(RESOURCE_REQ_LOW_MEM),$$(RESOURCE_REQ_VSHORT),$$(BCFTOOLS_MODULE),"\
-	$$(BCFTOOLS) isec -n+$$(MIN_CALLERS) -w1 $$(basename $$^) -o $$@")
+	$$(BCFTOOLS) isec -n+$$(MIN_CALLERS) -w1 $$(basename $$^) -o $$@ && $$(RM) $$(basename $$^) $$^")
 
 vcf/$1_$2.consensus.$(CALLER_STRING).$(VCF_SUFFIX).vcf : vcf/$1_$2.consensus.$(CALLER_STRING).vcf
 endef

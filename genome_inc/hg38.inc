@@ -77,11 +77,7 @@ else
   SNP_EFF_GENOME = GRCh38.86
 endif
 
-ifeq ($(HPC),ubelix)
-  DB_NSFP ?= $(REF_DIR)/dbNSFP/5.2a/dbNSFP5.2a_grch38.gz
-else
-  DB_NSFP ?= $(REF_DIR)/dbNSFP/GRCh38/dbNSFP3.2a.txt.gz
-endif
+DB_NSFP ?= $(REF_DIR)/dbNSFP/5.2a/dbNSFP5.2a_grch38.gz
 
 #MOSAICS_CHRFILE = $(GENOME_DIR)/human_g1k_v37_decoy.mosaics.chrfile
 
