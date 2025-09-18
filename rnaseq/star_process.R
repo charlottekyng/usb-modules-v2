@@ -6,7 +6,7 @@ optList <- list(
 	make_option('--gtf', action='store', default = NULL, help = 'GTF annotation file if gene subset is required'),
 	make_option('--geneBiotype', action='store', default = NULL, help = 'gene biotype/s to include'),
 	make_option('--outputFile', action='store', default = NULL, help = 'output file'),
-	make_option('--stranded', action='store', default = NULL, help = 'one of UNSTRANDED, FIRST_READ_TRANSCRIPTION_STRAND, SECOND_READ_TRANSCRIPTION_STRAND'))
+	make_option('--stranded', action='store', default = NULL, help = 'one of NONE, UNSTRANDED, FIRST_READ_TRANSCRIPTION_STRAND, SECOND_READ_TRANSCRIPTION_STRAND'))
 
 parser <- OptionParser(usage = "%prog", option_list = optList)
 arguments <- parse_args(parser, positional_arguments = T);
@@ -43,7 +43,7 @@ if (!is.null(opt$gtf)){
 star <- lapply(starFiles, read.delim, as.is=T, skip=4, header=F, row.names=1)
 names(star) <- gsub(".ReadsPerGene.out.tab", "", basename(starFiles), fixed=T)
 
-if(opt$stranded=="UNSTRANDED") { 
+if(opt$stranded %in% c("NONE", "UNSTRANDED")) { 
 	star <- lapply(names(star), function(x) { y <- star[[x]][, 1, drop=F]; colnames(y) <- x; y})
 } else if (opt$stranded=="FIRST_READ_TRANSCRIPTION_STRAND") {
 	star <-	lapply(names(star), function(x)	{ y <- star[[x]]; 
