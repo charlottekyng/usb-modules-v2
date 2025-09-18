@@ -63,7 +63,7 @@ GENCODE_CODING_GENE_GTF = $(ANN_DIR)/gencode.$(GENCODE_VER).primary_assembly.ann
 GENCODE_NONCODING_GENE_GTF = $(ANN_DIR)/gencode.$(GENCODE_VER).primary_assembly.annotation_gene.non_coding.gtf
 
 RIBOSOMAL_INTERVALS ?= $(ANN_DIR)/gencode.$(GENCODE_VER).primary_assembly.annotation_ribosomal.interval_list
-GENE_REF_FLAT = $(ANN_DIR)/gencode.$(GENCODE_VER).primary_assembly.annotation.refFlat.txt
+GENE_REF_FLAT = $(ANN_DIR)/gencode.$(GENCODE_VER).primary_assembly.annotation.refFlat
 
 ### TOOL-SPECIFIC REF ###
 
