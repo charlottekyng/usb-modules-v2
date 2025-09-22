@@ -182,6 +182,10 @@ TARGETS += caveman
 caveman :
 	$(call RUN_MAKE,usb-modules-v2/variant_callers/somatic/caveman.mk)
 
+TARGETS += deepsomatic
+deepsomatic :
+	$(call RUN_MAKE,usb-modules-v2/variant_callers/somatic/deepsomatic.mk)
+
 TARGETS += varscan_cnv
 varscan_cnv :
 	$(call RUN_MAKE,usb-modules-v2/copy_number/varscanCNV.mk)
@@ -328,9 +332,9 @@ TARGETS += svaba
 svaba :
 	$(call RUN_MAKE,usb-modules-v2/sv_callers/svaba.mk)
 
-TARGETS += sv_pon
-sv_pon :
-	$(call RUN_MAKE,usb-modules-v2/sv_callers/sv_pon.mk)
+TARGETS += gridss_pon
+gridss_pon :
+	$(call RUN_MAKE,usb-modules-v2/sv_callers/gridss_pon.mk)
 
 #########################################################
 ## The set of targets below have NOT been tested,
