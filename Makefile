@@ -182,10 +182,6 @@ TARGETS += caveman
 caveman :
 	$(call RUN_MAKE,usb-modules-v2/variant_callers/somatic/caveman.mk)
 
-TARGETS += deepsomatic
-deepsomatic :
-	$(call RUN_MAKE,usb-modules-v2/variant_callers/somatic/deepsomatic.mk)
-
 TARGETS += varscan_cnv
 varscan_cnv :
 	$(call RUN_MAKE,usb-modules-v2/copy_number/varscanCNV.mk)
@@ -283,6 +279,10 @@ tcell_extrect :
 TARGETS += ann_ext_vcf
 ann_ext_vcf: 
 	$(call RUN_MAKE,usb-modules-v2/vcf_tools/annotateExtVcf.mk)
+ 
+TARGETS += oncokb
+oncokb :
+	$(call RUN_MAKE,usb-modules-v2/vcf_tools/oncokb.mk)
 
 TARGETS += tvc
 tvc :
@@ -328,9 +328,9 @@ TARGETS += svaba
 svaba :
 	$(call RUN_MAKE,usb-modules-v2/sv_callers/svaba.mk)
 
-TARGETS += gridss_pon
-gridss_pon :
-	$(call RUN_MAKE,usb-modules-v2/sv_callers/gridss_pon.mk)
+TARGETS += sv_pon
+sv_pon :
+	$(call RUN_MAKE,usb-modules-v2/sv_callers/sv_pon.mk)
 
 #########################################################
 ## The set of targets below have NOT been tested,

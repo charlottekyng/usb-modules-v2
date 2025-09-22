@@ -15,6 +15,7 @@ CONDA_DIR ?= $(USR_DIR)/conda
 SV_PON_DIR ?= $(GROUP_DIR)/ref/PoN/hg38/wgs/PDAC_AMPAC/gridss/pondir/
 HOTSPOTS_DIR ?= $(USR_DIR)/local/cancer_hotspots
 NICE ?= 1000
+ONCOKB_TOKEN = 2acb7953-59fb-4110-b0fb-e730d9382d78
 # export PATH := $(USR_DIR):$(PATH)
 # export LD_LIBRARY_PATH := $(LD_LIBRARY_PATH)
 
@@ -106,6 +107,8 @@ MACS2_MODULE ?= $(ANACONDA_MODULE) && source activate $(CONDA_DIR)/macs2
 MATPLOTLIB_MODULE ?= matplotlib/3.4.3
 PYCLONE_MODULE ?= $(ANACONDA_MODULE) && source activate $(CONDA_DIR)/pyclone
 SIG_PROFILER_MODULE ?= $(ANACONDA_MODULE) && source activate $(CONDA_DIR)/SigProfiler
+VEP_ONCOKB_MODULE ?= $(ANACONDA_MODULE) && source activate $(CONDA_DIR)/oncokb/
+ONCOKB_MAF_ANNO = $(USR_DIR)/local/oncokb-annotator/MafAnnotator.py
 
 PERL ?= $(USR_DIR)/local/perl/5.16.3/bin/perl
 # on humanitas $TMPDIR is /tmp ($TMPDIR is set only on compute nodes)
@@ -258,10 +261,6 @@ GRIDSS ?= $(SINGULARITY_EXEC) $(GRIDSS_IMG)
 SVABA_IMG ?= $(IMG_DIR)/SvABA/svaba_1.2.0-ab39e3f.sif
 SVABA ?= $(SINGULARITY_EXEC) $(SVABA_IMG)
 
-DEEPSOMATIC_IMG ?= $(IMG_DIR)/deepsomatic/deepsomatic_1.9.0.sif
-DEEPSOMATIC ?= $(SINGULARITY_EXEC) $(DEEPSOMATIC_IMG)
-
-
 #SNP_EFF_CONFIG ?= usb-modules-v2/vcf_tools/snpEff.config
 SNP_EFF_DATA_DIR ?= $(REF_DIR)/snpeff/4.3
 SNP_EFF = $(JAVA) -Xmx$(1) -jar $(USR_DIR)/local/snpEff/snpEff/snpEff.jar
@@ -270,6 +269,9 @@ SNP_SIFT = $(JAVA) -Xmx$(1) -jar $(USR_DIR)/local/snpEff/snpEff/SnpSift.jar
 #SNP_SIFT_OPTS = -c $(SNP_EFF_CONFIG)
 VCF_EFF_ONE_PER_LINE = $(PERL) $(USR_DIR)/local/snpEff/snpEff/scripts/vcfEffOnePerLine.pl
 VCF_JOIN_EFF = $(PERL) $(MODULE_SCRIPTS_DIR)/joinEff.pl
+VCF2MAF = perl $(USR_DIR)/local/vcf2maf/mskcc-vcf2maf-f6d0c40/vcf2maf.pl
+VEP_PATH = $(USR_DIR)/conda/oncokb/bin
+VEP_DATA = $(REF_DIR)/vep
 
 VEP_CACHE_DIR ?= $(REF_DIR)/vep/
 VEP ?= vep --cache --offline --dir_cache $(VEP_CACHE_DIR) --no_stats --force_overwrite --pick --format vcf --vcf --symbol --terms SO
@@ -389,7 +391,7 @@ PIZZLY_FLATTEN_JSON ?= $(USR_DIR)/local/pizzly_v0.37.3/scripts/flatten_json.py
 MOSAICS_RUN ?= $(RSCRIPT) usb-modules-v2/chipseq/mosaics_run.R
 MOSAICS_CONSTRUCTBINS ?= $(RSCRIPT) usb-modules-v2/chipseq/mosaics_constructBins.R
 
-MACS2 ?= macs2
+MACS2 ?= macs
 
 MSISENSOR ?= $(BIN_DIR)/msisensor_Linux_x86_64
 MSISENSORPRO ?= $(BIN_DIR)/msisensor-pro-v1.3.0

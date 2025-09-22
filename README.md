@@ -312,6 +312,7 @@ make pipeit              ## use this
 make mutation_summary
 ```
 
+
 **`mutation_summary`** returns an Excel file for all mutations with simplified annotation. Here is a description of the fields included in the mutation summary:
 * CHROM, POS, REF, ALT: chromosome position, reference and alternate (variant) alleles
 * ID: dbSNP ID, COSMIC ID
@@ -385,6 +386,16 @@ Use `make deepsomatic` to call somatic variants without `poolednorm_bam`. You wi
 By default, deepsomatic's model will automatically be set to `WES_TUMOR_ONLY` or `WGS_TUMOR_ONLY`. If you have FFPE samples, or other sequencing types, you can use other models by setting `DEEPSOMATIC_MODEL` in your Makefile (see https://github.com/google/deepsomatic).
 
 **Note about `deepsomatic`**: for now it only works in tumor-only mode. However, deepsomatic can also be used with a matched normal. The pipeline will run it, but it will fail during the VCF depth filtering because deepsomatic does not output the normal sample in the VCF. This will be changed in future versions.
+
+### oncokb
+```
+make oncokb ## check the makefile to see how to change the defaults
+```
+Takes VCF files (from any variant caller), converts them to MAF with [vcf2maf](https://github.com/mskcc/vcf2maf), and enriches them with OncoKB annotations using the [oncokb-annotator](https://github.com/oncokb/oncokb-annotator) REST API.  
+By default, it uses the **consensus SNV VCF** generated from **Strelka2** and **Mutect2**.  
+
+⚠️ **Note:** Each environment requires a valid **`ONCOKB_TOKEN`**, which must be renewed every ~200 days.  
+For details, see [OncoKB API access](https://www.oncokb.org/api-access).
 
 ### Somatic CNA detection
 

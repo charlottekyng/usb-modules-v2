@@ -532,25 +532,28 @@ alltables/all$(PROJECT_PREFIX).%.vcf.stats : $(foreach sample,$(SAMPLES),vcf/$(s
 		cp $@ $@.tmp;\
 	done;
 	rm -rf $@.tmp $@.tmp2
-	
-
 
 
 #################### MAF ###################
-#ifdef SAMPLE_PAIRS
-#define vcf2maf-tumor-normal
-#maf/$1_$2.%.maf : vcf/$1_$2.%.vcf
-#	$$(call LSCRIPT_MEM,9G,12G,"$$(VCF2MAF) --input-vcf $$< --tumor-id $1 --normal-id $2 --ref-fasta $$(REF_FASTA) --vep-path $$(VEP_PATH) --vep-data $$(VEP_DATA) --output-maf $$@")
-#endef
-#$(foreach pair,$(SAMPLE_PAIRS),$(eval $(call vcf2maf-tumor-normal,$(tumor.$(pair)),$(normal.$(pair)))))
+ifdef SAMPLE_PAIRS
+define vcf2maf-tumor-normal
+maf/$1_$2.%.maf : vcf/$1_$2.%.vcf
+	$$(call RUN,4,$$(RESOURCE_REQ_MEDIUM_MEM),$$(RESOURCE_REQ_SHORT),$$(VEP_ONCOKB_MODULE)," 	sleep 5 && $$(VCF2MAF) 	--input-vcf $$< 	--tumor-id $1 	--normal-id $2 	--ref-fasta $$(REF_FASTA) 	--vep-path $$(VEP_PATH) 	--vep-data $$(VEP_DATA)  $$(if $$(findstring hg38,$(REF)), --ncbi-build GRCh38) --output-maf $$@ && $$(RM) vcf/$1_$2.*.vep.vcf")
+endef
+$(foreach pair,$(SAMPLE_PAIRS),$(eval $(call vcf2maf-tumor-normal,$(tumor.$(pair)),$(normal.$(pair)))))
+endif
 
-#allmaf/allTN.%.maf : $(foreach pair,$(SAMPLE_PAIRS),maf/$(pair).%.maf)
-#	$(INIT) \
-#	{ \
-#	grep -v '^#' $< | sed -n 1p; \
-#	for x in $^; do grep -v '^#' $$x | sed 1d; done \
-#	} > $@
-#endif
+ifdef SAMPLE_PAIRS
+alltables/allTN.%.maf : $(foreach pair,$(SAMPLE_PAIRS),maf/$(pair).%.maf)
+	$(INIT) \
+	{ \
+	echo -e "TUMOR_NORMAL\t$(shell grep -v '^#' $< | sed -n 1p)"; \
+	for x in $^; do \
+		pair=$$(basename $$x | cut -d. -f1); \
+		grep -v '^#' $$x | sed 1d | awk -v p=$$pair '{print p "\t" $$0}'; \
+	done; \
+	} > $@
+endif
 
 #define vcf2maf-sample
 #maf/$1.%.maf : vcf/$1.%.vcf
