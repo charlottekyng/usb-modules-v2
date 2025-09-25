@@ -23,15 +23,10 @@ all: consensus_tables consensus_vcfs
 consensus_vcfs : $(call MAKE_VCF_FILE_LIST,consensus.$(CALLER_STRING)) 
 consensus_tables : $(call MAKE_TABLE_FILE_LIST,consensus.$(CALLER_STRING))
 
-# Generate the suffix
-CONSENSUS_VCFS := $(call MAKE_VCF_FILE_LIST,consensus.$(CALLER_STRING))
-FIRST_VCF := $(firstword $(CONSENSUS_VCFS))
-VCF_SUFFIX := $(shell echo $(FIRST_VCF) |cut -d. -f$$(($(words $(CALLERS))+3))- | sed s/.vcf//)
-
 # Preprocess step to normalize and annotate each caller's VCF
 define preprocess
-vcf/$1_$2.$3.som_ad_ft.nft.hotspot.pass.norm2.vcf.gz : vcf/$1_$2.$3.som_ad_ft.nft.hotspot.pass.vcf
-vcf/$1_$2.$3.som_ad_ft.nft.hotspot.pass.norm2.vcf.gz.csi : vcf/$1_$2.$3.som_ad_ft.nft.hotspot.pass.norm2.vcf.gz
+vcf/$1_$2.$3.$(VCF_FILTER_SUFFIX).norm2.vcf.gz : vcf/$1_$2.$3.$(VCF_FILTER_SUFFIX).vcf
+vcf/$1_$2.$3.$(VCF_FILTER_SUFFIX).norm2.vcf.gz.csi : vcf/$1_$2.$3.$(VCF_FILTER_SUFFIX).norm2.vcf.gz
 endef
 # Loop through each sample pair and caller to preprocess each VCF
 $(foreach pair,$(SAMPLE_PAIRS), \
@@ -42,11 +37,11 @@ $(foreach pair,$(SAMPLE_PAIRS), \
 
 # Generate consensus VCF for each sample pair and all callers with bcftools isec
 define consensus
-vcf/$1_$2.consensus.$(CALLER_STRING).vcf : $(foreach caller,$(CALLERS),vcf/$1_$2.$(caller).som_ad_ft.nft.hotspot.pass.norm2.vcf.gz.csi)
+vcf/$1_$2.consensus.$(CALLER_STRING).vcf : $(foreach caller,$(CALLERS),vcf/$1_$2.$(caller).$(VCF_FILTER_SUFFIX).norm2.vcf.gz.csi)
 	$$(call RUN,1,$$(RESOURCE_REQ_LOW_MEM),$$(RESOURCE_REQ_VSHORT),$$(BCFTOOLS_MODULE),"\
 	$$(BCFTOOLS) isec -n+$$(MIN_CALLERS) -w1 $$(basename $$^) -o $$@ && $$(RM) $$(basename $$^) $$^")
 
-vcf/$1_$2.consensus.$(CALLER_STRING).$(VCF_SUFFIX).vcf : vcf/$1_$2.consensus.$(CALLER_STRING).vcf
+vcf/$1_$2.consensus.$(CALLER_STRING).$(VCF_FILTER_SUFFIX).$(VCF_ANNS_SUFFIX).vcf : vcf/$1_$2.consensus.$(CALLER_STRING).vcf
 endef
 # Loop through each sample pair and generate consensus VCFs
 $(foreach pair,$(SAMPLE_PAIRS), \
