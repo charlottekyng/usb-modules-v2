@@ -113,12 +113,24 @@ CLIP_FASTQ_R1 ?=
 CLIP_FASTQ_R2 ?=
 TRIM_GALORE_OPTS ?=
 
+
 # options for FASTQ_FILTER=cutadapt
 # ADAPTOR_POS =  [3prime|5prime]
 # NEXTSEQ_TRIM = true may help for sequencing done with NextSeq
-ADAPTOR_POS ?= 3prime 
+ADAPTOR_POS ?= 3prime
 ADAPTOR_SEQ ?= AGATCGGAAGAGC
-NEXTSEQ_TRIM ?= false 
+NEXTSEQ_TRIM ?= false
+
+ifeq ($(ADAPTOR_POS),3prime)
+CUTADAPT_OPTS ?= -a $(ADAPTOR_SEQ) $(if $(findstring true,$(PAIRED_END)),-A $(ADAPTOR_SEQ))
+endif
+ifeq ($(ADAPTOR_POS),5prime)
+CUTADAPT_OPTS ?= -g $(ADAPTOR_SEQ) $(if $(findstring true,$(PAIRED_END)),-G $(ADAPTOR_SEQ))
+endif
+ifeq ($(NEXTSEQ_TRIM),true)
+CUTADAPT_OPTS += --nextseq-trim=20
+endif
+CUTADAPT_OPTS += -q 20,20 --trim-n -m 35 --max-n=3
 
 
 #############################################

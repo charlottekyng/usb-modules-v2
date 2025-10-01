@@ -148,17 +148,6 @@ VCF_SORT ?= $(PERL) $(SCRIPTS_DIR)/vcfsorter.pl
 FASTQ_TRIMMER = $(PERL) usb-modules-v2/fastq_tools/trimFastq.pl
 VCF_PASS ?= usb-modules-v2/vcf_tools/extract_pass_vcf.pl
 
-ifeq ($(ADAPTOR_POS),3prime)
-CUTADAPT_OPTS ?= -a $(ADAPTOR_SEQ) $(if $(findstring true,$(PAIRED_END)),-A $(ADAPTOR_SEQ))
-endif
-ifeq ($(ADAPTOR_POS),5prime)
-CUTADAPT_OPTS ?= -g $(ADAPTOR_SEQ) $(if $(findstring true,$(PAIRED_END)),-G $(ADAPTOR_SEQ))
-endif
-ifeq ($(NEXTSEQ_TRIM),true)
-CUTADAPT_OPTS += --nextseq-trim=20
-endif
-CUTADAPT_OPTS += -q 20,20 --trim-n -m 35 --max-n=3 
-
 FASTQC ?= fastqc
 FASTQC_SUMMARY_PLOT = $(RSCRIPT) usb-modules-v2/qc/fastqcSummaryPlot.R
 PLOT_RNASEQ_METRICS = $(RSCRIPT) usb-modules-v2/qc/plotRnaseqMetrics.R
