@@ -40,7 +40,7 @@ $(if $(findstring $(QOS_2w),$3),--qos job_cpu_long,\
 $(if $(findstring $(QOS_1w),$3),--qos job_cpu_long,\
 $(if $(findstring $(QOS_1d),$3),--qos job_cpu,\
 $(if $(findstring $(QOS_6h),$3),--qos job_cpu,\
-$(if $(findstring $(QOS_30min),$3),--qos job_cpu,job_cpu_long))))),)
+$(if $(findstring $(QOS_30min),$3),--qos job_cpu,--qos job_cpu_long))))),)
 
 
 ###############################################################
