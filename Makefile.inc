@@ -111,7 +111,7 @@ ifeq ($(NO_RM),true)
     RMR = touch
 else
     RM := rm -f
-    RMR := rm -r
+    RMR := rm -fr
 endif
 
 # define $(,) and $( ) for escaping commas and spaces
