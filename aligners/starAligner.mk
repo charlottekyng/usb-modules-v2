@@ -11,49 +11,45 @@ override BAM_SORT := false
 override BAM_FIX_RG := true
 
 ifeq ($(strip $(PRIMARY_ALIGNER)),star)
-STAR_BAMS = $(foreach sample,$(SAMPLES),bam/$(sample).bam)
+STAR_BAMS = $(foreach sample,$(SAMPLES),bam/$(sample).bam) $(foreach sample,$(SAMPLES),star/$(sample).Aligned.sortedByCoord.out.bam)
 else
-STAR_BAMS = $(foreach sample,$(SAMPLES),star/$(sample).star.bam)
+STAR_BAMS = $(foreach sample,$(SAMPLES),star/$(sample).Aligned.sortedByCoord.out.bam)
 endif
 
 star : $(STAR_BAMS) $(addsuffix .bai,$(STAR_BAMS)) \
 star/all$(PROJECT_PREFIX).ReadsPerGene.out.tab star/all$(PROJECT_PREFIX).ReadsPerGene.out.tab.coding \
 star/all$(PROJECT_PREFIX).alignment_stats.txt \
-$(foreach sample,$(SAMPLES),star/$(sample).Chimeric.out.junction.gz star/$(sample).Chimeric.out.sam.gz \
+$(foreach sample,$(SAMPLES),$(if $(findstring Junctions,$(STAR_OPTIONS)),star/$(sample).Chimeric.out.junction.gz,) $(if $(findstring SeparateSAMold,$(STAR_OPTIONS)),star/$(sample).Chimeric.out.sam.gz,) \
 star/$(sample).Unmapped.out.mate1.gz $(if $(findstring true,$(PAIRED_END)),star/$(sample).Unmapped.out.mate2.gz) \
 star/$(sample).Log.out.gz star/$(sample).Log.progress.out.gz)
 
 star/%.Aligned.sortedByCoord.out.bam : fastq/%.1.fastq.gz $(if $(findstring true,$(PAIRED_END)),fastq/%.2.fastq.gz)
+	LBID=`echo "$*" | sed 's/_[A-Za-z0-9\-]\+//'`; \
 	$(call RUN,$(STAR_CPU),$(if $(findstring _,$(REF)),100G,50G),$(RESOURCE_REQ_MEDIUM),$(STAR_MODULE),"\
 	$(STAR) --runMode alignReads --runThreadN $(STAR_CPU) \
 	--genomeDir $(STAR_GENOME_DIR) \
 	--readFilesIn $< $(if $(findstring true,$(PAIRED_END)),$(word 2,$^)) \
 	--readFilesCommand gunzip -c \
-	--sjdbScore 2 --sjdbOverhang 100 \
-	--alignSJoverhangMin 8 --alignSJDBoverhangMin 10 --alignIntronMax 500000 --alignMatesGapMax 1000000 \
-	--outFileNamePrefix $(@D)/$*. --outFilterType BySJout \
-	--outFilterMultimapNmax 20 --outFilterMismatchNmax 10 --outFilterMultimapScoreRange 1 \
-	--outFilterMatchNminOverLread 0.33 --outFilterScoreMinOverLread 0.33 \
-	--outSAMstrandField intronMotif --outSAMprimaryFlag AllBestScore --outSAMtype BAM SortedByCoordinate \
-	--outReadsUnmapped Fastx --outMultimapperOrder Random --outSAMattrIHstart 0 \
-	--chimSegmentMin 12 --chimJunctionOverhangMin 12 --chimSegmentReadGapMax 3 \
-	--chimOutType Junctions SeparateSAMold \
-	--quantMode GeneCounts TranscriptomeSAM --twopassMode Basic && \
+	--outSAMtype BAM SortedByCoordinate \
+	--outSAMattrRGline ID:$* LB:$${LBID} PL:$(SEQ_PLATFORM) SM:$${LBID} \
+	--outReadsUnmapped Fastx \
+	--outFileNamePrefix $(@D)/$*. \
+	--quantMode GeneCounts TranscriptomeSAM \
+	$(STAR_OPTIONS) && \
 	$(RMR) $(@D)/$*._STARgenome $(@D)/$*._STARpass1")
 
-star/%.star.bam : star/%.Aligned.sortedByCoord.out.bam
-	$(INIT) ln -f $< $@
-
 star/%.Aligned.toTranscriptome.out.bam : star/%.Aligned.sortedByCoord.out.bam
-	$(INIT) touch $@
+	
 
 star/%.Chimeric.out.junction.gz : star/%.Aligned.sortedByCoord.out.bam
 	@if [ -f '$(basename $@)' ]; then \
 	$(call RUN,1,$(RESOURCE_REQ_LOW_MEM),$(RESOURCE_REQ_VSHORT),,"$(GZIP) $(basename $@)"); fi
 
+ifeq ($(findstring SeparateSAMold,$(STAR_OPTIONS)),SeparateSAMold)
 star/%.Chimeric.out.sam.gz : star/%.Aligned.sortedByCoord.out.bam
 	@if [ -f '$(basename $@)' ]; then \
 	$(call RUN,1,$(RESOURCE_REQ_LOW_MEM),$(RESOURCE_REQ_VSHORT),,"$(GZIP) $(basename $@)"); fi
+endif
 
 star/%.ReadsPerGene.out.tab : star/%.Aligned.sortedByCoord.out.bam
 	
@@ -71,14 +67,17 @@ star/%.Log.progress.out.gz : star/%.Aligned.sortedByCoord.out.bam
 
 star/%.Unmapped.out.mate1.gz : star/%.Aligned.sortedByCoord.out.bam
 	@if [ -f '$(basename $@)' ]; then \
-	$(call RUN,1,$(RESOURCE_REQ_LOW_MEM),$(RESOURCE_REQ_VSHORT),,"$(GZIP) $(basename $@)"); fi
+	$(call RUN,1,$(RESOURCE_REQ_LOW_MEM),$(RESOURCE_REQ_SHORT),,"$(GZIP) $(basename $@)"); fi
 
 star/%.Unmapped.out.mate2.gz : star/%.Aligned.sortedByCoord.out.bam
 	@if [ -f '$(basename $@)' ]; then \
-	$(call RUN,1,$(RESOURCE_REQ_LOW_MEM),$(RESOURCE_REQ_VSHORT),,"$(GZIP) $(basename $@)"); fi
+	$(call RUN,1,$(RESOURCE_REQ_LOW_MEM),$(RESOURCE_REQ_SHORT),,"$(GZIP) $(basename $@)"); fi
 
-bam/%.bam : star/%.star.$(BAM_SUFFIX) 
-	$(INIT) ln -f $< $@
+bam/%.bam : star/%.Aligned.sortedByCoord.out.bam
+	$(INIT) ln -s -f ../$< $@
+
+bam/%.bam.bai : star/%.Aligned.sortedByCoord.out.bam.bai
+	$(INIT) ln -s -f ../$< $@
 
 star/all$(PROJECT_PREFIX).ReadsPerGene.out.tab : $(foreach sample,$(SAMPLES),star/$(sample).ReadsPerGene.out.tab)
 	$(call RUN,1,$(RESOURCE_REQ_LOW_MEM),$(RESOURCE_REQ_VSHORT),$(R_MODULE),"\
@@ -88,27 +87,6 @@ star/all$(PROJECT_PREFIX).ReadsPerGene.out.tab.coding : $(foreach sample,$(SAMPL
 	$(call RUN,1,$(RESOURCE_REQ_LOW_MEM),$(RESOURCE_REQ_VSHORT),$(R_MODULE),"\
 	$(RSCRIPT) $(STAR_PROCESS) --gtf $(GENCODE_GENE_GTF) --outputFile $@ \
 	--stranded $(STRAND_SPECIFICITY) --geneBiotype protein_coding $^")
-
-#	perl -p -e "s/N_unmapped/GENE\t\t\t\nN_unmapped/;" `ls $< |head -1` | cut -f1 > $@; \
-#	if [ "$$STRAND_SPECIFICITY" == "FIRST_READ_TRANSCRIPTION_STRAND" ]; then \
-#	        for x in $^; do \
-#			sample=`echo $$x | sed 's/.*\///; s/\..*//'`; \
-#			perl -p -e "s/N_unmapped/\t$${sample}_total\t$${sample}_sense\t$${sample}_antisense\nN_unmapped/;" \
-#     			star/$$sample.ReadsPerGene.out.tab | cut -f 2-4 | paste $@ - > $@.tmp; mv $@.tmp $@; \
-#		done; \
-#	elif [ "$$STRAND_SPECIFICITY" == "SECOND_READ_TRANSCRIPTION_STRAND" ]; then \
-#	        for x in $^; do \
-#			sample=`echo $$x | sed 's/.*\///; s/\..*//'`; \
-#			perl -p -e "s/N_unmapped/\t$${sample}_total\t$${sample}_antisense\t$${sample}_sense\nN_unmapped/;" \
-#      			star/$$sample.ReadsPerGene.out.tab | cut -f 2-4 | paste $@ - > $@.tmp; mv $@.tmp $@; \
-#		done; \
-#	else \
-#	        for x in $^; do \
-#			sample=`echo $$x | sed 's/.*\///; s/\..*//'`; \
-#			perl -p -e "s/N_unmapped/\t$$sample\t\t\nN_unmapped/;" \
-#      			star/$$sample.ReadsPerGene.out.tab | cut -f 2 | paste $@ - > $@.tmp; mv $@.tmp $@; \
-#		done; \
-#	fi
 
 star/all$(PROJECT_PREFIX).alignment_stats.txt : $(foreach sample,$(SAMPLES),star/$(sample).Log.final.out)
 	$(INIT) \

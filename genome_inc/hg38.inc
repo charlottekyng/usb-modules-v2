@@ -2,7 +2,12 @@ ifndef HG38_INC
 REF = hg38
 include usb-modules-v2/genome_inc/common.inc
 
+ifeq ($(findstring RNA,$(CAPTURE_METHOD)),RNA)
+REF_FASTA ?= $(GENOME_DIR)/Homo_sapiens_assembly38_NOalt.fasta
+else
 REF_FASTA ?= $(GENOME_DIR)/Homo_sapiens_assembly38_gsa.fasta
+endif
+
 REF_DICT = $(REF_FASTA:.fasta=.dict)
 
 DBSNP ?= $(ANN_DIR)/dbsnp_151.hg38.vcf.gz
@@ -62,7 +67,12 @@ GENCODE_GENE_GTF = $(ANN_DIR)/gencode.$(GENCODE_VER).primary_assembly.annotation
 GENCODE_CODING_GENE_GTF = $(ANN_DIR)/gencode.$(GENCODE_VER).primary_assembly.annotation_gene.protein_coding.gtf
 GENCODE_NONCODING_GENE_GTF = $(ANN_DIR)/gencode.$(GENCODE_VER).primary_assembly.annotation_gene.non_coding.gtf
 
+ifeq ($(findstring RNA,$(CAPTURE_METHOD)),RNA)
+RIBOSOMAL_INTERVALS ?= $(ANN_DIR)/gencode.$(GENCODE_VER).primary_assembly_NOalt.annotation_ribosomal.interval_list
+else
 RIBOSOMAL_INTERVALS ?= $(ANN_DIR)/gencode.$(GENCODE_VER).primary_assembly.annotation_ribosomal.interval_list
+endif
+
 GENE_REF_FLAT = $(ANN_DIR)/gencode.$(GENCODE_VER).primary_assembly.annotation.refFlat
 
 ### TOOL-SPECIFIC REF ###

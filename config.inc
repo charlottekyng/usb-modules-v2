@@ -664,5 +664,7 @@ endif
 
 RSEM_OPTIONS ?= --alignments --no-bam-output -p $(RSEM_NUM_CORES) --strandedness $(RSEM_STRANDEDNESS) $(if $(RSEM_CALC_PME),--calc-pme)
 
+STAR_OPTIONS ?= --outFilterMultimapNmax 20 --outFilterMismatchNmax 999 --alignSJDBoverhangMin 1 --outSAMprimaryFlag AllBestScore --outMultimapperOrder Random --chimSegmentMin 12 --chimJunctionOverhangMin 12 --chimSegmentReadGapMax 3 --chimOutType Junctions WithinBAM SoftClip --twopassMode Basic
+
 endif
 CONFIG_INC = true
