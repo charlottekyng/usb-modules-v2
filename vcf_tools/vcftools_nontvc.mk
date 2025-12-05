@@ -101,7 +101,7 @@ vcf/$1_$2.%.sufam.vcf : vcf/$1_$2.%.vcf vcf/$3.%.sufam.tmp bam/$1.bam bam/$2.bam
 		$$(call PURGE_AND_LOAD, $$(JAVA8_MODULE)) && \
 		$$(call GATK,CombineVariants,$$(RESOURCE_REQ_HIGH_MEM_JAVA)) --variant $$< --variant $$@.tmp6 -o $$@ \
 		--genotypemergeoption UNSORTED -R $$(REF_FASTA) && \
-		$$(RM) $$@.tmp* $$(word 1,$$^)* $$(word 1,$$^)*.idx $$(word 2,$$^)* $$(word 2,$$^)*.idx"))
+		$$(RM) $$@.tmp* $$(word 1,$$^)*.idx $$(word 2,$$^)* $$(word 2,$$^)*.idx"))
 else
 vcf/$1_$2.%.sufam.vcf : vcf/$1_$2.%.vcf vcf/$3.%.sufam.tmp bam/$1.bam bam/$2.bam
 	$$(call CHECK_VCF_CMD,$$(word 2,$$^),cp $$(word 1,$$^) $$@,\
