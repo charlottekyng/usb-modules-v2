@@ -21,11 +21,10 @@ include usb-modules-v2/config.inc
 ##### DEFINE THE MAIN RUN FUNCTION #######
 ##########################################
 
-
 RUN_OPTS = $(if $(findstring false,$(USE_CLUSTER)),-l) -o $@ \
 $(if $(CLUSTER_ENGINE),-g $(CLUSTER_ENGINE)) $(if $(EXCLUDE_NODE),-x $(EXCLUDE_NODE)) \
 $(if $(PARTITION),--partition $(PARTITION)) \
--S $(SHELL) --log_file $(LOG) $(if $(PROJECT_NAME),-p $(PROJECT_NAME)) -c 
+-S $(SHELL) --log_file $(LOG) $(if $(PROJECT_NAME),-p $(PROJECT_NAME)) -c --nodes 1
 
 ## RUN is the main function!!
 ## arg1 = number of cores
@@ -35,12 +34,13 @@ $(if $(PARTITION),--partition $(PARTITION)) \
 RUN = $(call PURGE_AND_LOAD,$(PYTHON_MODULE)); echo "\
 $(call PURGE_AND_LOAD,$4); " $5 | python usb-modules-v2/scripts/run.py $(RUN_OPTS) -n $1 -m $2 -w $3
 
+# gratis has limited resources now, use job_cpu_preemptable for up to 1d jobs
 RUN += $(if $(findstring SLURM,$(CLUSTER_ENGINE)),\
-$(if $(findstring $(QOS_2w),$3),--qos job_cpu_long,\
-$(if $(findstring $(QOS_1w),$3),--qos job_cpu_long,\
-$(if $(findstring $(QOS_1d),$3),--qos job_cpu,\
-$(if $(findstring $(QOS_6h),$3),--qos job_cpu,\
-$(if $(findstring $(QOS_30min),$3),--qos job_cpu,--qos job_cpu_long))))),)
+$(if $(findstring $(QOS_2w),$3),--qos job_gratis,\
+$(if $(findstring $(QOS_1w),$3),--qos job_gratis,\
+$(if $(findstring $(QOS_1d),$3),--qos job_cpu_preemptable,\
+$(if $(findstring $(QOS_6h),$3),--qos job_cpu_preemptable,\
+$(if $(findstring $(QOS_30min),$3),--qos job_cpu_preemptable))))),)
 
 
 ###############################################################
