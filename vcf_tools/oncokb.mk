@@ -3,6 +3,7 @@ include usb-modules-v2/variant_callers/somatic/somaticVariantCaller.inc
 
 # Usage: consensus or single caller
 
+TUMOR_TYPE ?=
 TYPE ?= snvs
 CONSENSUS ?= consensus
 CALLERS ?= strelka2_$(TYPE) mutect2
@@ -21,7 +22,7 @@ PHONY += all
 .SECONDARY:
 .PHONY: $(PHONY)
 
-all: alltables/allTN.consensus.$(CALLER_STRING).$(VCF_SUFFIX).oncokb.maf
+all: alltables/allTN.consensus.$(CALLER_STRING).$(VCF_SUFFIX).$(TUMOR_TYPE).oncokb.maf
 
 #oncokb_vcfs : $(call MAKE_VCF_FILE_LIST,consensus.$(CALLER_STRING)) 
 #oncokb_tables : $(call MAKE_TABLE_FILE_LIST,consensus.$(CALLER_STRING))
@@ -37,8 +38,8 @@ $(foreach pair,$(SAMPLE_PAIRS), \
 
 # oncokb MAF annotator
 define oncokb_annotator
-maf/$1_$2.consensus.$(CALLER_STRING).$(VCF_SUFFIX).oncokb.maf : maf/$1_$2.consensus.$(CALLER_STRING).$(VCF_SUFFIX).maf
-	$$(call RUN,4,$$(RESOURCE_REQ_MEDIUM_MEM),$$(RESOURCE_REQ_SHORT),$$(VEP_ONCOKB_MODULE)," 	sleep 5 && python $$(ONCOKB_MAF_ANNO) -i $$< -o $$@ $$(if $$(findstring hg38,$$(REF)), -r GRCh38) -b $$(ONCOKB_TOKEN) && $$(RM) $$<")
+maf/$1_$2.consensus.$(CALLER_STRING).$(VCF_SUFFIX).$(TUMOR_TYPE).oncokb.maf : maf/$1_$2.consensus.$(CALLER_STRING).$(VCF_SUFFIX).maf
+	$$(call RUN,4,$$(RESOURCE_REQ_MEDIUM_MEM),$$(RESOURCE_REQ_SHORT),$$(VEP_ONCOKB_MODULE)," 	sleep 5 && python $$(ONCOKB_MAF_ANNO) -i $$< -o $$@ $$(if $$(findstring hg38,$$(REF)), -r GRCh38) -t $$(TUMOR_TYPE) -b $$(ONCOKB_TOKEN) -d && $$(RM) $$<")
 endef
 # Loop through each sample pair and generate consensus VCFs
 $(foreach pair,$(SAMPLE_PAIRS), \
@@ -46,6 +47,6 @@ $(foreach pair,$(SAMPLE_PAIRS), \
 )
 
 # concatenate all MAF in a alltable
-alltables/allTN.consensus.$(CALLER_STRING).$(VCF_SUFFIX).oncokb.maf  : $(foreach pair,$(SAMPLE_PAIRS),maf/$(pair).consensus.$(CALLER_STRING).$(VCF_SUFFIX).oncokb.maf)
+alltables/allTN.consensus.$(CALLER_STRING).$(VCF_SUFFIX).$(TUMOR_TYPE).oncokb.maf  : $(foreach pair,$(SAMPLE_PAIRS),maf/$(pair).consensus.$(CALLER_STRING).$(VCF_SUFFIX).$(TUMOR_TYPE).oncokb.maf)
 
 include usb-modules-v2/vcf_tools/vcftools.mk
