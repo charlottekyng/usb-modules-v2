@@ -41,6 +41,7 @@ if __name__ == '__main__':
     parser.add_argument('--mail_user', default=None, help='Mail User')
     parser.add_argument('--array', default=None, help='Number of Tasks and Parallel Tasks')
     parser.add_argument('--partition', default=None, help='SLURM partition')
+    parser.add_argument('--nodes', default=1, help='SLURM node number request')
 
 
     
@@ -180,6 +181,8 @@ if __name__ == '__main__':
             qsub_args += " --array {}".format(args.array)
         if args.partition is not None:
             qsub_args += " --partition {}".format(args.partition)
+        if args.nodes is not None:
+            qsub_args += " --nodes {}".format(args.nodes)
         if args.nice is not None:
             qsub_args += " --nice={}".format(args.nice)
 
