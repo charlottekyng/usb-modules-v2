@@ -16,9 +16,9 @@ PHONY += all clean
 .SECONDARY:
 .PHONY: $(PHONY)
 
-#clean intermediate files
-all: consensus_tables consensus_vcfs
-	rm -f vcf/*.norm2.vcf.gz vcf/*.norm2.vcf.gz.csi vcf/*consensus.$(CALLER_STRING).vcf
+#clean intermediate files 
+all: consensus_tables
+	rm -f vcf/*.norm2.vcf.gz vcf/*.norm2.vcf.gz.csi vcf/*consensus.$(CALLER_STRING).vcf vcf/*union.$(CALLER_STRING).vcf vcf/*excluded.$(CALLER_STRING).vcf
 
 consensus_vcfs : $(call MAKE_VCF_FILE_LIST,consensus.$(CALLER_STRING)) 
 consensus_tables : $(call MAKE_TABLE_FILE_LIST,consensus.$(CALLER_STRING))
@@ -36,16 +36,46 @@ $(foreach pair,$(SAMPLE_PAIRS), \
 )
 
 # Generate consensus VCF for each sample pair and all callers with bcftools isec
-define consensus
+define consensus_snvs
 vcf/$1_$2.consensus.$(CALLER_STRING).vcf : $(foreach caller,$(CALLERS),vcf/$1_$2.$(caller).$(VCF_FILTER_SUFFIX).norm2.vcf.gz.csi)
 	$$(call RUN,1,$$(RESOURCE_REQ_LOW_MEM),$$(RESOURCE_REQ_VSHORT),$$(BCFTOOLS_MODULE),"\
-	$$(BCFTOOLS) isec -n+$$(MIN_CALLERS) -w1 $$(basename $$^) -o $$@ && $$(RM) $$(basename $$^) $$^")
+	$$(BCFTOOLS) isec -n+$$(MIN_CALLERS) -w1 $$(basename $$^) -o $$@")
 
 vcf/$1_$2.consensus.$(CALLER_STRING).$(VCF_FILTER_SUFFIX).$(VCF_ANNS_SUFFIX).vcf : vcf/$1_$2.consensus.$(CALLER_STRING).vcf
 endef
+
+# Generate consensus VCF for each sample pair and all callers with bcftools isec, in case of indels also keeping the excluded entries
+#PS: exluded files for indels are pretty big, in the future we could consider using SURVIVOR and allow a certain slope for indel coordinates differences instead
+define consensus_indels
+vcf/$1_$2.consensus.$(CALLER_STRING).vcf : $(foreach caller,$(CALLERS),vcf/$1_$2.$(caller).$(VCF_FILTER_SUFFIX).norm2.vcf.gz.csi)
+	$$(call RUN,1,$$(RESOURCE_REQ_LOW_MEM),$$(RESOURCE_REQ_VSHORT),$$(BCFTOOLS_MODULE),"\
+	$$(BCFTOOLS) isec -n+$$(MIN_CALLERS) -w1 $$(basename $$^) -o $$@")
+
+vcf/$1_$2.consensus.$(CALLER_STRING).norm2.vcf.gz : vcf/$1_$2.consensus.$(CALLER_STRING).vcf
+vcf/$1_$2.consensus.$(CALLER_STRING).norm2.vcf.gz.csi : vcf/$1_$2.consensus.$(CALLER_STRING).norm2.vcf.gz
+
+vcf/$1_$2.union.$(CALLER_STRING).vcf : $(foreach caller,$(CALLERS),vcf/$1_$2.$(caller).$(VCF_FILTER_SUFFIX).norm2.vcf.gz.csi)
+	$$(call RUN,1,$$(RESOURCE_REQ_LOW_MEM),$$(RESOURCE_REQ_VSHORT),$$(BCFTOOLS_MODULE),"\
+	$$(BCFTOOLS) isec -n+1 -w1 $$(basename $$^) -o $$@")
+
+vcf/$1_$2.union.$(CALLER_STRING).norm2.vcf.gz : vcf/$1_$2.union.$(CALLER_STRING).vcf
+vcf/$1_$2.union.$(CALLER_STRING).norm2.vcf.gz.csi : vcf/$1_$2.union.$(CALLER_STRING).norm2.vcf.gz
+
+vcf/$1_$2.excluded.$(CALLER_STRING).vcf : vcf/$1_$2.union.$(CALLER_STRING).norm2.vcf.gz.csi vcf/$1_$2.consensus.$(CALLER_STRING).norm2.vcf.gz.csi
+	$$(call RUN,1,$$(RESOURCE_REQ_LOW_MEM),$$(RESOURCE_REQ_VSHORT),$$(BCFTOOLS_MODULE),"\
+	$$(BCFTOOLS) isec -n=1 -w1 $$(basename $$<) $$(basename $$<<) -o $$@")
+
+vcf/$1_$2.excluded.$(CALLER_STRING).$(VCF_FILTER_SUFFIX).$(VCF_ANNS_SUFFIX).vcf : vcf/$1_$2.excluded.$(CALLER_STRING).vcf
+vcf/$1_$2.consensus.$(CALLER_STRING).$(VCF_FILTER_SUFFIX).$(VCF_ANNS_SUFFIX).vcf : vcf/$1_$2.consensus.$(CALLER_STRING).vcf
+endef
+
 # Loop through each sample pair and generate consensus VCFs
-$(foreach pair,$(SAMPLE_PAIRS), \
-	$(eval $(call consensus,$(tumor.$(pair)),$(normal.$(pair)))) \
-)
+ifeq ($(TYPE),snvs)
+$(foreach pair,$(SAMPLE_PAIRS),$(eval $(call consensus_snvs,$(tumor.$(pair)),$(normal.$(pair)))))
+endif
+
+ifeq ($(TYPE),indels)
+$(foreach pair,$(SAMPLE_PAIRS),$(eval $(call consensus_indels,$(tumor.$(pair)),$(normal.$(pair)))))
+endif
 
 include usb-modules-v2/vcf_tools/vcftools.mk
