@@ -3,16 +3,13 @@ include usb-modules-v2/variant_callers/somatic/somaticVariantCaller.inc
 
 # Usage: consensus or single caller
 
-TUMOR_TYPE ?=
+TUMOR_TYPE ?= default
 TYPE ?= snvs
+TARGET_TYPE ?= gene
 CONSENSUS ?= consensus
-CALLERS ?= strelka2_$(TYPE) mutect2
-CALLERS := $(strip $(CALLERS))
-CALLER_STRING := $(subst $(space),.,$(CALLERS))
-# Generate the suffix
-CONSENSUS_VCFS := $(call MAKE_VCF_FILE_LIST,consensus.$(CALLER_STRING))
-FIRST_VCF := $(firstword $(CONSENSUS_VCFS))
-VCF_SUFFIX := $(shell echo $(FIRST_VCF) |cut -d. -f$$(($(words $(CALLERS))+3))- | sed s/.vcf//)
+CALLER ?= strelka2_$(TYPE) mutect2
+CALLER := $(strip $(CALLER))
+CALLER_STRING := $(subst $(space),.,$(CALLER))
 
 LOGDIR ?= log/oncokb.$(NOW)
 
@@ -22,31 +19,87 @@ PHONY += all
 .SECONDARY:
 .PHONY: $(PHONY)
 
-all: alltables/allTN.consensus.$(CALLER_STRING).$(VCF_SUFFIX).$(TUMOR_TYPE).oncokb.maf
+all: results
 
-#oncokb_vcfs : $(call MAKE_VCF_FILE_LIST,consensus.$(CALLER_STRING)) 
-#oncokb_tables : $(call MAKE_TABLE_FILE_LIST,consensus.$(CALLER_STRING))
+ifeq ($(CONSENSUS),consensus)
+  CALLER_SUFFIX := consensus.$(CALLER_STRING)
+else
+  CALLER_SUFFIX := $(CALLER_STRING)
+endif
+
+ifeq ($(filter $(TYPE),snvs indels),$(TYPE))
+results : oncokb/snvs_indels/allTN.$(CALLER_SUFFIX).$(TUMOR_TYPE).oncokb.maf
+else ifeq ($(TYPE),cna)
+results : oncokb/cna/all_thresholded.by_genes.$(TUMOR_TYPE).oncokb.txt
+else ifeq ($(TYPE),fusion)
+results : oncokb/fusion/SV.consensus.fusion.$(TUMOR_TYPE).oncokb.tsv
+else ifeq ($(TYPE),sv)
+results : oncokb/sv/SV.consensus.distrupted_$(TARGET_TYPE).$(TUMOR_TYPE).oncokb.tsv
+endif
 
 # convert VCF to MAF
-define convert
-maf/$1_$2.consensus.$(CALLER_STRING).$(VCF_SUFFIX).maf : vcf/$1_$2.consensus.$(CALLER_STRING).$(VCF_SUFFIX).vcf
+define convert_vcf_maf
+maf/$1_$2.$(CALLER_SUFFIX).$(call VCF_SUFFIX,).maf : vcf/$1_$2.$(CALLER_SUFFIX).$(call VCF_SUFFIX,).vcf
 endef
-# Loop through each sample pair and caller to preprocess each VCF
-$(foreach pair,$(SAMPLE_PAIRS), \
-		$(eval $(call convert,$(tumor.$(pair)),$(normal.$(pair)))) \
-)
 
 # oncokb MAF annotator
-define oncokb_annotator
-maf/$1_$2.consensus.$(CALLER_STRING).$(VCF_SUFFIX).$(TUMOR_TYPE).oncokb.maf : maf/$1_$2.consensus.$(CALLER_STRING).$(VCF_SUFFIX).maf
-	$$(call RUN,4,$$(RESOURCE_REQ_MEDIUM_MEM),$$(RESOURCE_REQ_SHORT),$$(VEP_ONCOKB_MODULE)," 	sleep 5 && python $$(ONCOKB_MAF_ANNO) -i $$< -o $$@ $$(if $$(findstring hg38,$$(REF)), -r GRCh38) -t $$(TUMOR_TYPE) -b $$(ONCOKB_TOKEN) -d && $$(RM) $$<")
+define oncokb_snvs_indels_annotator
+oncokb/snvs_indels/$1_$2.$(CALLER_SUFFIX).$(TUMOR_TYPE).oncokb.maf : maf/$1_$2.$(CALLER_SUFFIX).$(call VCF_SUFFIX,).maf
+	$$(MKDIR) $$(@D)
+	$$(call RUN,4,$$(RESOURCE_REQ_MEDIUM_MEM),$$(RESOURCE_REQ_SHORT),$$(VEP_ONCOKB_MODULE)," 	sleep 5 && python $$(ONCOKB_MAF_ANNO) -i $$< -o $$@ $$(if $$(findstring hg38,$$(REF)), -r GRCh38) -t $$(TUMOR_TYPE) -b $$(ONCOKB_TOKEN) -d")
 endef
-# Loop through each sample pair and generate consensus VCFs
+
+# oncokb CNA annotator
+define oncokb_cna_annotator
+oncokb/cna/all_thresholded.by_genes.$(TUMOR_TYPE).oncokb.txt : gistic/gistic_cnv300000/all_thresholded.by_genes.txt
+	$$(MKDIR) $$(@D)
+	$$(call RUN,4,$$(RESOURCE_REQ_MEDIUM_MEM),$$(RESOURCE_REQ_SHORT),$$(VEP_ONCOKB_MODULE),"\
+	sleep 5 && python $$(ONCOKB_CNA_ANNO) -i $$< -o $$@ -t $$(TUMOR_TYPE) -b $$(ONCOKB_TOKEN) -z -d")
+endef
+
+#need to format fusion in the right format for oncokb
+# oncokb FUSION annotator
+define oncokb_fusion_annotator
+oncokb/fusion/SV.consensus.fusion.$(TUMOR_TYPE).oncokb.tsv : consSV/oncokb_input/SV.consensus.fusion.tsv
+	$$(MKDIR) $$(@D)
+	$$(call RUN,4,$$(RESOURCE_REQ_MEDIUM_MEM),$$(RESOURCE_REQ_SHORT),$$(VEP_ONCOKB_MODULE),"\
+	sleep 5 && python $$(ONCOKB_FUSION_ANNO) -i $$< -o $$@ -t $$(TUMOR_TYPE) -b $$(ONCOKB_TOKEN) -d")
+endef
+#need to format gene/promoters in the right format for oncokb
+# oncokb SV annotator
+define oncokb_sv_annotator
+oncokb/sv/SV.consensus.distrupted_$(TARGET_TYPE).$(TUMOR_TYPE).oncokb.tsv : consSV/oncokb_input/SV.consensus.distrupted_$(TARGET_TYPE).tsv
+	$$(MKDIR) $$(@D)
+	$$(call RUN,4,$$(RESOURCE_REQ_MEDIUM_MEM),$$(RESOURCE_REQ_SHORT),$$(VEP_ONCOKB_MODULE),"\
+	sleep 5 && python $$(ONCOKB_SV_ANNO) -i $$< -o $$@ -t $$(TUMOR_TYPE) -b $$(ONCOKB_TOKEN) -d")
+endef
+
+#execute rules based on TYPE
+ifeq ($(filter $(TYPE),snvs indels),$(TYPE))
 $(foreach pair,$(SAMPLE_PAIRS), \
-	$(eval $(call oncokb_annotator,$(tumor.$(pair)),$(normal.$(pair)))) \
+		$(eval $(call convert_vcf_maf,$(tumor.$(pair)),$(normal.$(pair)))) \
 )
 
-# concatenate all MAF in a alltable
-alltables/allTN.consensus.$(CALLER_STRING).$(VCF_SUFFIX).$(TUMOR_TYPE).oncokb.maf  : $(foreach pair,$(SAMPLE_PAIRS),maf/$(pair).consensus.$(CALLER_STRING).$(VCF_SUFFIX).$(TUMOR_TYPE).oncokb.maf)
+$(foreach pair,$(SAMPLE_PAIRS), \
+		$(eval $(call oncokb_snvs_indels_annotator,$(tumor.$(pair)),$(normal.$(pair)))) \
+)
+
+oncokb/snvs_indels/allTN.$(CALLER_SUFFIX).$(TUMOR_TYPE).oncokb.maf  : $(foreach pair,$(SAMPLE_PAIRS),oncokb/snvs_indels/$(pair).$(CALLER_SUFFIX).$(TUMOR_TYPE).oncokb.maf)
+	$(INIT) \
+	{ \
+	echo -e "TUMOR_NORMAL\t$(shell grep -v '^#' $< | sed -n 1p)"; \
+	for x in $^; do \
+		pair=$$(basename $$x | cut -d. -f1); \
+		grep -v '^#' $$x | sed 1d | awk -v p=$$pair '{print p "\t" $$0}'; \
+	done; \
+	} > $@
+
+else ifeq ($(TYPE),cna)
+$(eval $(oncokb_cna_annotator))
+else ifeq ($(TYPE),fusion)
+$(eval $(oncokb_fusion_annotator))
+else ifeq ($(TYPE),sv)
+$(eval $(oncokb_sv_annotator))
+endif
 
 include usb-modules-v2/vcf_tools/vcftools.mk

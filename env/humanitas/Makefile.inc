@@ -15,7 +15,7 @@ CONDA_DIR ?= $(USR_DIR)/conda
 SV_PON_DIR ?= $(GROUP_DIR)/ref/PoN/hg38/wgs/PDAC_AMPAC/gridss/pondir/
 HOTSPOTS_DIR ?= $(USR_DIR)/local/cancer_hotspots
 NICE ?= 1000
-ONCOKB_TOKEN = 2acb7953-59fb-4110-b0fb-e730d9382d78
+ONCOKB_TOKEN = 3c10d6d3-958c-4db4-9109-9d2384fdd604
 # export PATH := $(USR_DIR):$(PATH)
 # export LD_LIBRARY_PATH := $(LD_LIBRARY_PATH)
 
@@ -109,6 +109,9 @@ PYCLONE_MODULE ?= $(ANACONDA_MODULE) && source activate $(CONDA_DIR)/pyclone
 SIG_PROFILER_MODULE ?= $(ANACONDA_MODULE) && source activate $(CONDA_DIR)/SigProfiler
 VEP_ONCOKB_MODULE ?= $(ANACONDA_MODULE) && source activate $(CONDA_DIR)/oncokb/
 ONCOKB_MAF_ANNO = $(USR_DIR)/local/oncokb-annotator/MafAnnotator.py
+ONCOKB_FUSION_ANNO = $(USR_DIR)/local/oncokb-annotator/FusionAnnotator.py
+ONCOKB_CNA_ANNO = $(USR_DIR)/local/oncokb-annotator/CnaAnnotator.py
+ONCOKB_SV_ANNO = $(USR_DIR)/local/oncokb-annotator/StructuralVariantAnnotator.py
 
 PERL ?= $(USR_DIR)/local/perl/5.16.3/bin/perl
 # on humanitas $TMPDIR is /tmp ($TMPDIR is set only on compute nodes)
