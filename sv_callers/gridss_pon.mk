@@ -20,7 +20,7 @@ $(REF_FASTA).gridsscache $(REF_FASTA).dict:
 # Main function to run gridss on panel of normals gridss is optimized for 32G and 8 cores
 define generate-gridss-pon
 gridss/pondir/%.normal.vcf : bam/%.bam $$(REF_FASTA).gridsscache $$(REF_FASTA).dict
-	mkdir -p gridss/gridss_tmp && \
+	$$(MKDIR) $$(@D)
 	$$(call RUN,8,$$(RESOURCE_REQ_HIGH_MEM),$$(RESOURCE_REQ_MEDIUM),$$(SINGULARITY_MODULE),"\
 	$$(GRIDSS) gridss \
 	$$(if $$(findstring hg38,$$(REF)),-b $$(BED_DIR)/ENCFF356LFX.bed) \
