@@ -49,7 +49,8 @@ brass_files/depth/%.bed : brass_files/%.bw
 
 brass_files/sorted/%.bed: brass_files/depth/%.bed
 	$(MKDIR) $(@D)
-	cat $< | sort -k1,1 -k2,2n > $@
+	$(call RUN,1,$(RESOURCE_REQ_LOW_MEM),$(RESOURCE_REQ_VSHORT),,"\
+	cat $< | sort -k1,1 -k2,2n > $@")
 
 brass_files/merged/intersect.bed: $(foreach pair,$(SAMPLE_PAIRS),brass_files/sorted/$(tumor.$(pair)).bed)
 	$(call RUN,1,$(RESOURCE_REQ_LOW_MEM),$(RESOURCE_REQ_VSHORT),$(BEDTOOLS_MODULE),"\
@@ -68,7 +69,8 @@ brass_files/merged/depth_mask.bed.gz: brass_files/merged/intersect.filtered.bed
 	| $(BGZIP) -c > $@")
 
 brass_files/merged/depth_mask.bed.gz.tbi: brass_files/merged/depth_mask.bed.gz
-	tabix -p bed $<
+	$(call RUN,1,$(RESOURCE_REQ_LOW_MEM),$(RESOURCE_REQ_VSHORT),,"\
+	tabix -p bed $<")
 
 brass_files/merged/depth_mask.bed: brass_files/merged/depth_mask.bed.gz
 	$(call RUN,1,$(RESOURCE_REQ_LOW_MEM),$(RESOURCE_REQ_VSHORT),,"\
@@ -77,11 +79,12 @@ brass_files/merged/depth_mask.bed: brass_files/merged/depth_mask.bed.gz
 
 brass_files/sampstat/%.txt: facets/cncf/all.summary.txt
 	$(MKDIR) $(@D)
+	$(call RUN,1,$(RESOURCE_REQ_LOW_MEM),$(RESOURCE_REQ_VSHORT),,"\
 	awk -v sample="$*" 'BEGIN{FS="\t"} NR > 1 && $$3 == sample { \
 		if ($$9 != "NA" && $$10 != "NA") { \
 			printf("rho\t%s\nPloidy\t%s\nGenderChr\tY\nGenderChrFound\tY\n", $$9, $$10); \
 		} \
-	}' $< > $@
+	}' $< > $@")
 
 define brass-tumor-normal
 brass/$1_$2.brass_wrap.log : bam/$1.bam bam/$2.bam bam/$1.bam.bas bam/$2.bam.bas brass_files/merged/depth_mask.bed brass_files/sampstat/$1.txt
