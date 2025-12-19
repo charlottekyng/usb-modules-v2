@@ -253,6 +253,9 @@ GRIDSS ?= $(SINGULARITY_EXEC) $(GRIDSS_IMG)
 SVABA_IMG ?= $(IMG_DIR)/SvABA/svaba_1.2.0-ab39e3f.sif
 SVABA ?= $(SINGULARITY_EXEC) $(SVABA_IMG)
 
+ONCOLINER_IMG ?= $(IMG_DIR)/oncoliner/oncoliner.sif
+VARIANT_EXTRACTOR ?= $(SINGULARITY_EXEC) $(ONCOLINER_IMG)
+
 DEEPSOMATIC_IMG ?= $(IMG_DIR)/deepsomatic/deepsomatic_1.9.0.sif
 DEEPSOMATIC ?= $(SINGULARITY_EXEC) $(DEEPSOMATIC_IMG)
 
@@ -396,3 +399,5 @@ DETIN ?= python $(DETIN_DIR)/deTiN.py
 
 TCELLEXTRECT_IMG ?= $(IMG_DIR)/TcellExTRECT/TcellExTRECT_v1.0.1.sif
 TCELLEXTRECT ?= $(SINGULARITY_EXEC) $(TCELLEXTRECT_IMG) Rscript usb-modules-v2/Tcell_quant/runTcellExTRECT.R
+
+CONSV = $(RSCRIPT) usb-modules-v2/sv_callers/conSV.R
