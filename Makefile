@@ -340,6 +340,10 @@ TARGETS += conSV
 conSV :
 	$(call RUN_MAKE,usb-modules-v2/sv_callers/conSV.mk)
 
+TARGETS += conSV_disruption
+conSV_disruption :
+	$(call RUN_MAKE,usb-modules-v2/sv_callers/conSV.mk conSV_disruption)
+
 #########################################################
 ## The set of targets below have NOT been tested,
 ## or are known to be broken/obsolete.

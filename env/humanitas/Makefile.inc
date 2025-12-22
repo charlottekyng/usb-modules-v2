@@ -401,3 +401,4 @@ TCELLEXTRECT_IMG ?= $(IMG_DIR)/TcellExTRECT/TcellExTRECT_v1.0.1.sif
 TCELLEXTRECT ?= $(SINGULARITY_EXEC) $(TCELLEXTRECT_IMG) Rscript usb-modules-v2/Tcell_quant/runTcellExTRECT.R
 
 CONSV = $(RSCRIPT) usb-modules-v2/sv_callers/conSV.R
+CONSV_disruption = $(RSCRIPT) usb-modules-v2/sv_callers/conSV_disruption.R
