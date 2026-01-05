@@ -47,8 +47,6 @@ if (!interactive()) {
     options(warn = -1, error = quote({ traceback(); q('no', status = 1) }))
 }
 
-print(commandArgs(trailingOnly = TRUE))
-
 optList <- list(
 	make_option("--oncokb_file", default = "conSV/cancerGeneList_edit_oncokb.xlsx",  type = "character", dest = "oncokb_file",
 	            help = "Oncokb file"),

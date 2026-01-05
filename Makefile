@@ -1,8 +1,5 @@
 # Top-level Makefile
-#
-#
-# Author: Raymond Lim <raylim@mm.st>
-#
+
 
 export
 
@@ -343,6 +340,10 @@ conSV :
 TARGETS += conSV_disruption
 conSV_disruption :
 	$(call RUN_MAKE,usb-modules-v2/sv_callers/conSV.mk conSV_disruption)
+
+TARGETS += conSV_fusion
+conSV_fusion :
+	$(call RUN_MAKE,usb-modules-v2/sv_callers/conSV.mk conSV_fusion)
 
 #########################################################
 ## The set of targets below have NOT been tested,

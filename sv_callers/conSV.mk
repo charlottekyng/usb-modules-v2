@@ -6,7 +6,7 @@ include usb-modules-v2/Makefile.inc
 include usb-modules-v2/vcf_tools/vcftools.mk
 
 LOGDIR = log/conSV.$(NOW)
-PHONY += conSV
+PHONY += conSV conSV_disruption conSV_fusion
 
 .DELETE_ON_ERROR:
 .SECONDARY:
@@ -19,6 +19,8 @@ MIN_CALLERS ?= 2
 SLOPE ?= 200
 
 conSV : $(foreach pair,$(SAMPLE_PAIRS),conSV/conSV_$(MIN_CALLERS)_outof_$(words $(SV_CALLERS))/$(tumor.$(pair)).$(MIN_CALLERS)_outof_$(words $(SV_CALLERS))_slope_$(SLOPE).tsv)
+conSV_disruption : $(foreach pair,$(SAMPLE_PAIRS),conSV/conSV_$(MIN_CALLERS)_outof_$(words $(SV_CALLERS))/$(tumor.$(pair)).$(MIN_CALLERS)_outof_$(words $(SV_CALLERS))_slope_$(SLOPE)_gene_disruption.tsv)
+conSV_fusion : $(foreach pair,$(SAMPLE_PAIRS),conSV/conSV_$(MIN_CALLERS)_outof_$(words $(SV_CALLERS))/$(tumor.$(pair)).$(MIN_CALLERS)_outof_$(words $(SV_CALLERS))_slope_$(SLOPE)_fusion.tsv)
 
 # create folder and organise data
 #BRASS no filter implemented so taken as it is
@@ -99,18 +101,19 @@ $(foreach pair,$(SAMPLE_PAIRS), \
 )
 
 #making consensus SVs
-define conSV_main
+define conSV
 conSV/conSV_$(MIN_CALLERS)_outof_$(words $(SV_CALLERS))/$1.$(MIN_CALLERS)_outof_$(words $(SV_CALLERS))_slope_$(SLOPE).tsv : $(foreach caller,$(SV_CALLERS), conSV/variantExtr/$1.$(caller).varExtr.vcf)
 	$$(MKDIR) $$(@D)
 	$$(call RUN,1,$$(RESOURCE_REQ_LOW_MEM),$$(RESOURCE_REQ_VSHORT),$$(R_MODULE),"\
 	$$(CONSV) --min_callers $$(MIN_CALLERS) --slope $$(SLOPE) --sv_callers $$(SV_CALLER_STRING) --output $$@ --input $1")
 endef
 $(foreach pair,$(SAMPLE_PAIRS), \
-	$(eval $(call conSV_main,$(tumor.$(pair)))) \
+	$(eval $(call conSV,$(tumor.$(pair)))) \
 )
 
 
-#making consensus SVs distruption annotation
+#making consensus SVs disruption annotation: 🚧 wip (implemented only for hg38 and for oncoKB anno file)
+#also promoter rigidly defined as region 200bp upstream and 50bp downstream genes TSS
 define conSV_disruption
 conSV/conSV_$(MIN_CALLERS)_outof_$(words $(SV_CALLERS))/$1.$(MIN_CALLERS)_outof_$(words $(SV_CALLERS))_slope_$(SLOPE)_gene_disruption.tsv : conSV/conSV_$(MIN_CALLERS)_outof_$(words $(SV_CALLERS))/$1.$(MIN_CALLERS)_outof_$(words $(SV_CALLERS))_slope_$(SLOPE).tsv
 	$$(call RUN,1,$$(RESOURCE_REQ_LOW_MEM),$$(RESOURCE_REQ_VSHORT),$$(R_MODULE),"\
@@ -118,4 +121,15 @@ conSV/conSV_$(MIN_CALLERS)_outof_$(words $(SV_CALLERS))/$1.$(MIN_CALLERS)_outof_
 endef
 $(foreach pair,$(SAMPLE_PAIRS), \
 	$(eval $(call conSV_disruption,$(tumor.$(pair)))) \
+)
+
+#making consensus SVs fusion gene annotation: 🚧 wip (implemented only for hg38 and naive way to consider fusion)
+# genes to consider for fusion are defined in the conSV_fusion.R script in future could be parameterized
+define conSV_fusion
+conSV/conSV_$(MIN_CALLERS)_outof_$(words $(SV_CALLERS))/$1.$(MIN_CALLERS)_outof_$(words $(SV_CALLERS))_slope_$(SLOPE)_fusion.tsv : conSV/conSV_$(MIN_CALLERS)_outof_$(words $(SV_CALLERS))/$1.$(MIN_CALLERS)_outof_$(words $(SV_CALLERS))_slope_$(SLOPE).tsv
+	$$(call RUN,1,$$(RESOURCE_REQ_LOW_MEM),$$(RESOURCE_REQ_VSHORT),$$(R_MODULE),"\
+	$$(CONSV_fusion) --output $$@ --input $$<")
+endef
+$(foreach pair,$(SAMPLE_PAIRS), \
+	$(eval $(call conSV_fusion,$(tumor.$(pair)))) \
 )

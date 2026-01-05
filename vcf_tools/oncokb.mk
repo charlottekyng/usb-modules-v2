@@ -58,14 +58,15 @@ oncokb/cna/all_thresholded.by_genes.$(TUMOR_TYPE).oncokb.txt : gistic/gistic_cnv
 endef
 
 #need to format fusion in the right format for oncokb
-# oncokb FUSION annotator
+#check https://github.com/oncokb/oncokb-annotator
+# oncokb FUSION annotator: input required: GENEA,GENEB,SV_TYPE,TUMOR_SAMPLE_BARCODE
 define oncokb_fusion_annotator
 oncokb/fusion/SV.consensus.fusion.$(TUMOR_TYPE).oncokb.tsv : consSV/oncokb_input/SV.consensus.fusion.tsv
 	$$(MKDIR) $$(@D)
 	$$(call RUN,4,$$(RESOURCE_REQ_MEDIUM_MEM),$$(RESOURCE_REQ_SHORT),$$(VEP_ONCOKB_MODULE),"\
 	sleep 5 && python $$(ONCOKB_FUSION_ANNO) -i $$< -o $$@ -t $$(TUMOR_TYPE) -b $$(ONCOKB_TOKEN) -d")
 endef
-#need to format gene/promoters in the right format for oncokb
+#need to format gene/promoters in the right format for oncokb: input required: GENEA,GENEB,SV_TYPE,TUMOR_SAMPLE_BARCODE (GENEA and GENEB are the same in this case)
 # oncokb SV annotator
 define oncokb_sv_annotator
 oncokb/sv/SV.consensus.distrupted_$(TARGET_TYPE).$(TUMOR_TYPE).oncokb.tsv : consSV/oncokb_input/SV.consensus.distrupted_$(TARGET_TYPE).tsv
