@@ -43,6 +43,11 @@ $(if $(findstring $(QOS_6h),$3),--qos job_cpu_preemptable,\
 $(if $(findstring $(QOS_30min),$3),--qos job_cpu_preemptable))))),)
 
 
+# ubelix has a 96h limit on gratis QOS, we have to restrict long jobs:
+# for some reason I get errors with values above 90h
+QOS_1w = 90:00:00
+QOS_2w = 90:00:00
+
 ###############################################################
 ####### DEFINE PATHS/NAMES FOR SCRIPTS, BINARIES, MODULES #####
 ###############################################################
