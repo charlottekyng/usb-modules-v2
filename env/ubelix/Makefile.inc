@@ -351,7 +351,7 @@ VIPER_RUN ?= $(R4SCRIPT) usb-modules-v2/rnaseq/viper_run.R
 
 STAR_PROCESS ?= usb-modules-v2/rnaseq/star_process.R
 
-KALLISTO ?= $(USR_DIR)/local/kallisto_v0.46.1/kallisto
+KALLISTO ?= $(USR_DIR)/local/kallisto_v0.48.0/kallisto
 KALLISTO_NUM_CORES ?= 4
 KALLISTO_OPTIONS ?= --fusion
 # --bias: learns parameters for a model of sequences specific bias and corrects the abundances accordingly.
