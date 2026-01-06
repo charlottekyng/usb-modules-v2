@@ -34,19 +34,19 @@ $(if $(PARTITION),--partition $(PARTITION)) \
 RUN = $(call PURGE_AND_LOAD,$(PYTHON_MODULE)); echo "\
 $(call PURGE_AND_LOAD,$4); " $5 | python usb-modules-v2/scripts/run.py $(RUN_OPTS) -n $1 -m $2 -w $3
 
-# gratis has limited resources now, use job_cpu_preemptable for up to 1d jobs
+# qos job_gratis has limited resources now (8 CPUs, 64G RAM, 96h), use job_cpu_preemptable (1d limit)
 RUN += $(if $(findstring SLURM,$(CLUSTER_ENGINE)),\
-$(if $(findstring $(QOS_2w),$3),--qos job_gratis,\
-$(if $(findstring $(QOS_1w),$3),--qos job_gratis,\
+$(if $(findstring $(QOS_2w),$3),--qos job_cpu_preemptable,\
+$(if $(findstring $(QOS_1w),$3),--qos job_cpu_preemptable,\
 $(if $(findstring $(QOS_1d),$3),--qos job_cpu_preemptable,\
 $(if $(findstring $(QOS_6h),$3),--qos job_cpu_preemptable,\
 $(if $(findstring $(QOS_30min),$3),--qos job_cpu_preemptable))))),)
 
 
-# ubelix has a 96h limit on gratis QOS, we have to restrict long jobs:
-# for some reason I get errors with values above 90h
-QOS_1w = 90:00:00
-QOS_2w = 90:00:00
+# We have to restrict long jobs:
+# (for some reason job_gratis accepted max 90h)
+QOS_1w = 24:00:00
+QOS_2w = 24:00:00
 
 ###############################################################
 ####### DEFINE PATHS/NAMES FOR SCRIPTS, BINARIES, MODULES #####
