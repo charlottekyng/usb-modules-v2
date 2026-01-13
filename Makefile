@@ -231,6 +231,10 @@ TARGETS	+= sig_profiler_assignment
 sig_profiler_assignment :
 	$(call RUN_MAKE,usb-modules-v2/mut_sigs/SigProfilerAssignment.mk)
 
+TARGETS	+= hrd_profiler
+hrd_profiler :
+	$(call RUN_MAKE,usb-modules-v2/mut_sigs/SigProfilerAssignment.mk hrd_profiler)
+
 TARGETS += lst
 lst :
 	$(call RUN_MAKE,usb-modules-v2/mut_sigs/lst.mk)
