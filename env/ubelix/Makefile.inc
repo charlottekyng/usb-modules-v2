@@ -34,14 +34,19 @@ $(if $(PARTITION),--partition $(PARTITION)) \
 RUN = $(call PURGE_AND_LOAD,$(PYTHON_MODULE)); echo "\
 $(call PURGE_AND_LOAD,$4); " $5 | python usb-modules-v2/scripts/run.py $(RUN_OPTS) -n $1 -m $2 -w $3
 
-# gratis has limited resources now, use job_cpu_preemptable for up to 1d jobs
+# qos job_gratis has limited resources now (8 CPUs, 64G RAM, 96h), use job_cpu_preemptable (1d limit)
 RUN += $(if $(findstring SLURM,$(CLUSTER_ENGINE)),\
-$(if $(findstring $(QOS_2w),$3),--qos job_gratis,\
-$(if $(findstring $(QOS_1w),$3),--qos job_gratis,\
+$(if $(findstring $(QOS_2w),$3),--qos job_cpu_preemptable,\
+$(if $(findstring $(QOS_1w),$3),--qos job_cpu_preemptable,\
 $(if $(findstring $(QOS_1d),$3),--qos job_cpu_preemptable,\
 $(if $(findstring $(QOS_6h),$3),--qos job_cpu_preemptable,\
 $(if $(findstring $(QOS_30min),$3),--qos job_cpu_preemptable))))),)
 
+
+# We have to restrict long jobs:
+# (for some reason job_gratis accepted max 90h)
+QOS_1w = 24:00:00
+QOS_2w = 24:00:00
 
 ###############################################################
 ####### DEFINE PATHS/NAMES FOR SCRIPTS, BINARIES, MODULES #####
@@ -346,7 +351,7 @@ VIPER_RUN ?= $(R4SCRIPT) usb-modules-v2/rnaseq/viper_run.R
 
 STAR_PROCESS ?= usb-modules-v2/rnaseq/star_process.R
 
-KALLISTO ?= $(USR_DIR)/local/kallisto_v0.46.1/kallisto
+KALLISTO ?= $(USR_DIR)/local/kallisto_v0.48.0/kallisto
 KALLISTO_NUM_CORES ?= 4
 KALLISTO_OPTIONS ?= --fusion
 # --bias: learns parameters for a model of sequences specific bias and corrects the abundances accordingly.
