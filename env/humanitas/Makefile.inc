@@ -298,6 +298,7 @@ MUT_SIG_COSMIC = signatures.exome.cosmic.v3.may2019
 MUTATIONALPATTERNS = $(RSCRIPT) usb-modules-v2/mut_sigs/MutationalPatterns.R --signatures $(MUT_SIG_COSMIC_DIR)/$(MUT_SIG_COSMIC).rda $(if $(findstring hg38,$(REF)),--ref hg38, $(if $(findstring b37,$(REF)),--ref hg19))
 
 SIG_PROFILER_ASSIGNMENT = $(PYTHON) usb-modules-v2/mut_sigs/run_SigProfilerAssignment.py
+SV_MATRIX_GENERATOR = $(PYTHON) usb-modules-v2/mut_sigs/run_SVMatrixGenerator.py 
 
 PVACSEQ ?= pvacseq
 PVACTOOLS_IMG ?= $(IMG_DIR)/pvactools.img
