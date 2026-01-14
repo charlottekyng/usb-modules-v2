@@ -10,7 +10,7 @@ SIG_TYPE ?= SBS
 
 .DELETE_ON_ERROR:
 .SECONDARY:
-.PHONY: sig_profiler_assignment hrd_profiler
+.PHONY: sig_profiler_assignment hrprofiler
 
 ifeq ($(SIG_TYPE), SBS)
 	ifneq ($(words $(CALLER_PREFIX)),1)
@@ -29,7 +29,7 @@ ifeq ($(filter $(SIG_TYPE),$(ALLOWED_SIG_TYPES)),)
 endif
 
 sig_profiler_assignment : SigProfilerAssignment/$(SIG_TYPE)/output/JOB_METADATA_SPA.txt
-hrd_profiler : HRDProfiler/output/JOB_METADATA_SPA.txt
+hrprofiler : HRProfiler/output/JOB_METADATA_SPA.txt
 
 ifeq ($(SIG_TYPE),SBS)
 SigProfilerAssignment/SBS/output/JOB_METADATA_SPA.txt :$(foreach pair,$(SAMPLE_PAIRS),vcf/$(pair).$(CALLER_PREFIX).*.hotspot.pass.vcf)
@@ -138,10 +138,10 @@ SigProfilerAssignment/SV/output/JOB_METADATA_SPA.txt : SigProfilerAssignment/SV/
 endif
 
 
-define hrd_profiler
-HRDProfiler/output/JOB_METADATA_SPA.txt : SigProfilerAssignment/SBS/output/JOB_METADATA_SPA.txt SigProfilerAssignment/CN/output/JOB_METADATA_SPA.txt
+define hrprofiler
+HRProfiler/output/JOB_METADATA_SPA.txt : SigProfilerAssignment/SBS/output/JOB_METADATA_SPA.txt SigProfilerAssignment/CN/output/JOB_METADATA_SPA.txt
 	$$(MKDIR) $$(@D) && \
 	$$(call RUN,1,$$(RESOURCE_REQ_MEDIUM_MEM),$$(RESOURCE_REQ_MEDIUM),$$(SIG_PROFILER_MODULE),"\
-	$$(HRD_PROFILER) && touch $$@")
+	$$(HRPROFILER) && touch $$@")
 endef
-$(eval $(call hrd_profiler))
+$(eval $(call hrprofiler))

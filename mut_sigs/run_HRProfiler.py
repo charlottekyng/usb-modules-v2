@@ -5,17 +5,17 @@ from SigProfilerMatrixGenerator.scripts import SigProfilerMatrixGeneratorFunc as
 import pandas as pd
 
 input_dir = "SigProfilerAssignment/SBS/input/"
-project = "HRDProfiler"
+project = "HRProfiler"
 
-#manually generate the input matrix for HRDProfiler
+#manually generate the input matrix for HRProfiler
 matrices = matGen.SigProfilerMatrixGeneratorFunc(
 	project, "GRCh38", input_dir,plot=True, exome=False, bed_file=None, 
 	chrom_based=False, tsb_stat=False, seqInfo=False, cushion=100
 )
 
 #SBS matrix
-matrices["96"].to_csv("HRDProfiler/matrixSBS.txt", sep="\t", index=True)
-sbs = pd.read_table("HRDProfiler/matrixSBS.txt", sep="\t")
+matrices["96"].to_csv("HRProfiler/matrixSBS.txt", sep="\t", index=True)
+sbs = pd.read_table("HRProfiler/matrixSBS.txt", sep="\t")
 sbs.columns = [col.split("_")[0] for col in sbs.columns]
 
 mask = sbs["MutationType"].str.contains(r"\[C>T\]G")
@@ -46,8 +46,8 @@ cn_df = pd.DataFrame(
 ).reset_index().rename(columns={"index": "mutation_type"})
 
 #ID matrix
-matrices["ID"].to_csv("HRDProfiler/matrixID.txt", sep="\t", index=True)
-id = pd.read_table("HRDProfiler/matrixID.txt", sep="\t")
+matrices["ID"].to_csv("HRProfiler/matrixID.txt", sep="\t", index=True)
+id = pd.read_table("HRProfiler/matrixID.txt", sep="\t")
 id.columns = [col.split("_")[0] for col in id.columns]
 mask = id["Unnamed: 0"].str.contains("5:Del:M" )
 summed1 = id.loc[mask, id.columns != "Unnamed: 0"].sum()
@@ -57,7 +57,7 @@ id_df = pd.DataFrame(
     index=["DEL_5_MH"]  # row labels
 ).reset_index().rename(columns={"index": "mutation_type"})
 
-#generate final input matrix for HRDProfiler
+#generate final input matrix for HRProfiler
 combined = pd.concat([sbs_df, cn_df, id_df], axis=0, ignore_index=True)
 df_t = combined.T 
 df_t = df_t.reset_index().rename(columns={"index": "sample"})
@@ -65,16 +65,16 @@ new_columns = df_t.iloc[0]
 df = df_t[1:]              
 df.columns = new_columns
 df.columns.values[0] = "samples"
-df.to_csv("HRDProfiler/data_matrix.txt", sep="\t", index=True)
+df.to_csv("HRProfiler/data_matrix.txt", sep="\t", index=True)
 
-#run HRDProfiler
+#run HRProfiler
 HR.HRProfiler(data_matrix=df,
               genome='GRCh38', 
               exome=False, 
               INDELS_DIR=None,
               SNV_DIR=None,
               CNV_DIR=None, 
-			  RESULT_DIR='HRDProfiler/output/',              
+			  RESULT_DIR='HRProfiler/output/',              
 			  cnv_file_type='ASCAT',
               bootstrap=False, 
               nreplicates=20,

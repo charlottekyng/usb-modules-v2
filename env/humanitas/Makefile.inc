@@ -299,7 +299,7 @@ MUTATIONALPATTERNS = $(RSCRIPT) usb-modules-v2/mut_sigs/MutationalPatterns.R --s
 
 SIG_PROFILER_ASSIGNMENT = $(PYTHON) usb-modules-v2/mut_sigs/run_SigProfilerAssignment.py
 SV_MATRIX_GENERATOR = $(PYTHON) usb-modules-v2/mut_sigs/run_SVMatrixGenerator.py 
-HRD_PROFILER = $(PYTHON) usb-modules-v2/mut_sigs/run_HRDProfiler.py 
+HRPROFILER = $(PYTHON) usb-modules-v2/mut_sigs/run_HRProfiler.py 
 
 PVACSEQ ?= pvacseq
 PVACTOOLS_IMG ?= $(IMG_DIR)/pvactools.img
