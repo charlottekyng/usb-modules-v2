@@ -349,6 +349,10 @@ TARGETS += conSV_fusion
 conSV_fusion :
 	$(call RUN_MAKE,usb-modules-v2/sv_callers/conSV.mk conSV_fusion)
 
+TARGETS += shatterseek
+shatterseek :
+	$(call RUN_MAKE,usb-modules-v2/sv_callers/shatterseek.mk)
+
 #########################################################
 ## The set of targets below have NOT been tested,
 ## or are known to be broken/obsolete.
