@@ -34,19 +34,21 @@ $(if $(PARTITION),--partition $(PARTITION)) \
 RUN = $(call PURGE_AND_LOAD,$(PYTHON_MODULE)); echo "\
 $(call PURGE_AND_LOAD,$4); " $5 | python usb-modules-v2/scripts/run.py $(RUN_OPTS) -n $1 -m $2 -w $3
 
-# qos job_gratis has limited resources now (8 CPUs, 64G RAM, 96h), use job_cpu_preemptable (1d limit)
+# qos job_gratis has limited resources (8 CPUs, 64G RAM, 96h)
+# qos job_cpu_preemptable has no CPU/RAM limits, but it's capped to only 6h
 RUN += $(if $(findstring SLURM,$(CLUSTER_ENGINE)),\
-$(if $(findstring $(QOS_2w),$3),--qos job_cpu_preemptable,\
-$(if $(findstring $(QOS_1w),$3),--qos job_cpu_preemptable,\
+$(if $(findstring $(QOS_2w),$3),--qos job_gratis,\
+$(if $(findstring $(QOS_1w),$3),--qos job_gratis,\
 $(if $(findstring $(QOS_1d),$3),--qos job_cpu_preemptable,\
 $(if $(findstring $(QOS_6h),$3),--qos job_cpu_preemptable,\
 $(if $(findstring $(QOS_30min),$3),--qos job_cpu_preemptable))))),)
 
-
-# We have to restrict long jobs:
-# (for some reason job_gratis accepted max 90h)
-QOS_1w = 24:00:00
-QOS_2w = 24:00:00
+# We have to shorten some jobs:
+# 1d jobs are very common but few hours should be enough for most of them:
+QOS_1d = 6:00:00
+# for some reason job_gratis accepts max 90h
+QOS_1w = 90:00:00
+QOS_2w = 90:00:00
 
 ###############################################################
 ####### DEFINE PATHS/NAMES FOR SCRIPTS, BINARIES, MODULES #####
