@@ -14,7 +14,7 @@ $(if $(findstring true,$(PAIRED_END)),$(foreach sample,$(SAMPLES),pizzly/$(sampl
 
 define kallisto
 kallisto/$1/abundance.tsv.gz: fastq/$1.1.fastq.gz $(if $(findstring true,$(PAIRED_END)),fastq/$1.2.fastq.gz)
-	$$(call RUN,4,3G,$$(RESOURCE_REQ_MEDIUM),,"\
+	$$(call RUN,$$(KALLISTO_NUM_CORES),$(RESOURCE_REQ_MEDIUM_MEM),$$(RESOURCE_REQ_MEDIUM),,"\
 	$$(KALLISTO) quant -i $$(KALLISTO_INDEX) $$(KALLISTO_OPTIONS) \
 	$$(if $$(findstring FIRST_READ_TRANSCRIPTION_STRAND,$$(STRAND_SPECIFICITY)),--fr-stranded) \
 	$$(if $$(findstring SECOND_READ_TRANSCRIPTION_STRAND,$$(STRAND_SPECIFICITY)),--rf-stranded) \
