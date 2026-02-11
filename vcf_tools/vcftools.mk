@@ -17,9 +17,9 @@ LOGDIR ?= log/vcf.$(NOW)
 	$(call RUN,1,$(RESOURCE_REQ_LOW_MEM),$(RESOURCE_REQ_VSHORT),$(TABIX_MODULE),"\
 	sleep 5 && $(BGZIP) -c -f $< >$@ && sleep 5")
 
-%.vcf : %.vcf.gz
-	$(call RUN,1,$(RESOURCE_REQ_LOW_MEM),$(RESOURCE_REQ_VSHORT),$(TABIX_MODULE),"\
-	sleep 5 && zcat $< > $@ && sleep 5")
+#%.vcf : %.vcf.gz
+#	$(call RUN,1,$(RESOURCE_REQ_LOW_MEM),$(RESOURCE_REQ_VSHORT),$(TABIX_MODULE),"\
+#	sleep 5 && zcat $< > $@ && sleep 5")
 
 %.vcf.gz.csi : %.vcf.gz
 	$(call RUN,1,$(RESOURCE_REQ_LOW_MEM),$(RESOURCE_REQ_VSHORT),$(BCFTOOLS_MODULE),"\

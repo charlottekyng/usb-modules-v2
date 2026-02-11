@@ -11,10 +11,10 @@ PHONY += manta
 .SECONDARY:
 .PHONY: $(PHONY)
 
-manta : $(foreach pair,$(SAMPLE_PAIRS),manta/$(tumor.$(pair))/results/variants/somaticSV.SVpass.vcf)
+manta : $(foreach pair,$(SAMPLE_PAIRS),manta/$(tumor.$(pair))_$(normal.$(pair))/results/variants/somaticSV.SVpass.vcf)
 
 define manta-tumor-normal
-manta/$1/runWorkflow.py : bam/$1.bam bam/$2.bam
+manta/$1_$2/runWorkflow.py : bam/$1.bam bam/$2.bam
 	$$(call RUN,1,1G,$$(RESOURCE_REQ_VSHORT),$$(SINGULARITY_MODULE),"\
 	$$(MANTA) configManta.py \
 	--tumorBam $$< \
@@ -25,13 +25,14 @@ manta/$1/runWorkflow.py : bam/$1.bam bam/$2.bam
 	--runDir $$(@D)")
 
 # manta uses little RAM, 2G per cpu should be enough
-manta/$1/results/variants/somaticSV.vcf.gz : manta/$1/runWorkflow.py
+manta/$1_$2/results/variants/somaticSV.vcf : manta/$1_$2/runWorkflow.py
 	$$(call RUN,$$(MANTA_NUM_CORES),$$(MANTA_MEM)G,$$(RESOURCE_REQ_MEDIUM),$$(SINGULARITY_MODULE),"\
-	$$(MANTA) $$< -j $$(MANTA_NUM_CORES) -g $$(MANTA_MEM)")
+	$$(MANTA) $$< -j $$(MANTA_NUM_CORES) -g $$(MANTA_MEM) \
+	sleep 5 && zcat $$(@).gz > $$@ && sleep 5")
 
-manta/$1/results/variants/somaticSV.vcf : manta/$1/results/variants/somaticSV.vcf.gz
+#manta/$1_$2/results/variants/somaticSV.vcf : manta/$1_$2/results/variants/somaticSV.vcf.gz
 
-manta/$1/results/variants/somaticSV.SVpass.vcf: manta/$1/results/variants/somaticSV.vcf
+manta/$1_$2/results/variants/somaticSV.SVpass.vcf: manta/$1_$2/results/variants/somaticSV.vcf
 
 endef
 $(foreach pair,$(SAMPLE_PAIRS),$(eval $(call manta-tumor-normal,$(tumor.$(pair)),$(normal.$(pair)))))
