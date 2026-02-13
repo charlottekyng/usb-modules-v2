@@ -11,16 +11,14 @@ PHONY += svaba
 .SECONDARY:
 .PHONY: $(PHONY)
 
-svaba : $(foreach pair,$(SAMPLE_PAIRS),svaba/$(tumor.$(pair)).svaba.somatic.sv.SVpass.vcf)
+svaba : $(foreach pair,$(SAMPLE_PAIRS),svaba/$(tumor.$(pair))_$(normal.$(pair)).svaba.somatic.sv.SVpass.vcf)
 
 define svaba-tumor-normal
-svaba/$1.contigs.bam : bam/$1.bam bam/$2.bam
+svaba/$1_$2.contigs.bam : bam/$1.bam bam/$2.bam
 	$$(call RUN,$$(SVABA_NUM_CORES),$$(RESOURCE_REQ_HIGH_MEM),$$(RESOURCE_REQ_MEDIUM),$$(SINGULARITY_MODULE),"\
-	$$(SVABA) svaba run \
-	-t $$< \
-	-n $$(<<) \
+	$$(SVABA) svaba run -t $$< -n $$(<<) \
 	-p $$(SVABA_NUM_CORES) \
-	-a svaba/$$(basename $$(notdir $$<)) \
+	-a svaba/$1_$2 \
 	-G $$(REF_FASTA) \
 	$$(if $$(findstring BAITS,$$(CAPTURE_METHOD)),--region $$(TARGETS_FILE_COVERED_INTERVALS),) \
 	-D $$(DBSNP_TARGETS_INTERVALS) \
@@ -33,7 +31,6 @@ endef
 $(foreach pair,$(SAMPLE_PAIRS),$(eval $(call svaba-tumor-normal,$(tumor.$(pair)),$(normal.$(pair)))))
 
 svaba/%.svaba.somatic.sv.vcf : svaba/%.contigs.bam
-
-svaba/%.svaba.somatic.sv.SVpass.vcf : svaba/%.svaba.somatic.sv.vcf
+	
 
 include usb-modules-v2/vcf_tools/vcftools.mk
