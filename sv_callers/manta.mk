@@ -30,8 +30,6 @@ manta/$1_$2/results/variants/somaticSV.vcf : manta/$1_$2/runWorkflow.py
 	$$(MANTA) $$< -j $$(MANTA_NUM_CORES) -g $$(MANTA_MEM) && \
 	sleep 5 && zcat $$(@).gz > $$@ && sleep 5")
 
-manta/$1_$2/results/variants/somaticSV.SVpass.vcf: manta/$1_$2/results/variants/somaticSV.vcf
-
 endef
 $(foreach pair,$(SAMPLE_PAIRS),$(eval $(call manta-tumor-normal,$(tumor.$(pair)),$(normal.$(pair)))))
 
