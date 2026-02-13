@@ -36,7 +36,7 @@ $(foreach normal,$(PANEL_OF_NORMAL_SAMPLES),$(eval $(call generate-gridss-pon,$(
 
 # Dedicated rule for bedpe+bed generation
 gridss/pondir/gridss_pon_single_breakend.bed : $(patsubst %,gridss/pondir/%.normal.vcf, $(PANEL_OF_NORMAL_SAMPLES))
-	$$(MKDIR) $$(@)
+	$(MKDIR) $(@D)
 	$(call RUN,1,$(RESOURCE_REQ_HIGH_MEM),$(RESOURCE_REQ_MEDIUM),$(SINGULARITY_MODULE),"\
 	$(GRIDSS) GeneratePonBedpe \
 	$(foreach f,$^,I=$(f) ) \
