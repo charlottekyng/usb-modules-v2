@@ -136,7 +136,7 @@ RBIND ?= $(RSCRIPT) $(MODULE_SCRIPTS_DIR)/rbind.R
 
 SAMTOOLS ?= samtools
 BCFTOOLS ?= bcftools
-BEDTOOLS ?= bedtools
+BEDTOOLS ?= $(USR_DIR)/local/bedtools
 IGVTOOLS ?= $(USR_DIR)/local/IGV_2.12.0/igvtools
 VCFTOOLS ?= vcftools
 VCFTOOLS_MERGE ?= vcf-merge
