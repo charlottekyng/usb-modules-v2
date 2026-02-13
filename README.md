@@ -155,6 +155,9 @@ _before_ the `include usb-modules-v2/Makefile` line.
 
 Here are the most basic ones and these should almost always be specified.
 ```
+# the HPC environment: scicore, ubelix or humanitas
+HPC=humanitas
+
 # example values:  b37, hg19_ionref, hg38 etc. Values permitted will have a `usb-modules-v2/genome_inc/$<REF>` directory
 REF = hg38
 
@@ -172,9 +175,6 @@ PAIRED_END = true
 
 # possible values: [SOMATIC|GERMLINE]
 ANALYSIS_TYPE = SOMATIC
-
-# specify which HPC you are using: [scicore|humanitas|ubelix|scicore_ubuntu] 
-HPC = humanitas
 
 include usb-modules-v2/Makefile
 ```
@@ -296,13 +296,12 @@ For Illumina, mutect/2 (SNVs) and strelka/2 (indels) are implemented and tested.
 
 *Note*: It is generally advisable to run facets for CNAs before these. If you do not have facets results, you have to set `ANN_FACETS=false` in your `Makefile`.
 ```
-make mutect              ## deprecated
-make strelka             ## deprecated
-make mutect2             ## recommended
-make strelka2            ## recommended
-make muse                ## somehow old, could be used for consensus calling
-make caveman             ## somehow old, could be used for consensus calling
-make mutation_summary    ## to generate an Excel file for protein-coding variants, with simplified columns (see below)
+make mutect2                ## recommended
+make strelka2               ## recommended
+make muse                   ## somehow old, could be used for consensus calling
+make caveman                ## somehow old, could be used for consensus calling
+make consensus_snvs_indels  ## generates consensus from VCF files
+make mutation_summary       ## to generate an Excel file for protein-coding variants, with simplified columns (see below)
 ```
 
 For Ion Torrent, TVC (both SNVs and indels) is implemented and tested.
@@ -330,7 +329,7 @@ make mutation_summary
 
 **Important notes regarding mutation_summary**: It is made from `*.nonsynonymous_synonymous.txt` tables in `alltables` folder. Three excel files are generated (`*.xlsx`, `*.consensus.xlsx`, and `*.singletons.xlsx`). The consensus strategy is very crude: variants that are identical between two callers will end up in the consensus. This strategy will omit rare cases of dinucleotide variants and complex variants if they are encoded differently in each VCF/table. To help manually spot such cases, an additional column `dist_to_alt_caller` is added to `*.singletons.xlsx`. Very small values indicate that a variant is very close to another variant from the alternate caller.
 
-<u>The consensus part of the **`mutation_summary`** was originally made for strelka2 and mutect2 calls. It was not tested with more callers (!), and it will be improved in the future.</u>
+<u>The consensus part of the **`mutation_summary`** was originally made for strelka2 and mutect2 calls. It was not tested with more callers (!), and it will be improved in the future. This has been superseded by `make consensus_snvs_indels`</u>
 
 **Important note for multi-tumor cases and the FILTER field**: 
 For a given patient, somatic mutations found in one (or more) sample by the mutation calling pipeline were additionally 
@@ -470,18 +469,19 @@ Tumor/normal sample swaps are not easy to spot. One possibility is to look into 
 2. This strategy will likely fail for samples with very low tumor content, and/or tumors with a flat CN profile!
 
 ### Somatic SV callers
-`make manta`
-`make delly`
-`make svaba`
+```
+make manta
+make delly
+make svaba
+make gridss_pon gridss
+make brass
+make conSV # to generate the consensus
+```
 
-**Note:** Results (VCFs) will be generated in the corresponding folders of each SV caller. No further annotation is implemented yet.
-For more details see:
+Results for individual callers (VCFs) will be generated in the corresponding folders of each SV caller. 
 
-https://github.com/Illumina/manta
-
-https://github.com/dellytools/delly
-
-https://github.com/walaj/svaba
+Consensus results from multiple callers are almost always necessary. Single caller results should almost never be used.
+`conSV` does the consensus, currently supporting the 5 callers listed above. SVs candidates from different callers were considered originating from the same event if both breakends fell within a 200bp slope.  
 
 ### TcellExTRECT (calculate T cell fractions from WES)
 TcellExTRECT is an R package to calculate T cell fractions from WES data from hg19 or hg38 aligned genomes.
@@ -519,6 +519,7 @@ When running mutational signatures modules, you need to specify only one `CALLER
 ```
 make sig_profiler_assignment CALLER_PREFIX=mutect2
 ```
+`caller` is typically `mutect2`, `strelka2_snvs` or `consensus.strelka2_snvs.mutect2` (basically the second component of `vcf/$
 
 Currently implemented: `SigProfilerAssignment`, `deconstruct_sigs` & `mutational_patterns`.
 
@@ -527,7 +528,6 @@ Usage:
 ```
 make sig_profiler_assignment CALLER_PREFIX=<caller>
 ```
-In most cases `caller` will be `mutect2`.
 
 Optional parameters:
 1. SIG_PROFILER_COSMIC_VERSION (Defines the version of the COSMIC reference signatures. Takes a positive float among `1`, `2`, `3`, `3.1`, `3.2`, `3.3`, and `3.4`. The default value is `3.4`.).
@@ -594,8 +594,10 @@ Heatmap 2: matrix of similarity scores between sample pairs obtained by the `vip
 
 You can perform additional analyses and comparisons of samples using the VIPER package. For convenience, you can continue working on the R session file `viper/viper.session.RData` and follow the VIPER tutorial on [Bioconductor](https://www.bioconductor.org/packages/release/bioc/html/viper.html). 
 
-### ABSOLUTE 
+### ABSOLUTE
 ABSOLUTE provides various models of tumor cell purity and ploidy for subsequent manual solution selection.
+
+**This module is probably broken.
 
 Only Absolute "total" is currently available (Absolute "allelic" might be implemented in the future).
 
@@ -637,13 +639,20 @@ make macs2
 ### Other downstream tools
 There are a lot more... 
 
-For exome analysis, there are a few things that are useful. These should work if you use them in the context of the suggested recipes below. Some of them may only work on the b37 genome.
+For exome/genome analysis, there are a few things that are useful. These should work if you use them in the context of the suggested recipes below. Some of them may only work on the b37 genome.
 You may run into errors if you run them outside of the context of in-house, standard data as they have complex (and cryptic) rules to obtain input files. 
 ```
+make gistic_facets    # GISTIC2 from facets output
 make lst              # For the detection of large-scale transitions, requires facets output
 make msisensorpro     # For the detection of microsatellite instability, requires bam files
 make pyclone          # For clonality analysis, requires mutations and facets output
 make pvacseq          # For the detection of neo-antigens, requires mutations (not well tested...)
+```
+For genome analysis, we also have:
+```
+make shatterseek          # runs from facets and conSV output
+make amplicon_architect   # runs from bams
+make hrprofiler           # runs from sig profiler assignment output
 ```
 
 ### Note regarding sanity checks
@@ -730,6 +739,13 @@ make -nf usb-modules-v2/copy_number/facets.mk `drymake`|less
 ```
 This prints the commands and jobs to be submitted to less without actually running the code. Here you can work through the commands to check parameters, to check the order of the commands etc etc.
 
+If make does not seem to generate the correct sequence of commands, sometimes it's because of the code. `--debug` sometimes helps.
+```
+make --debug=i -nf usb-modules-v2/copy_number/facets.mk `drymake`|less
+```
+This is very verbose but it helps to see where make gets stuck.
+
+
 ---
 
 # Example recipes
@@ -737,8 +753,13 @@ Assuming that you have set up the project correctly, here are some suggested rec
 
 #### Whole-exome/genome sequencing on Illumina for somatic analysis
 ```
-make bwamem genotype bam_metrics facets mutect2 strelka2 mutation_summary lst msisensor
-make sig_profiler_assignment CALLER_PREFIX=mutect2
+make bwamem genotype bam_metrics facets mutect2 strelka2 consensus_snvs_indels mutation_summary lst msisensorpro
+make sig_profiler_assignment CALLER_PREFIX=consensus.strelka2_snvs.mutect2
+
+(wgs only)
+make manta delly svaba gridss_pon gridss brass conSV
+make sig_profiler_assignment SIG_TYPE=SV
+make hrprofiler
 ```
 #### Whole-exome/genome sequencing on Illumina for germline analysis
 ```
