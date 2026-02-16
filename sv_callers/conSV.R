@@ -3,7 +3,9 @@ suppressPackageStartupMessages(library("data.table"));
 suppressPackageStartupMessages(library("dplyr"));
 suppressPackageStartupMessages(library("stringr"));
 suppressPackageStartupMessages(library("tidyr"));
-suppressPackageStartupMessages(library("conSV"));
+#suppressPackageStartupMessages(library("conSV"));
+#source file locally instead of a private unpublished package (made by Fabio)
+source("usb-modules-v2/sv_callers/conSV_functions.R")
 
 if (!interactive()) {
     options(warn = -1, error = quote({ traceback(); q('no', status = 1) }))
@@ -69,13 +71,12 @@ for (caller in sv_callers) {
   )
 
   if (nrow(formatted) == 0) next
-
   sv_list[[caller]] <- format_caller(formatted) %>%
     mutate(
-      SVTYPE = mapply(rename_SVclass, SVTYPE, CHROM, CHROM2, STRAND1, STRAND2),
+      SVTYPE = mapply(rename_SVclass, SVTYPE, CHROM, CHROM2, REF, ALT, STRAND1, STRAND2),
       sv_method = caller
     ) %>%
-    select(CHROM, START1, END1, CHROM2, START2, END2, SVTYPE, STRAND1, STRAND2,sv_method)
+    select(CHROM, START1, END1, CHROM2, START2, END2, SVTYPE, STRAND1, STRAND2, sv_method)
 }
 
 if (length(sv_list) == 0) {
@@ -84,7 +85,8 @@ if (length(sv_list) == 0) {
 }
 
 # Concatenate
-sv_all <- bind_rows(sv_list)
+#sv_all <- bind_rows(sv_list)
+sv_all <- do.call("rbind",sv_list)
 
 # Generate consensus
 consensus_sv <- make_sv_consensus(sv_all, max_dist = opt$slope)
