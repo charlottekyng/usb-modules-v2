@@ -48,7 +48,7 @@ if (!interactive()) {
 }
 
 optList <- list(
-	make_option("--oncokb_file", default = "conSV/cancerGeneList_edit_oncokb.xlsx",  type = "character", dest = "oncokb_file",
+	make_option("--oncokb_file", default = "oncokb_cancerGeneList_edit.xlsx",  type = "character", dest = "oncokb_file",
 	            help = "Oncokb file"),
 	make_option("--oncokb_minresources", default=2, type = "integer", dest = "oncokb_minresources",
 	            help = "Oncokb min resources threshold"),

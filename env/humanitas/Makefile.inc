@@ -405,5 +405,8 @@ TCELLEXTRECT ?= $(SINGULARITY_EXEC) $(TCELLEXTRECT_IMG) Rscript usb-modules-v2/T
 CONSV = $(RSCRIPT) usb-modules-v2/sv_callers/conSV.R
 CONSV_disruption = $(RSCRIPT) usb-modules-v2/sv_callers/conSV_disruption.R
 CONSV_fusion= $(RSCRIPT) usb-modules-v2/sv_callers/conSV_fusion.R
+ONCOKB_CANCERGENELIST ?= $(REF_DIR)/oncokb_cancerGeneList_edit_202510.xlsx
+ONCOKB_CANCERGENELIST_MINRESOURCES ?= 2
+
 
 SHATTERSEEK = $(RSCRIPT) usb-modules-v2/sv_callers/shatterseek.R

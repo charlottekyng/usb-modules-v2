@@ -103,7 +103,7 @@ $(foreach pair,$(SAMPLE_PAIRS), \
 define conSV_disruption
 conSV/conSV_$(MIN_CALLERS)_outof_$(words $(SV_CALLERS))/$1.$(MIN_CALLERS)_outof_$(words $(SV_CALLERS))_slope_$(SLOPE)_gene_disruption.tsv : conSV/conSV_$(MIN_CALLERS)_outof_$(words $(SV_CALLERS))/$1.$(MIN_CALLERS)_outof_$(words $(SV_CALLERS))_slope_$(SLOPE).tsv
 	$$(call RUN,1,$$(RESOURCE_REQ_LOW_MEM),$$(RESOURCE_REQ_VSHORT),$$(R_MODULE),"\
-	$$(CONSV_disruption) --oncokb_file $$(ONCOKB_FILE) --oncokb_minresources $$(ONCOKB_MINRESOURCES) --output $$@ --input $$<")
+	$$(CONSV_disruption) --oncokb_file $$(ONCOKB_CANCERGENELIST) --oncokb_minresources $$(ONCOKB_CANCERGENELIST_MINRESOURCES) --output $$@ --input $$<")
 endef
 $(foreach pair,$(SAMPLE_PAIRS), \
 	$(eval $(call conSV_disruption,$(pair))) \
