@@ -118,7 +118,7 @@ SigProfilerAssignment/SV/input/%.bedpe : conSV/conSV_$(MIN_CALLERS)_outof_$(word
 			      $$col["CONS_SVTYPE"] \
 		}' $< > $@
 
-SigProfilerAssignment/SV/output/SV.SV32.matrix.tsv : $(foreach pair,$(SAMPLE_PAIRS),SigProfilerAssignment/SV/input/$(tumor.$(pair)).bedpe)
+SigProfilerAssignment/SV/output/SV.SV32.matrix.tsv : $(foreach pair,$(SAMPLE_PAIRS),SigProfilerAssignment/SV/input/$(pair).bedpe)
 	$(MKDIR) $(@D)
 	$(call RUN,1,$(RESOURCE_REQ_MEDIUM_MEM),$(RESOURCE_REQ_MEDIUM),$(SIG_PROFILER_MODULE),"\
 	$(SV_MATRIX_GENERATOR) \

@@ -9,7 +9,7 @@ parser.add_argument('--samples', default=None, help='Path to the input somatic m
 parser.add_argument('--output', default=None, help='Path to the output folder.')
 parser.add_argument('--input_type', default='vcf', help='Can be "vcf", "matrix", and "seg:TYPE", where TYPE={"ASCAT", "ASCAT_NGS", "SEQUENZA", "ABSOLUTE", "BATTENBERG", "FACETS", "PURPLE", "TCGA"}')
 parser.add_argument('--context_type', default='96', help='Required context type if input_type is "vcf". context_type takes which context type of the input data is considered for assignment. Valid options include "96", "288", "1536", "DINUC", and "ID". The default value is "96".')
-parser.add_argument('--cosmic_version', default=3.4, help='version of the COSMIC reference signatures')
+parser.add_argument('--cosmic_version', type=float, default=3.4, help='version of the COSMIC reference signatures')
 parser.add_argument('--exome', action=argparse.BooleanOptionalAction, default=False, help='if the exome renormalized COSMIC signatures will be used')
 parser.add_argument('--genome_build', default="GRCh38", help='Supported genomes include "GRCh37", "GRCh38", "mm9", "mm10" and "rn6"')
 parser.add_argument('--signature_database', default=None, help='Path to the input set of known mutational signatures (only in case that COSMIC reference signatures are not used)')
